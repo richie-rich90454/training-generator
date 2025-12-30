@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Train Generator-AI Training Data Creator</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="./src/styles/main.css">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    </head>
+    <body>
+        <div class="app-container fade-in">
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h1>Train Generator</h1>
+                        <p class="subtitle">Convert documents to AI training data using Ollama</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="settings-btn" class="btn-icon" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button id="help-btn" class="btn-icon" title="Help">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Upload Documents</span>
+                            </div>
+                            <button id="clear-btn" class=" btn btn-secondary">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                        <div id="drop-zone" class="file-upload-area">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <div class="upload-text">
+                                <h3>Drop files here or click to browse</h3>
+                                <p>Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
+                            </div>
+                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.html">
+                            <button id="browse-btn" class="btn btn-primary">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </button>
+                        </div>
+                        <div class="file-list-section">
+                            <h3><i class="fas fa-file-alt"></i> Selected Files</h3>
+                            <div id="file-list" class="file-list">
+                                <p class="empty-state">No files selected</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-cogs"></i>
+                                <span>Processing</span>
+                            </div>
+                            <div class="section-actions">
+                                <button id="process-btn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-play"></i> Process Files
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <span id="progress-text">Ready to process</span>
+                                <span id="progress-percent">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progress-fill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <div id="processing-log" class="processing-log">
+                            <div class="log-entry info">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Welcome to Train Generator! Upload files to begin.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-file-code"></i>
+                                <span>Output Preview</span>
+                            </div>
+                            <div class="section-actions">
+                                <button id="export-btn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button id="copy-btn" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                        <div id="output-preview" class="output-preview">
+                            <pre><code>// Output will appear here after processing
+    // Example format (JSONL):
+    {
+    "instruction": "What is machine learning?",
+    "input": "",
+    "output": "Machine learning is a subset of artificial intelligence..."
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="config-panel">
+                        <h3><i class="fas fa-sliders-h"></i> Configuration</h3>
+                        <div class="form-group">
+                            <label for="model-select" class="form-label">
+                                <i class="fas fa-brain"></i>
+                                <span>Ollama Model</span>
+                            </label>
+                            <select id="model-select" class="form-control">
+                                <option value="" disabled selected>Loading models from Ollama...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="processing-type" class="form-label">
+                                <i class="fas fa-cogs"></i>
+                                <span>Processing Type</span>
+                            </label>
+                            <select id="processing-type" class="form-control">
+                                <option value="instruction" selected>Instruction Tuning (Q&A)</option>
+                                <option value="conversation">Conversation Generation</option>
+                                <option value="chunking">Text Chunking</option>
+                                <option value="custom">Custom Prompt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="output-format" class="form-label">
+                                <i class="fas fa-file-export"></i>
+                                <span>Output Format</span>
+                            </label>
+                            <select id="output-format" class="form-control">
+                                <option value="jsonl" selected>JSONL (Alpaca style)</option>
+                                <option value="chatml">ChatML Format</option>
+                                <option value="text">Plain Text</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="chunk-size" class="form-label">
+                                <i class="fas fa-cut"></i>
+                                <span>Chunk Size (characters)</span>
+                            </label>
+                            <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature" class="form-label">
+                                <i class="fas fa-thermometer-half"></i>
+                                <span>Temperature</span>
+                            </label>
+                            <input type="range" id="temperature" class="form-control" min="0" max="1" step="0.1" value="0.7">
+                            <div class="range-value">
+                                <span id="temperature-value">0.7</span>
+                            </div>
+                        </div>
+                        <button id="save-preset" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> Save Preset
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-server"></i>
+                                <span>System Status</span>
+                            </div>
+                        </div>
+                        <div class="status-panel">
+                            <div class="status-indicator" id="ollama-status">
+                                <div class="status-dot"></div>
+                                <span>Ollama: Checking...</span>
+                            </div>
+                            <div class="status-info">
+                                <div class="status-item">
+                                    <i class="fas fa-database"></i>
+                                    <span>Files Processed: <strong id="files-count">0</strong></span>
+                                </div>
+                                <div class="status-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last Processed: <strong id="last-processed">Never</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="app-footer">
+                <div class="footer-status">
+                    <div class="status-indicator" id="app-status">
+                        <div class="status-dot"></div>
+                        <span>Train Generator v1.0.0</span>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fas fa-book"></i> Documentation</a>
+                        <a href="#" class="footer-link"><i class="fas fa-bug"></i> Report Issue</a>
+                        <a href="#" class="footer-link"><i class="fas fa-star"></i> Star on GitHub</a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-cog"></i> Settings</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+        <script type="module" src="./src/renderer/main.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', ()=>{
+                let temperatureInput=document.getElementById('temperature');
+                let temperatureValue=document.getElementById('temperature-value');
+                if (temperatureInput&&temperatureValue){
+                    let updateTrackFill=()=>{
+                        let value=temperatureInput.value;
+                        let min=temperatureInput.min||0;
+                        let max=temperatureInput.max||1;
+                        let percentage=((value-min)/(max-min))*100;
+                        temperatureInput.style.setProperty('--range-fill', `${percentage}%`);
+                        temperatureValue.textContent=value;
+                    };
+                    updateTrackFill();
+                    temperatureInput.addEventListener('input', updateTrackFill);
+                    temperatureInput.addEventListener('change', updateTrackFill);
+                }
+            });
+        </script>
+    </body>
+</html>
