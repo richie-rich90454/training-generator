@@ -234,7 +234,7 @@ class TrainGeneratorApp{
                 let versionText=status.version!=="unknown"?`v${status.version}`:"";
                 this.ollamaStatusEl.querySelector("span").textContent=`Ollama:Online ${versionText}(${status.models.length}models)`;
                 this.ollamaStatusEl.className="status-indicator status-online";
-                this.addLog(`Ollama is running(${status.version})with ${status.models.length}models`,"success");
+                this.addLog(`Ollama is running(${status.version})with ${status.models.length} models`,"success");
                 this.updateModelSelect(status.models);
             }
             else{

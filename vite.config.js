@@ -9,7 +9,7 @@ export default defineConfig({
         outDir: "dist",
         emptyOutDir: true,
         target: "esnext",
-        minify: 'terser',
+        minify: "terser",
         terserOptions: {
             compress: {
                 drop_console: true,
@@ -26,7 +26,7 @@ export default defineConfig({
                 manualChunks: undefined,
             },
         },
-        assetsDir: 'assets',
+        assetsDir: "assets",
         chunkSizeWarningLimit: 1000,
     },
     optimizeDeps: {
