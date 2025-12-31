@@ -1,7 +1,7 @@
 {
   "name": "training-generator",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "vite & electron .",
@@ -25,6 +25,7 @@
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
     "node-fetch": "^2.7.0",
+    "terser": "^5.44.1",
     "vite": "^7.3.0"
   },
   "dependencies": {

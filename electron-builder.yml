@@ -8,6 +8,7 @@ directories:
 
 files:
   - "dist/**/*"
+  - "src/**/*"
   - "package.json"
   - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md}"
   - "!**/node_modules/*/*/{CHANGELOG.md,README.md,README,readme.md}"
@@ -19,13 +20,13 @@ files:
   - "!**/{appveyor.yml,.travis.yml,circle.yml}"
   - "!**/{npm-debug.log,yarn.lock,.yarn-integrity}"
 
-asar: true
-asarUnpack:
-  - "**/*.node"
-  - "**/pdf-parse/**"
-  - "**/mammoth/**"
-  - "**/officeparser/**"
-  - "**/rtf-parser-fixes/**"
+asar: false
+# asarUnpack:
+#   - "**/*.node"
+#   - "**/pdf-parse/**"
+#   - "**/mammoth/**"
+#   - "**/officeparser/**"
+#   - "**/rtf-parser-fixes/**"
 
 compression: maximum
 
@@ -47,8 +48,8 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Training Generator
-  installerIcon: assets/icon.ico
-  uninstallerIcon: assets/icon.ico
+  installerIcon: assets/favicon.ico
+  uninstallerIcon: assets/favicon.ico
   license: LICENSE
 
 # ----------------------
