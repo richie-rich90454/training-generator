@@ -1,7 +1,7 @@
 {
   "name": "training-generator",
   "version": "1.0.0",
-  "main": "src/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "vite & electron .",
@@ -18,7 +18,7 @@
     "llm",
     "fine-tuning"
   ],
-  "author": "Train Generator",
+  "author": "richie-rich90454",
   "license": "MIT",
   "description": "Desktop application to convert documents into AI training data using Ollama",
   "devDependencies": {
