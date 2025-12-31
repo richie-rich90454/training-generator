@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "vite & electron .",
+    "start": "cross-env NODE_ENV=production electron .",
+    "dev": "vite & cross-env NODE_ENV=development electron .",
     "build": "vite build",
     "preview": "vite preview",
     "package": "electron-builder",
@@ -22,6 +22,7 @@
   "license": "MIT",
   "description": "Desktop application to convert documents into AI training data using Ollama",
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
     "node-fetch": "^2.7.0",

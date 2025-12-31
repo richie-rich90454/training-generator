@@ -10,7 +10,7 @@ class TrainGeneratorApp{
     async detectPlatform(){
         try{
             let platform="unknown";
-            if(window.electronAPI && window.electronAPI.getPlatform){
+            if(window.electronAPI&&window.electronAPI.getPlatform){
                 platform=await window.electronAPI.getPlatform();
             }
             else{
@@ -27,7 +27,8 @@ class TrainGeneratorApp{
             }
             document.documentElement.setAttribute("data-platform",platform);
             console.log(`Platform detected:${platform}`);
-        }catch(error){
+        }
+        catch(error){
             console.error("Failed to detect platform:",error);
             document.documentElement.setAttribute("data-platform","unknown");
         }
@@ -40,9 +41,10 @@ class TrainGeneratorApp{
         this.cacheElements();
         this.bindEvents();
         this.loadSettings();
+        this.initSettings();
         await this.checkOllamaStatus();
         this.startOllamaMonitor();
-        console.log("Train Generator initialized");
+        console.log("Training Generator initialized");
     }
     cacheElements(){
         this.dropZone=document.getElementById("drop-zone");
@@ -137,7 +139,7 @@ class TrainGeneratorApp{
                 name:file.name,
                 size:file.size,
                 type:file.name.split(".").pop().toLowerCase(),
-                path:file.path || null
+                path:file.path||null
             };
             this.selectedFiles.push(fileObj);
             this.addFileToList(fileObj);
@@ -145,10 +147,10 @@ class TrainGeneratorApp{
         }
         this.updateProcessButton();
         if(addedCount>0){
-            this.addLog(`Added ${addedCount}file(s)`,"success");
+            this.addLog(`Added ${addedCount} file(s)`,"success");
         }
         if(skippedCount>0){
-            this.addLog(`Skipped ${skippedCount}file(s)due to size limits`,"warning");
+            this.addLog(`Skipped ${skippedCount} file(s)due to size limits`,"warning");
         }
     }
     addFileToList(fileObj){
@@ -208,7 +210,7 @@ class TrainGeneratorApp{
             md:"markdown",
             html:"code"
         };
-        return icons[fileType] || "file";
+        return icons[fileType]||"file";
     }
     formatFileSize(bytes){
         if(bytes==0)return "0 Bytes";
@@ -242,7 +244,8 @@ class TrainGeneratorApp{
             }
             this.updateProcessButton();
             return status;
-        }catch(error){
+        }
+        catch(error){
             console.error("Error checking Ollama status:",error);
             this.ollamaStatusEl.querySelector("span").textContent="Ollama:Error";
             this.ollamaStatusEl.className="status-indicator status-offline";
@@ -310,8 +313,8 @@ class TrainGeneratorApp{
             let totalChunks=0;
             let processedChunks=0;
             for(let file of this.processingQueue){
-                let chunkSize=parseInt(this.chunkSize.value)|| 2000;
-                let estimatedChunks=Math.max(1,Math.ceil((file.size || 10000)/chunkSize));
+                let chunkSize=parseInt(this.chunkSize.value)||2000;
+                let estimatedChunks=Math.max(1,Math.ceil((file.size||10000)/chunkSize));
                 totalChunks+=estimatedChunks;
             }
             for(let i=0;i<this.processingQueue.length;i++){
@@ -330,8 +333,8 @@ class TrainGeneratorApp{
                         `Processing ${file.name}(chunk ${chunksProcessed}/${totalChunksInFile})`
                     );
                 });
-                let chunkSize=parseInt(this.chunkSize.value)|| 2000;
-                let estimatedFileChunks=Math.max(1,Math.ceil((file.size || 10000)/chunkSize));
+                let chunkSize=parseInt(this.chunkSize.value)||2000;
+                let estimatedFileChunks=Math.max(1,Math.ceil((file.size||10000)/chunkSize));
                 processedChunks+=estimatedFileChunks;
                 if(result.success){
                     this.outputData.push(...result.data);
@@ -365,11 +368,13 @@ class TrainGeneratorApp{
             }
             this.filesCountEl.textContent=this.selectedFiles.length;
             this.lastProcessedEl.textContent=new Date().toLocaleTimeString();
-        }catch(error){
+        }
+        catch(error){
             this.addLog(`Processing failed:${error.message}`,"error");
             this.setProgress(0,"Processing failed");
             this.addLog("Please check your Ollama connection and try again.","warning");
-        }finally{
+        }
+        finally{
             this.isProcessing=false;
             this.processBtn.disabled=false;
             this.processBtn.innerHTML="<i class=\"fas fa-play\"></i>Process Files";
@@ -385,7 +390,7 @@ class TrainGeneratorApp{
     async processFile(fileObj,progressCallback){
         try{
             let textContent;
-            if(fileObj.file && fileObj.file instanceof File){
+            if(fileObj.file&&fileObj.file instanceof File){
                 if(fileObj.type=="pdf"){
                     let arrayBuffer=await this.readFileAsArrayBuffer(fileObj.file);
                     textContent=await this.extractTextFromPDFBuffer(arrayBuffer);
@@ -404,10 +409,10 @@ class TrainGeneratorApp{
             else{
                 throw new Error("No file path or file object available");
             }
-            if(!textContent || textContent.trim().length==0){
+            if(!textContent||textContent.trim().length==0){
                 throw new Error("No text content extracted from file");
             }
-            let chunkSize=parseInt(this.chunkSize.value)|| 2000;
+            let chunkSize=parseInt(this.chunkSize.value)||2000;
             let chunks=this.chunkText(textContent,chunkSize);
             if(chunks.length==0){
                 throw new Error("No text chunks created from file content");
@@ -430,7 +435,8 @@ class TrainGeneratorApp{
                     }
                     let chunkProgress=((i+1)/chunks.length)*100;
                     this.addLog(`Processed chunk ${i+1}/${chunks.length}(${Math.round(chunkProgress)}%)-generated ${trainingItems.length}items`,"info");
-                }catch(error){
+                }
+                catch(error){
                     this.addLog(`Failed to process chunk ${i+1}:${error.message}`,"warning");
                 }
             }
@@ -438,7 +444,8 @@ class TrainGeneratorApp{
                 success:true,
                 data:processedChunks
             };
-        }catch(error){
+        }
+        catch(error){
             this.addLog(`Error processing file ${fileObj.name}:${error.message}`,"error");
             return{
                 success:false,
@@ -462,18 +469,19 @@ class TrainGeneratorApp{
             try{
                 let decoder=new TextDecoder("latin1");
                 pdfString=decoder.decode(uint8Array);
-            }catch(e){
+            }
+            catch(e){
                 let decoder=new TextDecoder("utf-8");
                 pdfString=decoder.decode(uint8Array);
             }
             let btMatches=pdfString.match(/BT[\s\S]*?ET/g);
-            if(btMatches && btMatches.length>0){
+            if(btMatches&&btMatches.length>0){
                 for(let match of btMatches){
                     let textMatches=match.match(/T[mdjJ]?\s*\(([^)]+)\)/g);
                     if(textMatches){
                         for(let textMatch of textMatches){
                             let textContent=textMatch.match(/\(([^)]+)\)/);
-                            if(textContent && textContent[1]){
+                            if(textContent&&textContent[1]){
                                 extractedText+=textContent[1]+" ";
                             }
                         }
@@ -506,7 +514,8 @@ class TrainGeneratorApp{
             }
             console.log(`Extracted ${extractedText.length}characters from PDF(browser context-limited extraction)`);
             return extractedText;
-        }catch(error){
+        }
+        catch(error){
             console.error("PDF text extraction error:",error);
             throw new Error(`Failed to extract text from PDF:${error.message}. For better PDF support,use the file dialog or convert PDFs to text format first.`);
         }
@@ -522,7 +531,8 @@ class TrainGeneratorApp{
                     try{
                         let text=await this.extractTextFromPDFBuffer(e.target.result);
                         resolve(text);
-                    }catch(error){
+                    }
+                    catch(error){
                         reject(error);
                     }
                 };
@@ -540,10 +550,10 @@ class TrainGeneratorApp{
             if(end<text.length){
                 let nextPeriod=text.indexOf(".",end);
                 let nextNewline=text.indexOf("\n",end);
-                if(nextPeriod!==-1 && nextPeriod<end+100){
+                if(nextPeriod!==-1&&nextPeriod<end+100){
                     end=nextPeriod+1;
                 }
-                else if(nextNewline!==-1 && nextNewline<end+50){
+                else if(nextNewline!==-1&&nextNewline<end+50){
                     end=nextNewline+1;
                 }
             }
@@ -642,7 +652,7 @@ INSTRUCTIONS:
 OUTPUT FORMAT:
 Provide your analysis in a well-structured,comprehensive format.`
         };
-        return prompts[processingType] || prompts.instruction;
+        return prompts[processingType]||prompts.instruction;
     }
     createTrainingItem(input,output,processingType){
         let format=this.outputFormat.value;
@@ -739,7 +749,7 @@ Provide your analysis in a well-structured,comprehensive format.`
         for(let line of lines){
             let trimmedLine=line.trim();
             if(trimmedLine.match(/^question:?\s*/i)){
-                if(currentQuestion && currentAnswer){
+                if(currentQuestion&&currentAnswer){
                     pairs.push({
                         question:currentQuestion.trim(),
                         answer:currentAnswer.trim()
@@ -754,15 +764,15 @@ Provide your analysis in a well-structured,comprehensive format.`
                 currentAnswer=trimmedLine.replace(/^answer:?\s*/i,"");
             }
             else if(trimmedLine){
-                if(inAnswer && currentAnswer){
+                if(inAnswer&&currentAnswer){
                     currentAnswer+=" "+trimmedLine;
                 }
-                else if(currentQuestion &&!inAnswer){
+                else if(currentQuestion&&!inAnswer){
                     currentQuestion+=" "+trimmedLine;
                 }
             }
         }
-        if(currentQuestion && currentAnswer){
+        if(currentQuestion&&currentAnswer){
             pairs.push({
                 question:currentQuestion.trim(),
                 answer:currentAnswer.trim()
@@ -773,7 +783,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             if(qaMatches){
                 for(let match of qaMatches){
                     let qMatch=match.match(/Q:\s*(.*?)\s*A:\s*(.*)/is);
-                    if(qMatch && qMatch[1] && qMatch[2]){
+                    if(qMatch&&qMatch[1]&&qMatch[2]){
                         pairs.push({
                             question:qMatch[1].trim(),
                             answer:qMatch[2].trim()
@@ -794,7 +804,7 @@ Provide your analysis in a well-structured,comprehensive format.`
         for(let line of lines){
             let trimmedLine=line.trim();
             if(trimmedLine.match(/^user:?\s*/i)){
-                if(currentUser && currentAssistant){
+                if(currentUser&&currentAssistant){
                     turns.push({
                         user:currentUser.trim(),
                         assistant:currentAssistant.trim()
@@ -811,15 +821,15 @@ Provide your analysis in a well-structured,comprehensive format.`
                 currentAssistant=trimmedLine.replace(/^assistant:?\s*/i,"");
             }
             else if(trimmedLine){
-                if(inAssistant && currentAssistant){
+                if(inAssistant&&currentAssistant){
                     currentAssistant+=" "+trimmedLine;
                 }
-                else if(inUser && currentUser){
+                else if(inUser&&currentUser){
                     currentUser+=" "+trimmedLine;
                 }
             }
         }
-        if(currentUser && currentAssistant){
+        if(currentUser&&currentAssistant){
             turns.push({
                 user:currentUser.trim(),
                 assistant:currentAssistant.trim()
@@ -830,7 +840,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             if(convMatches){
                 for(let match of convMatches){
                     let hMatch=match.match(/Human:\s*(.*?)\s*Assistant:\s*(.*)/is);
-                    if(hMatch && hMatch[1] && hMatch[2]){
+                    if(hMatch&&hMatch[1]&&hMatch[2]){
                         turns.push({
                             user:hMatch[1].trim(),
                             assistant:hMatch[2].trim()
@@ -889,7 +899,8 @@ Provide your analysis in a well-structured,comprehensive format.`
             else{
                 this.addLog(`Failed to export:${result.error}`,"error");
             }
-        }catch(error){
+        }
+        catch(error){
             this.addLog(`Export failed:${error.message}`,"error");
         }
     }
@@ -917,7 +928,8 @@ Provide your analysis in a well-structured,comprehensive format.`
             }
             await navigator.clipboard.writeText(content);
             this.addLog("Copied to clipboard","success");
-        }catch(error){
+        }
+        catch(error){
             this.addLog(`Failed to copy:${error.message}`,"error");
         }
     }
@@ -958,7 +970,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             warning:"exclamation-triangle",
             error:"times-circle"
         };
-        return icons[type] || "info-circle";
+        return icons[type]||"info-circle";
     }
     escapeHtml(text){
         let div=document.createElement("div");
@@ -967,13 +979,14 @@ Provide your analysis in a well-structured,comprehensive format.`
     }
     loadSettings(){
         try{
-            let settings=JSON.parse(localStorage.getItem("train-generator-settings")|| "{}");
+            let settings=JSON.parse(localStorage.getItem("train-generator-settings")||"{}");
             if(settings.model)this.modelSelect.value=settings.model;
             if(settings.processingType)this.processingType.value=settings.processingType;
             if(settings.outputFormat)this.outputFormat.value=settings.outputFormat;
             if(settings.chunkSize)this.chunkSize.value=settings.chunkSize;
             this.addLog("Settings loaded","info");
-        }catch(error){
+        }
+        catch(error){
             console.error("Failed to load settings:",error);
         }
     }
@@ -987,7 +1000,8 @@ Provide your analysis in a well-structured,comprehensive format.`
         try{
             localStorage.setItem("train-generator-settings",JSON.stringify(settings));
             this.addLog("Settings saved","success");
-        }catch(error){
+        }
+        catch(error){
             this.addLog("Failed to save settings","error");
         }
     }
@@ -1002,7 +1016,7 @@ Provide your analysis in a well-structured,comprehensive format.`
     showHelp(){
         this.addLog("Opening help documentation...","info");
         let helpContent=`
-            <h3><i class="fas fa-question-circle"></i>Train Generator Help</h3>
+            <h3><i class="fas fa-question-circle"></i>Training Generator Help</h3>
             <div class="help-section">
                 <h4>Getting Started</h4>
                 <p>1.<strong>Upload Files</strong>:Drag & drop or click to browse for documents(PDF,DOCX,DOC,RTF,TXT,MD,HTML)</p>
@@ -1055,6 +1069,136 @@ Provide your analysis in a well-structured,comprehensive format.`
         }
         helpModal.classList.add("active");
         this.addLog("Help documentation opened","success");
+    }
+    initSettings(){
+        this.loadAppSettings();
+        let resetSettingsBtn=document.getElementById("reset-settings");
+        let saveSettingsBtn=document.getElementById("save-settings");
+        if (resetSettingsBtn){
+            resetSettingsBtn.addEventListener("click", ()=>this.resetSettings());
+        }
+        if (saveSettingsBtn){
+            saveSettingsBtn.addEventListener("click", ()=>this.saveAppSettings());
+        }
+        let settingsInputs=document.querySelectorAll("#settings-modal input, #settings-modal select");
+        settingsInputs.forEach(input=>{
+            input.addEventListener("change", ()=>{
+                let autoSave=document.getElementById("auto-save");
+                if (autoSave&&autoSave.checked){
+                    this.saveAppSettings();
+                }
+            });
+        });
+    }
+    loadAppSettings(){
+        try{
+            let settings=JSON.parse(localStorage.getItem("training-generator-app-settings")||"{}");
+            if (settings.theme){
+                let themeSelect=document.getElementById("theme-select");
+                if (themeSelect) themeSelect.value=settings.theme;
+                this.applyTheme(settings.theme);
+            }
+            if (settings.fontSize){
+                let fontSizeSelect=document.getElementById("font-size");
+                if (fontSizeSelect) fontSizeSelect.value=settings.fontSize;
+                this.applyFontSize(settings.fontSize);
+            }
+            let checkboxes=["auto-save", "auto-check-ollama", "start-maximized", "remember-window-size"];
+            checkboxes.forEach(id=>{
+                let checkbox=document.getElementById(id);
+                if (checkbox&&settings[id]!=undefined){
+                    checkbox.checked=settings[id];
+                }
+            });
+            if (settings["max-file-size"]!=undefined){
+                let maxFileSize=document.getElementById("max-file-size");
+                if (maxFileSize) maxFileSize.value=settings["max-file-size"];
+            }
+            this.addLog("Application settings loaded","info");
+        }
+        catch(error){
+            console.error("Failed to load application settings:",error);
+        }
+    }
+    saveAppSettings(){
+        try{
+            let settings={};
+            let themeSelect=document.getElementById("theme-select");
+            if (themeSelect){
+                settings.theme=themeSelect.value;
+                this.applyTheme(themeSelect.value);
+            }
+            let fontSizeSelect=document.getElementById("font-size");
+            if (fontSizeSelect){
+                settings.fontSize=fontSizeSelect.value;
+                this.applyFontSize(fontSizeSelect.value);
+            }
+            let checkboxes=["auto-save", "auto-check-ollama", "start-maximized", "remember-window-size"];
+            checkboxes.forEach(id=>{
+                let checkbox=document.getElementById(id);
+                if (checkbox){
+                    settings[id]=checkbox.checked;
+                }
+            });
+            let maxFileSize=document.getElementById("max-file-size");
+            if (maxFileSize){
+                settings["max-file-size"]=parseInt(maxFileSize.value)||100;
+            }
+            localStorage.setItem("training-generator-app-settings", JSON.stringify(settings));
+            this.addLog("Application settings saved","success");
+        }
+        catch(error){
+            this.addLog("Failed to save application settings","error");
+        }
+    }
+    resetSettings(){
+        try{
+            let themeSelect=document.getElementById("theme-select");
+            if (themeSelect) themeSelect.value="auto";
+            let fontSizeSelect=document.getElementById("font-size");
+            if (fontSizeSelect) fontSizeSelect.value="medium";
+            document.getElementById("auto-save").checked=true;
+            document.getElementById("auto-check-ollama").checked=true;
+            document.getElementById("start-maximized").checked=false;
+            document.getElementById("remember-window-size").checked=true;
+            document.getElementById("max-file-size").value=100;
+            this.applyTheme("auto");
+            this.applyFontSize("medium");
+            this.saveAppSettings();
+            this.addLog("Settings reset to defaults","success");
+        }
+        catch(error){
+            this.addLog("Failed to reset settings","error");
+        }
+    }
+    applyTheme(theme){
+        document.body.classList.remove("theme-light", "theme-dark");
+        if (theme=="light"){
+            document.body.classList.add("theme-light");
+        }
+        else if (theme=="dark"){
+            document.body.classList.add("theme-dark");
+        }
+        else{
+            if (window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches){
+                document.body.classList.add("theme-dark");
+            }
+            else{
+                document.body.classList.add("theme-light");
+            }
+        }
+    }
+    applyFontSize(size){
+        document.body.classList.remove("font-small", "font-medium", "font-large");
+        if (size=="small"){
+            document.body.classList.add("font-small");
+        }
+        else if (size=="large"){
+            document.body.classList.add("font-large");
+        }
+        else{
+            document.body.classList.add("font-medium");
+        }
     }
 }
 document.addEventListener("DOMContentLoaded",()=>{
