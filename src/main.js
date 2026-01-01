@@ -5,6 +5,7 @@ let {spawn}=require("child_process")
 let axios=require("axios")
 let FileParser=require("./core/fileParser")
 let mainWindow=null
+let splashWindow=null
 let isWindows=process.platform=="win32"
 let isMac=process.platform=="darwin"
 function setupLogging(){
@@ -51,7 +52,35 @@ app.commandLine.appendSwitch("enable-zero-copy")
 app.commandLine.appendSwitch("ignore-gpu-blacklist")
 app.commandLine.appendSwitch("enable-native-gpu-memory-buffers")
 app.commandLine.appendSwitch("enable-accelerated-2d-canvas")
+async function createSplashWindow(){
+    console.log("Creating splash window...")
+    let splashWidth=isWindows?450:500
+    let splashHeight=isWindows?350:400
+    splashWindow=new BrowserWindow({
+        width: splashWidth,
+        height: splashHeight,
+        frame: false,
+        transparent: isMac,
+        backgroundColor: isMac?'#00000000':'#FFFFFF',
+        resizable: false,
+        alwaysOnTop: true,
+        show: false,
+        webPreferences:{
+            nodeIntegration: false,
+            contextIsolation: true,
+            webgl: false,
+            sandbox: false
+        }
+    })
+    let splashPath=path.join(__dirname, "splash.html")
+    console.log("Loading splash screen from:", splashPath)
+    await splashWindow.loadFile(splashPath)
+    splashWindow.center()
+    splashWindow.show()
+    return splashWindow
+}
 async function createWindow(){
+    await createSplashWindow()
     console.log("Creating main window...")
     let iconPath=path.join(__dirname, "../assets/favicon.png")
     let iconConfig={}
@@ -112,16 +141,37 @@ async function createWindow(){
         })
     }
     mainWindow.once("ready-to-show", ()=>{
-        console.log("Window is ready to show")
-        mainWindow.show()
+        console.log("Main window is ready to show")
+        setTimeout(()=>{
+            if (splashWindow&&!splashWindow.isDestroyed()){
+                splashWindow.close()
+                splashWindow=null
+            }
+            mainWindow.show()
+            mainWindow.focus()
+        }, 500)
     })
     mainWindow.on("closed", ()=>{
         mainWindow=null
+    })
+    let splashTimeout=setTimeout(()=>{
+        if (splashWindow&&!splashWindow.isDestroyed()){
+            console.log("Splash timeout - closing splash window")
+            splashWindow.close()
+            splashWindow=null
+        }
+    }, 10000)
+    mainWindow.once('show', ()=>{
+        clearTimeout(splashTimeout)
     })
 }
 app.whenReady().then(()=>{
     createWindow().catch(error=>{
         console.error("Failed to create window:", error)
+        if (splashWindow&&!splashWindow.isDestroyed()){
+            splashWindow.close()
+            splashWindow=null
+        }
         app.quit()
     })
 })
@@ -146,8 +196,8 @@ ipcMain.handle("dialog:openFile", async ()=>{
     let result=await dialog.showOpenDialog(mainWindow,{
         properties: ["openFile", "multiSelections"],
         filters: [
-          {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
-          {name: "All Files", extensions: ["*"]}
+            {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
+            {name: "All Files", extensions: ["*"]}
         ]
     })
     if (result.canceled) return []
@@ -208,10 +258,10 @@ ipcMain.handle("dialog:saveFile", async (event, defaultFilename)=>{
     let result=await dialog.showSaveDialog(mainWindow,{
         defaultPath: defaultFilename||"training_data.jsonl",
         filters: [
-          {name: "JSON Lines", extensions: ["jsonl"]},
-          {name: "JSON", extensions: ["json"]},
-          {name: "Text", extensions: ["txt"]},
-          {name: "All Files", extensions: ["*"]}
+            {name: "JSON Lines", extensions: ["jsonl"]},
+            {name: "JSON", extensions: ["json"]},
+            {name: "Text", extensions: ["txt"]},
+            {name: "All Files", extensions: ["*"]}
         ]
     })
     if (result.canceled) return null

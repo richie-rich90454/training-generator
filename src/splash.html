@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Training Generator - Loading</title>
+        <link rel="stylesheet" href="./styles/splash.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            :root{
+                --primary-color: #1A73E8;
+                --secondary-color: #34A853;
+                --accent-color: #EA4335;
+                --warning-color: #FBBC05;
+                --surface-color: #FFFFFF;
+                --surface-variant: #F3F3F3;
+                --background-color: #FAFAFA;
+                --text-primary: #202124;
+                --text-secondary: #5F6368;
+                --text-disabled: #9AA0A6;
+                --radius-large: 16px;
+                --radius-medium: 12px;
+                --radius-small: 8px;
+                --radius-full: 9999px;
+                --spacing-md: 16px;
+                --spacing-lg: 24px;
+                --spacing-xl: 32px;
+                --transition-medium: 250ms cubic-bezier(.4, 0, .2, 1);
+            }
+            @media (prefers-color-scheme: dark){
+                :root{
+                    --primary-color: #8AB4F8;
+                    --secondary-color: #81C995;
+                    --accent-color: #F28B82;
+                    --warning-color: #FDD663;
+                    --surface-color: #202124;
+                    --surface-variant: #2D2E30;
+                    --background-color: #1A1A1A;
+                    --text-primary: #E8EAED;
+                    --text-secondary: #9AA0A6;
+                    --text-disabled: #5F6368;
+                }
+            }
+            *{
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body{
+                font-family: "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-primary);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                overflow: hidden;
+                margin: 0;
+                padding: var(--spacing-xl);
+            }
+            .splash-container{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                max-width: 500px;
+                width: 100%;
+                animation: fadeIn var(--transition-medium) ease-out;
+            }
+            .splash-logo{
+                font-size: 4rem;
+                color: var(--primary-color);
+                margin-bottom: var(--spacing-lg);
+                animation: pulse 2s infinite ease-in-out;
+            }
+            .splash-title{
+                font-size: 2.5rem;
+                font-weight: 700;
+                margin-bottom: var(--spacing-md);
+                letter-spacing: -.5px;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            .splash-subtitle{
+                font-size: 1.125rem;
+                color: var(--text-secondary);
+                margin-bottom: var(--spacing-xl);
+                line-height: 1.5;
+            }
+            .loading-container{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: var(--spacing-md);
+                width: 100%;
+                margin-top: var(--spacing-lg);
+            }
+            .loading-spinner{
+                width: 60px;
+                height: 60px;
+                border: 4px solid rgba(26, 115, 232, .1);
+                border-top: 4px solid var(--primary-color);
+                border-radius: var(--radius-full);
+                animation: spin 1s linear infinite;
+            }
+            .loading-text{
+                color: var(--text-secondary);
+                font-size: 1rem;
+                font-weight: 500;
+            }
+            .loading-progress{
+                width: 100%;
+                height: 6px;
+                background-color: var(--surface-variant);
+                border-radius: var(--radius-full);
+                overflow: hidden;
+                margin-top: var(--spacing-md);
+            }
+            .loading-progress-bar{
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                border-radius: var(--radius-full);
+                transition: width .3s ease;
+            }
+            .splash-footer{
+                margin-top: var(--spacing-xl);
+                color: var(--text-disabled);
+                font-size: .875rem;
+                padding-top: var(--spacing-md);
+                border-top: 1px solid var(--surface-variant);
+                width: 100%;
+            }
+            @keyframes fadeIn{
+                from{
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to{
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes spin{
+                0%{
+                    transform: rotate(0deg);
+                }
+                100%{
+                    transform: rotate(360deg);
+                }
+            }
+            @keyframes pulse{
+                0%, 100%{
+                    transform: scale(1);
+                }
+                50%{
+                    transform: scale(1.05);
+                }
+            }
+            @keyframes progress{
+                0%{
+                    width: 0%;
+                }
+                50%{
+                    width: 70%;
+                }
+                100%{
+                    width: 100%;
+                }
+            }
+            html[data-platform="windows"] .splash-container{
+                background: var(--surface-color);
+                border-radius: var(--radius-medium);
+                padding: var(--spacing-xl);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+                border: 1px solid rgba(0, 0, 0, .1);
+            }
+            html[data-platform="macos"] .splash-container{
+                backdrop-filter: blur(20px) saturate(180%);
+                background: rgba(255, 255, 255, .1);
+                border-radius: var(--radius-large);
+                padding: var(--spacing-xl);
+                border: 1px solid rgba(255, 255, 255, .15);
+            }
+            @media (max-width: 600px){
+                .splash-logo{
+                    font-size: 3rem;
+                }
+                .splash-title{
+                    font-size: 2rem;
+                }
+                .splash-subtitle{
+                    font-size: 1rem;
+                }
+                body{
+                    padding: var(--spacing-md);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="splash-container">
+            <div class="splash-logo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h1 class="splash-title">Training Generator</h1>
+            <p class="splash-subtitle">Converting documents to AI training data using Ollama</p>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loading-text">Initializing application...</div>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+            <div class="splash-footer">
+                <p>Version 1.0.0 • Loading please wait...</p>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", ()=>{
+                let progressBar=document.getElementById("progress-bar");
+                let loadingText=document.getElementById("loading-text");
+                let steps=["Initializing application...", "Loading core modules...", "Setting up file parser...", "Connecting to Ollama...", "Preparing user interface...", "Almost ready..."];
+                let currentStep=0;
+                let totalSteps=steps.length;
+                let updateProgress=()=>{
+                    if (currentStep<totalSteps){
+                        let progress=((currentStep+1)/totalSteps)*100;
+                        progressBar.style.width=`${progress}%`;
+                        loadingText.textContent=steps[currentStep];
+                        currentStep++;
+                        let nextDelay=300+Math.random()*700;
+                        setTimeout(updateProgress, nextDelay);
+                    }
+                    else{
+                        progressBar.style.width="100%";
+                        loadingText.textContent="Ready! Starting application...";
+                    }
+                };
+                setTimeout(updateProgress, 500);
+                let platform=navigator.platform.toLowerCase();
+                if (platform.includes("win")){
+                    document.documentElement.setAttribute("data-platform", "windows");
+                }
+                else if (platform.includes("mac")){
+                    document.documentElement.setAttribute("data-platform", "macos");
+                }
+                else{
+                    document.documentElement.setAttribute("data-platform", "linux");
+                }
+            });
+        </script>
+    </body>
+</html>
