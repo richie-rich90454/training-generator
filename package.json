@@ -7,7 +7,10 @@
     "dev": "vite & cross-env NODE_ENV=development electron .",
     "build": "vite build",
     "preview": "vite preview",
-    "package": "electron-builder",
+    "package": "npm run build && electron-builder",
+    "package:win": "npm run build && electron-builder --win",
+    "package:mac": "npm run build && electron-builder --mac",
+    "package:linux": "npm run build && electron-builder --linux",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,6 +24,98 @@
   "author": "richie-rich90454",
   "license": "MIT",
   "description": "Desktop application to convert documents into AI training data using Ollama",
+  "build": {
+    "appId": "com.training.generator",
+    "productName": "Training Generator",
+    "copyright": "Copyright © 2026 richie-rich90454",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist/**/*",
+      "src/**/*",
+      "package.json",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/.{git,hg,svn}",
+      "!**/{.DS_Store,.git,.hg,.svn,__pycache__,thumbs.db,.gitignore,.idea,.vscode}",
+      "!**/*.{iml,o,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!**/._*",
+      "!**/*.log",
+      "!**/test*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node",
+      "**/pdf-parse/**/*",
+      "**/officeparser/**/*",
+      "**/mammoth/**/*",
+      "**/rtf-parser-fixes/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": "x64"
+        },
+        {
+          "target": "portable",
+          "arch": "x64"
+        }
+      ],
+      "icon": "assets/favicon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Training Generator",
+      "installerIcon": "assets/favicon.ico",
+      "uninstallerIcon": "assets/favicon.ico",
+      "installerHeaderIcon": "assets/favicon.ico",
+      "license": "LICENSE"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "arm64"
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/favicon.icns"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "snap",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "Development",
+      "icon": "assets/favicon.png"
+    }
+  },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^39.2.7",

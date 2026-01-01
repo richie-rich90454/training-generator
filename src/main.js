@@ -7,6 +7,45 @@ let FileParser=require("./core/fileParser")
 let mainWindow=null
 let isWindows=process.platform=="win32"
 let isMac=process.platform=="darwin"
+function setupLogging(){
+    if (process.env.NODE_ENV=="development") return;
+    try{
+        let logPath=path.join(app.getPath("userData"), "logs");
+        let logFile=path.join(logPath, `app-${new Date().toISOString().replace(/[:.]/g, "-")}.log`);
+        let fsSync=require("fs");
+        if (!fsSync.existsSync(logPath)){
+            fsSync.mkdirSync(logPath,{ recursive: true });
+        }
+        let logStream=fsSync.createWriteStream(logFile,{ flags: "a" });
+        let originalLog=console.log;
+        let originalError=console.error;
+        let originalWarn=console.warn;
+        console.log=function(...args){
+            let message=`[LOG ${new Date().toISOString()}] ${args.join(" ")}\n`;
+            logStream.write(message);
+            originalLog.apply(console, args);
+        };
+        console.error=function(...args){
+            let message=`[ERROR ${new Date().toISOString()}] ${args.join(" ")}\n`;
+            logStream.write(message);
+            originalError.apply(console, args);
+        };
+        console.warn=function(...args){
+            let message=`[WARN ${new Date().toISOString()}] ${args.join(" ")}\n`;
+            logStream.write(message);
+            originalWarn.apply(console, args);
+        };
+        console.info=console.log;
+        process.on("exit", ()=>{
+            logStream.end();
+        });
+        console.log(`Logging to: ${logFile}`);
+    }
+    catch (error){
+
+    }
+}
+setupLogging();
 app.commandLine.appendSwitch("enable-gpu-rasterization")
 app.commandLine.appendSwitch("enable-zero-copy")
 app.commandLine.appendSwitch("ignore-gpu-blacklist")
@@ -42,10 +81,10 @@ async function createWindow(){
             contextIsolation: true,
             preload: path.join(__dirname, "preload.js"),
             webgl: true,
-            contextIsolation: true,
             enableRemoteModule: false,
             spellcheck: false,
-            disableHtmlFullscreenWindowResize: true
+            disableHtmlFullscreenWindowResize: true,
+            sandbox: false
         },
         ...iconConfig,
     })
@@ -60,9 +99,20 @@ async function createWindow(){
         mainWindow.webContents.openDevTools({ mode: "detach" })
     }
     else{
-        mainWindow.loadFile(path.join(__dirname, "../dist/index.html"))
+        let indexPath=path.join(__dirname, "../dist/index.html")
+        console.log("Loading production index.html from:", indexPath)
+        mainWindow.loadFile(indexPath).catch(error=>{
+            console.error("Failed to load index.html:", error)
+            let altPath=path.join(process.resourcesPath, "app.asar.unpacked", "dist", "index.html")
+            console.log("Trying alternative path:", altPath)
+            mainWindow.loadFile(altPath).catch(error2=>{
+                console.error("Failed to load from alternative path:", error2)
+                mainWindow.loadURL(`data:text/html,<h1>Failed to load application</h1><p>${error.message}</p>`)
+            })
+        })
     }
     mainWindow.once("ready-to-show", ()=>{
+        console.log("Window is ready to show")
         mainWindow.show()
     })
     mainWindow.on("closed", ()=>{
@@ -96,8 +146,8 @@ ipcMain.handle("dialog:openFile", async ()=>{
     let result=await dialog.showOpenDialog(mainWindow,{
         properties: ["openFile", "multiSelections"],
         filters: [
-           {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
-           {name: "All Files", extensions: ["*"]}
+          {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
+          {name: "All Files", extensions: ["*"]}
         ]
     })
     if (result.canceled) return []
@@ -158,10 +208,10 @@ ipcMain.handle("dialog:saveFile", async (event, defaultFilename)=>{
     let result=await dialog.showSaveDialog(mainWindow,{
         defaultPath: defaultFilename||"training_data.jsonl",
         filters: [
-           {name: "JSON Lines", extensions: ["jsonl"]},
-           {name: "JSON", extensions: ["json"]},
-           {name: "Text", extensions: ["txt"]},
-           {name: "All Files", extensions: ["*"]}
+          {name: "JSON Lines", extensions: ["jsonl"]},
+          {name: "JSON", extensions: ["json"]},
+          {name: "Text", extensions: ["txt"]},
+          {name: "All Files", extensions: ["*"]}
         ]
     })
     if (result.canceled) return null
@@ -218,7 +268,7 @@ ipcMain.handle("ollama:generate", async (event, payload)=>{
         try{
             let response=await axios.post(
                 "http://localhost:11434/api/generate",
-               {
+                {
                     model,
                     prompt,
                     stream: false,
@@ -228,7 +278,7 @@ ipcMain.handle("ollama:generate", async (event, payload)=>{
                         ...options
                     }
                 },
-               { 
+                { 
                     timeout: timeout,
                     headers:{
                         "Content-Type": "application/json",
