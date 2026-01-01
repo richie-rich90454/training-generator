@@ -35,6 +35,7 @@
     "files": [
       "dist/**/*",
       "src/**/*",
+      "native-splash/**/*",
       "package.json",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
@@ -51,11 +52,17 @@
         "from": "assets",
         "to": "assets",
         "filter": ["**/*"]
+      },
+      {
+        "from": "native-splash",
+        "to": "native-splash",
+        "filter": ["**/*"]
       }
     ],
     "asar": true,
     "asarUnpack": [
       "**/*.node",
+      "native-splash/**",
       "**/pdf-parse/**/*",
       "**/officeparser/**/*",
       "**/mammoth/**/*",

@@ -1,97 +1,79 @@
 let {app, BrowserWindow, ipcMain, dialog}=require("electron")
 let path=require("path")
-let fs=require("fs").promises
+let fs=require("fs")
+let fsp=require("fs").promises
 let {spawn}=require("child_process")
 let axios=require("axios")
 let FileParser=require("./core/fileParser")
+let isWin=process.platform=="win32"
+let isMac=process.platform=="darwin"
 let mainWindow=null
 let splashWindow=null
-let isWindows=process.platform=="win32"
-let isMac=process.platform=="darwin"
-function setupLogging(){
-    if (process.env.NODE_ENV=="development") return;
-    try{
-        let logPath=path.join(app.getPath("userData"), "logs");
-        let logFile=path.join(logPath, `app-${new Date().toISOString().replace(/[:.]/g, "-")}.log`);
-        let fsSync=require("fs");
-        if (!fsSync.existsSync(logPath)){
-            fsSync.mkdirSync(logPath,{ recursive: true });
-        }
-        let logStream=fsSync.createWriteStream(logFile,{ flags: "a" });
-        let originalLog=console.log;
-        let originalError=console.error;
-        let originalWarn=console.warn;
-        console.log=function(...args){
-            let message=`[LOG ${new Date().toISOString()}] ${args.join(" ")}\n`;
-            logStream.write(message);
-            originalLog.apply(console, args);
-        };
-        console.error=function(...args){
-            let message=`[ERROR ${new Date().toISOString()}] ${args.join(" ")}\n`;
-            logStream.write(message);
-            originalError.apply(console, args);
-        };
-        console.warn=function(...args){
-            let message=`[WARN ${new Date().toISOString()}] ${args.join(" ")}\n`;
-            logStream.write(message);
-            originalWarn.apply(console, args);
-        };
-        console.info=console.log;
-        process.on("exit", ()=>{
-            logStream.end();
-        });
-        console.log(`Logging to: ${logFile}`);
-    }
-    catch (error){
-
-    }
+let splashProcess=null
+let fileParser=new FileParser()
+app.commandLine.appendSwitch("no-first-run")
+app.commandLine.appendSwitch("disable-background-networking")
+app.commandLine.appendSwitch("disable-component-update")
+app.commandLine.appendSwitch("disable-sync")
+app.commandLine.appendSwitch("disable-default-apps")
+app.commandLine.appendSwitch("metrics-recording-only")
+if (isWin){
+    app.commandLine.appendSwitch("disable-hang-monitor")
+    app.commandLine.appendSwitch("disable-prompt-on-repost")
 }
-setupLogging();
-app.commandLine.appendSwitch("enable-gpu-rasterization")
-app.commandLine.appendSwitch("enable-zero-copy")
-app.commandLine.appendSwitch("ignore-gpu-blacklist")
-app.commandLine.appendSwitch("enable-native-gpu-memory-buffers")
-app.commandLine.appendSwitch("enable-accelerated-2d-canvas")
-async function createSplashWindow(){
-    console.log("Creating splash window...")
-    let splashWidth=isWindows?450:500
-    let splashHeight=isWindows?350:400
+function startSplash(){
+    if (isWin){
+        let exePath=path.join(
+            process.resourcesPath,
+            "native-splash",
+            "win",
+            "splash.exe"
+        )
+        if (fs.existsSync(exePath)){
+            splashProcess=spawn(exePath, [],{
+                detached: true,
+                stdio: "ignore"
+            })
+            splashProcess.unref()
+        }
+        return
+    }
     splashWindow=new BrowserWindow({
-        width: splashWidth,
-        height: splashHeight,
+        width: isMac?500:450,
+        height: isMac?400:350,
         frame: false,
         transparent: isMac,
-        backgroundColor: isMac?'#00000000':'#FFFFFF',
         resizable: false,
         alwaysOnTop: true,
         show: false,
+        backgroundColor: isMac?"#00000000":"#FFFFFF",
         webPreferences:{
             nodeIntegration: false,
             contextIsolation: true,
-            webgl: false,
-            sandbox: false
+            sandbox: true
         }
     })
-    let splashPath=path.join(__dirname, "splash.html")
-    console.log("Loading splash screen from:", splashPath)
-    await splashWindow.loadFile(splashPath)
-    splashWindow.center()
-    splashWindow.show()
-    return splashWindow
+    splashWindow
+        .loadFile(path.join(__dirname, "splash.html"))
+        .then(()=>{
+            splashWindow.center()
+            splashWindow.show()
+        })
+        .catch(console.error)
 }
-async function createWindow(){
-    await createSplashWindow()
-    console.log("Creating main window...")
-    let iconPath=path.join(__dirname, "../assets/favicon.png")
-    let iconConfig={}
-    try{
-        await fs.access(iconPath)
-        iconConfig={icon: iconPath}
-        console.log("Using custom icon:", iconPath)
+function stopSplash(){
+    if (isWin&&splashProcess){
+        try{ splashProcess.kill() }
+        catch{}
+        splashProcess=null
+        return
     }
-    catch (error){
-        console.log("Icon file not found, using default Electron icon")
+    if (splashWindow&&!splashWindow.isDestroyed()){
+        splashWindow.close()
+        splashWindow=null
     }
+}
+function createMainWindow(){
     mainWindow=new BrowserWindow({
         width: 1400,
         height: 900,
@@ -100,110 +82,62 @@ async function createWindow(){
         show: false,
         frame: true,
         transparent: isMac,
-        backgroundColor: isMac?"#000":"#FFF",
+        backgroundColor: isMac?"#000000":"#FFFFFF",
         titleBarStyle: "default",
-        trafficLightPosition: isMac?{x: 14, y: 14}:undefined,
-        visualEffectState: "active",
-        vibrancy: isMac?"sidebar":undefined,
+        useContentSize: true,
         webPreferences:{
+            preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, "preload.js"),
-            webgl: true,
             enableRemoteModule: false,
             spellcheck: false,
             disableHtmlFullscreenWindowResize: true,
-            sandbox: false
-        },
-        ...iconConfig,
+            sandbox: false,
+            webgl: false,
+            backgroundThrottling: true
+        }
     })
-    console.log("Window created with platform:", process.platform)
     mainWindow.setMenu(null)
-    mainWindow.webContents.on("did-finish-load", ()=>{
-        mainWindow.webContents.setZoomFactor(1)
-        mainWindow.webContents.setVisualZoomLevelLimits(1, 1)
-    })
     if (process.env.NODE_ENV=="development"){
         mainWindow.loadURL("http://localhost:5173")
         mainWindow.webContents.openDevTools({ mode: "detach" })
     }
     else{
-        let indexPath=path.join(__dirname, "../dist/index.html")
-        console.log("Loading production index.html from:", indexPath)
-        mainWindow.loadFile(indexPath).catch(error=>{
-            console.error("Failed to load index.html:", error)
-            let altPath=path.join(process.resourcesPath, "app.asar.unpacked", "dist", "index.html")
-            console.log("Trying alternative path:", altPath)
-            mainWindow.loadFile(altPath).catch(error2=>{
-                console.error("Failed to load from alternative path:", error2)
-                mainWindow.loadURL(`data:text/html,<h1>Failed to load application</h1><p>${error.message}</p>`)
-            })
-        })
+        mainWindow.loadFile(path.join(__dirname, "../dist/index.html"))
     }
-    mainWindow.once("ready-to-show", ()=>{
-        console.log("Main window is ready to show")
-        setTimeout(()=>{
-            if (splashWindow&&!splashWindow.isDestroyed()){
-                splashWindow.close()
-                splashWindow=null
-            }
-            mainWindow.show()
-            mainWindow.focus()
-        }, 500)
+    mainWindow.webContents.once("dom-ready", ()=>{
+        stopSplash()
+        mainWindow.show()
+        mainWindow.focus()
     })
     mainWindow.on("closed", ()=>{
         mainWindow=null
     })
-    let splashTimeout=setTimeout(()=>{
-        if (splashWindow&&!splashWindow.isDestroyed()){
-            console.log("Splash timeout - closing splash window")
-            splashWindow.close()
-            splashWindow=null
-        }
-    }, 10000)
-    mainWindow.once('show', ()=>{
-        clearTimeout(splashTimeout)
-    })
 }
 app.whenReady().then(()=>{
-    createWindow().catch(error=>{
-        console.error("Failed to create window:", error)
-        if (splashWindow&&!splashWindow.isDestroyed()){
-            splashWindow.close()
-            splashWindow=null
-        }
-        app.quit()
-    })
+    startSplash()
+    createMainWindow()
 })
 app.on("window-all-closed", ()=>{
     if (!isMac) app.quit()
 })
 app.on("activate", ()=>{
-    if (mainWindow==null){
-        createWindow().catch(error=>{
-            console.error("Failed to create window on activate:", error)
-        })
+    if (!mainWindow){
+        createMainWindow()
     }
 })
-process.on("uncaughtException", (error)=>{
-    console.error("Uncaught Exception:", error)
-})
-process.on("unhandledRejection", (reason, promise)=>{
-    console.error("Unhandled Rejection at:", promise, "reason:", reason)
-})
-let fileParser=new FileParser()
 ipcMain.handle("dialog:openFile", async ()=>{
     let result=await dialog.showOpenDialog(mainWindow,{
         properties: ["openFile", "multiSelections"],
         filters: [
-            {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
-            {name: "All Files", extensions: ["*"]}
+           {name: "Documents", extensions: ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]},
+           {name: "All Files", extensions: ["*"]}
         ]
     })
     if (result.canceled) return []
     let files=await Promise.all(result.filePaths.map(async filePath=>{
         try{
-            let stats=await fs.stat(filePath)
+            let stats=await fsp.stat(filePath)
             return{
                 path: filePath,
                 name: path.basename(filePath),
@@ -218,7 +152,37 @@ ipcMain.handle("dialog:openFile", async ()=>{
     }))
     return files.filter(Boolean)
 })
-ipcMain.handle("file:parse", async (event, filePath, fileType)=>{
+ipcMain.handle("dialog:saveFile", async (_, defaultFilename)=>{
+    let result=await dialog.showSaveDialog(mainWindow,{
+        defaultPath: defaultFilename||"training_data.jsonl",
+        filters: [
+           {name: "JSON Lines", extensions: ["jsonl"]},
+           {name: "JSON", extensions: ["json"]},
+           {name: "Text", extensions: ["txt"]},
+           {name: "All Files", extensions: ["*"]}
+        ]
+    })
+    return result.canceled?null:result.filePath
+})
+ipcMain.handle("file:read", async (_, filePath)=>{
+    try{
+        let content=await fsp.readFile(filePath, "utf-8")
+        return{success: true, content}
+    }
+    catch (error){
+        return{success: false, error: error.message}
+    }
+})
+ipcMain.handle("file:save", async (_, filePath, content)=>{
+    try{
+        await fsp.writeFile(filePath, content, "utf-8")
+        return{success: true}
+    }
+    catch (error){
+        return{success: false, error: error.message}
+    }
+})
+ipcMain.handle("file:parse", async (_, filePath, fileType)=>{
     try{
         let text=await fileParser.parseFile(filePath, fileType)
         return{success: true, content: text}
@@ -227,7 +191,8 @@ ipcMain.handle("file:parse", async (event, filePath, fileType)=>{
         return{success: false, error: error.message}
     }
 })
-ipcMain.handle("file:parseBatch", async (event, files)=>{
+
+ipcMain.handle("file:parseBatch", async (_, files)=>{
     try{
         let results=await fileParser.processFiles(files.map(f=>f.path))
         return{success: true, results}
@@ -236,82 +201,43 @@ ipcMain.handle("file:parseBatch", async (event, files)=>{
         return{success: false, error: error.message}
     }
 })
-ipcMain.handle("file:read", async (event, filePath)=>{
-    try{
-        let content=await fs.readFile(filePath, "utf-8")
-        return{success: true, content}
-    }
-    catch (error){
-        return{success: false, error: error.message}
-    }
-})
-ipcMain.handle("file:save", async (event, filePath, content)=>{
-    try{
-        await fs.writeFile(filePath, content, "utf-8")
-        return{success: true}
-    }
-    catch (error){
-        return{success: false, error: error.message}
-    }
-})
-ipcMain.handle("dialog:saveFile", async (event, defaultFilename)=>{
-    let result=await dialog.showSaveDialog(mainWindow,{
-        defaultPath: defaultFilename||"training_data.jsonl",
-        filters: [
-            {name: "JSON Lines", extensions: ["jsonl"]},
-            {name: "JSON", extensions: ["json"]},
-            {name: "Text", extensions: ["txt"]},
-            {name: "All Files", extensions: ["*"]}
-        ]
-    })
-    if (result.canceled) return null
-    return result.filePath
-})
+
 ipcMain.handle("ollama:check", async ()=>{
     try{
-        let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout: 5000})
+        let tagsResponse=await axios.get("http://localhost:11434/api/tags",{ timeout: 5000 })
         let version="unknown"
         try{
-            let versionResponse=await axios.get("http://localhost:11434/api/version",{timeout: 3000})
+            let versionResponse=await axios.get("http://localhost:11434/api/version",{ timeout: 3000 })
             version=versionResponse.data.version||"unknown"
         }
-        catch (versionError){
-            console.warn("Could not get Ollama version:", versionError.message)
-            if (tagsResponse.data&&tagsResponse.data.version){
+        catch{
+            if (tagsResponse.data?.version){
                 version=tagsResponse.data.version
             }
         }
         return{
             running: true,
             models: tagsResponse.data.models||[],
-            version: version
+            version
         }
     }
     catch (error){
-        return{running: false, error: error.message}
+        return{ running: false, error: error.message}
     }
 })
-ipcMain.handle("ollama:generate", async (event, payload)=>{
+ipcMain.handle("ollama:generate", async (_, payload)=>{
     let{model, prompt, options={}}=payload
     try{
-        await axios.get(`http://localhost:11434/api/show`,{
+        await axios.get("http://localhost:11434/api/show",{
             params:{ name: model },
             timeout: 10000
-        }).catch(()=>{
-            console.log(`Model ${model} might need to be loaded`)
-        })
+        }).catch(()=>{})
     }
-    catch (error){
-        console.log(`Model check for ${model} failed:`, error.message)
-    }
+    catch{}
     let promptLength=prompt.length
     let timeout=300000
-    if (promptLength>10000){
-        timeout=600000
-    }
-    else if (promptLength>5000){
-        timeout=450000
-    }
+    if (promptLength>10000) timeout=600000
+    else if (promptLength>5000) timeout=450000
     let maxRetries=2
     let lastError=null
     for (let attempt=0; attempt<=maxRetries; attempt++){
@@ -328,8 +254,8 @@ ipcMain.handle("ollama:generate", async (event, payload)=>{
                         ...options
                     }
                 },
-                { 
-                    timeout: timeout,
+                {
+                    timeout,
                     headers:{
                         "Content-Type": "application/json",
                         "Accept": "application/json"
@@ -339,25 +265,27 @@ ipcMain.handle("ollama:generate", async (event, payload)=>{
             if (!response.data?.response){
                 throw new Error("Invalid response from Ollama")
             }
-            return{success: true, response: response.data.response}
-            
+            return{success: true, response: response.data.response }
         }
         catch (error){
             lastError=error
             if (error.code=="ECONNABORTED"||error.message.includes("timeout")){
-                console.log(`Generation attempt ${attempt+1}/${maxRetries+1} timed out after ${timeout}ms`)
                 if (attempt<maxRetries){
-                    await new Promise(resolve=>setTimeout(resolve, 5000))
-                    console.log(`Retrying generation (attempt ${attempt+2})...`)
+                    await new Promise(r=>setTimeout(r, 5000))
                 }
             }
             else{
-                console.error("Generation failed with non-timeout error:", error.message)
                 break
             }
         }
     }
-    throw new Error(`Failed to generate after ${maxRetries+1} attempts: ${lastError?.message||"Unknown error"}`)
+    throw new Error(`Failed after ${maxRetries+1} attempts: ${lastError?.message||"Unknown error"}`)
 })
 ipcMain.handle("app:getVersion", ()=>app.getVersion())
 ipcMain.handle("app:getPlatform", ()=>process.platform)
+process.on("uncaughtException", error=>{
+    console.error("Uncaught Exception:", error)
+})
+process.on("unhandledRejection", (reason, promise)=>{
+    console.error("Unhandled Rejection at:", promise, "reason:", reason)
+})
