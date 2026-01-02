@@ -11,8 +11,36 @@ let mainWindow=null
 let splashWindow=null
 let splashProcess=null
 let fileParser=new FileParser()
-app.setPath("userData",path.join(app.getPath("documents"),"TrainingGenerator"))
-app.setPath("cache",path.join(app.getPath("documents"),"TrainingGenerator","Cache"))
+
+// Set up paths and ensure directories exist
+let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
+let cachePath=path.join(userDataPath,"Cache")
+
+// Ensure directories exist
+try{
+    if(!fs.existsSync(userDataPath)){
+        fs.mkdirSync(userDataPath,{recursive:true})
+    }
+    if(!fs.existsSync(cachePath)){
+        fs.mkdirSync(cachePath,{recursive:true})
+    }
+}catch(error){
+    console.error("Failed to create directories:",error)
+    // Fallback to default paths
+    userDataPath=app.getPath("userData")
+    cachePath=app.getPath("cache")
+}
+
+app.setPath("userData",userDataPath)
+app.setPath("cache",cachePath)
+
+// Add cache-related command line switches to prevent cache errors
+app.commandLine.appendSwitch("disable-features","VizDisplayCompositor")
+app.commandLine.appendSwitch("disable-gpu-shader-disk-cache")
+app.commandLine.appendSwitch("disable-software-rasterizer")
+app.commandLine.appendSwitch("disable-gpu")
+app.commandLine.appendSwitch("disable-accelerated-2d-canvas")
+app.commandLine.appendSwitch("disable-accelerated-video-decode")
 app.commandLine.appendSwitch("no-first-run")
 app.commandLine.appendSwitch("disable-background-networking")
 app.commandLine.appendSwitch("disable-component-update")
@@ -22,12 +50,15 @@ app.commandLine.appendSwitch("metrics-recording-only")
 app.commandLine.appendSwitch("enable-gpu-rasterization")
 app.commandLine.appendSwitch("enable-oop-rasterization")
 app.commandLine.appendSwitch("enable-zero-copy")
-app.commandLine.appendSwitch("enable-features","Vulkan")
-app.commandLine.appendSwitch("enable-features","CanvasOopRasterization")
-app.commandLine.appendSwitch("enable-features","UseSkiaRenderer")
 if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
+    // Windows-specific cache fixes
+    app.commandLine.appendSwitch("disable-direct-composition")
+    app.commandLine.appendSwitch("disable-gpu-vsync")
+    // Use in-memory cache to avoid disk permission issues
+    app.commandLine.appendSwitch("disk-cache-dir","")
+    app.commandLine.appendSwitch("disable-disk-cache")
 }
 function startSplash(){
     if(isWin){

@@ -27,7 +27,7 @@ class TrainGeneratorApp{
                 }
             }
             document.documentElement.setAttribute("data-platform",platform);
-            console.log(`Platform detected:${platform}`);
+            console.log(`Platform detected: ${platform}`);
         }
         catch(error){
             console.error("Failed to detect platform:",error);
@@ -129,12 +129,12 @@ class TrainGeneratorApp{
         for(let file of validFiles){
             let maxSize=100*1024*1024;
             if(file.size>maxSize){
-                this.addLog(`File too large:${file.name}(${this.formatFileSize(file.size)}). Maximum size is 100MB.`,"warning");
+                this.addLog(`File too large: ${file.name}(${this.formatFileSize(file.size)}). Maximum size is 100MB.`,"warning");
                 skippedCount++;
                 continue;
             }
             if(file.name.toLowerCase().endsWith(".pdf")&& file.size>20*1024*1024){
-                this.addLog(`Large PDF detected:${file.name}(${this.formatFileSize(file.size)}). Processing may take longer.`,"info");
+                this.addLog(`Large PDF detected: ${file.name}(${this.formatFileSize(file.size)}). Processing may take longer.`,"info");
             }
             let fileObj={
                 file:file,
@@ -183,7 +183,7 @@ class TrainGeneratorApp{
         this.selectedFiles=this.selectedFiles.filter(f=>f.name!==fileName);
         this.updateFileList();
         this.updateProcessButton();
-        this.addLog(`Removed file:${fileName}`,"info");
+        this.addLog(`Removed file: ${fileName}`,"info");
     }
     updateFileList(){
         this.fileList.innerHTML="";
@@ -325,7 +325,7 @@ class TrainGeneratorApp{
                     (processedChunks/totalChunks)*100,
                     `Processing ${file.name}...`
                 );
-                this.addLog(`Processing file ${i+1}/${this.processingQueue.length}:${file.name}`,"info");
+                this.addLog(`Processing file ${i+1}/${this.processingQueue.length}: ${file.name}`,"info");
                 let result=await this.processFile(file,(chunksProcessed,totalChunksInFile)=>{
                     let fileStartProgress=(processedChunks/totalChunks)*100;
                     let fileEndProgress=((processedChunks+totalChunksInFile)/totalChunks)*100;
@@ -346,7 +346,7 @@ class TrainGeneratorApp{
                 }
                 else{
                     failedFiles++;
-                    this.addLog(`✗ Failed to process ${file.name}:${result.error}`,"error");
+                    this.addLog(`✗ Failed to process ${file.name}: ${result.error}`,"error");
                 }
                 this.setProgress(
                     (processedChunks/totalChunks)*100,
@@ -372,7 +372,7 @@ class TrainGeneratorApp{
             this.lastProcessedEl.textContent=new Date().toLocaleTimeString();
         }
         catch(error){
-            this.addLog(`Processing failed:${error.message}`,"error");
+            this.addLog(`Processing failed: ${error.message}`,"error");
             this.setProgress(0,"Processing failed");
             this.addLog("Please check your Ollama connection and try again.","warning");
         }
@@ -439,7 +439,7 @@ class TrainGeneratorApp{
                     this.addLog(`Processed chunk ${i+1}/${chunks.length}(${Math.round(chunkProgress)}%)-generated ${trainingItems.length}items`,"info");
                 }
                 catch(error){
-                    this.addLog(`Failed to process chunk ${i+1}:${error.message}`,"warning");
+                    this.addLog(`Failed to process chunk ${i+1}: ${error.message}`,"warning");
                 }
             }
             return{
@@ -448,7 +448,7 @@ class TrainGeneratorApp{
             };
         }
         catch(error){
-            this.addLog(`Error processing file ${fileObj.name}:${error.message}`,"error");
+            this.addLog(`Error processing file ${fileObj.name}: ${error.message}`,"error");
             return{
                 success:false,
                 error:error.message
@@ -519,7 +519,7 @@ class TrainGeneratorApp{
         }
         catch(error){
             console.error("PDF text extraction error:",error);
-            throw new Error(`Failed to extract text from PDF:${error.message}. For better PDF support,use the file dialog or convert PDFs to text format first.`);
+            throw new Error(`Failed to extract text from PDF: ${error.message}. For better PDF support,use the file dialog or convert PDFs to text format first.`);
         }
     }
     async readFileContent(file){
@@ -581,19 +581,23 @@ class TrainGeneratorApp{
             `./prompts/${fileName}`,
             `../prompts/${fileName}`,
         ];
-        console.log(`[PROMPT DEBUG] Loading prompt file:${fileName}for language:${language},type:${processingType}`);
-        console.log(`[PROMPT DEBUG] Trying paths:${possiblePaths.join(",")}`);
-        console.log(`[PROMPT DEBUG] Electron API available:${!!(window.electronAPI&&window.electronAPI.readFile)}`);
+        console.log(`[PROMPT DEBUG] Loading prompt file: ${fileName}for language: ${language},type: ${processingType}`);
+        console.log(`[PROMPT DEBUG] Trying paths: ${possiblePaths.join(",")}`);
+        console.log(`[PROMPT DEBUG] Electron API available: ${!!(window.electronAPI&&window.electronAPI.readFile)}`);
         let loadedPrompt=null;
         let loadedPath=null;
         let loadMethod=null;
         if(window.electronAPI&&window.electronAPI.readFile){
             for(let filePath of possiblePaths){
                 try{
-                    console.log(`[PROMPT DEBUG] Trying Electron API with path:${filePath}`);
-                    let promptTemplate=await window.electronAPI.readFile(filePath);
-                    console.log(`[PROMPT DEBUG] Successfully loaded prompt file via Electron API:${filePath}`);
-                    loadedPrompt=promptTemplate;
+                    console.log(`[PROMPT DEBUG] Trying Electron API with path: ${filePath}`);
+                    let result=await window.electronAPI.readFile(filePath);
+                    if(!result.success){
+                        console.log(`[PROMPT DEBUG] Failed to load via Electron API ${filePath}:`,result.error);
+                        continue;
+                    }
+                    console.log(`[PROMPT DEBUG] Successfully loaded prompt file via Electron API: ${filePath}`);
+                    loadedPrompt=result.content;
                     loadedPath=filePath;
                     loadMethod="electron";
                     break;
@@ -606,16 +610,16 @@ class TrainGeneratorApp{
         if(!loadedPrompt){
             for(let filePath of possiblePaths){
                 try{
-                    console.log(`[PROMPT DEBUG] Trying fetch with path:${filePath}`);
+                    console.log(`[PROMPT DEBUG] Trying fetch with path: ${filePath}`);
                     let response=await fetch(filePath);
                     if(response.ok){
                         loadedPrompt=await response.text();
-                        console.log(`[PROMPT DEBUG] Successfully loaded prompt file via fetch:${filePath}`);
+                        console.log(`[PROMPT DEBUG] Successfully loaded prompt file via fetch: ${filePath}`);
                         loadedPath=filePath;
                         loadMethod="fetch";
                         break;
                     }else{
-                        console.log(`[PROMPT DEBUG] Fetch failed with status:${response.status}${response.statusText}`);
+                        console.log(`[PROMPT DEBUG] Fetch failed with status: ${response.status}${response.statusText}`);
                     }
                 }
                 catch(error){
@@ -629,8 +633,8 @@ class TrainGeneratorApp{
                 previewLines=previewLines.substring(0,100)+"...";
             }
             previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-            let simpleLogMessage=`Using ${langua·ge}prompt:${fileName}`;
-            console.log(`[PROMPT DEBUG] Simple log message:${simpleLogMessage}`);
+            let simpleLogMessage=`Using ${language} prompt: ${fileName}`;
+            console.log(`[PROMPT DEBUG] Simple log message: ${simpleLogMessage}`);
             try{
                 this.addLog(simpleLogMessage,"info");
                 console.log(`[PROMPT DEBUG] Simple addLog called successfully`);
@@ -650,10 +654,14 @@ class TrainGeneratorApp{
             for(let filePath of possiblePaths.map(p=>p.replace(fileName,fallbackFileName))){
                 try{
                     if(window.electronAPI&&window.electronAPI.readFile){
-                        let promptTemplate=await window.electronAPI.readFile(filePath);
-                        console.log(`[PROMPT DEBUG] Falling back to English prompt via Electron API:${filePath}`);
-                        this.addLog(`Falling back to English prompt:${fallbackFileName}`,"warning");
-                        return promptTemplate.replace("{{text}}",text);
+                        let result=await window.electronAPI.readFile(filePath);
+                        if(!result.success){
+                            console.log(`[PROMPT DEBUG] Failed to load English fallback via Electron API ${filePath}:`,result.error);
+                            continue;
+                        }
+                        console.log(`[PROMPT DEBUG] Falling back to English prompt via Electron API: ${filePath}`);
+                        this.addLog(`Falling back to English prompt: ${fallbackFileName}`,"warning");
+                        return result.content.replace("{{text}}",text);
                     }
                 }
                 catch(error){
@@ -663,8 +671,8 @@ class TrainGeneratorApp{
                     let response=await fetch(filePath);
                     if(response.ok){
                         let promptTemplate=await response.text();
-                        console.log(`[PROMPT DEBUG] Falling back to English prompt via fetch:${filePath}`);
-                        this.addLog(`Falling back to English prompt:${fallbackFileName}`,"warning");
+                        console.log(`[PROMPT DEBUG] Falling back to English prompt via fetch: ${filePath}`);
+                        this.addLog(`Falling back to English prompt: ${fallbackFileName}`,"warning");
                         return promptTemplate.replace("{{text}}",text);
                     }
                 }
@@ -856,6 +864,10 @@ Provide your analysis in a well-structured,comprehensive format.`
         return items;
     }
     parseQuestionAnswerPairs(text){
+        if(!text||typeof text!=='string'){
+            console.warn('parseQuestionAnswerPairs: text is not a string',text);
+            return[];
+        }
         let pairs=[];
         let lines=text.split("\n");
         let currentQuestion="";
@@ -910,6 +922,10 @@ Provide your analysis in a well-structured,comprehensive format.`
         return pairs;
     }
     parseConversationTurns(text){
+        if(!text||typeof text!=='string'){
+            console.warn('parseConversationTurns: text is not a string',text);
+            return[];
+        }
         let turns=[];
         let lines=text.split("\n");
         let currentUser="";
@@ -1012,11 +1028,11 @@ Provide your analysis in a well-structured,comprehensive format.`
                 this.addLog(`Exported to ${savePath}`,"success");
             }
             else{
-                this.addLog(`Failed to export:${result.error}`,"error");
+                this.addLog(`Failed to export: ${result.error}`,"error");
             }
         }
         catch(error){
-            this.addLog(`Export failed:${error.message}`,"error");
+            this.addLog(`Export failed: ${error.message}`,"error");
         }
     }
     async copyOutput(){
@@ -1045,7 +1061,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             this.addLog("Copied to clipboard","success");
         }
         catch(error){
-            this.addLog(`Failed to copy:${error.message}`,"error");
+            this.addLog(`Failed to copy: ${error.message}`,"error");
         }
     }
     clearAll(){
@@ -1128,19 +1144,38 @@ Provide your analysis in a well-structured,comprehensive format.`
             let fileType=processingTypeMap[processingType]||"instruction";
             let fileName=`${language}_${fileType}.txt`;
             let promptPreview="";
-            try{
-                let filePath=`prompts/${fileName}`;
-                if(window.electronAPI&&window.electronAPI.readFile){
-                    try{
-                        let loadedPrompt=await window.electronAPI.readFile(filePath);
-                        let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
-                        if(previewLines.length>100){
-                            previewLines=previewLines.substring(0,100)+"...";
+                try{
+                    let filePath=`prompts/${fileName}`;
+                    if(window.electronAPI&&window.electronAPI.readFile){
+                        try{
+                            let result=await window.electronAPI.readFile(filePath);
+                            if(result.success){
+                                let loadedPrompt=result.content;
+                                let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                                if(previewLines.length>100){
+                                    previewLines=previewLines.substring(0,100)+"...";
+                                }
+                                previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+                                promptPreview=`(prompt:"${previewLines}")`;
+                            }
                         }
-                        previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-                        promptPreview=`(prompt:"${previewLines}")`;
-                    }
-                    catch(e){
+                        catch(e){
+                            try{
+                                let response=await fetch(filePath);
+                                if(response.ok){
+                                    let loadedPrompt=await response.text();
+                                    let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                                    if(previewLines.length>100){
+                                        previewLines=previewLines.substring(0,100)+"...";
+                                    }
+                                    previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+                                    promptPreview=`(prompt:"${previewLines}")`;
+                                }
+                            }
+                            catch(e2){
+                            }
+                        }
+                    }else{
                         try{
                             let response=await fetch(filePath);
                             if(response.ok){
@@ -1153,39 +1188,23 @@ Provide your analysis in a well-structured,comprehensive format.`
                                 promptPreview=`(prompt:"${previewLines}")`;
                             }
                         }
-                        catch(e2){
-                        }
-                    }
-                }else{
-                    try{
-                        let response=await fetch(filePath);
-                        if(response.ok){
-                            let loadedPrompt=await response.text();
-                            let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
-                            if(previewLines.length>100){
-                                previewLines=previewLines.substring(0,100)+"...";
-                            }
-                            previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-                            promptPreview=`(prompt:"${previewLines}")`;
-                        }
-                    }
-                    catch(e){
+                        catch(e){
 
+                        }
                     }
                 }
-            }
             catch(error){
 
             }
-            this.addLog(`Settings saved. Output language set to:${settings.language}${promptPreview}`,"success");
+            this.addLog(`Settings saved. Output language set to: ${settings.language}${promptPreview}`,"success");
             let nonLatinLanguages=["zh-Hans","zh-Hant","ja","ko"];
             if(nonLatinLanguages.includes(settings.language)){
-                this.addLog(`Note:${settings.language}uses non-Latin script. Ensure your Ollama model supports this language.`,"warning");
+                this.addLog(`Note: ${settings.language}uses non-Latin script. Ensure your Ollama model supports this language.`,"warning");
             }
         }
         catch(error){
             console.error("Error in savePreset:",error);
-            this.addLog(`Settings saved. Output language set to:${settings.language}`,"success");
+            this.addLog(`Settings saved. Output language set to: ${settings.language}`,"success");
         }
     }
     showModal(show){
