@@ -575,31 +575,109 @@ class TrainGeneratorApp{
         };
         let fileType=processingTypeMap[processingType]||"instruction";
         let fileName=`${language}_${fileType}.txt`;
-        let filePath=`src/prompts/${fileName}`;
-        try{
-            let response=await fetch(filePath);
-            if(response.ok){
-                let promptTemplate=await response.text();
-                return promptTemplate.replace("{{text}}",text);
-            }
-            else{
-                let fallbackFileName=`en_${fileType}.txt`;
-                let fallbackPath=`src/prompts/${fallbackFileName}`;
-                let fallbackResponse=await fetch(fallbackPath);
-                if(fallbackResponse.ok){
-                    let promptTemplate=await fallbackResponse.text();
-                    return promptTemplate.replace("{{text}}",text);
+        let possiblePaths=[
+            `src/prompts/${fileName}`,
+            `prompts/${fileName}`,
+            `./prompts/${fileName}`,
+            `../prompts/${fileName}`,
+        ];
+        console.log(`[PROMPT DEBUG] Loading prompt file:${fileName}for language:${language},type:${processingType}`);
+        console.log(`[PROMPT DEBUG] Trying paths:${possiblePaths.join(",")}`);
+        console.log(`[PROMPT DEBUG] Electron API available:${!!(window.electronAPI&&window.electronAPI.readFile)}`);
+        let loadedPrompt=null;
+        let loadedPath=null;
+        let loadMethod=null;
+        if(window.electronAPI&&window.electronAPI.readFile){
+            for(let filePath of possiblePaths){
+                try{
+                    console.log(`[PROMPT DEBUG] Trying Electron API with path:${filePath}`);
+                    let promptTemplate=await window.electronAPI.readFile(filePath);
+                    console.log(`[PROMPT DEBUG] Successfully loaded prompt file via Electron API:${filePath}`);
+                    loadedPrompt=promptTemplate;
+                    loadedPath=filePath;
+                    loadMethod="electron";
+                    break;
                 }
-                else{
-                    return this.getFallbackPrompt(text,processingType);
+                catch(error){
+                    console.log(`[PROMPT DEBUG] Failed to load via Electron API ${filePath}:`,error.message);
                 }
             }
-        }catch(error){
-            console.error(`Error loading prompt file ${fileName}:`,error);
-            return this.getFallbackPrompt(text,processingType);
         }
+        if(!loadedPrompt){
+            for(let filePath of possiblePaths){
+                try{
+                    console.log(`[PROMPT DEBUG] Trying fetch with path:${filePath}`);
+                    let response=await fetch(filePath);
+                    if(response.ok){
+                        loadedPrompt=await response.text();
+                        console.log(`[PROMPT DEBUG] Successfully loaded prompt file via fetch:${filePath}`);
+                        loadedPath=filePath;
+                        loadMethod="fetch";
+                        break;
+                    }else{
+                        console.log(`[PROMPT DEBUG] Fetch failed with status:${response.status}${response.statusText}`);
+                    }
+                }
+                catch(error){
+                    console.log(`[PROMPT DEBUG] Failed to load via fetch ${filePath}:`,error.message);
+                }
+            }
+        }
+        if(loadedPrompt){
+            let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+            if(previewLines.length>100){
+                previewLines=previewLines.substring(0,100)+"...";
+            }
+            previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+            let simpleLogMessage=`Using ${langua·ge}prompt:${fileName}`;
+            console.log(`[PROMPT DEBUG] Simple log message:${simpleLogMessage}`);
+            try{
+                this.addLog(simpleLogMessage,"info");
+                console.log(`[PROMPT DEBUG] Simple addLog called successfully`);
+                let fullLogMessage=`Prompt loaded from ${loadedPath}(Preview:"${previewLines}")`;
+                this.addLog(fullLogMessage,"info");
+                console.log(`[PROMPT DEBUG] Full addLog called successfully`);
+            }
+            catch(logError){
+                console.error(`[PROMPT DEBUG] Failed to add log:`,logError);
+                this.addLog(`Loaded ${language}prompt`,"info");
+            }
+            return loadedPrompt.replace("{{text}}",text);
+        }
+        if(language!=="en"){
+            console.warn(`[PROMPT DEBUG] Failed to load ${language}prompt ${fileName}. Falling back to English.`);
+            let fallbackFileName=`en_${fileType}.txt`;
+            for(let filePath of possiblePaths.map(p=>p.replace(fileName,fallbackFileName))){
+                try{
+                    if(window.electronAPI&&window.electronAPI.readFile){
+                        let promptTemplate=await window.electronAPI.readFile(filePath);
+                        console.log(`[PROMPT DEBUG] Falling back to English prompt via Electron API:${filePath}`);
+                        this.addLog(`Falling back to English prompt:${fallbackFileName}`,"warning");
+                        return promptTemplate.replace("{{text}}",text);
+                    }
+                }
+                catch(error){
+                    console.log(`[PROMPT DEBUG] Failed to load English fallback via Electron API ${filePath}:`,error.message);
+                }
+                try{
+                    let response=await fetch(filePath);
+                    if(response.ok){
+                        let promptTemplate=await response.text();
+                        console.log(`[PROMPT DEBUG] Falling back to English prompt via fetch:${filePath}`);
+                        this.addLog(`Falling back to English prompt:${fallbackFileName}`,"warning");
+                        return promptTemplate.replace("{{text}}",text);
+                    }
+                }
+                catch(error){
+                    console.log(`[PROMPT DEBUG] Failed to load English fallback via fetch ${filePath}:`,error.message);
+                }
+            }
+        }
+        console.warn(`[PROMPT DEBUG] Failed to load any prompt file. Using hardcoded fallback for ${language}.`);
+        this.addLog(`Using hardcoded fallback prompt for ${language}`,"warning");
+        return this.getFallbackPrompt(text,processingType,language);
     }
-    getFallbackPrompt(text,processingType){
+    getFallbackPrompt(text,processingType,language="en"){
         let fallbackPrompts={
             instruction:`You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.
 TEXT TO ANALYZE:
@@ -1029,7 +1107,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             console.error("Failed to load settings:",error);
         }
     }
-    savePreset(){
+    async savePreset(){
         let settings={
             model:this.modelSelect.value,
             processingType:this.processingType.value,
@@ -1039,14 +1117,75 @@ Provide your analysis in a well-structured,comprehensive format.`
         };
         try{
             localStorage.setItem("train-generator-settings",JSON.stringify(settings));
-            this.addLog(`Settings saved. Output language set to: ${settings.language}`,"success");
-            let nonLatinLanguages=["zh-Hans", "zh-Hant", "ja", "ko"];
-            if (nonLatinLanguages.includes(settings.language)) {
-                this.addLog(`Note: ${settings.language} uses non-Latin script. Ensure your Ollama model supports this language.`, "warning");
+            let language=settings.language;
+            let processingType=settings.processingType;
+            let processingTypeMap={
+                "instruction":"instruction",
+                "conversation":"conversation",
+                "chunking":"chunking",
+                "custom":"custom"
+            };
+            let fileType=processingTypeMap[processingType]||"instruction";
+            let fileName=`${language}_${fileType}.txt`;
+            let promptPreview="";
+            try{
+                let filePath=`prompts/${fileName}`;
+                if(window.electronAPI&&window.electronAPI.readFile){
+                    try{
+                        let loadedPrompt=await window.electronAPI.readFile(filePath);
+                        let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                        if(previewLines.length>100){
+                            previewLines=previewLines.substring(0,100)+"...";
+                        }
+                        previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+                        promptPreview=`(prompt:"${previewLines}")`;
+                    }
+                    catch(e){
+                        try{
+                            let response=await fetch(filePath);
+                            if(response.ok){
+                                let loadedPrompt=await response.text();
+                                let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                                if(previewLines.length>100){
+                                    previewLines=previewLines.substring(0,100)+"...";
+                                }
+                                previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+                                promptPreview=`(prompt:"${previewLines}")`;
+                            }
+                        }
+                        catch(e2){
+                        }
+                    }
+                }else{
+                    try{
+                        let response=await fetch(filePath);
+                        if(response.ok){
+                            let loadedPrompt=await response.text();
+                            let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                            if(previewLines.length>100){
+                                previewLines=previewLines.substring(0,100)+"...";
+                            }
+                            previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+                            promptPreview=`(prompt:"${previewLines}")`;
+                        }
+                    }
+                    catch(e){
+
+                    }
+                }
+            }
+            catch(error){
+
+            }
+            this.addLog(`Settings saved. Output language set to:${settings.language}${promptPreview}`,"success");
+            let nonLatinLanguages=["zh-Hans","zh-Hant","ja","ko"];
+            if(nonLatinLanguages.includes(settings.language)){
+                this.addLog(`Note:${settings.language}uses non-Latin script. Ensure your Ollama model supports this language.`,"warning");
             }
         }
         catch(error){
-            this.addLog("Failed to save settings","error");
+            console.error("Error in savePreset:",error);
+            this.addLog(`Settings saved. Output language set to:${settings.language}`,"success");
         }
     }
     showModal(show){

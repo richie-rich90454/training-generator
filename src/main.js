@@ -11,12 +11,20 @@ let mainWindow=null
 let splashWindow=null
 let splashProcess=null
 let fileParser=new FileParser()
+app.setPath("userData",path.join(app.getPath("documents"),"TrainingGenerator"))
+app.setPath("cache",path.join(app.getPath("documents"),"TrainingGenerator","Cache"))
 app.commandLine.appendSwitch("no-first-run")
 app.commandLine.appendSwitch("disable-background-networking")
 app.commandLine.appendSwitch("disable-component-update")
 app.commandLine.appendSwitch("disable-sync")
 app.commandLine.appendSwitch("disable-default-apps")
 app.commandLine.appendSwitch("metrics-recording-only")
+app.commandLine.appendSwitch("enable-gpu-rasterization")
+app.commandLine.appendSwitch("enable-oop-rasterization")
+app.commandLine.appendSwitch("enable-zero-copy")
+app.commandLine.appendSwitch("enable-features","Vulkan")
+app.commandLine.appendSwitch("enable-features","CanvasOopRasterization")
+app.commandLine.appendSwitch("enable-features","UseSkiaRenderer")
 if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
@@ -96,15 +104,19 @@ function createMainWindow(){
             spellcheck:false,
             disableHtmlFullscreenWindowResize:true,
             sandbox:false,
-            webgl:false,
-            backgroundThrottling:true
+            webgl:true,
+            webgl2:true,
+            backgroundThrottling:false,
+            enablePreferredSizeMode:true,
+            scrollBounce:true
         }
     })
     mainWindow.setMenu(null)
     if(process.env.NODE_ENV=="development"){
         mainWindow.loadURL("http://localhost:5173")
         mainWindow.webContents.openDevTools({mode:"detach"})
-    }else{
+    }
+    else{
         mainWindow.loadFile(path.join(__dirname,"../dist/index.html"))
     }
     mainWindow.webContents.once("dom-ready",()=>{
@@ -112,25 +124,25 @@ function createMainWindow(){
         mainWindow.show()
         mainWindow.focus()
     })
-    mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription, validatedURL)=>{
-        console.error(`Failed to load: ${validatedURL}, Code: ${errorCode}, ${errorDescription}`)
+    mainWindow.webContents.on("did-fail-load",(event,errorCode,errorDescription,validatedURL)=>{
+        console.error(`Failed to load:${validatedURL},Code:${errorCode},${errorDescription}`)
         dialog.showErrorBox(
             "Loading Failed",
-            `Failed to load application: ${errorDescription}\n\nPlease check if the application files are complete and try again.`
+            `Failed to load application:${errorDescription}\n\nPlease check if the application files are complete and try again.`
         )
         stopSplash()
-        if(mainWindow&&!mainWindow.isDestroyed()) {
+        if(mainWindow&&!mainWindow.isDestroyed()){
             mainWindow.close()
         }
     })
-    mainWindow.webContents.on("render-process-gone",(event, details)=>{
-        console.error("Renderer process crashed:", details)
+    mainWindow.webContents.on("render-process-gone",(event,details)=>{
+        console.error("Renderer process crashed:",details)
         dialog.showErrorBox(
             "Renderer Crashed",
             "The application UI has crashed. Please restart the application."
         )
         stopSplash()
-        if(mainWindow&&!mainWindow.isDestroyed()) {
+        if(mainWindow&&!mainWindow.isDestroyed()){
             mainWindow.close()
         }
     })
@@ -295,12 +307,13 @@ ipcMain.handle("ollama:generate",async(_,payload)=>{
                 if(attempt<maxRetries){
                     await new Promise(r=>setTimeout(r,5000))
                 }
-            }else{
+            }
+            else{
                 break
             }
         }
     }
-    throw new Error(`Failed after ${maxRetries+1} attempts: ${lastError?.message||"Unknown error"}`)
+    throw new Error(`Failed after ${maxRetries+1}attempts:${lastError?.message||"Unknown error"}`)
 })
 ipcMain.handle("app:getVersion",()=>app.getVersion())
 ipcMain.handle("app:getPlatform",()=>process.platform)
