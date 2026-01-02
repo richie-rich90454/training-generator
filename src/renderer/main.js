@@ -695,8 +695,8 @@ INSTRUCTIONS:
 2. For EACH significant piece of information,create a clear,specific question that someone might ask about it. Questions and answers should be in the same language as the source text.
 3. Provide detailed,accurate answers based EXCLUSIVELY on the text content.
 4. Format each pair exactly as:
-Question:[the question]
-Answer:[the answer]
+Question: [the question]
+Answer: [the answer]
 5. Create DIVERSE question types:
    -Factual questions(who,what,when,where)
    -Conceptual questions(how,why,explain)
@@ -709,11 +709,13 @@ Answer:[the answer]
 9. If the text contains lists,procedures,or steps,create questions for EACH item/step.
 10. If the text contains examples,create questions about each example.
 OUTPUT FORMAT:
-Question:[First question]
-Answer:[First answer]
-Question:[Second question]
-Answer:[Second answer]
-[Continue with as many pairs as needed to cover all information]`,
+Question: [First question]
+Answer: [First answer]
+
+Question: [Second question]
+Answer: [Second answer]
+
+[Continue with as many pairs as needed to cover all information, with a blank line between each question-answer pair]`,
             conversation:`You are an AI training data generator. Your task is to create comprehensive,informative conversations between a user and an AI assistant based on ALL information in the provided text.
 TEXT TO ANALYZE:
 ${text}
@@ -722,8 +724,8 @@ INSTRUCTIONS:
 2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text. Questions and responses should match the source text language.
 3. The assistant should provide detailed,accurate responses based EXCLUSIVELY on the text.
 4. Format the conversation exactly as:
-User:[user message]
-Assistant:[assistant response]
+User: [user message]
+Assistant: [assistant response]
 5. Make the conversation flow naturally while covering ALL key information.
 6. Include 5-10+exchanges(user-assistant pairs)to cover different aspects of the text COMPLETELY.
 7. The assistant"s responses should be informative,comprehensive,and directly based on the text content.
@@ -731,11 +733,13 @@ Assistant:[assistant response]
 9. If the text contains multiple sections or topics,create conversation exchanges for EACH one.
 10. Ensure the conversation explores the text DEEPLY,not just superficially.
 OUTPUT FORMAT:
-User:[First user message]
-Assistant:[First assistant response]
-User:[Second user message]
-Assistant:[Second assistant response]
-[Continue with as many exchanges as needed to cover all information]`,
+User: [First user message]
+Assistant: [First assistant response]
+
+User: [Second user message]
+Assistant: [Second assistant response]
+
+[Continue with as many exchanges as needed to cover all information, with a blank line between each user-assistant pair]`,
             chunking:`You are an AI training data generator. Your task is to create a comprehensive,detailed summary of the provided text that captures ALL essential information.
 TEXT TO SUMMARIZE:
 ${text}

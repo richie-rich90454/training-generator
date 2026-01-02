@@ -8,8 +8,8 @@ INSTRUCCIONES:
 2. Para CADA pieza significativa de información, crea una pregunta clara y específica que alguien podría hacer sobre ella. Las preguntas y respuestas DEBEN estar en español. Todo el texto de salida debe estar en español..
 3. Proporciona respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el contenido del texto.
 4. Formatea cada par exactamente como:
-Pregunta: [la pregunta]
-Respuesta: [la respuesta]
+Question: [la pregunta]
+Answer: [la respuesta]
 5. Crea tipos de preguntas DIVERSAS:
    - Preguntas factuales (quién, qué, cuándo, dónde)
    - Preguntas conceptuales (cómo, por qué, explicar)
@@ -23,8 +23,10 @@ Respuesta: [la respuesta]
 10. Si el texto contiene ejemplos, crea preguntas sobre cada ejemplo.
 
 FORMATO DE SALIDA:
-Pregunta: [Primera pregunta]
-Respuesta: [Primera respuesta]
-Pregunta: [Segunda pregunta]
-Respuesta: [Segunda respuesta]
-[Continúa con tantos pares como sea necesario para cubrir toda la información]
+Question: [Primera pregunta]
+Answer: [Primera respuesta]
+
+Question: [Segunda pregunta]
+Answer: [Segunda respuesta]
+
+[Continúe con tantos pares como sea necesario para cubrir toda la información, con una línea en blanco entre cada par pregunta-respuesta]

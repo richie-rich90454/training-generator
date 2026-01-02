@@ -8,8 +8,8 @@ INSTRUCTIONS:
 2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text. Questions and responses MUST be in English (en-US). All output text must be in English..
 3. The assistant should provide detailed, accurate responses based EXCLUSIVELY on the text.
 4. Format the conversation exactly as:
-User:[user message]
-Assistant:[assistant response]
+User: [user message]
+Assistant: [assistant response]
 5. Make the conversation flow naturally while covering ALL key information.
 6. Include 5-10+ exchanges (user-assistant pairs) to cover different aspects of the text COMPLETELY.
 7. The assistant's responses should be informative, comprehensive, and directly based on the text content.
@@ -18,8 +18,10 @@ Assistant:[assistant response]
 10. Ensure the conversation explores the text DEEPLY, not just superficially.
 
 OUTPUT FORMAT:
-User:[First user message]
-Assistant:[First assistant response]
-User:[Second user message]
-Assistant:[Second assistant response]
-[Continue with as many exchanges as needed to cover all information]
+User: [First user message]
+Assistant: [First assistant response]
+
+User: [Second user message]
+Assistant: [Second assistant response]
+
+[Continue with as many exchanges as needed to cover all information, with a blank line between each user-assistant pair]

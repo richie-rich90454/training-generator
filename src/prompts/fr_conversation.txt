@@ -8,8 +8,8 @@ INSTRUCTIONS :
 2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
 3. L'assistant doit fournir des réponses détaillées et précises basées EXCLUSIVEMENT sur le texte.
 4. Formatez la conversation exactement comme suit :
-Utilisateur : [message de l'utilisateur]
-Assistant : [réponse de l'assistant]
+User: [message utilisateur]
+Assistant: [réponse assistant]
 5. Faites couler la conversation naturellement tout en couvrant TOUTES les informations clés.
 6. Incluez 5-10+ échanges (paires utilisateur-assistant) pour couvrir COMPLÈTEMENT différents aspects du texte.
 7. Les réponses de l'assistant doivent être informatives, complètes et directement basées sur le contenu du texte.
@@ -18,8 +18,10 @@ Assistant : [réponse de l'assistant]
 10. Assurez-vous que la conversation explore le texte en PROFONDEUR, pas seulement superficiellement.
 
 FORMAT DE SORTIE :
-Utilisateur : [Premier message de l'utilisateur]
-Assistant : [Première réponse de l'assistant]
-Utilisateur : [Deuxième message de l'utilisateur]
-Assistant : [Deuxième réponse de l'assistant]
-[Continuez avec autant d'échanges que nécessaire pour couvrir toutes les informations]
+User: [Premier message utilisateur]
+Assistant: [Première réponse assistant]
+
+User: [Deuxième message utilisateur]
+Assistant: [Deuxième réponse assistant]
+
+[Continuez avec autant d'échanges que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire utilisateur-assistant]

@@ -8,8 +8,8 @@ INSTRUCTIONS :
 2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
 3. Fournissez des réponses détaillées et précises basées EXCLUSIVEMENT sur le contenu du texte.
 4. Formatez chaque paire exactement comme suit :
-Question : [la question]
-Réponse : [la réponse]
+Question: [la question]
+Answer: [la réponse]
 5. Créez des types de questions DIVERSIFIÉS :
    - Questions factuelles (qui, quoi, quand, où)
    - Questions conceptuelles (comment, pourquoi, expliquer)
@@ -23,8 +23,10 @@ Réponse : [la réponse]
 10. Si le texte contient des exemples, créez des questions sur chaque exemple.
 
 FORMAT DE SORTIE :
-Question : [Première question]
-Réponse : [Première réponse]
-Question : [Deuxième question]
-Réponse : [Deuxième réponse]
-[Continuez avec autant de paires que nécessaire pour couvrir toutes les informations]
+Question: [Première question]
+Answer: [Première réponse]
+
+Question: [Deuxième question]
+Answer: [Deuxième réponse]
+
+[Continuez avec autant de paires que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire question-réponse]

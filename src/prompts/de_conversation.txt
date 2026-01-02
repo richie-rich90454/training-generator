@@ -9,8 +9,8 @@ ANWEISUNGEN:
 2. Erstellen Sie ein vollständiges Gespräch, in dem der Benutzer Fragen stellt oder ALLE wichtigen Aspekte des Textes diskutiert. Fragen und Antworten sollten mit der Sprache des Quelltextes übereinstimmen.
 3. Der Assistent muss detaillierte und genaue Antworten geben, die AUSSCHLIESSLICH auf dem Text basieren.
 4. Formatieren Sie das Gespräch genau wie folgt:
-Benutzer: [Benutzernachricht]
-Assistent: [Assistentenantwort]
+User: [Benutzernachricht]
+Assistant: [Assistentenantwort]
 5. Lassen Sie das Gespräch natürlich fließen, während es ALLE Schlüsselinformationen abdeckt.
 6. Nehmen Sie 5-10+ Austausche (Benutzer-Assistent-Paare) auf, um UNTERSCHIEDLICHE Aspekte des Textes VOLLSTÄNDIG abzudecken.
 7. Die Antworten des Assistenten müssen informativ, vollständig und direkt auf dem Textinhalt basierend sein.
@@ -19,8 +19,10 @@ Assistent: [Assistentenantwort]
 10. Stellen Sie sicher, dass das Gespräch den Text in der TIEFE erkundet, nicht nur oberflächlich.
 
 AUSGABEFORMAT:
-Benutzer: [Erste Benutzernachricht]
-Assistent: [Erste Assistentenantwort]
-Benutzer: [Zweite Benutzernachricht]
-Assistent: [Zweite Assistentenantwort]
-[Fahren Sie mit so vielen Austauschen fort, wie nötig sind, um alle Informationen abzudecken]
+User: [Erste Benutzernachricht]
+Assistant: [Erste Assistentenantwort]
+
+User: [Zweite Benutzernachricht]
+Assistant: [Zweite Assistentenantwort]
+
+[Fahren Sie mit so vielen Austauschen fort, wie nötig sind, um alle Informationen abzudecken, mit einer Leerzeile zwischen jedem Benutzer-Assistent-Paar]

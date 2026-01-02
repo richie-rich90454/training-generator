@@ -9,8 +9,8 @@ INSTRUCTIONS:
 2. For EACH significant piece of information, create a clear, specific question that someone might ask about it. Questions and answers MUST be in English (en-US). All output text must be in English.
 3. Provide detailed, accurate answers based EXCLUSIVELY on the text content.
 4. Format each pair exactly as:
-Question:[the question]
-Answer:[the answer]
+Question: [the question]
+Answer: [the answer]
 5. Create DIVERSE question types:
    - Factual questions (who, what, when, where)
    - Conceptual questions (how, why, explain)
@@ -24,8 +24,10 @@ Answer:[the answer]
 10. If the text contains examples, create questions about each example.
 
 OUTPUT FORMAT:
-Question:[First question]
-Answer:[First answer]
-Question:[Second question]
-Answer:[Second answer]
-[Continue with as many pairs as needed to cover all information]
+Question: [First question]
+Answer: [First answer]
+
+Question: [Second question]
+Answer: [Second answer]
+
+[Continue with as many pairs as needed to cover all information, with a blank line between each question-answer pair]

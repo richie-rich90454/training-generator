@@ -8,8 +8,8 @@ ANWEISUNGEN:
 2. Erstellen Sie für JEDES bedeutende Informationsstück eine klare, spezifische Frage, die jemand dazu stellen könnte. Fragen und Antworten MÜSSEN auf Deutsch sein. Alle Ausgabetexte müssen auf Deutsch sein..
 3. Geben Sie detaillierte, genaue Antworten basierend AUSSCHLIESSLICH auf den Textinhalt.
 4. Formatieren Sie jedes Paar genau wie folgt:
-Frage: [die Frage]
-Antwort: [die Antwort]
+Question: [die Frage]
+Answer: [die Antwort]
 5. Erstellen Sie VIELFÄLTIGE Fragetypen:
    - Faktische Fragen (wer, was, wann, wo)
    - Konzeptionelle Fragen (wie, warum, erklären)
@@ -23,8 +23,10 @@ Antwort: [die Antwort]
 10. Wenn der Text Beispiele enthält, erstellen Sie Fragen zu jedem Beispiel.
 
 AUSGABEFORMAT:
-Frage: [Erste Frage]
-Antwort: [Erste Antwort]
-Frage: [Zweite Frage]
-Antwort: [Zweite Antwort]
-[Fahren Sie mit so vielen Paaren fort, wie nötig sind, um alle Informationen abzudecken]
+Question: [Erste Frage]
+Answer: [Erste Antwort]
+
+Question: [Zweite Frage]
+Answer: [Zweite Antwort]
+
+[Fahren Sie mit so vielen Paaren fort, wie nötig sind, um alle Informationen abzudecken, mit einer Leerzeile zwischen jedem Frage-Antwort-Paar]
