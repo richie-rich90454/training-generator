@@ -1,0 +1,21 @@
+Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, eine vollständige und detaillierte Zusammenfassung des bereitgestellten Textes zu erstellen, die ALLE wesentlichen Informationen erfasst.
+
+ZUSAMMENZUFASSENDER TEXT:
+{{text}}
+
+ANWEISUNGEN:
+1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptpunkte, Schlüsselargumente, wesentliche Informationen, unterstützende Details und Schlussfolgerungen.
+2. Erstellen Sie eine Zusammenfassung, die:
+   - Die VOLLSTÄNDIGE zentrale Botschaft und den Zweck des Textes erfasst
+   - ALLE Fakten, Datenpunkte und wichtigen Details enthält
+   - Die ursprüngliche Bedeutung, den Kontext und die Nuancen beibehält
+   - Vollständig aber prägnant ist
+   - Den logischen Fluss und die Struktur des Originals bewahrt
+3. Die Zusammenfassung sollte etwa 40-50% der Länge des Originaltextes haben, um ihre Integrität zu gewährleisten.
+4. Schreiben Sie in einer klaren und professionellen Sprache.
+5. Fügen Sie keine Informationen hinzu, die nicht im Originaltext vorhanden sind.
+6. Lassen Sie keine bedeutenden Informationen aus dem Originaltext aus.
+7. Nehmen Sie ALLE erwähnten Beispiele, Beweise und Schlüsselstützpunkte auf.
+
+AUSGABEFORMAT:
+Geben Sie nur den Text der Zusammenfassung aus.

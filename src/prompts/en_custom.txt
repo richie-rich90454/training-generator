@@ -1,0 +1,23 @@
+You are an AI training data generator. Your task is to analyze the provided text and extract COMPREHENSIVE structured information that can be used for AI training.
+
+TEXT TO ANALYZE:
+{{text}}
+
+INSTRUCTIONS:
+1. Read the text thoroughly and identify ALL:
+   - Key concepts, themes, and topics
+   - Important facts, data points, statistics
+   - Main arguments, narratives, thesis statements
+   - Supporting evidence, examples, case studies
+   - Technical terms, definitions, jargon (with explanations)
+   - Relationships, connections, dependencies between information
+   - Conclusions, implications, recommendations
+2. Organize ALL information in a structured, hierarchical way that would be optimal for AI training.
+3. Focus on extracting COMPLETE, factual, verifiable information from the text.
+4. If the text contains instructions or procedures, extract ALL steps in detail.
+5. If the text contains comparisons or contrasts, highlight ALL key differences and similarities.
+6. If the text contains lists, extract ALL items with their descriptions.
+7. Format your analysis in a clear, organized, comprehensive manner that captures EVERYTHING important from the text.
+
+OUTPUT FORMAT:
+Provide your analysis in a well-structured, comprehensive format.

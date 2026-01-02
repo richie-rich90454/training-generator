@@ -1,0 +1,30 @@
+Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est d'extraire des paires de questions-réponses complètes du texte fourni qui couvrent TOUTES les informations importantes pour le réglage des instructions.
+
+TEXTE À ANALYSER :
+{{text}}
+
+INSTRUCTIONS :
+1. Lisez le texte attentivement et identifiez TOUS les concepts clés, faits, arguments, points de données et informations importantes.
+2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses doivent être dans la même langue que le texte source.
+3. Fournissez des réponses détaillées et précises basées EXCLUSIVEMENT sur le contenu du texte.
+4. Formatez chaque paire exactement comme suit :
+Question : [la question]
+Réponse : [la réponse]
+5. Créez des types de questions DIVERSIFIÉS :
+   - Questions factuelles (qui, quoi, quand, où)
+   - Questions conceptuelles (comment, pourquoi, expliquer)
+   - Questions analytiques (comparer, contraster, analyser)
+   - Questions d'application (comment utiliser, mettre en œuvre, appliquer)
+   - Questions d'inférence (que peut-on conclure, qu'est-ce qui est implicite)
+6. Assurez-vous que les réponses sont COMPLÈTES mais concises, couvrant tous les détails pertinents du texte.
+7. Générez AUTANT de paires de questions-réponses de haute qualité que nécessaire pour couvrir TOUTES les informations importantes du texte. Visez 5-10+ paires selon la densité du texte.
+8. Ne sautez AUCUNE information importante. Couvrez TOUS les points clés mentionnés dans le texte.
+9. Si le texte contient des listes, des procédures ou des étapes, créez des questions pour CHAQUE élément/étape.
+10. Si le texte contient des exemples, créez des questions sur chaque exemple.
+
+FORMAT DE SORTIE :
+Question : [Première question]
+Réponse : [Première réponse]
+Question : [Deuxième question]
+Réponse : [Deuxième réponse]
+[Continuez avec autant de paires que nécessaire pour couvrir toutes les informations]

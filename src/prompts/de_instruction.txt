@@ -1,0 +1,30 @@
+Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, umfassende Frage-Antwort-Paare aus dem bereitgestellten Text zu extrahieren, die ALLE wichtigen Informationen für das Instruction Tuning abdecken.
+
+ZU ANALYSIERENDER TEXT:
+{{text}}
+
+ANWEISUNGEN:
+1. Lesen Sie den Text gründlich und identifizieren Sie ALLE Schlüsselkonzepte, Fakten, Argumente, Datenpunkte und wichtige Informationen.
+2. Erstellen Sie für JEDES bedeutende Informationsstück eine klare, spezifische Frage, die jemand dazu stellen könnte. Fragen und Antworten sollten in derselben Sprache wie der Quelltext sein.
+3. Geben Sie detaillierte, genaue Antworten basierend AUSSCHLIESSLICH auf den Textinhalt.
+4. Formatieren Sie jedes Paar genau wie folgt:
+Frage: [die Frage]
+Antwort: [die Antwort]
+5. Erstellen Sie VIELFÄLTIGE Fragetypen:
+   - Faktische Fragen (wer, was, wann, wo)
+   - Konzeptionelle Fragen (wie, warum, erklären)
+   - Analytische Fragen (vergleichen, gegenüberstellen, analysieren)
+   - Anwendungsfragen (wie verwenden, implementieren, anwenden)
+   - Inferenzfragen (was kann geschlossen werden, was ist impliziert)
+6. Stellen Sie sicher, dass die Antworten UMFASSEND aber prägnant sind und alle relevanten Details aus dem Text abdecken.
+7. Generieren Sie SO VIELE hochwertige Frage-Antwort-Paare wie nötig, um ALLE wichtigen Informationen im Text abzudecken. Zielen Sie auf 5-10+ Paare je nach Textdichte.
+8. Überspringen Sie KEINE wichtigen Informationen. Decken Sie ALLE im Text erwähnten Schlüsselpunkte ab.
+9. Wenn der Text Listen, Verfahren oder Schritte enthält, erstellen Sie Fragen für JEDES Element/jeden Schritt.
+10. Wenn der Text Beispiele enthält, erstellen Sie Fragen zu jedem Beispiel.
+
+AUSGABEFORMAT:
+Frage: [Erste Frage]
+Antwort: [Erste Antwort]
+Frage: [Zweite Frage]
+Antwort: [Zweite Antwort]
+[Fahren Sie mit so vielen Paaren fort, wie nötig sind, um alle Informationen abzudecken]

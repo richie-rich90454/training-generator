@@ -1,0 +1,21 @@
+You are an AI training data generator. Your task is to create a comprehensive, detailed summary of the provided text that captures ALL essential information.
+
+TEXT TO SUMMARIZE:
+{{text}}
+
+INSTRUCTIONS:
+1. Read the text carefully and identify ALL main points, key arguments, essential information, supporting details, and conclusions.
+2. Create a summary that:
+   - Captures the COMPLETE core message and purpose of the text
+   - Includes ALL important facts, data points, and details
+   - Maintains the original meaning, context, and nuance
+   - Is comprehensive yet concise
+   - Preserves the logical flow and structure of the original
+3. The summary should be approximately 40-50% of the original text length to ensure completeness.
+4. Write in clear, professional language.
+5. Do not add any information not present in the original text.
+6. Do not omit any significant information from the original text.
+7. Include ALL key examples, evidence, and supporting points mentioned.
+
+OUTPUT FORMAT:
+Provide only the summary text.

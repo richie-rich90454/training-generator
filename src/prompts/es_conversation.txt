@@ -1,0 +1,25 @@
+Eres un generador de datos de entrenamiento para IA. Tu tarea es crear conversaciones completas e informativas entre un usuario y un asistente de IA basadas en TODA la información del texto proporcionado.
+
+TEXTO PARA ANALIZAR:
+{{text}}
+
+INSTRUCCIONES:
+1. Lee el texto detenidamente e identifica TODOS los temas principales, información clave, argumentos y detalles.
+2. Crea una conversación completa donde el usuario haga preguntas o discuta TODOS los aspectos importantes del texto. Las preguntas y respuestas deben coincidir con el idioma del texto fuente.
+3. El asistente debe proporcionar respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el texto.
+4. Formatea la conversación exactamente como:
+Usuario: [mensaje del usuario]
+Asistente: [respuesta del asistente]
+5. Haz que la conversación fluya naturalmente mientras cubre TODA la información clave.
+6. Incluye 5-10+ intercambios (pares usuario-asistente) para cubrir COMPLETAMENTE diferentes aspectos del texto.
+7. Las respuestas del asistente deben ser informativas, completas y basadas directamente en el contenido del texto.
+8. Cubre TODOS los puntos importantes: ideas principales, detalles de apoyo, ejemplos, puntos de datos, conclusiones.
+9. Si el texto contiene múltiples secciones o temas, crea intercambios de conversación para CADA uno.
+10. Asegúrate de que la conversación explore el texto en PROFUNDIDAD, no solo superficialmente.
+
+FORMATO DE SALIDA:
+Usuario: [Primer mensaje del usuario]
+Asistente: [Primera respuesta del asistente]
+Usuario: [Segundo mensaje del usuario]
+Asistente: [Segunda respuesta del asistente]
+[Continúa con tantos intercambios como sea necesario para cubrir toda la información]

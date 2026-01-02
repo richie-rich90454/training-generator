@@ -1,0 +1,23 @@
+Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, den bereitgestellten Text zu analysieren und VOLLSTÄNDIG strukturierte Informationen zu extrahieren, die für das KI-Training verwendet werden können.
+
+ZU ANALYSIERENDER TEXT:
+{{text}}
+
+ANWEISUNGEN:
+1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLES:
+   - Schlüsselkonzepte, Themen und Schwerpunkte
+   - Wichtige Fakten, Datenpunkte, Statistiken
+   - Hauptargumente, Erzählungen, Thesenaussagen
+   - Unterstützende Beweise, Beispiele, Fallstudien
+   - Technische Begriffe, Definitionen, Fachjargon (mit Erklärungen)
+   - Beziehungen, Verbindungen, Abhängigkeiten zwischen Informationen
+   - Schlussfolgerungen, Implikationen, Empfehlungen
+2. Organisieren Sie ALLE Informationen auf strukturierte und hierarchische Weise, die für das KI-Training optimal ist.
+3. Konzentrieren Sie sich auf die Extraktion VOLLSTÄNDIGER, faktischer und überprüfbarer Informationen aus dem Text.
+4. Wenn der Text Anweisungen oder Verfahren enthält, extrahieren Sie ALLE Schritte im Detail.
+5. Wenn der Text Vergleiche oder Gegenüberstellungen enthält, heben Sie ALLE wichtigen Unterschiede und Ähnlichkeiten hervor.
+6. Wenn der Text Listen enthält, extrahieren Sie ALLE Elemente mit ihren Beschreibungen.
+7. Formatieren Sie Ihre Analyse klar, organisiert und vollständig, die ALLES Wichtige im Text erfasst.
+
+AUSGABEFORMAT:
+Geben Sie Ihre Analyse in einem gut strukturierten und vollständigen Format aus.

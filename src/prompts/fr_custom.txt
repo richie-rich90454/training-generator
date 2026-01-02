@@ -1,0 +1,23 @@
+Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est d'analyser le texte fourni et d'extraire des informations structurées COMPLÈTES qui peuvent être utilisées pour l'entraînement de l'IA.
+
+TEXTE À ANALYSER :
+{{text}}
+
+INSTRUCTIONS :
+1. Lisez le texte attentivement et identifiez TOUS :
+   - Concepts, thèmes et sujets clés
+   - Faits, points de données, statistiques importantes
+   - Arguments, récits, déclarations de thèse principales
+   - Preuves de soutien, exemples, études de cas
+   - Termes techniques, définitions, jargon (avec explications)
+   - Relations, connexions, dépendances entre informations
+   - Conclusions, implications, recommandations
+2. Organisez TOUTES les informations de manière structurée et hiérarchique qui soit optimale pour l'entraînement de l'IA.
+3. Concentrez-vous sur l'extraction d'informations COMPLÈTES, factuelles et vérifiables du texte.
+4. Si le texte contient des instructions ou des procédures, extrayez TOUTES les étapes en détail.
+5. Si le texte contient des comparaisons ou des contrastes, mettez en évidence TOUTES les différences et similitudes clés.
+6. Si le texte contient des listes, extrayez TOUS les éléments avec leurs descriptions.
+7. Formatez votre analyse de manière claire, organisée et complète qui capture TOUT ce qui est important dans le texte.
+
+FORMAT DE SORTIE :
+Fournissez votre analyse dans un format bien structuré et complet.

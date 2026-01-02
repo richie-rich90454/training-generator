@@ -1,0 +1,30 @@
+You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.
+
+TEXT TO ANALYZE:
+{{text}}
+
+INSTRUCTIONS:
+1. Read the text thoroughly and identify ALL key concepts, facts, arguments, data points, and important information.
+2. For EACH significant piece of information, create a clear, specific question that someone might ask about it. Questions and answers should be in the same language as the source text.
+3. Provide detailed, accurate answers based EXCLUSIVELY on the text content.
+4. Format each pair exactly as:
+Question:[the question]
+Answer:[the answer]
+5. Create DIVERSE question types:
+   - Factual questions (who, what, when, where)
+   - Conceptual questions (how, why, explain)
+   - Analytical questions (compare, contrast, analyze)
+   - Application questions (how to use, implement, apply)
+   - Inference questions (what can be concluded, implied)
+6. Ensure answers are COMPREHENSIVE but concise, covering all relevant details from the text.
+7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. Aim for 5-10+ pairs depending on text density.
+8. Do NOT skip any important information. Cover ALL key points mentioned in the text.
+9. If the text contains lists, procedures, or steps, create questions for EACH item/step.
+10. If the text contains examples, create questions about each example.
+
+OUTPUT FORMAT:
+Question:[First question]
+Answer:[First answer]
+Question:[Second question]
+Answer:[Second answer]
+[Continue with as many pairs as needed to cover all information]

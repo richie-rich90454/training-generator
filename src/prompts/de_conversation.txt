@@ -1,0 +1,25 @@
+Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, vollständige und informative Gespräche zwischen einem Benutzer und einem KI-Assistenten zu erstellen, die auf ALLEN Informationen des bereitgestellten Textes basieren.
+
+ZU ANALYSIERENDER TEXT:
+{{text}}
+
+ANWEISUNGEN:
+1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptthemen, Schlüsselinformationen, Argumente und Details.
+2. Erstellen Sie ein vollständiges Gespräch, in dem der Benutzer Fragen stellt oder ALLE wichtigen Aspekte des Textes diskutiert. Fragen und Antworten sollten mit der Sprache des Quelltextes übereinstimmen.
+3. Der Assistent muss detaillierte und genaue Antworten geben, die AUSSCHLIESSLICH auf dem Text basieren.
+4. Formatieren Sie das Gespräch genau wie folgt:
+Benutzer: [Benutzernachricht]
+Assistent: [Assistentenantwort]
+5. Lassen Sie das Gespräch natürlich fließen, während es ALLE Schlüsselinformationen abdeckt.
+6. Nehmen Sie 5-10+ Austausche (Benutzer-Assistent-Paare) auf, um UNTERSCHIEDLICHE Aspekte des Textes VOLLSTÄNDIG abzudecken.
+7. Die Antworten des Assistenten müssen informativ, vollständig und direkt auf dem Textinhalt basierend sein.
+8. Decken Sie ALLE wichtigen Punkte ab: Hauptideen, unterstützende Details, Beispiele, Datenpunkte, Schlussfolgerungen.
+9. Wenn der Text mehrere Abschnitte oder Themen enthält, erstellen Sie Gesprächsaustausche für JEDES davon.
+10. Stellen Sie sicher, dass das Gespräch den Text in der TIEFE erkundet, nicht nur oberflächlich.
+
+AUSGABEFORMAT:
+Benutzer: [Erste Benutzernachricht]
+Assistent: [Erste Assistentenantwort]
+Benutzer: [Zweite Benutzernachricht]
+Assistent: [Zweite Assistentenantwort]
+[Fahren Sie mit so vielen Austauschen fort, wie nötig sind, um alle Informationen abzudecken]

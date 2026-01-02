@@ -1,0 +1,30 @@
+Eres un generador de datos de entrenamiento para IA. Tu tarea es extraer pares de preguntas y respuestas completos del texto proporcionado que cubran TODA la información importante para el ajuste de instrucciones.
+
+TEXTO PARA ANALIZAR:
+{{text}}
+
+INSTRUCCIONES:
+1. Lee el texto detenidamente e identifica TODOS los conceptos clave, hechos, argumentos, puntos de datos e información importante.
+2. Para CADA pieza significativa de información, crea una pregunta clara y específica que alguien podría hacer sobre ella. Las preguntas y respuestas deben estar en el mismo idioma que el texto fuente.
+3. Proporciona respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el contenido del texto.
+4. Formatea cada par exactamente como:
+Pregunta: [la pregunta]
+Respuesta: [la respuesta]
+5. Crea tipos de preguntas DIVERSAS:
+   - Preguntas factuales (quién, qué, cuándo, dónde)
+   - Preguntas conceptuales (cómo, por qué, explicar)
+   - Preguntas analíticas (comparar, contrastar, analizar)
+   - Preguntas de aplicación (cómo usar, implementar, aplicar)
+   - Preguntas de inferencia (qué se puede concluir, qué implica)
+6. Asegúrate de que las respuestas sean COMPLETAS pero concisas, cubriendo todos los detalles relevantes del texto.
+7. Genera TANTOS pares de preguntas y respuestas de alta calidad como sea necesario para cubrir TODA la información importante en el texto. Apunta a 5-10+ pares dependiendo de la densidad del texto.
+8. NO omitas ninguna información importante. Cubre TODOS los puntos clave mencionados en el texto.
+9. Si el texto contiene listas, procedimientos o pasos, crea preguntas para CADA elemento/paso.
+10. Si el texto contiene ejemplos, crea preguntas sobre cada ejemplo.
+
+FORMATO DE SALIDA:
+Pregunta: [Primera pregunta]
+Respuesta: [Primera respuesta]
+Pregunta: [Segunda pregunta]
+Respuesta: [Segunda respuesta]
+[Continúa con tantos pares como sea necesario para cubrir toda la información]
