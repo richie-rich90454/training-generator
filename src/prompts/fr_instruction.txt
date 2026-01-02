@@ -5,7 +5,7 @@ TEXTE À ANALYSER :
 
 INSTRUCTIONS :
 1. Lisez le texte attentivement et identifiez TOUS les concepts clés, faits, arguments, points de données et informations importantes.
-2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses doivent être dans la même langue que le texte source.
+2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
 3. Fournissez des réponses détaillées et précises basées EXCLUSIVEMENT sur le contenu du texte.
 4. Formatez chaque paire exactement comme suit :
 Question : [la question]

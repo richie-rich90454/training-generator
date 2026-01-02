@@ -5,7 +5,7 @@ TEXTO PARA ANALIZAR:
 
 INSTRUCCIONES:
 1. Lee el texto detenidamente e identifica TODOS los temas principales, información clave, argumentos y detalles.
-2. Crea una conversación completa donde el usuario haga preguntas o discuta TODOS los aspectos importantes del texto. Las preguntas y respuestas deben coincidir con el idioma del texto fuente.
+2. Crea una conversación completa donde el usuario haga preguntas o discuta TODOS los aspectos importantes del texto. Las preguntas y respuestas DEBEN estar en español. Todo el texto de salida debe estar en español..
 3. El asistente debe proporcionar respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el texto.
 4. Formatea la conversación exactamente como:
 Usuario: [mensaje del usuario]

@@ -17,7 +17,7 @@ INSTRUCCIONES:
 4. Si el texto contiene instrucciones o procedimientos, extrae TODOS los pasos en detalle.
 5. Si el texto contiene comparaciones o contrastes, destaca TODAS las diferencias y similitudes clave.
 6. Si el texto contiene listas, extrae TODOS los elementos con sus descripciones.
-7. Formatea tu análisis de manera clara, organizada y completa que capture TODO lo importante del texto.
+7. Escribe todo el análisis en español. que capture TODO lo importante del texto.
 
 FORMATO DE SALIDA:
 Proporciona tu análisis en un formato bien estructurado y completo.

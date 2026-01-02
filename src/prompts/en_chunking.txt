@@ -12,7 +12,7 @@ INSTRUCTIONS:
    - Is comprehensive yet concise
    - Preserves the logical flow and structure of the original
 3. The summary should be approximately 40-50% of the original text length to ensure completeness.
-4. Write in clear, professional language.
+4. Write in clear, professional English..
 5. Do not add any information not present in the original text.
 6. Do not omit any significant information from the original text.
 7. Include ALL key examples, evidence, and supporting points mentioned.

@@ -3,6 +3,7 @@ Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, den bereitgestellt
 ZU ANALYSIERENDER TEXT:
 {{text}}
 
+Verfassen Sie die gesamte Analyse auf Deutsch.
 ANWEISUNGEN:
 1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLES:
    - Schlüsselkonzepte, Themen und Schwerpunkte

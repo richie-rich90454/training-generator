@@ -5,7 +5,7 @@ ZU ANALYSIERENDER TEXT:
 
 ANWEISUNGEN:
 1. Lesen Sie den Text gründlich und identifizieren Sie ALLE Schlüsselkonzepte, Fakten, Argumente, Datenpunkte und wichtige Informationen.
-2. Erstellen Sie für JEDES bedeutende Informationsstück eine klare, spezifische Frage, die jemand dazu stellen könnte. Fragen und Antworten sollten in derselben Sprache wie der Quelltext sein.
+2. Erstellen Sie für JEDES bedeutende Informationsstück eine klare, spezifische Frage, die jemand dazu stellen könnte. Fragen und Antworten MÜSSEN auf Deutsch sein. Alle Ausgabetexte müssen auf Deutsch sein..
 3. Geben Sie detaillierte, genaue Antworten basierend AUSSCHLIESSLICH auf den Textinhalt.
 4. Formatieren Sie jedes Paar genau wie folgt:
 Frage: [die Frage]

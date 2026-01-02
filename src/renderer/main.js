@@ -1039,7 +1039,11 @@ Provide your analysis in a well-structured,comprehensive format.`
         };
         try{
             localStorage.setItem("train-generator-settings",JSON.stringify(settings));
-            this.addLog("Settings saved","success");
+            this.addLog(`Settings saved. Output language set to: ${settings.language}`,"success");
+            let nonLatinLanguages=["zh-Hans", "zh-Hant", "ja", "ko"];
+            if (nonLatinLanguages.includes(settings.language)) {
+                this.addLog(`Note: ${settings.language} uses non-Latin script. Ensure your Ollama model supports this language.`, "warning");
+            }
         }
         catch(error){
             this.addLog("Failed to save settings","error");

@@ -3,6 +3,7 @@ Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, eine vollständige
 ZUSAMMENZUFASSENDER TEXT:
 {{text}}
 
+Schreiben Sie in klarem, professionellem Deutsch.
 ANWEISUNGEN:
 1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptpunkte, Schlüsselargumente, wesentliche Informationen, unterstützende Details und Schlussfolgerungen.
 2. Erstellen Sie eine Zusammenfassung, die:

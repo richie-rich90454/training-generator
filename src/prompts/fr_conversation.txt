@@ -5,7 +5,7 @@ TEXTE À ANALYSER :
 
 INSTRUCTIONS :
 1. Lisez le texte attentivement et identifiez TOUS les sujets principaux, les informations clés, les arguments et les détails.
-2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses doivent correspondre à la langue du texte source.
+2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
 3. L'assistant doit fournir des réponses détaillées et précises basées EXCLUSIVEMENT sur le texte.
 4. Formatez la conversation exactement comme suit :
 Utilisateur : [message de l'utilisateur]

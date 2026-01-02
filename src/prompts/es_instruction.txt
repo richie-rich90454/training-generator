@@ -5,7 +5,7 @@ TEXTO PARA ANALIZAR:
 
 INSTRUCCIONES:
 1. Lee el texto detenidamente e identifica TODOS los conceptos clave, hechos, argumentos, puntos de datos e información importante.
-2. Para CADA pieza significativa de información, crea una pregunta clara y específica que alguien podría hacer sobre ella. Las preguntas y respuestas deben estar en el mismo idioma que el texto fuente.
+2. Para CADA pieza significativa de información, crea una pregunta clara y específica que alguien podría hacer sobre ella. Las preguntas y respuestas DEBEN estar en español. Todo el texto de salida debe estar en español..
 3. Proporciona respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el contenido del texto.
 4. Formatea cada par exactamente como:
 Pregunta: [la pregunta]

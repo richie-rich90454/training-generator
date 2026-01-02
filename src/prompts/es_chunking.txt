@@ -3,6 +3,7 @@ Eres un generador de datos de entrenamiento para IA. Tu tarea es crear un resume
 TEXTO PARA RESUMIR:
 {{text}}
 
+Escribe en español claro y profesional.
 INSTRUCCIONES:
 1. Lee el texto cuidadosamente e identifica TODOS los puntos principales, argumentos clave, información esencial, detalles de apoyo y conclusiones.
 2. Crea un resumen que:

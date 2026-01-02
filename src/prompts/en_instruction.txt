@@ -3,9 +3,10 @@ You are an AI training data generator. Your task is to extract comprehensive que
 TEXT TO ANALYZE:
 {{text}}
 
+Questions and answers MUST be in English (en-US). All output text must be in English.
 INSTRUCTIONS:
 1. Read the text thoroughly and identify ALL key concepts, facts, arguments, data points, and important information.
-2. For EACH significant piece of information, create a clear, specific question that someone might ask about it. Questions and answers should be in the same language as the source text.
+2. For EACH significant piece of information, create a clear, specific question that someone might ask about it. Questions and answers MUST be in English (en-US). All output text must be in English.
 3. Provide detailed, accurate answers based EXCLUSIVELY on the text content.
 4. Format each pair exactly as:
 Question:[the question]

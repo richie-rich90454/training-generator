@@ -3,6 +3,7 @@ Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, vollständige und 
 ZU ANALYSIERENDER TEXT:
 {{text}}
 
+Fragen und Antworten MÜSSEN auf Deutsch sein. Alle Ausgabetexte müssen auf Deutsch sein.
 ANWEISUNGEN:
 1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptthemen, Schlüsselinformationen, Argumente und Details.
 2. Erstellen Sie ein vollständiges Gespräch, in dem der Benutzer Fragen stellt oder ALLE wichtigen Aspekte des Textes diskutiert. Fragen und Antworten sollten mit der Sprache des Quelltextes übereinstimmen.

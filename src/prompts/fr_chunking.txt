@@ -12,7 +12,7 @@ INSTRUCTIONS :
    - Soit complet mais concis
    - Préserve le flux logique et la structure de l'original
 3. Le résumé doit avoir environ 40-50% de la longueur du texte original pour garantir son intégrité.
-4. Écrivez dans un langage clair et professionnel.
+4. Écrivez en français clair et professionnel..
 5. N'ajoutez aucune information qui n'est pas présente dans le texte original.
 6. Ne omettez aucune information significative du texte original.
 7. Incluez TOUS les exemples, preuves et points de soutien clés mentionnés.
