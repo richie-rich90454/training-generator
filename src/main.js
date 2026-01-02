@@ -23,13 +23,19 @@ if(isWin){
 }
 function startSplash(){
     if(isWin){
-        let exePath=path.join(
-            process.resourcesPath,
-            "native-splash",
-            "win",
-            "splash.exe"
-        )
-        if(fs.existsSync(exePath)){
+        let exePaths=[
+            path.join(process.resourcesPath,"native-splash","splash.exe"),
+            path.join(__dirname,"..","native-splash","splash.exe"),
+            path.join(__dirname,"..","..","native-splash","splash.exe"),
+        ]
+        let exePath=null
+        for(let p of exePaths){
+            if(fs.existsSync(p)){
+                exePath=p
+                break
+            }
+        }
+        if(exePath){
             splashProcess=spawn(exePath,[],{
                 detached:true,
                 stdio:"ignore"
@@ -105,6 +111,28 @@ function createMainWindow(){
         stopSplash()
         mainWindow.show()
         mainWindow.focus()
+    })
+    mainWindow.webContents.on("did-fail-load",(event, errorCode, errorDescription, validatedURL)=>{
+        console.error(`Failed to load: ${validatedURL}, Code: ${errorCode}, ${errorDescription}`)
+        dialog.showErrorBox(
+            "Loading Failed",
+            `Failed to load application: ${errorDescription}\n\nPlease check if the application files are complete and try again.`
+        )
+        stopSplash()
+        if(mainWindow&&!mainWindow.isDestroyed()) {
+            mainWindow.close()
+        }
+    })
+    mainWindow.webContents.on("render-process-gone",(event, details)=>{
+        console.error("Renderer process crashed:", details)
+        dialog.showErrorBox(
+            "Renderer Crashed",
+            "The application UI has crashed. Please restart the application."
+        )
+        stopSplash()
+        if(mainWindow&&!mainWindow.isDestroyed()) {
+            mainWindow.close()
+        }
     })
     mainWindow.on("closed",()=>{
         mainWindow=null

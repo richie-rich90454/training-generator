@@ -1,4 +1,4 @@
-//g++ splash.cpp -O2 -mwindows -o splash.exe
+//g++ splash-modified.cpp -O2 -mwindows -o splash-modified.exe
 #include <windows.h>
 #include <math.h>
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -15,7 +15,7 @@ struct SplashState{
     int progress;
     int stepIndex;
     const char* message;
-    int angle; // for spinner
+    int angle;
 };
 SplashState splashState={0, 0, steps[0], 0};
 void PaintSplash(HWND hwnd){
@@ -78,16 +78,12 @@ void UpdateProgress(HWND hwnd){
     if(splashState.angle>=360) splashState.angle-=360;
     static int counter=0;
     counter++;
-    if(counter%2==0&&splashState.stepIndex<totalSteps){ 
+    if(counter%2==0){ 
+        splashState.stepIndex = (splashState.stepIndex+1)%totalSteps;
         splashState.message=steps[splashState.stepIndex];
         splashState.progress=((splashState.stepIndex+1)*100)/totalSteps;
-        splashState.stepIndex++;
     }
     InvalidateRect(hwnd,NULL,TRUE);
-    if(splashState.stepIndex>=totalSteps){
-        KillTimer(hwnd,1);
-        PostMessage(hwnd,WM_CLOSE,0,0);
-    }
 }
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp){
     switch(msg){
