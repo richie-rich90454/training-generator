@@ -11,12 +11,8 @@ let mainWindow=null
 let splashWindow=null
 let splashProcess=null
 let fileParser=new FileParser()
-
-// Set up paths and ensure directories exist
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
-
-// Ensure directories exist
 try{
     if(!fs.existsSync(userDataPath)){
         fs.mkdirSync(userDataPath,{recursive:true})
@@ -24,17 +20,14 @@ try{
     if(!fs.existsSync(cachePath)){
         fs.mkdirSync(cachePath,{recursive:true})
     }
-}catch(error){
+}
+catch(error){
     console.error("Failed to create directories:",error)
-    // Fallback to default paths
     userDataPath=app.getPath("userData")
     cachePath=app.getPath("cache")
 }
-
 app.setPath("userData",userDataPath)
 app.setPath("cache",cachePath)
-
-// Add cache-related command line switches to prevent cache errors
 app.commandLine.appendSwitch("disable-features","VizDisplayCompositor")
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache")
 app.commandLine.appendSwitch("disable-software-rasterizer")
@@ -53,10 +46,8 @@ app.commandLine.appendSwitch("enable-zero-copy")
 if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
-    // Windows-specific cache fixes
     app.commandLine.appendSwitch("disable-direct-composition")
     app.commandLine.appendSwitch("disable-gpu-vsync")
-    // Use in-memory cache to avoid disk permission issues
     app.commandLine.appendSwitch("disk-cache-dir","")
     app.commandLine.appendSwitch("disable-disk-cache")
 }
@@ -233,22 +224,15 @@ ipcMain.handle("dialog:saveFile",async(_,defaultFilename)=>{
 })
 ipcMain.handle("file:read",async(_,filePath)=>{
     try{
-        // Handle prompt files specially - they might be in different locations
-        // depending on development vs production
         let resolvedPath=filePath;
-        
-        // Check if it's a prompt file path
         if(filePath.includes("prompts/")){
-            // Try multiple possible locations
             let possiblePaths=[
-                filePath, // Original path
-                path.join(process.resourcesPath,filePath), // In resources (production)
-                path.join(__dirname,"..",filePath), // Relative to main.js (development)
-                path.join(__dirname,"..","dist",filePath), // In dist (production build)
-                path.join(app.getAppPath(),filePath), // In app directory
+                filePath,
+                path.join(process.resourcesPath,filePath),
+                path.join(__dirname,"..",filePath),
+                path.join(__dirname,"..","dist",filePath),
+                path.join(app.getAppPath(),filePath),
             ];
-            
-            // Also try with "src/" prefix removed
             if(filePath.startsWith("src/prompts/")){
                 let withoutSrc=filePath.replace("src/prompts/","prompts/");
                 possiblePaths.push(
@@ -259,15 +243,14 @@ ipcMain.handle("file:read",async(_,filePath)=>{
                     path.join(app.getAppPath(),withoutSrc)
                 );
             }
-            
-            // Try each path
             for(let p of possiblePaths){
                 try{
                     if(fs.existsSync(p)){
                         resolvedPath=p;
                         break;
                     }
-                }catch{}
+                }
+                catch{}
             }
         }
         
