@@ -161,6 +161,7 @@ try {
         console.log("2. Start the app:npm run dev");
         console.log("3. Open the app in your browser(if not auto-opened)");
         console.log("4. Drag & drop files and start generating training data!");
+        process.exit(0)
     }
     else{
         console.log("Some tests failed. Please check the issues above.");
@@ -168,6 +169,7 @@ try {
         console.log("1. Make sure all dependencies are installed:npm install");
         console.log("2. Check if Ollama is installed and running");
         console.log("3. Verify file permissions");
+        process.exit(1)
     }
     return allTestsPassed;
 }
