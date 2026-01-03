@@ -35,6 +35,12 @@
     --transition-medium:150ms cubic-bezier(.4,0,.2,1);
     --transition-slow:250ms cubic-bezier(.4,0,.2,1);
 }
+@font-face{
+    font-family: "Noto Sans";
+    src: url("/assets/NotoSans-VariableFont_wdth_wght.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 1 1000;
+}
 html[data-platform="windows"]{
     --platform:windows;
 }
