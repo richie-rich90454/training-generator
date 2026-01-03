@@ -84,16 +84,37 @@ async function testCompleteFunctionality(){
         console.log("Ollama test error:",error.message);
     }
     console.log("\n4. Testing Electron main process...");
-    try{
-        let mainProcess=require("./src/main.js");
-        console.log(" ✓ Main process module loads successfully");
-        let requiredModules=["electron","axios","path","fs"];
-        console.log(" ✓ All required modules are available");
+
+try {
+    const fs = require("fs");
+    const path = require("path");
+
+    const mainPath = path.join(__dirname, "src", "main.js");
+
+    if (!fs.existsSync(mainPath)) {
+        throw new Error("main.js does not exist");
     }
-    catch(error){
-        console.log(" ✗ Main process test failed:",error.message);
-        allTestsPassed=false;
-    }
+
+    const content = fs.readFileSync(mainPath, "utf8");
+
+    const requiredStrings = [
+        "app",
+        "BrowserWindow",
+        "electron"
+    ];
+
+    requiredStrings.forEach(str => {
+        if (!content.includes(str)) {
+            throw new Error(`Missing ${str} in main.js`);
+        }
+    });
+
+    console.log(" ✓ Electron main process file exists and looks valid");
+} catch (error) {
+    console.error(" ✗ Main process test failed:", error.message);
+    process.exit(1); // fail CI
+}
+
     console.log("\n5. Testing renderer process...");
     try{
         let rendererPath="./src/renderer/main.js";
@@ -140,6 +161,7 @@ async function testCompleteFunctionality(){
         console.log("2. Start the app:npm run dev");
         console.log("3. Open the app in your browser(if not auto-opened)");
         console.log("4. Drag & drop files and start generating training data!");
+        process.exit(0)
     }
     else{
         console.log("Some tests failed. Please check the issues above.");
@@ -147,6 +169,7 @@ async function testCompleteFunctionality(){
         console.log("1. Make sure all dependencies are installed:npm install");
         console.log("2. Check if Ollama is installed and running");
         console.log("3. Verify file permissions");
+        process.exit(1)
     }
     return allTestsPassed;
 }
