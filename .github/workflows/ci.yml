@@ -1,16 +1,18 @@
 name: CI
 
 on:
-  workflow_dispatch:
-
   push:
     branches: [ci-setup]
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | bash
+      - name: Run Ollama
+        run: ollama start &
       - name: Checkout repository
         uses: actions/checkout@v4
 
