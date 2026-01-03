@@ -314,21 +314,21 @@
         </div>
         <script type="module" src="./src/renderer/main.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', ()=>{
-                let temperatureInput=document.getElementById('temperature');
-                let temperatureValue=document.getElementById('temperature-value');
+            document.addEventListener("DOMContentLoaded", ()=>{
+                let temperatureInput=document.getElementById("temperature");
+                let temperatureValue=document.getElementById("temperature-value");
                 if (temperatureInput&&temperatureValue){
                     let updateTrackFill=()=>{
                         let value=temperatureInput.value;
                         let min=temperatureInput.min||0;
                         let max=temperatureInput.max||1;
                         let percentage=((value-min)/(max-min))*100;
-                        temperatureInput.style.setProperty('--range-fill', `${percentage}%`);
+                        temperatureInput.style.setProperty("--range-fill", `${percentage}%`);
                         temperatureValue.textContent=value;
                     };
                     updateTrackFill();
-                    temperatureInput.addEventListener('input', updateTrackFill);
-                    temperatureInput.addEventListener('change', updateTrackFill);
+                    temperatureInput.addEventListener("input", updateTrackFill);
+                    temperatureInput.addEventListener("change", updateTrackFill);
                 }
             });
         </script>
