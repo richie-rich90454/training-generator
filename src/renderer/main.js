@@ -618,7 +618,8 @@ class TrainGeneratorApp{
                         loadedPath=filePath;
                         loadMethod="fetch";
                         break;
-                    }else{
+                    }
+                    else{
                         console.log(`[PROMPT DEBUG] Fetch failed with status: ${response.status}${response.statusText}`);
                     }
                 }
@@ -632,13 +633,14 @@ class TrainGeneratorApp{
             if(previewLines.length>100){
                 previewLines=previewLines.substring(0,100)+"...";
             }
-            previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
+            // Use the existing escapeHtml method to properly escape HTML entities
+            let escapedPreviewLines=this.escapeHtml(previewLines);
             let simpleLogMessage=`Using ${language} prompt: ${fileName}`;
             console.log(`[PROMPT DEBUG] Simple log message: ${simpleLogMessage}`);
             try{
                 this.addLog(simpleLogMessage,"info");
                 console.log(`[PROMPT DEBUG] Simple addLog called successfully`);
-                let fullLogMessage=`Prompt loaded from ${loadedPath}(Preview:"${previewLines}")`;
+                let fullLogMessage=`Prompt loaded from ${loadedPath}(Preview:"${escapedPreviewLines}")`;
                 this.addLog(fullLogMessage,"info");
                 console.log(`[PROMPT DEBUG] Full addLog called successfully`);
             }
@@ -1148,57 +1150,51 @@ Provide your analysis in a well-structured,comprehensive format.`
             let fileType=processingTypeMap[processingType]||"instruction";
             let fileName=`${language}_${fileType}.txt`;
             let promptPreview="";
+            let possiblePaths=[
+                `src/prompts/${fileName}`,
+                `prompts/${fileName}`,
+                `./prompts/${fileName}`,
+                `../prompts/${fileName}`,
+            ];
+            for(let filePath of possiblePaths){
                 try{
-                    let filePath=`prompts/${fileName}`;
                     if(window.electronAPI&&window.electronAPI.readFile){
-                        try{
-                            let result=await window.electronAPI.readFile(filePath);
-                            if(result.success){
-                                let loadedPrompt=result.content;
-                                let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
-                                if(previewLines.length>100){
-                                    previewLines=previewLines.substring(0,100)+"...";
-                                }
-                                previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-                                promptPreview=`(prompt:"${previewLines}")`;
+                        let result=await window.electronAPI.readFile(filePath);
+                        if(result.success){
+                            let loadedPrompt=result.content;
+                            let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                            if(previewLines.length>100){
+                                previewLines=previewLines.substring(0,100)+"...";
                             }
-                        }
-                        catch(e){
-                            try{
-                                let response=await fetch(filePath);
-                                if(response.ok){
-                                    let loadedPrompt=await response.text();
-                                    let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
-                                    if(previewLines.length>100){
-                                        previewLines=previewLines.substring(0,100)+"...";
-                                    }
-                                    previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-                                    promptPreview=`(prompt:"${previewLines}")`;
-                                }
+                            if(loadedPrompt.includes("{{text}}")){
+                                let escapedPreviewLines=this.escapeHtml(previewLines);
+                                promptPreview=`(prompt:"${escapedPreviewLines}")`;
                             }
-                            catch(e2){
+                            else{
+                                promptPreview="";
                             }
-                        }
-                    }else{
-                        try{
-                            let response=await fetch(filePath);
-                            if(response.ok){
-                                let loadedPrompt=await response.text();
-                                let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
-                                if(previewLines.length>100){
-                                    previewLines=previewLines.substring(0,100)+"...";
-                                }
-                                previewLines=previewLines.replace(/"/g,'"').replace(/"/g,"&#39;");
-                                promptPreview=`(prompt:"${previewLines}")`;
-                            }
-                        }
-                        catch(e){
-
+                            break;
                         }
                     }
                 }
-            catch(error){
+                catch(e){
+                }
+                try{
+                    let response=await fetch(filePath);
+                    if(response.ok){
+                        let loadedPrompt=await response.text();
+                        let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ");
+                        if(previewLines.length>100){
+                            previewLines=previewLines.substring(0,100)+"...";
+                        }
+                        let escapedPreviewLines=this.escapeHtml(previewLines);
+                        promptPreview=`(prompt:"${escapedPreviewLines}")`;
+                        break;
+                    }
+                }
+                catch(e){
 
+                }
             }
             this.addLog(`Settings saved. Output language set to: ${settings.language}${promptPreview}`,"success");
             let nonLatinLanguages=["zh-Hans","zh-Hant","ja","ko"];
@@ -1233,7 +1229,7 @@ Provide your analysis in a well-structured,comprehensive format.`
             <div class="help-section">
                 <h4>Requirements</h4>
                 <p>•<strong>Ollama</strong>:Must be installed and running for AI processing</p>
-                <p>•<strong>Models</strong>:Pull models using<code>ollama pull<model-name></code></p>
+                <p>•<strong>Models</strong>:Pull models using<code>ollama pull <model-name></code></p>
                 <p>•<strong>File Size</strong>:Maximum 100MB per file</p>
             </div>
             <div class="help-section">

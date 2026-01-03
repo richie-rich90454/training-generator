@@ -223,7 +223,7 @@ ipcMain.handle("dialog:saveFile",async(_,defaultFilename)=>{
     let result=await dialog.showSaveDialog(mainWindow,{
         defaultPath:defaultFilename||"training_data.jsonl",
         filters:[
-            {name:"JSON Lines",extensions:["jsonl"]},
+            {name:"JSON Liners",extensions:["jsonl"]},
             {name:"JSON",extensions:["json"]},
             {name:"Text",extensions:["txt"]},
             {name:"All Files",extensions:["*"]}
@@ -233,7 +233,45 @@ ipcMain.handle("dialog:saveFile",async(_,defaultFilename)=>{
 })
 ipcMain.handle("file:read",async(_,filePath)=>{
     try{
-        let content=await fsp.readFile(filePath,"utf-8")
+        // Handle prompt files specially - they might be in different locations
+        // depending on development vs production
+        let resolvedPath=filePath;
+        
+        // Check if it's a prompt file path
+        if(filePath.includes("prompts/")){
+            // Try multiple possible locations
+            let possiblePaths=[
+                filePath, // Original path
+                path.join(process.resourcesPath,filePath), // In resources (production)
+                path.join(__dirname,"..",filePath), // Relative to main.js (development)
+                path.join(__dirname,"..","dist",filePath), // In dist (production build)
+                path.join(app.getAppPath(),filePath), // In app directory
+            ];
+            
+            // Also try with "src/" prefix removed
+            if(filePath.startsWith("src/prompts/")){
+                let withoutSrc=filePath.replace("src/prompts/","prompts/");
+                possiblePaths.push(
+                    withoutSrc,
+                    path.join(process.resourcesPath,withoutSrc),
+                    path.join(__dirname,"..",withoutSrc),
+                    path.join(__dirname,"..","dist",withoutSrc),
+                    path.join(app.getAppPath(),withoutSrc)
+                );
+            }
+            
+            // Try each path
+            for(let p of possiblePaths){
+                try{
+                    if(fs.existsSync(p)){
+                        resolvedPath=p;
+                        break;
+                    }
+                }catch{}
+            }
+        }
+        
+        let content=await fsp.readFile(resolvedPath,"utf-8")
         return{success:true,content}
     }
     catch(error){
