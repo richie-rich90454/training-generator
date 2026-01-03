@@ -25,7 +25,7 @@ A desktop application built with Electron and Node.js that converts documents (P
 
 1. **Clone or download the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/richie-rich90454/training-generator.git
    cd training-generator
    ```
 
