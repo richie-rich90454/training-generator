@@ -1,4 +1,5 @@
 # Training Generator
+[![CI](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml)
 
 A desktop application built with Electron and Node.js that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into AI training data using Ollama-run models to summarize and output the data.
 
