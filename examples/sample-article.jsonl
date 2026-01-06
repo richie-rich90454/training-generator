@@ -1,0 +1,3 @@
+{"instruction":"Answer the question based on the text","input":"What is the title of the document?","output":"The title of the document is \"Vector Databases for Semantic Search\"."}
+{"instruction":"Answer the question based on the text","input":"What do vector databases store instead of raw text?","output":"Vector databases store numerical embeddings instead of raw text."}
+{"instruction":"Answer the question based on the text","input":"Why are vector databases used in semantic search and RAG pipelines?","output":"They enable similarity search by comparing embeddings and retrieving contextually relevant information."}
