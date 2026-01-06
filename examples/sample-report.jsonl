@@ -1,0 +1,3 @@
+{"instruction":"Answer the question based on the text","input":"What is the main topic of the report?","output":"The report describes a training data generation pipeline."}
+{"instruction":"Answer the question based on the text","input":"Which document formats are parsed by the pipeline?","output":"The pipeline parses PDF, DOCX, and Markdown files."}
+{"instruction":"Answer the question based on the text","input":"What is the final output format produced by the pipeline?","output":"The final output is stored in JSONL format for instruction tuning."}
