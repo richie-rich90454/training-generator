@@ -4,13 +4,13 @@ let fs=require("fs")
 let fsp=require("fs").promises
 let {spawn}=require("child_process")
 let axios=require("axios")
-let FileParser=require("./core/fileParser")
+let FileParserLazy=require("./core/fileParserLazy")
 let isWin=process.platform=="win32"
 let isMac=process.platform=="darwin"
 let mainWindow=null
 let splashWindow=null
 let splashProcess=null
-let fileParser=new FileParser()
+let fileParser=null
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
 try{
@@ -28,12 +28,6 @@ catch(error){
 }
 app.setPath("userData",userDataPath)
 app.setPath("cache",cachePath)
-app.commandLine.appendSwitch("disable-features","VizDisplayCompositor")
-app.commandLine.appendSwitch("disable-gpu-shader-disk-cache")
-app.commandLine.appendSwitch("disable-software-rasterizer")
-app.commandLine.appendSwitch("disable-gpu")
-app.commandLine.appendSwitch("disable-accelerated-2d-canvas")
-app.commandLine.appendSwitch("disable-accelerated-video-decode")
 app.commandLine.appendSwitch("no-first-run")
 app.commandLine.appendSwitch("disable-background-networking")
 app.commandLine.appendSwitch("disable-component-update")
@@ -43,13 +37,12 @@ app.commandLine.appendSwitch("metrics-recording-only")
 app.commandLine.appendSwitch("enable-gpu-rasterization")
 app.commandLine.appendSwitch("enable-oop-rasterization")
 app.commandLine.appendSwitch("enable-zero-copy")
+app.commandLine.appendSwitch("enable-gpu")
+app.commandLine.appendSwitch("enable-accelerated-2d-canvas")
+app.commandLine.appendSwitch("enable-accelerated-video-decode")
 if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
-    app.commandLine.appendSwitch("disable-direct-composition")
-    app.commandLine.appendSwitch("disable-gpu-vsync")
-    app.commandLine.appendSwitch("disk-cache-dir","")
-    app.commandLine.appendSwitch("disable-disk-cache")
 }
 function startSplash(){
     if(isWin){
@@ -272,6 +265,9 @@ ipcMain.handle("file:save",async(_,filePath,content)=>{
 })
 ipcMain.handle("file:parse",async(_,filePath,fileType)=>{
     try{
+        if(!fileParser){
+            fileParser=new FileParserLazy()
+        }
         let text=await fileParser.parseFile(filePath,fileType)
         return{success:true,content:text}
     }
@@ -281,6 +277,9 @@ ipcMain.handle("file:parse",async(_,filePath,fileType)=>{
 })
 ipcMain.handle("file:parseBatch",async(_,files)=>{
     try{
+        if(!fileParser){
+            fileParser=new FileParserLazy()
+        }
         let results=await fileParser.processFiles(files.map(f=>f.path))
         return{success:true,results}
     }

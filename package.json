@@ -1,6 +1,6 @@
 {
   "name": "training-generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "src/main.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production electron .",
@@ -150,7 +150,6 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "fs": "^0.0.1-security",
     "html-to-text": "^9.0.5",
     "mammoth": "^1.11.0",
     "officeparser": "^3.0.0",

@@ -55,7 +55,29 @@ export default defineConfig({
                 main:"./index.html",
             },
             output:{
-                manualChunks:undefined,
+                manualChunks(id){
+                    if (id.includes("node_modules")){
+                        if (id.includes("axios")){
+                            return "vendor-axios";
+                        }
+                        if (id.includes("pdf-parse")||id.includes("mammoth")||id.includes("officeparser")){
+                            return "vendor-parsers";
+                        }
+                        if (id.includes("html-to-text")||id.includes("rtf-parser-fixes")){
+                            return "vendor-text";
+                        }
+                        return "vendor";
+                    }
+                    if (id.includes("src/renderer")){
+                        return "renderer";
+                    }
+                    if (id.includes("src/core")){
+                        return "core";
+                    }
+                    if (id.includes("src/workers")){
+                        return "workers";
+                    }
+                },
                 entryFileNames:"assets/[name]-[hash].js",
                 chunkFileNames:"assets/[name]-[hash].js",
                 assetFileNames:"assets/[name]-[hash].[ext]",

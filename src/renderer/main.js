@@ -6,6 +6,9 @@ class TrainGeneratorApp{
         this.outputData=[];
         this.ollamaStatus={running:false,models:[]};
         this.selectedLanguage="en";
+        this.eventListeners=[];
+        this.intervals=[];
+        this.timeouts=[];
         this.init();
     }
     async detectPlatform(){
@@ -76,23 +79,23 @@ class TrainGeneratorApp{
         this.helpBtn=document.getElementById("help-btn");
     }
     bindEvents(){
-        this.dropZone.addEventListener("dragover",this.handleDragOver.bind(this));
-        this.dropZone.addEventListener("dragleave",this.handleDragLeave.bind(this));
-        this.dropZone.addEventListener("drop",this.handleDrop.bind(this));
-        this.fileInput.addEventListener("change",this.handleFileSelect.bind(this));
-        this.browseBtn.addEventListener("click",()=>this.fileInput.click());
-        this.processBtn.addEventListener("click",this.processFiles.bind(this));
-        this.clearBtn.addEventListener("click",this.clearAll.bind(this));
-        this.exportBtn.addEventListener("click",this.exportOutput.bind(this));
-        this.copyBtn.addEventListener("click",this.copyOutput.bind(this));
-        this.savePresetBtn.addEventListener("click",this.savePreset.bind(this));
-        this.settingsBtn.addEventListener("click",()=>this.showModal(true));
-        this.modalClose.addEventListener("click",()=>this.showModal(false));
-        this.settingsModal.addEventListener("click",(e)=>{
+        this.addEventListener(this.dropZone,"dragover",this.handleDragOver.bind(this));
+        this.addEventListener(this.dropZone,"dragleave",this.handleDragLeave.bind(this));
+        this.addEventListener(this.dropZone,"drop",this.handleDrop.bind(this));
+        this.addEventListener(this.fileInput,"change",this.handleFileSelect.bind(this));
+        this.addEventListener(this.browseBtn,"click",()=>this.fileInput.click());
+        this.addEventListener(this.processBtn,"click",this.processFiles.bind(this));
+        this.addEventListener(this.clearBtn,"click",this.clearAll.bind(this));
+        this.addEventListener(this.exportBtn,"click",this.exportOutput.bind(this));
+        this.addEventListener(this.copyBtn,"click",this.copyOutput.bind(this));
+        this.addEventListener(this.savePresetBtn,"click",this.savePreset.bind(this));
+        this.addEventListener(this.settingsBtn,"click",()=>this.showModal(true));
+        this.addEventListener(this.modalClose,"click",()=>this.showModal(false));
+        this.addEventListener(this.settingsModal,"click",(e)=>{
             if(e.target==this.settingsModal)this.showModal(false);
         });
-        this.helpBtn.addEventListener("click",()=>this.showHelp());
-        this.fileInput.addEventListener("change",()=>this.updateProcessButton());
+        this.addEventListener(this.helpBtn,"click",()=>this.showHelp());
+        this.addEventListener(this.fileInput,"change",()=>this.updateProcessButton());
     }
     handleDragOver(e){
         e.preventDefault();
@@ -278,9 +281,10 @@ class TrainGeneratorApp{
         this.updateProcessButton();
     }
     startOllamaMonitor(){
-        setInterval(()=>{
+        let intervalId=setInterval(()=>{
             this.checkOllamaStatus();
         },30000);
+        this.intervals.push(intervalId);
     }
     async processFiles(){
         if(this.isProcessing){
@@ -1400,6 +1404,36 @@ Provide your analysis in a well-structured,comprehensive format.`
         }
         else{
             document.body.classList.add("font-medium");
+        }
+    }
+    addEventListener(element, event, handler){
+        element.addEventListener(event, handler);
+        this.eventListeners.push({ element, event, handler });
+    }
+    removeAllEventListeners(){
+        this.eventListeners.forEach(({ element, event, handler })=>{
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners=[];
+    }
+    clearAllIntervals(){
+        this.intervals.forEach(intervalId=>clearInterval(intervalId));
+        this.intervals=[];
+    }
+    clearAllTimeouts(){
+        this.timeouts.forEach(timeoutId=>clearTimeout(timeoutId));
+        this.timeouts=[];
+    }
+    dispose(){
+        this.removeAllEventListeners();
+        this.clearAllIntervals();
+        this.clearAllTimeouts();
+        this.selectedFiles=[];
+        this.processingQueue=[];
+        this.outputData=[];
+        this.ollamaStatus={ running: false, models: [] };
+        if (window.app==this){
+            window.app=null;
         }
     }
 }
