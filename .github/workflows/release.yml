@@ -10,18 +10,17 @@ jobs:
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:mac
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: ls -lah release/
-
       - uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -37,20 +36,19 @@ jobs:
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: sudo apt-get update
       - run: sudo apt-get install -y libfuse2 rpm
       - run: npm ci
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:linux
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: ls -lah release/
-
       - uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -66,18 +64,17 @@ jobs:
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
       - run: npm run build
       - run: mkdir release
       - run: npm run package:win
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: dir release
-
       - uses: softprops/action-gh-release@v2
         with:
           files: |
