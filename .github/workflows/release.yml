@@ -21,6 +21,8 @@ jobs:
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:mac
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: ls -lah release/
 
       - uses: softprops/action-gh-release@v2
@@ -51,6 +53,8 @@ jobs:
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:linux
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: ls -lah release/
 
       - uses: softprops/action-gh-release@v2
@@ -79,6 +83,8 @@ jobs:
       - run: npm run build
       - run: mkdir release
       - run: npm run package:win
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: dir release
 
       - uses: softprops/action-gh-release@v2
