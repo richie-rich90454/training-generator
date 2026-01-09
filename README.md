@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Electron](https://img.shields.io/badge/Electron-39.2.7-47848F.svg)](https://www.electronjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
+[![Release](https://img.shields.io/github/v/release/richie-rich90454/training-generator?color=blue&label=latest%20release)](https://github.com/richie-rich90454/training-generator/releases)
+[![Stars](https://img.shields.io/github/stars/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/stargazers)
 
 A modern desktop application built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into AI training data using local **Ollama** models. Process documents locally with privacy-first AI processing.
 
@@ -313,6 +315,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 -->
 
 *Screenshot placeholders - add actual screenshots to the `screenshots/` directory*
+
+## In Development
+- 🟢 Modular Architecture
+- 🟡 Performance Dashboard
+- 🔴 API Server Mode
 
 ---
 
