@@ -49,14 +49,8 @@
       "!**/test*"
     ],
     "extraResources": [
-      {
-        "from": "assets",
-        "to": "assets"
-      },
-      {
-        "from": "native-splash",
-        "to": "native-splash"
-      }
+      { "from": "assets", "to": "assets" },
+      { "from": "native-splash", "to": "native-splash" }
     ],
     "asar": true,
     "asarUnpack": [
@@ -71,14 +65,8 @@
       "icon": "assets/favicon.ico",
       "requestedExecutionLevel": "asInvoker",
       "target": [
-        {
-          "target": "nsis",
-          "arch": "x64"
-        },
-        {
-          "target": "portable",
-          "arch": "x64"
-        }
+        { "target": "nsis", "arch": "x64" },
+        { "target": "portable", "arch": "x64" }
       ]
     },
     "nsis": {
@@ -94,34 +82,30 @@
       "license": "LICENSE"
     },
     "mac": {
-      "icon": "assets/icon.png",
+      "icon": "assets/favicon.icns",
       "category": "public.app-category.developer-tools",
       "target": [
-        {
-          "target": "dmg",
-          "arch": "arm64"
-        },
-        {
-          "target": "zip",
-          "arch": "arm64"
-        }
+        { "target": "dmg", "arch": "arm64" },
+        { "target": "zip", "arch": "arm64" }
       ]
     },
     "linux": {
-      "icon": "assets/icon.png",
+      "icon": "assets/favicon.png",
       "maintainer": "richie-rich90454 <noreply@github.com>",
       "category": "Development",
       "target": [
-        {
-          "target": "AppImage",
-          "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "deb",
-          "arch": ["x64", "arm64"]
-        }
+        { "target": "AppImage", "arch": ["x64", "arm64"] },
+        { "target": "deb", "arch": ["x64", "arm64"] }
       ]
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "richie-rich90454",
+        "repo": "training-generator",
+        "private": false
+      }
+    ]
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
