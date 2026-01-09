@@ -103,8 +103,7 @@
         "provider": "github",
         "owner": "richie-rich90454",
         "repo": "training-generator",
-        "private": false,
-        "token": "${GH_TOKEN}"
+        "private": false
       }
     ]
   },
