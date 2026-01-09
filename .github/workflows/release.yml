@@ -7,7 +7,7 @@ on:
 jobs:
   package-mac:
     runs-on: macos-latest
-    if: "!contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta')"
+    if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     
     steps:
       - name: Checkout repository
@@ -48,7 +48,7 @@ jobs:
 
   package-linux:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta')"
+    if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     
     steps:
       - name: Checkout repository
