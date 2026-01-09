@@ -6,8 +6,14 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
 [![Release](https://img.shields.io/github/v/release/richie-rich90454/training-generator?color=blue&label=latest%20release)](https://github.com/richie-rich90454/training-generator/releases)
 [![Stars](https://img.shields.io/github/stars/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/stargazers)
+[![Contributors](https://img.shields.io/github/contributors/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/issues)
+[![Forks](https://img.shields.io/github/forks/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/network/members)
+[![Open Pull Requests](https://img.shields.io/github/issues-pr/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/pulls)
+[![GitHub last commit](https://img.shields.io/github/last-commit/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/commits/main)
+[![GitHub discussions](https://img.shields.io/badge/discussions-join-blue)](https://github.com/richie-rich90454/training-generator/discussions)
 
-A modern desktop application built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into AI training data using local **Ollama** models. Process documents locally with privacy-first AI processing.
+**Training Generator** is a cross-platform **desktop application** built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into **AI training data** using **local Ollama models**. Extract instructions, Q&A pairs, conversation data, and structured output for machine learning, NLP workflows, or AI fine-tuning — all processed offline for privacy and speed.
 
 ## ✨ Features
 
@@ -299,7 +305,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: [GitHub Wiki](https://github.com/richie-rich90454/training-generator/wiki)
 - **Issue Tracker**: [Report Bugs](https://github.com/richie-rich90454/training-generator/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/richie-rich90454/training-generator/discussions)
-- **Star the Project**: [⭐ on GitHub](https://github.com/richie-rich90454/training-generator)
+- If this project helps you, please ⭐ **Star** the repo and share feedback via [Discussions](https://github.com/richie-rich90454/training-generator/discussions)!
 
 ## 📸 Screenshots
 
