@@ -116,6 +116,22 @@ npm run package:mac       # macOS only
 npm run package:linux     # Linux only
 ```
 
+### Automated Release Packaging
+When a new GitHub release is created, the following packages are automatically built and attached to the release:
+
+**macOS (Apple Silicon/M-series only):**
+- DMG installer (`.dmg`)
+- Portable ZIP archive (`.zip`) - unpacked application bundle
+
+**Linux (x64 & arm64):**
+- AppImage (`.AppImage`) - portable executable
+- Snap package (`.snap`) - universal Linux package
+- DEB package (`.deb`) - Debian/Ubuntu installer
+
+**Note:** Windows packages are not automatically built but can be created manually using `npm run package:win`.
+
+The automated packaging workflow only runs on stable releases (skips alpha/beta tags).
+
 ## 🏗️ Project Structure
 
 ```
