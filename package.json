@@ -51,17 +51,11 @@
     "extraResources": [
       {
         "from": "assets",
-        "to": "assets",
-        "filter": [
-          "**/*"
-        ]
+        "to": "assets"
       },
       {
         "from": "native-splash",
-        "to": "native-splash",
-        "filter": [
-          "**/*"
-        ]
+        "to": "native-splash"
       }
     ],
     "asar": true,
@@ -74,6 +68,8 @@
       "**/rtf-parser-fixes/**/*"
     ],
     "win": {
+      "icon": "assets/favicon.ico",
+      "requestedExecutionLevel": "asInvoker",
       "target": [
         {
           "target": "nsis",
@@ -83,9 +79,7 @@
           "target": "portable",
           "arch": "x64"
         }
-      ],
-      "icon": "assets/favicon.ico",
-      "requestedExecutionLevel": "asInvoker"
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -100,6 +94,8 @@
       "license": "LICENSE"
     },
     "mac": {
+      "icon": "assets/icon.png",
+      "category": "public.app-category.developer-tools",
       "target": [
         {
           "target": "dmg",
@@ -109,36 +105,22 @@
           "target": "zip",
           "arch": "arm64"
         }
-      ],
-      "category": "public.app-category.developer-tools",
-      "icon": "assets/favicon.icns"
+      ]
     },
     "linux": {
+      "icon": "assets/icon.png",
+      "maintainer": "richie-rich90454 <noreply@github.com>",
+      "category": "Development",
       "target": [
         {
           "target": "AppImage",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "snap",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         },
         {
           "target": "deb",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         }
-      ],
-      "category": "Development",
-      "icon": "assets/favicon.png"
+      ]
     }
   },
   "devDependencies": {
