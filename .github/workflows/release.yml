@@ -2,96 +2,66 @@ name: Release
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   package-mac:
     runs-on: macos-latest
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
-    
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: 24
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run build
+      - run: mkdir -p release
+      - run: npm run package:mac
+      - run: ls -lah release/
 
-      - name: Build application
-        run: npm run build
-
-      - name: Clean release directory
-        run: rm -rf release
-
-      - name: Package for macOS (arm64)
-        run: npm run package:mac
-
-      - name: List release files
-        run: ls -la release/
-
-      - name: Upload macOS release assets
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.dmg
             release/*.zip
             release/*.blockmap
             release/latest-mac.yml
-          tag_name: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   package-linux:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
-    
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: 24
+          cache: npm
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y fuse libfuse2
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y libfuse2 rpm
+      - run: npm ci
+      - run: npm run build
+      - run: mkdir -p release
+      - run: npm run package:linux
+      - run: ls -lah release/
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-
-      - name: Clean release directory
-        run: rm -rf release
-
-      - name: Package for Linux (x64 & arm64)
-        run: npm run package:linux
-
-      - name: List release files
-        run: ls -la release/
-
-      - name: Upload Linux release assets
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.AppImage
-            release/*.snap
             release/*.deb
             release/*.rpm
             release/*.tar.gz
             release/*.tar.xz
             release/*.blockmap
             release/latest-linux.yml
-          tag_name: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
