@@ -20,11 +20,15 @@
     "ai",
     "training",
     "llm",
-    "fine-tuning"
+    "fine-tuning",
+    "cli"
   ],
   "author": "richie-rich90454",
   "license": "MIT",
   "description": "Desktop application to convert documents into AI training data using Ollama",
+  "bin": {
+    "training-generator": "./cli.js"
+  },
   "build": {
     "appId": "com.training.generator",
     "productName": "Training Generator",
@@ -49,8 +53,14 @@
       "!**/test*"
     ],
     "extraResources": [
-      { "from": "assets", "to": "assets" },
-      { "from": "native-splash", "to": "native-splash" }
+      {
+        "from": "assets",
+        "to": "assets"
+      },
+      {
+        "from": "native-splash",
+        "to": "native-splash"
+      }
     ],
     "asar": true,
     "asarUnpack": [
@@ -65,8 +75,14 @@
       "icon": "assets/favicon.ico",
       "requestedExecutionLevel": "asInvoker",
       "target": [
-        { "target": "nsis", "arch": "x64" },
-        { "target": "portable", "arch": "x64" }
+        {
+          "target": "nsis",
+          "arch": "x64"
+        },
+        {
+          "target": "portable",
+          "arch": "x64"
+        }
       ]
     },
     "nsis": {
@@ -85,8 +101,14 @@
       "icon": "assets/favicon.icns",
       "category": "public.app-category.developer-tools",
       "target": [
-        { "target": "dmg", "arch": "arm64" },
-        { "target": "zip", "arch": "arm64" }
+        {
+          "target": "dmg",
+          "arch": "arm64"
+        },
+        {
+          "target": "zip",
+          "arch": "arm64"
+        }
       ]
     },
     "linux": {
@@ -94,8 +116,20 @@
       "maintainer": "richie-rich90454 <noreply@github.com>",
       "category": "Development",
       "target": [
-        { "target": "AppImage", "arch": ["x64", "arm64"] },
-        { "target": "deb", "arch": ["x64", "arm64"] }
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ]
     },
     "publish": [
@@ -120,6 +154,10 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "chalk": "^5.6.2",
+    "cli-progress": "^3.12.0",
+    "commander": "^14.0.2",
+    "figlet": "^1.9.4",
     "html-to-text": "^9.0.5",
     "mammoth": "^1.11.0",
     "officeparser": "^3.0.0",

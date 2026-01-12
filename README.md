@@ -147,13 +147,113 @@ training-generator/
 │   ├── styles/
 │   │   └── main.css       # Application styles
 │   ├── prompts/           # AI prompt templates (multiple languages)
+│   ├── shared/            # Shared modules for CLI and GUI
+│   │   ├── processingEngine.js  # Core processing engine
+│   │   ├── ollamaClient.js      # Ollama API client
+│   │   ├── promptManager.js     # Prompt loading and management
+│   │   ├── outputFormatter.js   # Output formatting
+│   │   └── textProcessor.js     # Text processing utilities
 │   └── workers/           # Web workers for background processing
 ├── assets/                # Application assets (icons, fonts)
 ├── native-splash/         # Native C++/WinAPI splash screen (Windows)
+├── cli.js                # CLI entry point
 ├── index.html            # Main application window
 ├── vite.config.js        # Vite build configuration
 ├── package.json          # Project dependencies and scripts
 └── README.md            # This file
+```
+
+## 🖥️ Command Line Interface (CLI)
+
+The Training Generator now includes a powerful CLI for headless operation and automation.
+
+### Installation as Global CLI Tool
+
+```bash
+# Install globally
+npm install -g .
+
+# Or use directly from project directory
+node cli.js [command]
+```
+
+### CLI Commands
+
+#### Process Files
+```bash
+# Process single file
+training-generator process document.pdf
+
+# Process multiple files with options
+training-generator process --model llama3.2 --type instruction *.pdf
+
+# Process with specific format and language
+training-generator process --format jsonl --language zh-Hans report.docx
+
+# Process with custom chunk size and temperature
+training-generator process --chunk-size 4000 --temperature 0.8 file.txt
+```
+
+#### Check Status
+```bash
+# Check Ollama status and available models
+training-generator status
+```
+
+#### List Supported Formats
+```bash
+# List all supported file formats
+training-generator list-formats
+```
+
+### CLI Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-m, --model <name>` | Ollama model to use | First available model |
+| `-t, --type <type>` | Processing type: instruction, conversation, chunking, custom | instruction |
+| `-f, --format <format>` | Output format: jsonl, json, csv, text, chatml | jsonl |
+| `-l, --language <lang>` | Language: en, zh-Hans, zh-Hant, es, fr, de, ja, ko | en |
+| `-c, --chunk-size <size>` | Chunk size in characters | 2000 |
+| `--temperature <value>` | Temperature for AI generation (0.0-1.0) | 0.7 |
+| `--ollama-url <url>` | Ollama API URL | http://localhost:11434 |
+| `--no-progress` | Disable progress bar | Enabled |
+| `-v, --verbose` | Verbose output | Disabled |
+
+### CLI Examples
+
+```bash
+# Batch process all PDFs in a directory
+training-generator process --model llama3.2 --type instruction ./documents/*.pdf
+
+# Process with verbose output for debugging
+training-generator process -v --model mistral document.pdf
+
+# Process multiple file types
+training-generator process report.docx notes.txt presentation.pdf
+
+# Use custom Ollama instance
+training-generator process --ollama-url http://192.168.1.100:11434 file.pdf
+```
+
+### Output Files
+Processed files are saved in the same directory as input files with `_training` suffix:
+- `document.pdf` → `document_training.jsonl`
+- `report.docx` → `report_training.json`
+- `notes.txt` → `notes_training.csv`
+
+### Automation & Scripting
+The CLI is perfect for automation scripts and batch processing:
+
+```bash
+#!/bin/bash
+# Process all documents in a folder
+for file in ./input/*.pdf; do
+    training-generator process --model llama3.2 --type instruction "$file"
+done
+
+# Combine outputs
+cat ./input/*_training.jsonl > combined_training_data.jsonl
 ```
 
 ## ⚙️ Configuration
