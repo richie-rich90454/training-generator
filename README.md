@@ -2,10 +2,30 @@
 
 [![CI](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Electron](https://img.shields.io/badge/Electron-39.2.7-47848F.svg)](https://www.electronjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
+[![Release](https://img.shields.io/github/v/release/richie-rich90454/training-generator?color=blue&label=latest%20release)](https://github.com/richie-rich90454/training-generator/releases)
+[![Stars](https://img.shields.io/github/stars/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/stargazers)
+[![Forks](https://img.shields.io/github/forks/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/network/members)
+[![Contributors](https://img.shields.io/github/contributors/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/graphs/contributors)
+[![Open Issues](https://img.shields.io/github/issues/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/issues)
+[![Open Pull Requests](https://img.shields.io/github/issues-pr/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/commits/main)
+[![Discussions](https://img.shields.io/badge/Discussions-join-blue)](https://github.com/richie-rich90454/training-generator/discussions)
+[![Downloads](https://img.shields.io/github/downloads/richie-rich90454/training-generator/total?color=blue)](https://github.com/richie-rich90454/training-generator/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/richie-rich90454/training-generator/ci.yml?branch=main)](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml)
 
-A modern desktop application built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into AI training data using local **Ollama** models. Process documents locally with privacy-first AI processing.
+---
+
+### 🚀 Built With
+
+[![Electron](https://img.shields.io/badge/Electron-39.2.7-47848F.svg)](https://www.electronjs.org/)  [![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)  [![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-9cf)](https://ollama.com/)  [![Vite](https://img.shields.io/badge/Vite-7.3.0-646cff.svg)](https://vitejs.dev/)  [![Axios](https://img.shields.io/badge/Axios-1.7.9-0055ff.svg)](https://axios-http.com/)  [![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)  [![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)  [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+
+**Training Generator** is a cross-platform **desktop application** built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into **AI training data** using **local Ollama models**. Extract instructions, Q&A pairs, conversation data, and structured output for machine learning, NLP workflows, or AI fine-tuning — all processed offline for privacy and speed.
+
+- Convert PDF, DOCX, TXT, MD, HTML, RTF documents to AI training data
+- Generate instruction/Q&A pairs & conversation datasets
+- Multi-language support: EN, CN, FR, DE, ES, JP, KR
+- Real-time output preview & batch processing
+- Local processing for privacy — no data leaves your computer
 
 ## ✨ Features
 
@@ -297,7 +317,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: [GitHub Wiki](https://github.com/richie-rich90454/training-generator/wiki)
 - **Issue Tracker**: [Report Bugs](https://github.com/richie-rich90454/training-generator/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/richie-rich90454/training-generator/discussions)
-- **Star the Project**: [⭐ on GitHub](https://github.com/richie-rich90454/training-generator)
+- If this project helps you, please ⭐ **Star** the repo and share feedback via [Discussions](https://github.com/richie-rich90454/training-generator/discussions)!
 
 ## 📸 Screenshots
 
@@ -313,6 +333,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 -->
 
 *Screenshot placeholders - add actual screenshots to the `screenshots/` directory*
+
+## In Development
+- 🟢 Modular Architecture
+- 🟡 Performance Dashboard
+- 🔴 API Server Mode
 
 ---
 
