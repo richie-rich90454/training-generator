@@ -1,124 +1,204 @@
-//g++ splash-modified.cpp -O2 -mwindows -o splash-modified.exe
+//g++ splash.cpp -O2 -std=c++11 -mwindows -lgdiplus -o splash.exe
+#define _WIN32_WINNT 0x0501
+#define UNICODE
+#define _UNICODE
 #include <windows.h>
-#include <math.h>
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-const char* steps[]={
-    "Initializing application...",
-    "Loading core modules...",
-    "Setting up file parser...",
-    "Connecting to Ollama...",
-    "Preparing user interface...",
-    "Almost ready..."
-};
-int totalSteps=sizeof(steps)/sizeof(steps[0]);
+#include <gdiplus.h>
+#include <cmath>
+#include <algorithm>
+using std::min;
+#pragma comment(lib, "gdiplus.lib")
+using namespace Gdiplus;
+int dpi=96;
 struct SplashState{
-    int progress;
-    int stepIndex;
-    const char* message;
-    int angle;
+    float spinnerAngle=0.0f;
+    float progress=0.0f;
+    int step=0;
 };
-SplashState splashState={0, 0, steps[0], 0};
-void PaintSplash(HWND hwnd){
+SplashState state;
+const wchar_t* steps[]={
+    L"Initializing application...",
+    L"Loading core modules...",
+    L"Preparing runtime...",
+    L"Connecting services...",
+    L"Finalizing UI...",
+    L"Almost ready..."
+};
+constexpr int totalSteps=sizeof(steps)/sizeof(steps[0]);
+void EnableDPIAwareness(){
+    HMODULE user32=LoadLibraryW(L"user32.dll");
+    if (!user32) return;
+    typedef BOOL (WINAPI *SetDpiCtxFn)(HANDLE);
+    SetDpiCtxFn setCtx=(SetDpiCtxFn)GetProcAddress(user32, "SetProcessDpiAwarenessContext");
+    if (setCtx){
+        setCtx((HANDLE)-4);
+        FreeLibrary(user32);
+        return;
+    }
+    typedef BOOL (WINAPI *SetProcessDPIAwareFn)(void);
+    SetProcessDPIAwareFn setAware=(SetProcessDPIAwareFn)GetProcAddress(user32, "SetProcessDPIAware");
+    if (setAware){
+        setAware();
+    }
+    FreeLibrary(user32);
+}
+void UpdateDPI(HWND hwnd){
+    dpi=96;
+    HMODULE user32=GetModuleHandleW(L"user32.dll");
+    if (user32){
+        typedef UINT (WINAPI *GetDpiForWindowFn)(HWND);
+        GetDpiForWindowFn getDpi=(GetDpiForWindowFn)GetProcAddress(user32, "GetDpiForWindow");
+        if (getDpi){
+            dpi=getDpi(hwnd);
+        }
+    }
+}
+int Scale(int v){
+    return MulDiv(v, dpi, 96);
+}
+float EaseOutCubic(float t){
+    return 1.0f-powf(1.0f-t, 3.0f);
+}
+void DrawRoundedRect(Graphics& g, RectF r, float radius, Color fill){
+    GraphicsPath path;
+    float d=radius*2.0f;
+    path.AddArc(r.X, r.Y, d, d, 180, 90);
+    path.AddArc(r.GetRight()-d, r.Y, d, d, 270, 90);
+    path.AddArc(r.GetRight()-d, r.GetBottom()-d, d, d, 0, 90);
+    path.AddArc(r.X, r.GetBottom()-d, d, d, 90, 90);
+    path.CloseFigure();
+    SolidBrush brush(fill);
+    g.FillPath(&brush, &path);
+}
+void DrawSpinner(Graphics& g, float cx, float cy, float r, float angle){
+    Pen pen(Color(255, 26, 115, 232), (REAL)Scale(4));
+    pen.SetStartCap(LineCapRound);
+    pen.SetEndCap(LineCapRound);
+    RectF arc(cx-r, cy-r, r*2, r*2);
+    g.DrawArc(&pen, arc, angle, 270);
+}
+void Paint(HWND hwnd){
     PAINTSTRUCT ps;
     HDC hdc=BeginPaint(hwnd, &ps);
-    RECT rect;
-    GetClientRect(hwnd, &rect);
-    HBRUSH bg=CreateSolidBrush(RGB(250,250,250));
-    FillRect(hdc, &rect, bg);
-    DeleteObject(bg);
-
-    int cx=rect.right/2;
-    int cy=rect.top+80;
-    int r=30;
-    int startAngle=splashState.angle;
-    int endAngle=startAngle+270;
-    HBRUSH spinnerBrush=CreateSolidBrush(RGB(26,115,232));
-    HBRUSH oldBrush=(HBRUSH)SelectObject(hdc, spinnerBrush);
-    POINT center={cx, cy};
-    POINT pt[4];
-    pt[0]=center;
-    double radStart=startAngle*3.14159265/180.0;
-    double radEnd=endAngle*3.14159265/180.0;
-    pt[1].x=cx+(int)(r*cos(radStart));
-    pt[1].y=cy - (int)(r*sin(radStart));
-    pt[2].x=cx+(int)(r*cos(radEnd));
-    pt[2].y=cy - (int)(r*sin(radEnd));
-    pt[3]=center;
-    Polygon(hdc, pt, 3);
-    SelectObject(hdc, oldBrush);
-    DeleteObject(spinnerBrush);
-    HFONT hTitle=[](){ NONCLIENTMETRICS ncm={ sizeof(NONCLIENTMETRICS) }; SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0); ncm.lfMessageFont.lfHeight=-40; return CreateFontIndirect(&ncm.lfMessageFont); }();
-    HFONT oldFont=(HFONT)SelectObject(hdc,hTitle);
-    SetTextColor(hdc, RGB(26,115,232));
-    SetBkMode(hdc, TRANSPARENT);
-    RECT titleRect={0, cy+40, rect.right, cy+100};
-    DrawTextA(hdc, "Training Generator", -1, &titleRect, DT_CENTER|DT_SINGLELINE);
-    SelectObject(hdc, oldFont);
-    DeleteObject(hTitle);
-    HFONT hSub=[](){ NONCLIENTMETRICS ncm={sizeof(NONCLIENTMETRICS)}; SystemParametersInfo(SPI_GETNONCLIENTMETRICS,sizeof(ncm),&ncm,0); ncm.lfMessageFont.lfHeight=-16; ncm.lfMessageFont.lfWeight=FW_NORMAL; return CreateFontIndirect(&ncm.lfMessageFont); }();
-    oldFont=(HFONT)SelectObject(hdc,hSub);
-    SetTextColor(hdc, RGB(95,99,104));
-    RECT subRect={0, cy+110, rect.right, cy+140};
-    DrawTextA(hdc, splashState.message, -1, &subRect, DT_CENTER|DT_SINGLELINE);
-    SelectObject(hdc, oldFont);
-    DeleteObject(hSub);
-    RECT progRect={rect.right/4, cy+160, rect.right*3/4, cy+180};
-    HBRUSH bgBar=CreateSolidBrush(RGB(243,243,243));
-    FillRect(hdc, &progRect, bgBar);
-    DeleteObject(bgBar);
-    int progWidth=((progRect.right-progRect.left)*splashState.progress)/100;
-    RECT fgRect={progRect.left, progRect.top, progRect.left+progWidth, progRect.bottom};
-    HBRUSH fgBar=CreateSolidBrush(RGB(26,115,232));
-    FillRect(hdc, &fgRect, fgBar);
-    DeleteObject(fgBar);
-    EndPaint(hwnd,&ps);
-}
-void UpdateProgress(HWND hwnd){
-    splashState.angle+=15;
-    if(splashState.angle>=360) splashState.angle-=360;
-    static int counter=0;
-    counter++;
-    if(counter%2==0){ 
-        splashState.stepIndex = (splashState.stepIndex+1)%totalSteps;
-        splashState.message=steps[splashState.stepIndex];
-        splashState.progress=((splashState.stepIndex+1)*100)/totalSteps;
-    }
-    InvalidateRect(hwnd,NULL,TRUE);
+    RECT rc;
+    GetClientRect(hwnd, &rc);
+    HDC memDC=CreateCompatibleDC(hdc);
+    HBITMAP bmp=CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
+    HBITMAP oldBmp=(HBITMAP)SelectObject(memDC, bmp);
+    Graphics g(memDC);
+    g.SetSmoothingMode(SmoothingModeHighQuality);
+    g.SetTextRenderingHint(TextRenderingHintClearTypeGridFit);
+    SolidBrush bg(Color(255, 250, 250, 250));
+    g.FillRectangle(&bg, 0, 0, rc.right, rc.bottom);
+    float cx=rc.right/2.0f;
+    float cy=(REAL)Scale(110);
+    DrawSpinner(g, cx, cy, (REAL)Scale(42), state.spinnerAngle);
+    DrawSpinner(g, cx, cy, (REAL)Scale(28), -state.spinnerAngle*1.5f);
+    FontFamily segoe(L"Segoe UI");
+    FontFamily tahoma(L"Tahoma");
+    FontFamily* family=(segoe.GetLastStatus()== Ok)?&segoe:&tahoma;
+    Font title(family, (REAL)Scale(32), FontStyleBold);
+    Font body(family, (REAL)Scale(16), FontStyleRegular);
+    StringFormat center;
+    center.SetAlignment(StringAlignmentCenter);
+    SolidBrush titleBrush(Color(255, 26, 115, 232));
+    g.DrawString(
+        L"Training Generator",
+        -1,
+        &title,
+        PointF(cx, cy+Scale(35)),
+        &center,
+        &titleBrush
+    );
+    SolidBrush subBrush(Color(255, 95, 99, 104));
+    g.DrawString(
+        steps[state.step],
+        -1,
+        &body,
+        PointF(cx, cy+Scale(105)),
+        &center,
+        &subBrush
+    );
+    float barW=rc.right*0.55f;
+    float barH=(REAL)Scale(10);
+    float barX=(rc.right-barW)/2.0f;
+    float barY=cy+Scale(145);
+    DrawRoundedRect(
+        g,
+        RectF(barX, barY, barW, barH),
+        barH/2,
+        Color(255, 230, 230, 230)
+    );
+    float eased=EaseOutCubic(state.progress);
+    DrawRoundedRect(
+        g,
+        RectF(barX, barY, barW*eased, barH),
+        barH/2,
+        Color(255, 26, 115, 232)
+    );
+    BitBlt(hdc, 0, 0, rc.right, rc.bottom, memDC, 0, 0, SRCCOPY);
+    SelectObject(memDC, oldBmp);
+    DeleteObject(bmp);
+    DeleteDC(memDC);
+    EndPaint(hwnd, &ps);
 }
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp){
-    switch(msg){
-        case WM_PAINT: PaintSplash(hwnd); return 0;
-        case WM_TIMER: UpdateProgress(hwnd); return 0;
-        case WM_DESTROY: PostQuitMessage(0); return 0;
+    switch (msg){
+    case WM_CREATE:
+        UpdateDPI(hwnd);
+        SetTimer(hwnd, 1, 16, nullptr);
+        return 0;
+    case WM_TIMER:
+        state.spinnerAngle+=2.5f;
+        if (state.spinnerAngle>=360.0f){
+            state.spinnerAngle-=360.0f;
+        }
+        state.progress+=0.002f;
+        if (state.progress>1.0f){
+            state.progress=1.0f;
+        }
+        state.step=min((int)(state.progress*totalSteps), totalSteps-1);
+        InvalidateRect(hwnd, nullptr, FALSE);
+        return 0;
+    case WM_PAINT:
+        Paint(hwnd);
+        return 0;
+    case WM_ERASEBKGND:
+        return 1;
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
     }
-    return DefWindowProc(hwnd,msg,wp,lp);
+    return DefWindowProc(hwnd, msg, wp, lp);
 }
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int){
-    WNDCLASSA wc={};
+    EnableDPIAwareness();
+    GdiplusStartupInput gsi;
+    ULONG_PTR token;
+    GdiplusStartup(&token, &gsi, nullptr);
+    WNDCLASS wc={};
     wc.lpfnWndProc=WndProc;
     wc.hInstance=hInst;
-    wc.lpszClassName="NativeSplashSpinner";
-    RegisterClassA(&wc);
-    int width=500, height=300;
-    int x=(GetSystemMetrics(SM_CXSCREEN)-width)/2;
-    int y=(GetSystemMetrics(SM_CYSCREEN)-height)/2;
-    HWND hwnd=CreateWindowExA(
+    wc.lpszClassName=L"ModernSplashXP";
+    wc.hCursor=LoadCursor(nullptr, IDC_ARROW);
+    RegisterClass(&wc);
+    int w=Scale(640);
+    int h=Scale(420);
+    HWND hwnd=CreateWindowEx(
         WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
         wc.lpszClassName,
-        "",
-        WS_POPUP,
-        x,y,width,height,
-        NULL,NULL,hInst,NULL
+        L"",
+        WS_POPUP|WS_VISIBLE,
+        (GetSystemMetrics(SM_CXSCREEN)-w)/2,
+        (GetSystemMetrics(SM_CYSCREEN)-h)/2,
+        w, h,
+        nullptr, nullptr, hInst, nullptr
     );
-    ShowWindow(hwnd, SW_SHOW);
-    UpdateWindow(hwnd);
-    SetForegroundWindow(hwnd);
-    SetWindowPos(hwnd, HWND_TOPMOST,0,0,0,0, SWP_NOMOVE|SWP_NOSIZE);
-    SetTimer(hwnd,1,100,NULL);
     MSG msg;
-    while(GetMessage(&msg,NULL,0,0)){
+    while (GetMessage(&msg, nullptr, 0, 0)){
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+    GdiplusShutdown(token);
     return 0;
 }
