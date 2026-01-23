@@ -5,7 +5,7 @@ TEXT TO ANALYZE:
 
 INSTRUCTIONS:
 1. Read the text thoroughly and identify ALL main topics, key information, arguments, and details.
-2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text. Questions and responses MUST be in English (en-US). All output text must be in English..
+2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text.
 3. The assistant should provide detailed, accurate responses based EXCLUSIVELY on the text.
 4. Format the conversation exactly as:
 User: [user message]
@@ -16,6 +16,10 @@ Assistant: [assistant response]
 8. Cover ALL important points: main ideas, supporting details, examples, data points, conclusions.
 9. If the text contains multiple sections or topics, create conversation exchanges for EACH one.
 10. Ensure the conversation explores the text DEEPLY, not just superficially.
+11. Create a natural dialogue progression that builds understanding incrementally.
+12. Include follow-up questions that probe deeper into complex topics.
+13. Ensure the assistant's responses are well-structured and easy to understand.
+14. All conversation text and the output MUST be in English (en-US).
 
 OUTPUT FORMAT:
 User: [First user message]

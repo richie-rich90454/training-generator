@@ -17,7 +17,11 @@ INSTRUCTIONS:
 4. If the text contains instructions or procedures, extract ALL steps in detail.
 5. If the text contains comparisons or contrasts, highlight ALL key differences and similarities.
 6. If the text contains lists, extract ALL items with their descriptions.
-7. Write all analysis in English. that captures EVERYTHING important from the text.
+7. Create clear headings and subheadings to organize the extracted information logically.
+8. Use bullet points or numbered lists where appropriate to enhance readability.
+9. Include contextual explanations for technical terms and complex concepts.
+10. Ensure the analysis maintains the original meaning and nuance of the text.
+11. All analysis MUST be written in English and capture EVERYTHING important from the text.
 
 OUTPUT FORMAT:
 Provide your analysis in a well-structured, comprehensive format.

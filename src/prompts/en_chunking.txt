@@ -11,11 +11,13 @@ INSTRUCTIONS:
    - Maintains the original meaning, context, and nuance
    - Is comprehensive yet concise
    - Preserves the logical flow and structure of the original
-3. The summary should be approximately 40-50% of the original text length to ensure completeness.
-4. Write in clear, professional English..
+3. The summary should be approximately 40-50% of the original text length to ensure completeness while maintaining all essential information.
+4. Write in clear, professional English.
 5. Do not add any information not present in the original text.
 6. Do not omit any significant information from the original text.
 7. Include ALL key examples, evidence, and supporting points mentioned.
+8. If the text contains technical terms or jargon, ensure they are properly explained in context.
+9. Maintain appropriate tone and style matching the original text.
 
 OUTPUT FORMAT:
 Provide only the summary text.
