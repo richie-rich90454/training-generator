@@ -110,7 +110,7 @@
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^39.2.7",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.8.1",
     "glob": "^13.0.0",
     "jest": "^30.2.0",
     "node-fetch": "^2.7.0",
