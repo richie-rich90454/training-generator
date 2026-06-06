@@ -1421,11 +1421,16 @@ Provide your analysis in a well-structured,comprehensive format.`
             if(themeSelect)themeSelect.value="auto"
             let fontSizeSelect=document.getElementById("font-size") as HTMLSelectElement|null
             if(fontSizeSelect)fontSizeSelect.value="medium"
-            ;(document.getElementById("auto-save") as HTMLInputElement).checked=true
-            ;(document.getElementById("auto-check-ollama") as HTMLInputElement).checked=true
-            ;(document.getElementById("start-maximized") as HTMLInputElement).checked=false
-            ;(document.getElementById("remember-window-size") as HTMLInputElement).checked=true
-            ;(document.getElementById("max-file-size") as HTMLInputElement).value="100"
+            let autoSave=document.getElementById("auto-save") as HTMLInputElement|null
+            if(autoSave)autoSave.checked=true
+            let autoCheckOllama=document.getElementById("auto-check-ollama") as HTMLInputElement|null
+            if(autoCheckOllama)autoCheckOllama.checked=true
+            let startMaximized=document.getElementById("start-maximized") as HTMLInputElement|null
+            if(startMaximized)startMaximized.checked=false
+            let rememberWindowSize=document.getElementById("remember-window-size") as HTMLInputElement|null
+            if(rememberWindowSize)rememberWindowSize.checked=true
+            let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
+            if(maxFileSize)maxFileSize.value="100"
             this.applyTheme("auto")
             this.applyFontSize("medium")
             this.saveAppSettings()
