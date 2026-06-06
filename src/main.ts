@@ -349,7 +349,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
                 }
             )
             if(!response.data?.response){
-                throw new Error("Invalid response from Ollama")
+                return{success:false,error:"Invalid response from Ollama"}
             }
             return{success:true,response:response.data.response}
         }
@@ -365,7 +365,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
             }
         }
     }
-    throw new Error(`Failed after ${maxRetries+1}attempts:${lastError?.message||"Unknown error"}`)
+    return{success:false,error:`Failed after ${maxRetries+1}attempts:${lastError?.message||"Unknown error"}`}
 })
 ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
 ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
