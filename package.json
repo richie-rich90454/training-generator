@@ -150,7 +150,7 @@
     "node-fetch": "^2.7.0",
     "terser": "^5.44.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0",
+    "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vite-plugin-copy": "^0.1.6",
     "vitest": "^4.1.8"
