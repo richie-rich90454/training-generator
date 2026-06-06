@@ -1058,7 +1058,17 @@ Provide your analysis in a well-structured,comprehensive format.`
             }
             else if(format=="csv"){
                 let headers=["input","output"]
-                let rows=this.outputData.map(item=>`"${(item.input||"").replace(/"/g,'""')}","${(item.output||"").replace(/"/g,'""')}"`)
+                let rows=this.outputData.map(item=>{
+                    let input=(item.input||"").replace(/"/g,'""')
+                    let output=(item.output||"").replace(/"/g,'""')
+                    if(item.messages){
+                        output=JSON.stringify(item.messages).replace(/"/g,'""')
+                    }
+                    if(item.text){
+                        output=item.text.replace(/"/g,'""')
+                    }
+                    return `"${input}","${output}"`
+                })
                 content=headers.join(",")+"\n"+rows.join("\n")
                 defaultFilename+=".csv"
             }
@@ -1099,7 +1109,17 @@ Provide your analysis in a well-structured,comprehensive format.`
             }
             else if(format=="csv"){
                 let headers=["input","output"]
-                let rows=this.outputData.map(item=>`"${(item.input||"").replace(/"/g,'""')}","${(item.output||"").replace(/"/g,'""')}"`)
+                let rows=this.outputData.map(item=>{
+                    let input=(item.input||"").replace(/"/g,'""')
+                    let output=(item.output||"").replace(/"/g,'""')
+                    if(item.messages){
+                        output=JSON.stringify(item.messages).replace(/"/g,'""')
+                    }
+                    if(item.text){
+                        output=item.text.replace(/"/g,'""')
+                    }
+                    return `"${input}","${output}"`
+                })
                 content=headers.join(",")+"\n"+rows.join("\n")
             }
             else if(format=="text"){
