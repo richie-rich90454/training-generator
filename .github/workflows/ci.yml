@@ -35,6 +35,9 @@ jobs:
             echo "No lint script found, skipping."
           fi
 
+      - name: Type check
+        run: npm run typecheck
+
       - name: Run tests
         run: |
           if npm run | grep -q "test"; then
