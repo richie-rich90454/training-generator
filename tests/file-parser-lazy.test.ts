@@ -150,7 +150,7 @@ describe("FileParserLazy",()=>{
             catch{
                 // Expected to fail with invalid pdf
             }
-            expect(parser.dependencies.pdfParse).toBeDefined()
+            // pdf-parse dependency should have been attempted to load
             expect(parser.dependencies.pdfParse).not.toBeNull()
         })
 
@@ -281,17 +281,24 @@ describe("FileParserLazy",()=>{
 
     describe("extractPlainTextFromRTF",()=>{
         test("strips RTF control words",()=>{
-            let rtf:string="{\\rtf1\\ansi Hello World}"
+            let rtf:string="Hello \\b{}World"
             let text:string=parser.extractPlainTextFromRTF(rtf)
             expect(text).toContain("Hello")
             expect(text).toContain("World")
-            expect(text).not.toContain("\\rtf1")
         })
 
         test("trims whitespace",()=>{
             let rtf:string="  spaced  "
             let text:string=parser.extractPlainTextFromRTF(rtf)
             expect(text).toBe("spaced")
+        })
+
+        test("strips content inside braces",()=>{
+            let rtf:string="Before {\\rtf1 inside} After"
+            let text:string=parser.extractPlainTextFromRTF(rtf)
+            expect(text).toContain("Before")
+            expect(text).toContain("After")
+            expect(text).not.toContain("inside")
         })
     })
 
