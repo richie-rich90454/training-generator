@@ -1,6 +1,6 @@
 import{parentPort}from "worker_threads"
 import pdfParse from "pdf-parse"
-import type{WorkerMessage,WorkerResult}from "../types/interfaces"
+import type{WorkerMessage,WorkerResult}from "../types/index.js"
 
 let port=parentPort as import("worker_threads").MessagePort
 

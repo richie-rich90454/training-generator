@@ -6,7 +6,7 @@ import{spawn}from "child_process"
 import{fileURLToPath}from "url"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.js"
-import type{FileObj,OllamaGenerateOptions}from "./types/interfaces"
+import type{FileObj,OllamaGenerateOptions}from "./types/index.js"
 
 let isWin:boolean=process.platform=="win32"
 let isMac:boolean=process.platform=="darwin"

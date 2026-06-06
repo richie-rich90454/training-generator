@@ -1,4 +1,4 @@
-import type{SelectedFile,TrainingItem,QAPair,ConversationTurn,ProcessFileResult,OllamaStatus,OllamaModel,AppSettings,FullAppSettings}from "../types/interfaces"
+import type{SelectedFile,TrainingItem,QAPair,ConversationTurn,ProcessFileResult,OllamaStatus,OllamaModel,AppSettings,FullAppSettings}from "../types/index.js"
 
 class TrainGeneratorApp{
     selectedFiles:SelectedFile[]
