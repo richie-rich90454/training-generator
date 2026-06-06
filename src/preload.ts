@@ -1,4 +1,5 @@
 import{contextBridge,ipcRenderer}from "electron"
+import type{OllamaStatus}from "./types/index.js"
 
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>ipcRenderer.invoke("dialog:openFile"),
@@ -11,8 +12,11 @@ contextBridge.exposeInMainWorld("electronAPI",{
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>)=>ipcRenderer.invoke("ollama:generate",{model,prompt,options}),
     getAppVersion:()=>ipcRenderer.invoke("app:getVersion"),
     getPlatform:()=>ipcRenderer.invoke("app:getPlatform"),
-    onOllamaStatusUpdate:(callback:()=>void):()=>void=>{
-        return()=>{}
+    onOllamaStatusUpdate:(callback:(status:OllamaStatus)=>void)=>()=>{
+        ipcRenderer.on("ollama:status-update",(_event:any,status:OllamaStatus)=>callback(status))
+        return()=>{
+            ipcRenderer.removeListener("ollama:status-update",(_event:any,status:OllamaStatus)=>callback(status))
+        }
     }
 })
 

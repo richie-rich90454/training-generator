@@ -11,7 +11,7 @@ export interface ElectronAPI{
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>)=>Promise<OllamaGenerateResult>
     getAppVersion:()=>Promise<string>
     getPlatform:()=>Promise<string>
-    onOllamaStatusUpdate:(callback:()=>void)=>()=>void
+    onOllamaStatusUpdate:(callback:(status:OllamaStatus)=>void)=>()=>void
 }
 
 export interface AppConsole{
