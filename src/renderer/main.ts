@@ -538,7 +538,7 @@ class TrainGeneratorApp{
                 let readableText=decoder.decode(uint8Array.slice(0,sliceSize))
                 let textSequences=readableText.match(/[A-Za-z0-9\s.,;:!?()""-]{10,}/g)
                 if(textSequences){
-                    extractedText+=textSequences.join(" ")
+                    extractedText=textSequences.join(" ")
                 }
             }
             if(extractedText.length<50){
