@@ -27,10 +27,10 @@ try{
 catch(error){
     console.error("Failed to create directories:",error)
     userDataPath=app.getPath("userData")
-    cachePath=app.getPath("cache")
+    cachePath=(app as any).getPath("cache")
 }
 app.setPath("userData",userDataPath)
-app.setPath("cache",cachePath)
+;(app as any).setPath("cache",cachePath)
 app.commandLine.appendSwitch("no-first-run")
 app.commandLine.appendSwitch("disable-background-networking")
 app.commandLine.appendSwitch("disable-component-update")
@@ -122,7 +122,6 @@ function createMainWindow(){
             disableHtmlFullscreenWindowResize:true,
             sandbox:false,
             webgl:true,
-            webgl2:true,
             backgroundThrottling:false,
             enablePreferredSizeMode:true,
             scrollBounce:true
@@ -180,7 +179,7 @@ app.on("activate",()=>{
     }
 })
 ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
-    let result=await dialog.showOpenDialog(mainWindow,{
+    let result=await dialog.showOpenDialog(mainWindow as Electron.BaseWindow,{
         properties:["openFile","multiSelections"],
         filters:[
             {name:"Documents",extensions:["pdf","docx","doc","rtf","txt","md","html"]},
@@ -206,7 +205,7 @@ ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<Fi
     return files.filter(Boolean)as FileObj[]
 })
 ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
-    let result=await dialog.showSaveDialog(mainWindow!,{
+    let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
         defaultPath:defaultFilename||"training_data.jsonl",
         filters:[
             {name:"JSON Liners",extensions:["jsonl"]},

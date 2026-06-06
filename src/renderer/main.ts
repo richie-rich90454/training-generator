@@ -7,7 +7,7 @@ class TrainGeneratorApp{
     outputData:TrainingItem[]
     ollamaStatus:OllamaStatus
     selectedLanguage:string
-    eventListeners:Array<{element:HTMLElement|Window;event:string;handler:EventListenerOrEventListenerObject}>
+    eventListeners:Array<{element:HTMLElement|Window;event:string;handler:EventListener}>
     intervals:number[]
     timeouts:number[]
 
@@ -118,9 +118,9 @@ class TrainGeneratorApp{
         this.helpBtn=document.getElementById("help-btn") as HTMLElement
     }
     bindEvents():void{
-        this.addEventListener(this.dropZone,"dragover",this.handleDragOver.bind(this))
-        this.addEventListener(this.dropZone,"dragleave",this.handleDragLeave.bind(this))
-        this.addEventListener(this.dropZone,"drop",this.handleDrop.bind(this))
+        this.addEventListener(this.dropZone,"dragover",this.handleDragOver.bind(this) as EventListener)
+        this.addEventListener(this.dropZone,"dragleave",this.handleDragLeave.bind(this) as EventListener)
+        this.addEventListener(this.dropZone,"drop",this.handleDrop.bind(this) as unknown as EventListener)
         this.addEventListener(this.fileInput,"change",this.handleFileSelect.bind(this))
         this.addEventListener(this.browseBtn,"click",()=>this.fileInput.click())
         this.addEventListener(this.processBtn,"click",this.processFiles.bind(this))
@@ -1445,13 +1445,13 @@ Provide your analysis in a well-structured,comprehensive format.`
             document.body.classList.add("font-medium")
         }
     }
-    addEventListener(element:HTMLElement|Window,event:string,handler:EventListenerOrEventListenerObject):void{
+    addEventListener(element:HTMLElement|Window,event:string,handler:EventListener):void{
         element.addEventListener(event,handler)
         this.eventListeners.push({element,event,handler})
     }
     removeAllEventListeners():void{
         this.eventListeners.forEach(({element,event,handler})=>{
-            element.removeEventListener(event,handler as EventListener)
+            element.removeEventListener(event,handler)
         })
         this.eventListeners=[]
     }
