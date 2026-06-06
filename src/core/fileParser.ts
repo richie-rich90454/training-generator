@@ -1,10 +1,11 @@
 import mammoth from "mammoth"
 import pdfParse from "pdf-parse"
 import officeParser from "officeparser"
-import {RtfParser} from "rtf-parser-fixes"
-import {htmlToText} from "html-to-text"
+import{RtfParser}from "rtf-parser-fixes"
+import{htmlToText}from "html-to-text"
 import fs from "fs"
 import path from "path"
+import type{ParseBatchItem}from "../types/index.js"
 class FileParser{
     supportedFormats:string[]
     constructor(){
@@ -185,8 +186,8 @@ class FileParser{
         }
         return await this.parseFile(filePath,ext)
     }
-    async processFiles(filePaths:string[]):Promise<Array<{filePath:string;success:boolean;text:string;error:string|null}>>{
-        let results:Array<{filePath:string;success:boolean;text:string;error:string|null}>=[]
+    async processFiles(filePaths:string[]):Promise<ParseBatchItem[]>{
+        let results:ParseBatchItem[]=[]
         for(let filePath of filePaths){
             try{
                 let text=await this.extractTextFromFile(filePath)
