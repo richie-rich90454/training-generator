@@ -118,7 +118,6 @@ function createMainWindow(){
             preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.js"),
             nodeIntegration:false,
             contextIsolation:true,
-            enableRemoteModule:false,
             spellcheck:false,
             disableHtmlFullscreenWindowResize:true,
             sandbox:false,
@@ -207,7 +206,7 @@ ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<Fi
     return files.filter(Boolean)as FileObj[]
 })
 ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
-    let result=await dialog.showSaveDialog(mainWindow,{
+    let result=await dialog.showSaveDialog(mainWindow!,{
         defaultPath:defaultFilename||"training_data.jsonl",
         filters:[
             {name:"JSON Liners",extensions:["jsonl"]},

@@ -6,7 +6,7 @@ import type{ParseBatchItem}from "../types/interfaces"
 
 class FileParserLazy{
     supportedFormats:string[]
-    dependencies:{
+    dependencies:Record<string,unknown|null>&{
         mammoth:unknown|null
         pdfParse:unknown|null
         officeParser:unknown|null
@@ -209,10 +209,10 @@ class FileParserLazy{
         return new Promise((resolve, reject)=>{
             let parser=new RtfParser();
             let result="";
-            parser.on("text", (text)=>{
+            parser.on("text", (text:string)=>{
                 result+=text;
             });
-            parser.on("error", (error)=>{
+            parser.on("error", (error:Error)=>{
                 reject(error);
             });
             parser.on("end", ()=>{

@@ -138,10 +138,10 @@ class FileParser{
         return new Promise((resolve,reject)=>{
             let parser=new RtfParser()
             let result=""
-            parser.on("text",(text)=>{
+            parser.on("text",(text:string)=>{
                 result+=text
             })
-            parser.on("error",(error)=>{
+            parser.on("error",(error:Error)=>{
                 reject(error)
             })
             parser.on("end",()=>{

@@ -7,36 +7,36 @@ class TrainGeneratorApp{
     outputData:TrainingItem[]
     ollamaStatus:OllamaStatus
     selectedLanguage:string
-    eventListeners:Array<{element:HTMLElement|Window;event:string;handler:EventListener}>
+    eventListeners:Array<{element:HTMLElement|Window;event:string;handler:EventListenerOrEventListenerObject}>
     intervals:number[]
     timeouts:number[]
 
-    dropZone:HTMLElement
-    fileInput:HTMLInputElement
-    browseBtn:HTMLElement
-    fileList:HTMLElement
-    processBtn:HTMLButtonElement
-    clearBtn:HTMLButtonElement
-    modelSelect:HTMLSelectElement
-    processingType:HTMLSelectElement
-    outputFormat:HTMLSelectElement
-    languageSelect:HTMLSelectElement
-    chunkSize:HTMLInputElement
-    savePresetBtn:HTMLElement
-    progressText:HTMLElement
-    progressPercent:HTMLElement
-    progressFill:HTMLElement
-    processingLog:HTMLElement
-    outputPreview:HTMLElement
-    exportBtn:HTMLButtonElement
-    copyBtn:HTMLButtonElement
-    ollamaStatusEl:HTMLElement
-    filesCountEl:HTMLElement
-    lastProcessedEl:HTMLElement
-    settingsBtn:HTMLElement
-    settingsModal:HTMLElement
-    modalClose:HTMLElement
-    helpBtn:HTMLElement
+    dropZone!:HTMLElement
+    fileInput!:HTMLInputElement
+    browseBtn!:HTMLElement
+    fileList!:HTMLElement
+    processBtn!:HTMLButtonElement
+    clearBtn!:HTMLButtonElement
+    modelSelect!:HTMLSelectElement
+    processingType!:HTMLSelectElement
+    outputFormat!:HTMLSelectElement
+    languageSelect!:HTMLSelectElement
+    chunkSize!:HTMLInputElement
+    savePresetBtn!:HTMLElement
+    progressText!:HTMLElement
+    progressPercent!:HTMLElement
+    progressFill!:HTMLElement
+    processingLog!:HTMLElement
+    outputPreview!:HTMLElement
+    exportBtn!:HTMLButtonElement
+    copyBtn!:HTMLButtonElement
+    ollamaStatusEl!:HTMLElement
+    filesCountEl!:HTMLElement
+    lastProcessedEl!:HTMLElement
+    settingsBtn!:HTMLElement
+    settingsModal!:HTMLElement
+    modalClose!:HTMLElement
+    helpBtn!:HTMLElement
 
     constructor(){
         this.selectedFiles=[]
@@ -78,7 +78,7 @@ class TrainGeneratorApp{
     }
     async init():Promise<void>{
         if(document.readyState=="loading"){
-            await new Promise<void>(resolve=>document.addEventListener("DOMContentLoaded",resolve))
+            await new Promise<void>(resolve=>{document.addEventListener("DOMContentLoaded",()=>resolve())})
         }
         await this.detectPlatform()
         this.cacheElements()
@@ -270,7 +270,7 @@ class TrainGeneratorApp{
                 this.ollamaStatusEl.querySelector("span")!.textContent="Ollama:Browser Mode"
                 this.ollamaStatusEl.className="status-indicator status-offline"
                 this.addLog("Running in browser mode(Ollama unavailable)","warning")
-                return{running:false,error:"Browser mode"}
+                return{running:false,models:[],error:"Browser mode"}
             }
             let status=await window.electronAPI.checkOllama()
             this.ollamaStatus=status
@@ -294,7 +294,7 @@ class TrainGeneratorApp{
             this.ollamaStatusEl.querySelector("span")!.textContent="Ollama:Error"
             this.ollamaStatusEl.className="status-indicator status-offline"
             this.addLog("Failed to check Ollama status","error")
-            return{running:false,error:(error as Error).message}
+            return{running:false,models:[],error:(error as Error).message}
         }
     }
     updateModelSelect(models:OllamaModel[]):void{
@@ -1445,13 +1445,13 @@ Provide your analysis in a well-structured,comprehensive format.`
             document.body.classList.add("font-medium")
         }
     }
-    addEventListener(element:HTMLElement|Window,event:string,handler:EventListener):void{
+    addEventListener(element:HTMLElement|Window,event:string,handler:EventListenerOrEventListenerObject):void{
         element.addEventListener(event,handler)
         this.eventListeners.push({element,event,handler})
     }
     removeAllEventListeners():void{
         this.eventListeners.forEach(({element,event,handler})=>{
-            element.removeEventListener(event,handler)
+            element.removeEventListener(event,handler as EventListener)
         })
         this.eventListeners=[]
     }
