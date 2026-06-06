@@ -1,0 +1,1 @@
+export type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,ParseBatchItem,OllamaModel,OllamaStatus,OllamaGenerateOptions,OllamaGenerateResult,SelectedFile,TrainingItem,QAPair,ConversationTurn,ProcessFileResult,WorkerMessage,WorkerResult,AppSettings,FullAppSettings}from "./interfaces"
