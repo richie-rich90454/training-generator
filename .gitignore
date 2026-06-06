@@ -140,3 +140,8 @@ vite.config.ts.timestamp-*
 
 #electron app build
 release
+
+#TypeScript build output
+dist-ts
+.trae
+AGENTS.md
