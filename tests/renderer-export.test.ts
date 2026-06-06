@@ -138,14 +138,14 @@ describe("formatAsCsv",()=>{
         let items:TrainingItem[]=[{instruction:"",input:"",output:""}]
         let result=formatAsCsv(items)
         let lines=result.split("\n")
-        expect(lines[1]).toBe('"""","""","""')
+        expect(lines[1]).toBe('"","",""')
     })
 
     test("handles missing fields",()=>{
         let items:TrainingItem[]=[{}]
         let result=formatAsCsv(items)
         let lines=result.split("\n")
-        expect(lines[1]).toBe('"""","""","""')
+        expect(lines[1]).toBe('"","",""')
     })
 })
 

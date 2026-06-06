@@ -4,7 +4,7 @@ import{describe,test,expect}from "vitest"
 // Extract parseQuestionAnswerPairs logic for testing
 function parseQuestionAnswerPairs(text:string):Array<{role:string;content:string}>{
     let messages:Array<{role:string;content:string}>=[]
-    let regex=/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis
+    let regex=/Q:\s*([\s\S]*?)\s*A:\s*([\s\S]*?)(?=Q:|$)/gi
     let match:RegExpExecArray|null
     while((match=regex.exec(text))!==null){
         if(match[1]&&match[2]){
@@ -18,7 +18,7 @@ function parseQuestionAnswerPairs(text:string):Array<{role:string;content:string
 // Extract parseConversationTurns logic for testing
 function parseConversationTurns(text:string):Array<{role:string;content:string}>{
     let messages:Array<{role:string;content:string}>=[]
-    let regex=/(Human|User):\s*(.*?)\s*(Assistant|AI):\s*(.*?)(?=(?:Human|User):|$)/gis
+    let regex=/(Human|User):\s*([\s\S]*?)\s*(Assistant|AI):\s*([\s\S]*?)(?=(?:Human|User):|$)/gi
     let match:RegExpExecArray|null
     while((match=regex.exec(text))!==null){
         if(match[2]&&match[4]){
