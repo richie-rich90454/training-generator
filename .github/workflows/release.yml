@@ -15,6 +15,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:mac
@@ -43,6 +44,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install -y libfuse2 rpm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
       - run: mkdir -p release
       - run: npm run package:linux
@@ -69,6 +71,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
       - run: mkdir release
       - run: npm run package:win
