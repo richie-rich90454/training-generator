@@ -148,6 +148,7 @@
     "electron": "^42.3.3",
     "electron-builder": "^26.15.0",
     "glob": "^13.0.6",
+    "happy-dom": "^20.10.1",
     "node-fetch": "^2.7.0",
     "terser": "^5.44.1",
     "tsx": "^4.19.0",
