@@ -288,7 +288,7 @@ ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileO
         return{success:false,error:(error as Error).message}
     }
 })
-ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;error:string}>=>{
+ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;models:never[];error:string}>=>{
     try{
         let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
         let version="unknown"
@@ -308,7 +308,7 @@ ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{runn
         }
     }
     catch(error){
-        return{running:false,error:(error as Error).message}
+        return{running:false,models:[],error:(error as Error).message}
     }
 })
 ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
