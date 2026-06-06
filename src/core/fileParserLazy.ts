@@ -138,7 +138,7 @@ class FileParserLazy{
     }
     async parsePDFWithWorker(buffer:Buffer):Promise<string>{
         return new Promise((resolve, reject)=>{
-            let workerPath=path.join(path.dirname(fileURLToPath(import.meta.url)),"../workers/pdfWorker.js")
+            let workerPath=path.join(path.dirname(fileURLToPath(import.meta.url)),"../workers/pdfWorker.ts")
             let worker=new Worker(workerPath);
             let id=Date.now()+Math.random();
             let timeout=setTimeout(()=>{
