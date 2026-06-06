@@ -4,8 +4,8 @@
   "type":"module",
   "main":"src/main.ts",
   "scripts":{
-    "start":"cross-env NODE_ENV=production electron .",
-    "dev":"vite & cross-env NODE_ENV=development electron .",
+    "start":"cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
+    "dev":"vite & cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .",
     "build":"vite build",
     "preview":"vite preview",
     "package":"npm run build && electron-builder",
