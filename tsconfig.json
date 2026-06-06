@@ -18,6 +18,7 @@
     "include":[
         "src/**/*.ts",
         "tests/**/*.ts",
+        "jest.config.ts",
         "vite.config.ts",
         "test-app.ts",
         "test-complete.ts",
