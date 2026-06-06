@@ -134,7 +134,6 @@ class TrainGeneratorApp{
             if((e as MouseEvent).target==this.settingsModal)this.showModal(false)
         })
         this.addEventListener(this.helpBtn,"click",()=>this.showHelp())
-        this.addEventListener(this.fileInput,"change",()=>this.updateProcessButton())
     }
     handleDragOver(e:DragEvent):void{
         e.preventDefault()
