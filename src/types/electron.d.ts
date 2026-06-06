@@ -1,4 +1,4 @@
-import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,OllamaStatus,OllamaGenerateResult}from"./interfaces"
+import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,OllamaStatus,OllamaGenerateResult}from"./index.js"
 
 export interface ElectronAPI{
     openFileDialog:()=>Promise<FileObj[]>
