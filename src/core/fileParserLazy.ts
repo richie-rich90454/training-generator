@@ -29,13 +29,13 @@ class FileParserLazy{
         }
         switch (name){
             case "mammoth":
-                this.dependencies.mammoth=await import("mammoth")
+                this.dependencies.mammoth=(await import("mammoth")).default
                 break
             case "pdfParse":
-                this.dependencies.pdfParse=await import("pdf-parse")
+                this.dependencies.pdfParse=(await import("pdf-parse")).default
                 break
             case "officeParser":
-                this.dependencies.officeParser=await import("officeparser")
+                this.dependencies.officeParser=(await import("officeparser")).default
                 break
             case "RtfParser":
                 this.dependencies.RtfParser=(await import("rtf-parser-fixes")).RtfParser
