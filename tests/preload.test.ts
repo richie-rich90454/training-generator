@@ -132,7 +132,7 @@ describe("Preload API structure",()=>{
         expect(listeners).toBeDefined()
         expect(listeners.length).toBe(1)
         listeners[0]({},status)
-        expect(callback).toHaveBeenCalledWith(status)
+        expect(callback).toHaveBeenCalledWith({},status)
     })
 
     test("onOllamaStatusUpdate unsubscribe stops receiving events",()=>{
