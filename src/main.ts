@@ -208,7 +208,7 @@ ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFile
     let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
         defaultPath:defaultFilename||"training_data.jsonl",
         filters:[
-            {name:"JSON Liners",extensions:["jsonl"]},
+            {name:"JSON Lines",extensions:["jsonl"]},
             {name:"JSON",extensions:["json"]},
             {name:"Text",extensions:["txt"]},
             {name:"All Files",extensions:["*"]}
@@ -335,8 +335,8 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
                     prompt,
                     stream:false,
                     options:{
-                        temperature:options.temperature??.7,
-                        top_p:options.top_p??.9,
+                        temperature:options.temperature ?? 0.7,
+                        top_p:options.top_p ?? 0.9,
                         ...options
                     }
                 },
