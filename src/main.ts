@@ -115,7 +115,7 @@ function createMainWindow(){
         titleBarStyle:"default",
         useContentSize:true,
         webPreferences:{
-            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.js"),
+            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.ts"),
             nodeIntegration:false,
             contextIsolation:true,
             spellcheck:false,
