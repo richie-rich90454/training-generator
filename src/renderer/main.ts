@@ -284,7 +284,7 @@ class TrainGeneratorApp{
             let status=await window.electronAPI.checkOllama()
             this.ollamaStatus=status
             if(status.running){
-                let versionText=status.version!=="unknown"?`v${status.version}`:""
+                let versionText=status.version&&status.version!=="unknown"?`v${String(status.version).replace(/[\x00-\x1F<>"'&]/g,"")}`:""
                 this.ollamaStatusEl.querySelector("span")!.textContent=`Ollama:Online ${versionText}(${status.models.length}models)`
                 this.ollamaStatusEl.className="status-indicator status-online"
                 this.addLog(`Ollama is running(${status.version})with ${status.models.length}models`,"success")
