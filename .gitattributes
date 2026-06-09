@@ -1,0 +1,3 @@
+# Mark pre-compiled native binaries as binary to prevent Git from
+# trying to diff them and to ensure correct line-ending handling.
+native-splash/splash.exe binary
