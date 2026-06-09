@@ -402,7 +402,7 @@ ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileO
                 return{success:false,error:"Invalid file entry in batch"}
             }
             if(!isPathSafeForParse(f.path)){
-                return{success:false,error:`Invalid or unsafe file path: ${path.basename(f.path)}`}
+                return{success:false,error:"Invalid or unsafe file path in batch"}
             }
         }
         if(!fileParser){
