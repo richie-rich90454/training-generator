@@ -81,10 +81,15 @@ class FileParserLazy{
     }
     async streamTextFile(filePath:string):Promise<string>{
         return new Promise((resolve, reject)=>{
-            let readStream=fs.createReadStream(filePath,{ encoding: "utf8" });
-            let content="";
+            let readStream=fs.createReadStream(filePath,{ encoding: "utf8", highWaterMark: 64*1024 })
+            let content=""
+            let maxSize=50*1024*1024
             readStream.on("data", (chunk)=>{
-                content+=chunk;
+                content+=chunk
+                if(content.length>maxSize){
+                    readStream.destroy()
+                    reject(new Error("Text file too large to process"))
+                }
             });
             readStream.on("end", ()=>{
                 resolve(content);
