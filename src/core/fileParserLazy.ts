@@ -272,7 +272,7 @@ class FileParserLazy{
                     filePath,
                     success: false,
                     text: "",
-                    error: (error as Error).message
+                    error: "Failed to extract text from file"
                 });
             }
         }
