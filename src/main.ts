@@ -16,6 +16,80 @@ let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
+function isPathWithin(baseDir:string,targetPath:string):boolean{
+    try{
+        let resolvedTarget=path.resolve(targetPath)
+        let resolvedBase=path.resolve(baseDir)
+        return resolvedTarget===resolvedBase||resolvedTarget.startsWith(resolvedBase+path.sep)
+    }
+    catch{
+        return false
+    }
+}
+function getSafeReadDirs():string[]{
+    let dirs:string[]=[]
+    try{
+        dirs.push(path.resolve(app.getAppPath()))
+        dirs.push(path.resolve(app.getAppPath(),"src","prompts"))
+        dirs.push(path.resolve(app.getAppPath(),"dist","prompts"))
+        dirs.push(path.resolve(app.getAppPath(),"prompts"))
+        if(process.resourcesPath){
+            dirs.push(path.resolve(process.resourcesPath))
+        }
+        let metaDir=path.dirname(fileURLToPath(import.meta.url))
+        dirs.push(path.resolve(metaDir,"..","src","prompts"))
+        dirs.push(path.resolve(metaDir,"..","dist","prompts"))
+        dirs.push(path.resolve(metaDir,"..","prompts"))
+        dirs.push(path.resolve(metaDir,"..","..","src","prompts"))
+        dirs.push(path.resolve(metaDir,"..","..","dist","prompts"))
+    }
+    catch{}
+    return dirs
+}
+function isPathSafeForRead(filePath:string):boolean{
+    if(!filePath||typeof filePath!=="string"||filePath.includes("\x00"))return false
+    try{
+        let resolved=path.resolve(filePath)
+        for(let dir of getSafeReadDirs()){
+            if(isPathWithin(dir,resolved))return true
+        }
+        return false
+    }
+    catch{
+        return false
+    }
+}
+function isPathSafeForWrite(filePath:string):boolean{
+    if(!filePath||typeof filePath!=="string"||filePath.includes("\x00"))return false
+    try{
+        let resolved=path.resolve(filePath)
+        let userDocs=path.resolve(app.getPath("documents"))
+        let userDownloads=path.resolve(app.getPath("downloads"))
+        let userDesktop=path.resolve(app.getPath("desktop"))
+        let userHome=path.resolve(app.getPath("home"))
+        return isPathWithin(userDocs,resolved)
+            ||isPathWithin(userDownloads,resolved)
+            ||isPathWithin(userDesktop,resolved)
+            ||isPathWithin(userHome,resolved)
+    }
+    catch{
+        return false
+    }
+}
+function isPathSafeForParse(filePath:string):boolean{
+    if(!filePath||typeof filePath!=="string"||filePath.includes("\x00")||filePath.includes(".."))return false
+    try{
+        let resolved=path.resolve(filePath)
+        let userHome=path.resolve(app.getPath("home"))
+        if(!isPathWithin(userHome,resolved))return false
+        if(!fs.existsSync(resolved))return false
+        let stats=fs.statSync(resolved)
+        return stats.isFile()
+    }
+    catch{
+        return false
+    }
+}
 try{
     if(!fs.existsSync(userDataPath)){
         fs.mkdirSync(userDataPath,{recursive:true})
@@ -173,6 +247,12 @@ app.whenReady().then(()=>{
 app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
 })
+app.on("before-quit",async()=>{
+    if(fileParser){
+        try{await fileParser.cleanup()}catch{}
+        fileParser=null
+    }
+})
 app.on("activate",()=>{
     if(!mainWindow){
         createMainWindow()
@@ -218,6 +298,9 @@ ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFile
 })
 ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
     try{
+        if(!filePath||typeof filePath!=="string"){
+            return{success:false,error:"Invalid file path"}
+        }
         let resolvedPath=filePath;
         if(filePath.includes("prompts/")){
             let possiblePaths=[
@@ -248,24 +331,42 @@ ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):
             }
         }
         
+        if(!isPathSafeForRead(resolvedPath)){
+            return{success:false,error:"File path is outside allowed directories"}
+        }
         let content=await fsp.readFile(resolvedPath,"utf-8")
         return{success:true,content}
     }
     catch(error){
-        return{success:false,error:(error as Error).message}
+        return{success:false,error:"Failed to read file"}
     }
 })
 ipcMain.handle("file:save",async(_:Electron.IpcMainInvokeEvent,filePath:string,content:string):Promise<{success:boolean;error?:string}>=>{
     try{
+        if(!filePath||typeof filePath!=="string"||!content||typeof content!=="string"){
+            return{success:false,error:"Invalid file path or content"}
+        }
+        if(content.length>100*1024*1024){
+            return{success:false,error:"Content exceeds maximum size of 100MB"}
+        }
+        if(!isPathSafeForWrite(filePath)){
+            return{success:false,error:"File path is outside allowed write directories"}
+        }
         await fsp.writeFile(filePath,content,"utf-8")
         return{success:true}
     }
     catch(error){
-        return{success:false,error:(error as Error).message}
+        return{success:false,error:"Failed to save file"}
     }
 })
 ipcMain.handle("file:parse",async(_:Electron.IpcMainInvokeEvent,filePath:string,fileType:string):Promise<{success:boolean;content?:string;error?:string}>=>{
     try{
+        if(!filePath||typeof filePath!=="string"||!fileType||typeof fileType!=="string"){
+            return{success:false,error:"Invalid file path or type"}
+        }
+        if(!isPathSafeForParse(filePath)){
+            return{success:false,error:"Invalid or unsafe file path"}
+        }
         if(!fileParser){
             fileParser=new FileParserLazy()
         }
@@ -273,11 +374,25 @@ ipcMain.handle("file:parse",async(_:Electron.IpcMainInvokeEvent,filePath:string,
         return{success:true,content:text}
     }
     catch(error){
-        return{success:false,error:(error as Error).message}
+        return{success:false,error:"Failed to parse file"}
     }
 })
 ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileObj[]):Promise<{success:boolean;results?:unknown[];error?:string}>=>{
     try{
+        if(!files||!Array.isArray(files)||files.length===0){
+            return{success:false,error:"Invalid files array"}
+        }
+        if(files.length>50){
+            return{success:false,error:"Cannot process more than 50 files at once"}
+        }
+        for(let f of files){
+            if(!f||!f.path||typeof f.path!=="string"){
+                return{success:false,error:"Invalid file entry in batch"}
+            }
+            if(!isPathSafeForParse(f.path)){
+                return{success:false,error:`Invalid or unsafe file path: ${path.basename(f.path)}`}
+            }
+        }
         if(!fileParser){
             fileParser=new FileParserLazy()
         }
@@ -285,12 +400,16 @@ ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileO
         return{success:true,results}
     }
     catch(error){
-        return{success:false,error:(error as Error).message}
+        return{success:false,error:"Failed to parse files"}
     }
 })
 ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;models:never[];error:string}>=>{
     try{
         let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
+        let models=(tagsResponse.data.models||[]).map((m:any)=>({
+            ...m,
+            name:typeof m.name==="string"?m.name.replace(/[\x00-\x1F]/g,""):String(m.name||"").replace(/[\x00-\x1F]/g,"")
+        }))
         let version="unknown"
         try{
             let versionResponse=await axios.get("http://localhost:11434/api/version",{timeout:3000})
@@ -303,16 +422,23 @@ ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{runn
         }
         return{
             running:true,
-            models:tagsResponse.data.models||[],
+            models,
             version
         }
     }
     catch(error){
-        return{running:false,models:[],error:(error as Error).message}
+        console.error("Ollama check failed:",(error as Error).message)
+        return{running:false,models:[],error:"Failed to connect to Ollama"}
     }
 })
 ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
     let{model,prompt,options={}}=payload
+    if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
+        return{success:false,error:"Invalid model name or prompt"}
+    }
+    if(prompt.length>500000){
+        return{success:false,error:"Prompt is too large"}
+    }
     try{
         await axios.get("http://localhost:11434/api/show",{
             params:{name:model},
@@ -321,7 +447,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
     }
     catch{}
     let promptLength=prompt.length
-    let timeout=300000
+    let timeout=Math.min(300000,600000)
     if(promptLength>10000)timeout=600000
     else if(promptLength>5000)timeout=450000
     let maxRetries=2
@@ -331,12 +457,12 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
             let response=await axios.post(
                 "http://localhost:11434/api/generate",
                 {
-                    model,
+                    model:model.replace(/[\x00-\x1F]/g,""),
                     prompt,
                     stream:false,
                     options:{
-                        temperature:options.temperature ?? 0.7,
-                        top_p:options.top_p ?? 0.9,
+                        temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                        top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
                         ...options
                     }
                 },
@@ -348,7 +474,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
                     }
                 }
             )
-            if(!response.data?.response){
+            if(!response.data||typeof response.data.response!=="string"){
                 return{success:false,error:"Invalid response from Ollama"}
             }
             return{success:true,response:response.data.response}
@@ -365,7 +491,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
             }
         }
     }
-    return{success:false,error:`Failed after ${maxRetries+1}attempts:${lastError?.message||"Unknown error"}`}
+    return{success:false,error:"Failed to generate response from Ollama"}
 })
 ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
 ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
