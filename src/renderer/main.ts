@@ -310,8 +310,9 @@ class TrainGeneratorApp{
         }
         models.forEach((model,index)=>{
             let option=document.createElement("option")
-            option.value=model.name
-            option.textContent=model.name
+            let safeName=String(model.name||"").replace(/[\u0000-\u001F<>"'&]/g,"")
+            option.value=safeName
+            option.textContent=safeName
             this.modelSelect.appendChild(option)
             if(index==0){
                 option.selected=true
@@ -358,7 +359,7 @@ class TrainGeneratorApp{
             let totalChunks=0
             let processedChunks=0
             for(let file of this.processingQueue){
-                let chunkSize=parseInt(this.chunkSize.value)||2000
+                let chunkSize=Math.min(10000,Math.max(500,parseInt(this.chunkSize.value)||2000))
                 let estimatedChunks=Math.max(1,Math.ceil((file.size||10000)/chunkSize))
                 totalChunks+=estimatedChunks
             }
@@ -378,7 +379,7 @@ class TrainGeneratorApp{
                         `Processing ${file.name}(chunk ${chunksProcessed}/${totalChunksInFile})`
                     )
                 })
-                let chunkSize=parseInt(this.chunkSize.value)||2000
+                let chunkSize=Math.min(10000,Math.max(500,parseInt(this.chunkSize.value)||2000))
                 let estimatedFileChunks=Math.max(1,Math.ceil((file.size||10000)/chunkSize))
                 processedChunks+=estimatedFileChunks
                 if(result.success){
@@ -457,7 +458,7 @@ class TrainGeneratorApp{
             if(!textContent||textContent.trim().length==0){
                 throw new Error("No text content extracted from file")
             }
-            let chunkSize=parseInt(this.chunkSize.value)||2000
+            let chunkSize=Math.min(10000,Math.max(500,parseInt(this.chunkSize.value)||2000))
             let chunks=this.chunkText(textContent,chunkSize)
             if(chunks.length==0){
                 throw new Error("No text chunks created from file content")
