@@ -476,6 +476,10 @@ class TrainGeneratorApp{
             if(!textContent||textContent.trim().length==0){
                 throw new Error("No text content extracted from file")
             }
+            if(textContent.length>5*1024*1024){
+                this.addLog(`Truncating large text from ${fileObj.name}(exceeds 5MB limit)`,"warning")
+                textContent=textContent.substring(0,5*1024*1024)
+            }
             let chunkSize=Math.min(10000,Math.max(500,parseInt(this.chunkSize.value)||2000))
             let chunks=this.chunkText(textContent,chunkSize)
             if(chunks.length==0){
@@ -597,10 +601,8 @@ class TrainGeneratorApp{
     async readFileContent(file:File):Promise<string>{
         return new Promise((resolve,reject)=>{
             let reader=new FileReader()
-            reader.onload=(e)=>resolve(e.target!.result as string)
             reader.onerror=(e)=>reject(new Error("Failed to read file"))
             if(file.type=="application/pdf"){
-                reader.readAsArrayBuffer(file)
                 reader.onload=async(e)=>{
                     try{
                         let text=await this.extractTextFromPDFBuffer(e.target!.result as ArrayBuffer)
@@ -610,8 +612,10 @@ class TrainGeneratorApp{
                         reject(error)
                     }
                 }
+                reader.readAsArrayBuffer(file)
             }
             else{
+                reader.onload=(e)=>resolve(e.target!.result as string)
                 reader.readAsText(file)
             }
         })
@@ -957,7 +961,7 @@ Provide your analysis in a well-structured,comprehensive format.`
                 answer:currentAnswer.trim()
             })
         }
-        if(pairs.length==0){
+        if(pairs.length==0&&text.length<100000){
             let qaMatches=text.match(/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis)
             if(qaMatches){
                 for(let match of qaMatches){
@@ -1018,7 +1022,7 @@ Provide your analysis in a well-structured,comprehensive format.`
                 assistant:currentAssistant.trim()
             })
         }
-        if(turns.length==0){
+        if(turns.length==0&&text.length<100000){
             let convMatches=text.match(/Human:\s*(.*?)\s*Assistant:\s*(.*?)(?=Human:|$)/gis)
             if(convMatches){
                 for(let match of convMatches){
