@@ -1067,13 +1067,14 @@ Provide your analysis in a well-structured,comprehensive format.`
             else if(format=="csv"){
                 let headers=["input","output"]
                 let rows=this.outputData.map(item=>{
-                    let input=(item.input||"").replace(/"/g,'""')
-                    let output=(item.output||"").replace(/"/g,'""')
+                    let input=this.escapeCsvField(item.input||"")
+                    let output=this.escapeCsvField(item.output||"")
                     if(item.messages){
                         output=JSON.stringify(item.messages).replace(/"/g,'""')
+                        if(/^[=+\-@]/.test(output))output="'"+output
                     }
                     if(item.text){
-                        output=item.text.replace(/"/g,'""')
+                        output=this.escapeCsvField(item.text)
                     }
                     return `"${input}","${output}"`
                 })
@@ -1118,13 +1119,14 @@ Provide your analysis in a well-structured,comprehensive format.`
             else if(format=="csv"){
                 let headers=["input","output"]
                 let rows=this.outputData.map(item=>{
-                    let input=(item.input||"").replace(/"/g,'""')
-                    let output=(item.output||"").replace(/"/g,'""')
+                    let input=this.escapeCsvField(item.input||"")
+                    let output=this.escapeCsvField(item.output||"")
                     if(item.messages){
                         output=JSON.stringify(item.messages).replace(/"/g,'""')
+                        if(/^[=+\-@]/.test(output))output="'"+output
                     }
                     if(item.text){
-                        output=item.text.replace(/"/g,'""')
+                        output=this.escapeCsvField(item.text)
                     }
                     return `"${input}","${output}"`
                 })
@@ -1185,6 +1187,11 @@ Provide your analysis in a well-structured,comprehensive format.`
         let div=document.createElement("div")
         div.textContent=String(text)
         return div.innerHTML
+    }
+    escapeCsvField(value:string):string{
+        let escaped=value.replace(/"/g,'""')
+        if(/^[=+\-@]/.test(escaped))escaped="'"+escaped
+        return escaped
     }
     loadSettings():void{
         try{
