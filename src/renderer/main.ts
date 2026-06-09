@@ -156,6 +156,16 @@ class TrainGeneratorApp{
         ;(e.target as HTMLInputElement).value=""
     }
     async addFiles(files:File[]):Promise<void>{
+        let maxFiles=100
+        if(this.selectedFiles.length>=maxFiles){
+            this.addLog(`Maximum of ${maxFiles}files already selected`,"warning")
+            return
+        }
+        let remainingSlots=maxFiles-this.selectedFiles.length
+        if(files.length>remainingSlots){
+            this.addLog(`Only ${remainingSlots}more file(s)can be added(max ${maxFiles})`,"warning")
+            files=files.slice(0,remainingSlots)
+        }
         let validFiles=files.filter(file=>{
             let ext=file.name.split(".").pop()!.toLowerCase()
             return ["pdf","docx","doc","rtf","txt","md","html"].includes(ext)
