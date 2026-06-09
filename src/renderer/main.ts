@@ -382,6 +382,14 @@ class TrainGeneratorApp{
                 let estimatedFileChunks=Math.max(1,Math.ceil((file.size||10000)/chunkSize))
                 processedChunks+=estimatedFileChunks
                 if(result.success){
+                    if(this.outputData.length+result.data!.length>50000){
+                        let remaining=Math.max(0,50000-this.outputData.length)
+                        if(remaining>0)this.outputData.push(...result.data!.slice(0,remaining))
+                        totalItemsGenerated+=Math.min(result.data!.length,remaining)
+                        successfulFiles++
+                        this.addLog(`✓ Processed ${file.name}(truncated to ${this.outputData.length}total items)`,"warning")
+                        break
+                    }
                     this.outputData.push(...result.data!)
                     totalItemsGenerated+=result.data!.length
                     successfulFiles++
@@ -1147,18 +1155,25 @@ Provide your analysis in a well-structured,comprehensive format.`
         return icons[type]||"info-circle"
     }
     escapeHtml(text:string):string{
+        if(text==null)return""
         let div=document.createElement("div")
-        div.textContent=text
+        div.textContent=String(text)
         return div.innerHTML
     }
     loadSettings():void{
         try{
             let settings=JSON.parse(localStorage.getItem("train-generator-settings")||"{}") as AppSettings
-            if(settings.model)this.modelSelect.value=settings.model
-            if(settings.processingType)this.processingType.value=settings.processingType
-            if(settings.outputFormat)this.outputFormat.value=settings.outputFormat
-            if(settings.language)this.languageSelect.value=settings.language
-            if(settings.chunkSize)this.chunkSize.value=settings.chunkSize
+            let validProcessingTypes=["instruction","conversation","chunking","custom"]
+            let validOutputFormats=["jsonl","chatml","text","csv"]
+            let validLanguages=["en","zh-Hans","zh-Hant","es","fr","de","ja","ko"]
+            if(settings.model&&typeof settings.model==="string"&&settings.model.length>0)this.modelSelect.value=settings.model
+            if(settings.processingType&&validProcessingTypes.includes(settings.processingType))this.processingType.value=settings.processingType
+            if(settings.outputFormat&&validOutputFormats.includes(settings.outputFormat))this.outputFormat.value=settings.outputFormat
+            if(settings.language&&validLanguages.includes(settings.language))this.languageSelect.value=settings.language
+            if(settings.chunkSize){
+                let n=parseInt(settings.chunkSize)
+                if(!isNaN(n)&&n>=500&&n<=10000)this.chunkSize.value=String(n)
+            }
             this.selectedLanguage=this.languageSelect.value||"en"
             this.addLog("Settings loaded","info")
         }
