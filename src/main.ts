@@ -271,9 +271,15 @@ ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<Fi
         ]
     })
     if(result.canceled)return[]
+    let maxSize=100*1024*1024
     let files=await Promise.all(result.filePaths.map(async filePath=>{
         try{
+            if(filePath.includes("\x00")||filePath.includes(".."))return null
+            let resolvedPath=path.resolve(filePath)
+            let userHome=path.resolve(app.getPath("home"))
+            if(!isPathWithin(userHome,resolvedPath))return null
             let stats=await fsp.stat(filePath)
+            if(!stats.isFile()||stats.size>maxSize)return null
             return{
                 path:filePath,
                 name:path.basename(filePath),
@@ -298,7 +304,9 @@ ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFile
             {name:"All Files",extensions:["*"]}
         ]
     })
-    return result.canceled?null:result.filePath
+    if(result.canceled||!result.filePath)return null
+    if(result.filePath.includes("\x00")||result.filePath.includes(".."))return null
+    return result.filePath
 })
 ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
     try{
@@ -472,6 +480,8 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
                 },
                 {
                     timeout,
+                    maxContentLength:50*1024*1024,
+                    maxBodyLength:50*1024*1024,
                     headers:{
                         "Content-Type":"application/json",
                         "Accept":"application/json"
