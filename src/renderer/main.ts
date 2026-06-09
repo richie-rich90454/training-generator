@@ -199,15 +199,16 @@ class TrainGeneratorApp{
     addFileToList(fileObj:SelectedFile):void{
         let fileItem=document.createElement("div")
         fileItem.className="file-item"
+        let escapedName=this.escapeHtml(fileObj.name)
         fileItem.innerHTML=`
             <div class="file-info">
                 <i class="fas fa-file-${this.getFileIcon(fileObj.type)}file-icon"></i>
                 <div>
-                    <div class="file-name">${fileObj.name}</div>
+                    <div class="file-name">${escapedName}</div>
                     <div class="file-size">${this.formatFileSize(fileObj.size)}</div>
                 </div>
             </div>
-            <button class="file-remove" data-name="${fileObj.name}">
+            <button class="file-remove" data-name="${escapedName}">
                 <i class="fas fa-times"></i>
             </button>
         `
