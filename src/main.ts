@@ -253,7 +253,7 @@ app.on("before-quit",async()=>{
         splashProcess=null
     }
     if(fileParser){
-        try{await fileParser.cleanup()}catch{}
+        try{await fileParser.dispose()}catch{}
         fileParser=null
     }
 })
