@@ -168,6 +168,7 @@ class TrainGeneratorApp{
         }
         let validFiles=files.filter(file=>{
             let ext=file.name.split(".").pop()!.toLowerCase()
+            if(!ext||ext===file.name.toLowerCase())return false
             return ["pdf","docx","doc","rtf","txt","md","html"].includes(ext)
         })
         if(validFiles.length==0){
@@ -480,12 +481,22 @@ class TrainGeneratorApp{
             if(chunks.length==0){
                 throw new Error("No text chunks created from file content")
             }
+            let maxChunks=200
+            if(chunks.length>maxChunks){
+                this.addLog(`File has ${chunks.length}chunks, limiting to ${maxChunks}to prevent excessive API calls`,"warning")
+                chunks=chunks.slice(0,maxChunks)
+            }
             let processedChunks:TrainingItem[]=[]
             let model=this.modelSelect.value
             let processingType=this.processingType.value
             for(let i=0;i<chunks.length;i++){
                 let chunk=chunks[i]
+                if(!chunk||chunk.trim().length==0)continue
                 let prompt=await this.generatePrompt(chunk,processingType)
+                if(!prompt||prompt.trim().length==0){
+                    this.addLog(`Skipping chunk ${i+1}:generated prompt is empty`,"warning")
+                    continue
+                }
                 try{
                     let response=await window.electronAPI.generateWithOllama(model,prompt,{
                         temperature:0.7,
