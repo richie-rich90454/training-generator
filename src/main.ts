@@ -248,6 +248,10 @@ app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
 })
 app.on("before-quit",async()=>{
+    if(splashProcess){
+        try{splashProcess.kill()}catch{}
+        splashProcess=null
+    }
     if(fileParser){
         try{await fileParser.cleanup()}catch{}
         fileParser=null
@@ -447,7 +451,7 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
     }
     catch{}
     let promptLength=prompt.length
-    let timeout=Math.min(300000,600000)
+    let timeout=300000
     if(promptLength>10000)timeout=600000
     else if(promptLength>5000)timeout=450000
     let maxRetries=2
