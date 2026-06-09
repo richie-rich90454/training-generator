@@ -69,7 +69,6 @@ class TrainGeneratorApp{
                 }
             }
             document.documentElement.setAttribute("data-platform",platform)
-            console.log(`Platform detected: ${platform}`)
         }
         catch(error){
             console.error("Failed to detect platform:",error)
@@ -87,7 +86,7 @@ class TrainGeneratorApp{
         this.initSettings()
         await this.checkOllamaStatus()
         this.startOllamaMonitor()
-        console.log("Training Generator initialized")
+        // App is now ready
     }
     cacheElements():void{
         this.dropZone=document.getElementById("drop-zone") as HTMLElement
@@ -625,51 +624,36 @@ class TrainGeneratorApp{
             `./prompts/${fileName}`,
             `../prompts/${fileName}`,
         ]
-        console.log(`[PROMPT DEBUG] Loading prompt file: ${fileName}for language: ${language},type: ${processingType}`)
-        console.log(`[PROMPT DEBUG] Trying paths: ${possiblePaths.join(",")}`)
-        console.log(`[PROMPT DEBUG] Electron API available: ${!!(window.electronAPI&&window.electronAPI.readFile)}`)
         let loadedPrompt:string|null=null
         let loadedPath:string|null=null
         let loadMethod:string|null=null
         if(window.electronAPI&&window.electronAPI.readFile){
             for(let filePath of possiblePaths){
                 try{
-                    console.log(`[PROMPT DEBUG] Trying Electron API with path: ${filePath}`)
                     let result=await window.electronAPI.readFile(filePath)
                     if(!result.success){
-                        console.log(`[PROMPT DEBUG] Failed to load via Electron API ${filePath}:`,result.error)
                         continue
                     }
-                    console.log(`[PROMPT DEBUG] Successfully loaded prompt file via Electron API: ${filePath}`)
                     loadedPrompt=result.content!
                     loadedPath=filePath
                     loadMethod="electron"
                     break
                 }
-                catch(error){
-                    console.log(`[PROMPT DEBUG] Failed to load via Electron API ${filePath}:`,(error as Error).message)
-                }
+                catch{}
             }
         }
         if(!loadedPrompt){
             for(let filePath of possiblePaths){
                 try{
-                    console.log(`[PROMPT DEBUG] Trying fetch with path: ${filePath}`)
                     let response=await fetch(filePath)
                     if(response.ok){
                         loadedPrompt=await response.text()
-                        console.log(`[PROMPT DEBUG] Successfully loaded prompt file via fetch: ${filePath}`)
                         loadedPath=filePath
                         loadMethod="fetch"
                         break
                     }
-                    else{
-                        console.log(`[PROMPT DEBUG] Fetch failed with status: ${response.status}${response.statusText}`)
-                    }
                 }
-                catch(error){
-                    console.log(`[PROMPT DEBUG] Failed to load via fetch ${filePath}:`,(error as Error).message)
-                }
+                catch{}
             }
         }
         if(loadedPrompt){
@@ -677,57 +661,46 @@ class TrainGeneratorApp{
             if(previewLines.length>100){
                 previewLines=previewLines.substring(0,100)+"..."
             }
-            // Use the existing escapeHtml method to properly escape HTML entities
             let escapedPreviewLines=this.escapeHtml(previewLines)
             let simpleLogMessage=`Using ${language} prompt: ${fileName}`
-            console.log(`[PROMPT DEBUG] Simple log message: ${simpleLogMessage}`)
             try{
                 this.addLog(simpleLogMessage,"info")
-                console.log(`[PROMPT DEBUG] Simple addLog called successfully`)
                 let fullLogMessage=`Prompt loaded from ${loadedPath}(Preview:"${escapedPreviewLines}")`
                 this.addLog(fullLogMessage,"info")
-                console.log(`[PROMPT DEBUG] Full addLog called successfully`)
             }
             catch(logError){
-                console.error(`[PROMPT DEBUG] Failed to add log:`,logError)
                 this.addLog(`Loaded ${language}prompt`,"info")
             }
             return loadedPrompt.replace("{{text}}",text)
         }
         if(language!=="en"){
-            console.warn(`[PROMPT DEBUG] Failed to load ${language}prompt ${fileName}. Falling back to English.`)
+            console.warn(`Failed to load ${language}prompt ${fileName}. Falling back to English.`)
             let fallbackFileName=`en_${fileType}.txt`
             for(let filePath of possiblePaths.map(p=>p.replace(fileName,fallbackFileName))){
                 try{
                     if(window.electronAPI&&window.electronAPI.readFile){
                         let result=await window.electronAPI.readFile(filePath)
                         if(!result.success){
-                            console.log(`[PROMPT DEBUG] Failed to load English fallback via Electron API ${filePath}:`,result.error)
                             continue
                         }
-                        console.log(`[PROMPT DEBUG] Falling back to English prompt via Electron API: ${filePath}`)
                         this.addLog(`Falling back to English prompt: ${fallbackFileName}`,"warning")
                         return result.content!.replace("{{text}}",text)
                     }
                 }
-                catch(error){
-                    console.log(`[PROMPT DEBUG] Failed to load English fallback via Electron API ${filePath}:`,(error as Error).message)
+                catch{}
                 }
                 try{
                     let response=await fetch(filePath)
                     if(response.ok){
                         let promptTemplate=await response.text()
-                        console.log(`[PROMPT DEBUG] Falling back to English prompt via fetch: ${filePath}`)
                         this.addLog(`Falling back to English prompt: ${fallbackFileName}`,"warning")
                         return promptTemplate.replace("{{text}}",text)
                     }
                 }
-                catch(error){
-                    console.log(`[PROMPT DEBUG] Failed to load English fallback via fetch ${filePath}:`,(error as Error).message)
-                }
+                catch{}
             }
         }
-        console.warn(`[PROMPT DEBUG] Failed to load any prompt file. Using hardcoded fallback for ${language}.`)
+        console.warn(`Failed to load any prompt file for ${language}. Using hardcoded fallback.`)
         this.addLog(`Using hardcoded fallback prompt for ${language}`,"warning")
         return this.getFallbackPrompt(text,processingType,language)
     }
