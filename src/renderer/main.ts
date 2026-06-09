@@ -434,7 +434,7 @@ class TrainGeneratorApp{
             this.lastProcessedEl.textContent=new Date().toLocaleTimeString()
         }
         catch(error){
-            this.addLog(`Processing failed: ${(error as Error).message}`,"error")
+            this.addLog("Processing failed due to an unexpected error","error")
             this.setProgress(0,"Processing failed")
             this.addLog("Please check your Ollama connection and try again.","warning")
         }
@@ -524,10 +524,10 @@ class TrainGeneratorApp{
             }
         }
         catch(error){
-            this.addLog(`Error processing file ${fileObj.name}: ${(error as Error).message}`,"error")
+            this.addLog(`Error processing file ${fileObj.name}`,"error")
             return{
                 success:false,
-                error:(error as Error).message
+                error:"Failed to process file"
             }
         }
     }
