@@ -1147,6 +1147,7 @@ Provide your analysis in a well-structured,comprehensive format.`
         this.addLog("Cleared all files and output","info")
     }
     setProgress(percent:number,text:string):void{
+        if(isNaN(percent)||!isFinite(percent))percent=0
         let clampedPercent=Math.max(0,Math.min(100,percent))
         this.progressFill.style.width=`${clampedPercent}%`
         this.progressPercent.textContent=`${Math.round(clampedPercent)}%`
@@ -1387,7 +1388,10 @@ Provide your analysis in a well-structured,comprehensive format.`
             })
             if(settings["max-file-size"]!=undefined){
                 let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
-                if(maxFileSize)maxFileSize.value=String(settings["max-file-size"])
+                if(maxFileSize){
+                    let n=parseInt(String(settings["max-file-size"]))
+                    if(!isNaN(n)&&n>=10&&n<=1000)maxFileSize.value=String(n)
+                }
             }
             this.addLog("Application settings loaded","info")
         }
