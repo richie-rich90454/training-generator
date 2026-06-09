@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   package-mac:
     runs-on: macos-latest
@@ -29,8 +32,6 @@ jobs:
             release/*.zip
             release/*.blockmap
             release/latest-mac.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   package-linux:
     runs-on: ubuntu-latest
@@ -58,8 +59,6 @@ jobs:
             release/*.deb
             release/*.blockmap
             release/latest-linux.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   package-windows:
     runs-on: windows-latest
@@ -83,5 +82,3 @@ jobs:
           files: |
             release/*.exe
             release/*.blockmap
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
