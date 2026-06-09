@@ -721,7 +721,6 @@ class TrainGeneratorApp{
                     }
                 }
                 catch{}
-                }
                 try{
                     let response=await fetch(filePath)
                     if(response.ok){
