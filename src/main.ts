@@ -1,4 +1,4 @@
-import{app,BrowserWindow,ipcMain,dialog}from "electron"
+﻿import{app,BrowserWindow,ipcMain,dialog}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
@@ -507,8 +507,195 @@ ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{mo
     }
     return{success:false,error:"Failed to generate response from Ollama"}
 })
+export async function handleOllamaGenerateStream(payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>{
+    let{model,prompt,options={}}=payload
+    if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
+        return{success:false,error:"Invalid model name or prompt"}
+    }
+    if(prompt.length>500000){
+        return{success:false,error:"Prompt is too large"}
+    }
+    let promptLength=prompt.length
+    let timeout=300000
+    if(promptLength>10000)timeout=600000
+    else if(promptLength>5000)timeout=450000
+    try{
+        let response=await axios.post(
+            "http://localhost:11434/api/generate",
+            {
+                model:model.replace(/[\x00-\x1F]/g,""),
+                prompt,
+                stream:true,
+                options:{
+                    temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                    ...options
+                }
+            },
+            {
+                timeout,
+                responseType:"stream",
+                headers:{
+                    "Content-Type":"application/json",
+                    "Accept":"application/json"
+                }
+            }
+        )
+        let fullResponse=""
+        let stream=response.data
+        return await new Promise((resolve,reject)=>{
+            stream.on("data",(chunk:Buffer)=>{
+                let lines=chunk.toString().split("\n").filter((l:string)=>l.trim())
+                for(let line of lines){
+                    try{
+                        let parsed=JSON.parse(line)
+                        if(parsed.response){
+                            fullResponse+=parsed.response
+                        }
+                        if(parsed.done){
+                            resolve({success:true,response:fullResponse})
+                        }
+                    }
+                    catch{}
+                }
+            })
+            stream.on("error",(error:Error)=>{
+                reject(error)
+            })
+            stream.on("end",()=>{
+                if(!fullResponse){
+                    reject(new Error("Stream ended without response"))
+                }
+                else{
+                    resolve({success:true,response:fullResponse})
+                }
+            })
+        })
+    }
+    catch(error){
+        return{success:false,error:"Failed to generate response from Ollama"}
+    }
+}
+
+ipcMain.handle("ollama:generateStream",async(_event,payload)=>handleOllamaGenerateStream(payload))
+
+ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payload:{
+    apiKey:string
+    baseUrl:string
+    model:string
+    prompt:string
+    options?:{temperature?:number;top_p?:number;max_tokens?:number}
+}):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+    let{apiKey,baseUrl,model,prompt,options={}}=payload
+    if(!apiKey||!model||!prompt){
+        return{success:false,error:"Missing required parameters"}
+    }
+    try{
+        let cleanBaseUrl=baseUrl.replace(/\/+$/,"")
+        let response=await axios.post(
+            `${cleanBaseUrl}/v1/chat/completions`,
+            {
+                model,
+                messages:[
+                    {role:"system",content:"You are a helpful assistant for generating training data."},
+                    {role:"user",content:prompt}
+                ],
+                temperature:options.temperature??0.7,
+                top_p:options.top_p??0.9,
+                max_tokens:options.max_tokens??4096
+            },
+            {
+                headers:{
+                    "Content-Type":"application/json",
+                    "Authorization":`Bearer ${apiKey}`
+                },
+                timeout:300000
+            }
+        )
+        let rc=response.data.choices?.[0]?.message?.content||""
+        return{
+            success:true,
+            response:rc,
+            usage:response.data.usage
+        }
+    }
+    catch(error:any){
+        if(error.response){
+            return{success:false,error:`API error ${error.response.status}: ${JSON.stringify(error.response.data)}`}
+        }
+        return{success:false,error:error.message||"Failed to call OpenAI API"}
+    }
+})
 ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
 ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
+ipcMain.handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
+    try{
+        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+        if(fs.existsSync(cachePath)){
+            let data=JSON.parse(fs.readFileSync(cachePath,"utf-8"))
+            return{success:true,data}
+        }
+        return{success:true,data:{}}
+    }
+    catch{
+        return{success:true,data:{}}
+    }
+})
+ipcMain.handle("cache:save",async(_event:Electron.IpcMainInvokeEvent,data:Record<string,any>):Promise<{success:boolean}>=>{
+    try{
+        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+        fs.writeFileSync(cachePath,JSON.stringify(data))
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
+ipcMain.handle("cache:clear",async():Promise<{success:boolean}>=>{
+    try{
+        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+        if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
+ipcMain.handle("progress:save",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+    try{
+        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+        fs.writeFileSync(progressPath,JSON.stringify(data))
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
+
+ipcMain.handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
+    try{
+        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+        if(fs.existsSync(progressPath)){
+            let data=JSON.parse(fs.readFileSync(progressPath,"utf-8"))
+            return{success:true,data}
+        }
+        return{success:true,data:null}
+    }
+    catch{
+        return{success:true,data:null}
+    }
+})
+
+ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
+    try{
+        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+        if(fs.existsSync(progressPath))fs.unlinkSync(progressPath)
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
 process.on("uncaughtException",(error:Error)=>{
     console.error("Uncaught Exception:",error)
 })
