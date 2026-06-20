@@ -114,6 +114,10 @@ export interface AppSettings{
     outputFormat?:string
     language?:string
     chunkSize?:string
+    concurrency?:string
+    provider?:string
+    apiKey?:string
+    baseUrl?:string
 }
 
 export interface FullAppSettings{

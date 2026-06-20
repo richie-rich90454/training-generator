@@ -20,3 +20,7 @@ declare module "node-fetch"{
     let fetch:(url:string,init?:RequestInit)=>Promise<Response>;
     export default fetch;
 }
+declare module "*.css"{
+    let content:string;
+    export default content;
+}
