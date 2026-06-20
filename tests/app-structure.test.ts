@@ -54,7 +54,7 @@ describe("App Structure",()=>{
         "package.json",
         "src/main.ts",
         "src/preload.ts",
-        "src/renderer/main.ts",
+        "src/renderer/app.ts",
         "src/core/fileParser.ts",
         "src/styles/main.css",
         "index.html",

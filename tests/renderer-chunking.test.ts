@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,test,expect,beforeEach}from "vitest"
+import{describe,test,it,expect,beforeEach}from "vitest"
 
 // We need to test chunkText which is a method of TrainGeneratorApp
 // Since the class depends on DOM, we'll test the logic by extracting it
@@ -120,5 +120,36 @@ describe("chunkText",()=>{
         for(let chunk of chunks){
             expect(chunk.length).toBeGreaterThan(0)
         }
+    })
+})
+
+describe("chunkText edge cases",()=>{
+    it("should handle empty text",()=>{
+        let result=chunkText("",2000,0)
+        expect(result).toEqual([])
+    })
+
+    it("should handle single character text",()=>{
+        let result=chunkText("a",2000,0)
+        expect(result.length).toBe(1)
+        expect(result[0]).toBe("a")
+    })
+
+    it("should handle text exactly at chunk size",()=>{
+        let text="a".repeat(2000)
+        let result=chunkText(text,2000,0)
+        expect(result.length).toBe(1)
+    })
+
+    it("should handle text slightly larger than chunk size",()=>{
+        let text="a".repeat(2001)
+        let result=chunkText(text,2000,0)
+        expect(result.length).toBe(2)
+    })
+
+    it("should handle very large text",()=>{
+        let text="a".repeat(100000)
+        let result=chunkText(text,2000,0)
+        expect(result.length).toBe(50)
     })
 })

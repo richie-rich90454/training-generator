@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,test,expect}from "vitest"
+import{describe,test,it,expect}from "vitest"
 
 function getFallbackPrompt(language:string,type:string):string{
     let prompts:Record<string,Record<string,string>>={
@@ -153,5 +153,35 @@ describe("Prompt template validation",()=>{
 
     test("accepts template with multiple placeholders",()=>{
         expect(validatePromptTemplate("{{text}} and {{text}}")).toBe(true)
+    })
+})
+
+// Real getFallbackPrompt from app.ts: getFallbackPrompt(text, processingType, language)
+function getFallbackPromptWithText(text:string,processingType:string,language:string="en"):string{
+    let fallbackPrompts:Record<string,string>={
+        instruction:`You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.\nTEXT TO ANALYZE:\n${text}\nINSTRUCTIONS:\n1. Read the text thoroughly and identify ALL key concepts,facts,arguments,data points,and important information.\n2. For EACH significant piece of information,create a clear,specific question that someone might ask about it. Questions and answers should be in the same language as the source text.\n3. Provide detailed,accurate answers based EXCLUSIVELY on the text content.`,
+        conversation:`You are an AI training data generator. Your task is to create natural conversation turns from the provided text.\nTEXT TO CONVERT:\n${text}\nINSTRUCTIONS:\n1. Read the text and identify the main topics and ideas.\n2. Create a natural conversation between a user and an assistant discussing these topics.\n3. Format each turn as:\nUser: [question or comment]\nAssistant: [helpful response]`,
+        chunking:`You are an AI training data generator. Process the following text chunk:\n${text}\nINSTRUCTIONS:\n1. Extract key information from this chunk.\n2. Create question-answer pairs based on the content.`,
+        custom:`You are an AI training data generator. Process the following text:\n${text}\nINSTRUCTIONS:\n1. Generate training data in the requested format.\n2. Ensure output is accurate and comprehensive.`
+    }
+    return fallbackPrompts[processingType]||fallbackPrompts["instruction"]
+}
+
+describe("getFallbackPrompt",()=>{
+    it("should generate fallback prompt for instruction type",()=>{
+        let result=getFallbackPromptWithText("test text","instruction","en")
+        expect(result).toContain("test text")
+        expect(result).toContain("question")
+    })
+
+    it("should generate fallback prompt for conversation type",()=>{
+        let result=getFallbackPromptWithText("test text","conversation","en")
+        expect(result).toContain("test text")
+        expect(result).toContain("conversation")
+    })
+
+    it("should generate fallback prompt for Chinese language",()=>{
+        let result=getFallbackPromptWithText("测试文本","instruction","zh")
+        expect(result).toContain("测试文本")
     })
 })

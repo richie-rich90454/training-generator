@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,test,expect}from "vitest"
+import{describe,test,it,expect}from "vitest"
 
 // Extract parseQuestionAnswerPairs logic for testing
 function parseQuestionAnswerPairs(text:string):Array<{role:string;content:string}>{
@@ -153,5 +153,82 @@ describe("parseConversationTurns",()=>{
         let messages=parseConversationTurns(text)
         expect(messages[0].content).toContain("<div>")
         expect(messages[1].content).toContain("HTML element")
+    })
+})
+
+// OutputManager-style parse functions matching the real OutputManager return types
+function parseQAPairs(text:string):Array<{question:string;answer:string}>{
+    let pairs:Array<{question:string;answer:string}>=[]
+    let qaMatches=text.match(/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis)
+    if(qaMatches){
+        for(let match of qaMatches){
+            let qMatch=match.match(/Q:\s*(.*?)\s*A:\s*(.*)/is)
+            if(qMatch&&qMatch[1]&&qMatch[2]){
+                pairs.push({
+                    question:qMatch[1].trim(),
+                    answer:qMatch[2].trim()
+                })
+            }
+        }
+    }
+    return pairs
+}
+
+function parseConvTurns(text:string):Array<{user:string;assistant:string}>{
+    let turns:Array<{user:string;assistant:string}>=[]
+    let convMatches=text.match(/Human:\s*(.*?)\s*Assistant:\s*(.*?)(?=Human:|$)/gis)
+    if(convMatches){
+        for(let match of convMatches){
+            let hMatch=match.match(/Human:\s*(.*?)\s*Assistant:\s*(.*)/is)
+            if(hMatch&&hMatch[1]&&hMatch[2]){
+                turns.push({
+                    user:hMatch[1].trim(),
+                    assistant:hMatch[2].trim()
+                })
+            }
+        }
+    }
+    return turns
+}
+
+let outputManager={
+    parseQuestionAnswerPairs:parseQAPairs,
+    parseConversationTurns:parseConvTurns
+}
+
+describe("Q:/A: format parsing",()=>{
+    it("should parse Q: and A: format",()=>{
+        let result=outputManager.parseQuestionAnswerPairs("Q: What is this?\nA: This is a test")
+        expect(result.length).toBe(1)
+        expect(result[0].question).toBe("What is this?")
+        expect(result[0].answer).toBe("This is a test")
+    })
+
+    it("should parse multiple Q:/A: pairs",()=>{
+        let result=outputManager.parseQuestionAnswerPairs("Q: First question\nA: First answer\nQ: Second question\nA: Second answer")
+        expect(result.length).toBe(2)
+        expect(result[0].question).toBe("First question")
+        expect(result[0].answer).toBe("First answer")
+        expect(result[1].question).toBe("Second question")
+        expect(result[1].answer).toBe("Second answer")
+    })
+
+    it("should handle Q: and A: with colons",()=>{
+        let result=outputManager.parseQuestionAnswerPairs("Q: What is this?\nA: This is a test")
+        expect(result.length).toBe(1)
+    })
+})
+
+describe("Human:/Assistant: format parsing",()=>{
+    it("should parse Human: and Assistant: conversation format",()=>{
+        let result=outputManager.parseConversationTurns("Human: Hello\nAssistant: Hi there!")
+        expect(result.length).toBe(1)
+        expect(result[0].user).toBe("Hello")
+        expect(result[0].assistant).toBe("Hi there!")
+    })
+
+    it("should parse multiple turns",()=>{
+        let result=outputManager.parseConversationTurns("Human: Question 1\nAssistant: Answer 1\nHuman: Question 2\nAssistant: Answer 2")
+        expect(result.length).toBe(2)
     })
 })

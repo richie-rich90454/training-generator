@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,test,expect}from "vitest"
+import{describe,test,it,expect}from "vitest"
 
 function isValidFileSize(size:number,maxSizeMB:number=100):boolean{
     return size>=0&&size<=maxSizeMB*1024*1024
@@ -138,5 +138,54 @@ describe("Filename sanitization",()=>{
 
     test("handles quotes in filename",()=>{
         expect(sanitizeFilename('file"name.txt')).toBe("file_name.txt")
+    })
+})
+
+// FileManager mock with fileStatuses and setFileStatus
+class MockFileManager{
+    fileStatuses:Map<string,string>
+    app:any
+
+    constructor(app:any){
+        this.app=app
+        this.fileStatuses=new Map()
+    }
+
+    setFileStatus(fileName:string,status:string):void{
+        this.fileStatuses.set(fileName,status)
+    }
+
+    removeFile(fileName:string):void{
+        this.fileStatuses.delete(fileName)
+    }
+}
+
+describe("FileManager file status",()=>{
+    let mockApp:any={}
+
+    it("should set file status to processing",()=>{
+        let fileManager=new MockFileManager(mockApp)
+        fileManager.setFileStatus("test.pdf","processing")
+        expect(fileManager.fileStatuses.get("test.pdf")).toBe("processing")
+    })
+
+    it("should set file status to completed",()=>{
+        let fileManager=new MockFileManager(mockApp)
+        fileManager.setFileStatus("test.pdf","completed")
+        expect(fileManager.fileStatuses.get("test.pdf")).toBe("completed")
+    })
+
+    it("should set file status to failed",()=>{
+        let fileManager=new MockFileManager(mockApp)
+        fileManager.setFileStatus("test.pdf","failed")
+        expect(fileManager.fileStatuses.get("test.pdf")).toBe("failed")
+    })
+
+    it("should remove file status when file is removed",()=>{
+        let fileManager=new MockFileManager(mockApp)
+        fileManager.setFileStatus("test.pdf","waiting")
+        expect(fileManager.fileStatuses.has("test.pdf")).toBe(true)
+        fileManager.removeFile("test.pdf")
+        expect(fileManager.fileStatuses.has("test.pdf")).toBe(false)
     })
 })

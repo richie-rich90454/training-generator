@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,test,expect}from "vitest"
+import{describe,test,it,expect}from "vitest"
 
 interface TrainingItem{
     instruction?:string
@@ -183,5 +183,43 @@ describe("formatAsText",()=>{
 
     test("handles empty array",()=>{
         expect(formatAsText([])).toBe("")
+    })
+})
+
+// escapeCsvField from UIManager (uiManager.ts)
+function escapeCsvField(value:string):string{
+    let escaped=value.replace(/"/g,'""')
+    if(/^[=+\-@]/.test(escaped))escaped="'"+escaped
+    return escaped
+}
+
+let outputManager={
+    escapeCsvField:escapeCsvField
+}
+
+describe("CSV injection protection",()=>{
+    it("should escape CSV fields with formula injection",()=>{
+        let result=outputManager.escapeCsvField("=SUM(1,2)")
+        expect(result).toBe("'=SUM(1,2)")
+    })
+
+    it("should escape CSV fields starting with @",()=>{
+        let result=outputManager.escapeCsvField("@test")
+        expect(result).toBe("'@test")
+    })
+
+    it("should escape CSV fields starting with +",()=>{
+        let result=outputManager.escapeCsvField("+test")
+        expect(result).toBe("'+test")
+    })
+
+    it("should escape CSV fields starting with -",()=>{
+        let result=outputManager.escapeCsvField("-test")
+        expect(result).toBe("'-test")
+    })
+
+    it("should not escape normal CSV fields",()=>{
+        let result=outputManager.escapeCsvField("normal text")
+        expect(result).toBe("normal text")
     })
 })
