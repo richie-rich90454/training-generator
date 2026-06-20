@@ -1135,3 +1135,35 @@ html[data-platform="windows"] .app-container{
         font-size:.875rem;
     }
 }
+.file-item{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:var(--spacing-sm) var(--spacing-md);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    margin-bottom:var(--spacing-xs);
+    background:var(--surface-color);
+    transition:background var(--transition-fast);
+}
+.file-item:hover{
+    background:var(--surface-variant);
+}
+.file-status{
+    margin-left:auto;
+    margin-right:var(--spacing-sm);
+    font-size:14px;
+}
+.file-status .fa-check-circle{
+    color:#107C10;
+}
+.file-status .fa-times-circle{
+    color:#D13438;
+}
+.file-status .fa-spinner{
+    color:#0078D4;
+}
+.file-status .fa-clock{
+    color:#A19F9D;
+}

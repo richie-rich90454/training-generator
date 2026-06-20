@@ -3,9 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://cdnjs.cloudflare.com">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'">
         <title>Training Generator-AI Training Data Creator</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-9180iWa75iJnDf3Su3hO4vsAHAt66SgRgp+JmHyNMNw=" crossorigin="anonymous">
         <link rel="stylesheet" href="./src/styles/main.css">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     </head>
@@ -22,10 +21,10 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button id="settings-btn" class="btn-icon" title="Settings">
+                    <button id="settings-btn" class="btn-icon" title="Settings" aria-label="Open settings">
                         <i class="fas fa-cog"></i>
                     </button>
-                    <button id="help-btn" class="btn-icon" title="Help">
+                    <button id="help-btn" class="btn-icon" title="Help" aria-label="Show help">
                         <i class="fas fa-question-circle"></i>
                     </button>
                 </div>
@@ -38,11 +37,11 @@
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span>Upload Documents</span>
                             </div>
-                            <button id="clear-btn" class=" btn btn-secondary">
+                            <button id="clear-btn" class=" btn btn-secondary" aria-label="Clear all files">
                                 <i class="fas fa-trash"></i> Clear All
                             </button>
                         </div>
-                        <div id="drop-zone" class="file-upload-area">
+                        <div id="drop-zone" class="file-upload-area" role="button" aria-label="Drop files here or click to browse" tabindex="0">
                             <div class="upload-icon">
                                 <i class="fas fa-file-upload"></i>
                             </div>
@@ -51,13 +50,13 @@
                                 <p>Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
                             </div>
                             <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.html">
-                            <button id="browse-btn" class="btn btn-primary">
+                            <button id="browse-btn" class="btn btn-primary" title="Ctrl+O" aria-label="Browse for files (Ctrl+O)">
                                 <i class="fas fa-folder-open"></i> Browse Files
                             </button>
                         </div>
                         <div class="file-list-section">
                             <h3><i class="fas fa-file-alt"></i> Selected Files</h3>
-                            <div id="file-list" class="file-list">
+                            <div id="file-list" class="file-list" role="list" aria-label="Selected files">
                                 <p class="empty-state">No files selected</p>
                             </div>
                         </div>
@@ -69,8 +68,12 @@
                                 <span>Processing</span>
                             </div>
                             <div class="section-actions">
-                                <button id="process-btn" class="btn btn-primary" disabled>
+                                <button id="process-btn" class="btn btn-primary" disabled title="Ctrl+Enter" aria-label="Process files (Ctrl+Enter)">
                                     <i class="fas fa-play"></i> Process Files
+                                </button>
+                                <button id="demo-btn" class="btn btn-secondary" title="Run without Ollama using demo data" aria-label="Toggle demo mode">
+                                    <i class="fas fa-magic"></i>
+                                    Demo
                                 </button>
                             </div>
                         </div>
@@ -79,11 +82,11 @@
                                 <span id="progress-text">Ready to process</span>
                                 <span id="progress-percent">0%</span>
                             </div>
-                            <div class="progress-bar">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Processing progress">
                                 <div id="progress-fill" class="progress-fill"></div>
                             </div>
                         </div>
-                        <div id="processing-log" class="processing-log">
+                        <div id="processing-log" class="processing-log" role="log" aria-live="polite" aria-label="Processing log">
                             <div class="log-entry info">
                                 <i class="fas fa-info-circle"></i>
                                 <span>Welcome to Training Generator! Upload files to begin.</span>
@@ -97,15 +100,15 @@
                                 <span>Output Preview</span>
                             </div>
                             <div class="section-actions">
-                                <button id="export-btn" class="btn btn-primary" disabled>
+                                <button id="export-btn" class="btn btn-primary" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
                                     <i class="fas fa-download"></i> Export
                                 </button>
-                                <button id="copy-btn" class="btn btn-secondary" disabled>
+                                <button id="copy-btn" class="btn btn-secondary" disabled title="Ctrl+Shift+C" aria-label="Copy output to clipboard (Ctrl+Shift+C)">
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
                             </div>
                         </div>
-                        <div id="output-preview" class="output-preview">
+                        <div id="output-preview" class="output-preview" role="region" aria-label="Output preview">
                             <pre><code>// Output will appear here after processing
     // Example format (JSONL):
     {
@@ -117,7 +120,7 @@
                     </div>
                 </div>
                 <div class="right-column">
-                    <div class="config-panel">
+                    <div class="config-panel" role="form" aria-label="Processing configuration">
                         <h3><i class="fas fa-sliders-h"></i> Configuration</h3>
                         <div class="form-group">
                             <label for="model-select" class="form-label">
@@ -127,6 +130,32 @@
                             <select id="model-select" class="form-control">
                                 <option value="" disabled selected>Loading models from Ollama...</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="provider" class="form-label">
+                                <i class="fas fa-cloud"></i>
+                                <span>Provider</span>
+                            </label>
+                            <select id="provider" class="form-control">
+                                <option value="ollama">Ollama (Local)</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                                <option value="gemini">Google Gemini</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="api-key-group" style="display:none">
+                            <label for="api-key" class="form-label">
+                                <i class="fas fa-key"></i>
+                                <span>API Key</span>
+                            </label>
+                            <input type="password" id="api-key" class="form-control" placeholder="sk-..." autocomplete="off">
+                        </div>
+                        <div class="form-group" id="base-url-group" style="display:none">
+                            <label for="base-url" class="form-label">
+                                <i class="fas fa-link"></i>
+                                <span>Base URL</span>
+                            </label>
+                            <input type="text" id="base-url" class="form-control" placeholder="https://api.openai.com">
                         </div>
                         <div class="form-group">
                             <label for="processing-type" class="form-label">
@@ -176,6 +205,19 @@
                             <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
                         </div>
                         <div class="form-group">
+                            <label for="concurrency" class="form-label">
+                                <i class="fas fa-bolt"></i>
+                                <span>Concurrency</span>
+                            </label>
+                            <select id="concurrency" class="form-control">
+                                <option value="1">1 (Serial)</option>
+                                <option value="2">2</option>
+                                <option value="3" selected>3 (Recommended)</option>
+                                <option value="4">4</option>
+                                <option value="5">5 (Fast)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="temperature" class="form-label">
                                 <i class="fas fa-thermometer-half"></i>
                                 <span>Temperature</span>
@@ -185,7 +227,7 @@
                                 <span id="temperature-value">0.7</span>
                             </div>
                         </div>
-                        <button id="save-preset" class="btn btn-secondary">
+                        <button id="save-preset" class="btn btn-secondary" aria-label="Save preset">
                             <i class="fas fa-save"></i> Save Preset
                         </button>
                     </div>
@@ -229,7 +271,7 @@
                 </div>
             </footer>
         </div>
-        <div id="settings-modal" class="modal">
+        <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-label="Settings">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2><i class="fas fa-cog"></i> Settings</h2>
@@ -303,17 +345,17 @@
                         </div>
                     </div>
                     <div class="settings-actions">
-                        <button id="reset-settings" class="btn btn-secondary">
+                        <button id="reset-settings" class="btn btn-secondary" aria-label="Reset settings to defaults">
                             <i class="fas fa-undo"></i> Reset to Defaults
                         </button>
-                        <button id="save-settings" class="btn btn-primary">
+                        <button id="save-settings" class="btn btn-primary" aria-label="Save settings">
                             <i class="fas fa-check"></i> Save Settings
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <script type="module" src="./src/renderer/main.ts"></script>
+        <script type="module" src="./src/renderer/app.ts"></script>
         <script>
             document.addEventListener("DOMContentLoaded", ()=>{
                 let temperatureInput=document.getElementById("temperature");
