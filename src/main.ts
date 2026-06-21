@@ -1,12 +1,17 @@
-﻿import{app,BrowserWindow,ipcMain,dialog}from "electron"
+import{app,BrowserWindow,ipcMain,dialog}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
 import{spawn}from "child_process"
 import{fileURLToPath}from "url"
+import http from "http"
+import https from "https"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.js"
 import type{FileObj,OllamaGenerateOptions}from "./types/index.js"
+
+let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
+let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 
 let isWin:boolean=process.platform=="win32"
 let isMac:boolean=process.platform=="darwin"
@@ -609,7 +614,9 @@ ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payloa
                     "Content-Type":"application/json",
                     "Authorization":`Bearer ${apiKey}`
                 },
-                timeout:300000
+                timeout:300000,
+                httpAgent,
+                httpsAgent
             }
         )
         let rc=response.data.choices?.[0]?.message?.content||""
@@ -694,6 +701,87 @@ ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
     }
     catch{
         return{success:false}
+    }
+})
+const LOGS_DIR=path.join(userDataPath,"logs")
+const MAX_LOG_FILES=5
+const MAX_LOG_SIZE=1024*1024
+function getLogFilePath(index:number):string{
+    return path.join(LOGS_DIR,`app-${index}.log`)
+}
+function getCurrentLogFilePath():string{
+    let dirsExist=false
+    try{
+        if(!fs.existsSync(LOGS_DIR)){
+            fs.mkdirSync(LOGS_DIR,{recursive:true})
+        }
+        dirsExist=true
+    }
+    catch{
+        return getLogFilePath(0)
+    }
+    for(let i=0;i<MAX_LOG_FILES;i++){
+        let filePath=getLogFilePath(i)
+        try{
+            if(!fs.existsSync(filePath)){
+                return filePath
+            }
+            let stats=fs.statSync(filePath)
+            if(stats.size<MAX_LOG_SIZE){
+                return filePath
+            }
+        }
+        catch{
+            return filePath
+        }
+    }
+    try{
+        for(let i=MAX_LOG_FILES-1;i>0;i--){
+            let src=getLogFilePath(i-1)
+            let dst=getLogFilePath(i)
+            if(fs.existsSync(src)){
+                if(fs.existsSync(dst))fs.unlinkSync(dst)
+                fs.renameSync(src,dst)
+            }
+        }
+        fs.writeFileSync(getLogFilePath(0),"")
+        return getLogFilePath(0)
+    }
+    catch{
+        return getLogFilePath(0)
+    }
+}
+ipcMain.handle("write-log",async(_:Electron.IpcMainInvokeEvent,entry:unknown):Promise<void>=>{
+    try{
+        if(!entry||typeof entry!=="object"){
+            return
+        }
+        let logLine=JSON.stringify(entry)+"\n"
+        let filePath=getCurrentLogFilePath()
+        fs.appendFileSync(filePath,logLine,"utf-8")
+    }
+    catch{}
+})
+ipcMain.handle("export-logs",async(_:Electron.IpcMainInvokeEvent,data:string):Promise<{success:boolean;error?:string}>=>{
+    try{
+        if(!data||typeof data!=="string"){
+            return{success:false,error:"Invalid log data"}
+        }
+        let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
+            defaultPath:"logs.jsonl",
+            filters:[
+                {name:"JSONL Files",extensions:["jsonl"]},
+                {name:"All Files",extensions:["*"]}
+            ]
+        })
+        if(result.canceled||!result.filePath){
+            return{success:false,error:"Export cancelled"}
+        }
+        await fsp.writeFile(result.filePath,data,"utf-8")
+        return{success:true}
+    }
+    catch(error){
+        return{success:false,error:"Failed to export logs"}
     }
 })
 process.on("uncaughtException",(error:Error)=>{
