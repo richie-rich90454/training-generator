@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' http://localhost:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com; img-src 'self' data:;">
         <title>Training Generator-AI Training Data Creator</title>
         <link rel="stylesheet" href="./src/styles/main.css">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
@@ -21,6 +21,9 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <button id="edit-templates-btn" class="btn-icon" title="Edit Prompt Templates" aria-label="Edit prompt templates">
+                        <i class="fas fa-edit"></i>
+                    </button>
                     <button id="settings-btn" class="btn-icon" title="Settings" aria-label="Open settings" data-i18n="header.settings">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -76,6 +79,10 @@
                                     <i class="fas fa-magic"></i>
                                     <span data-i18n="processing.demo">Demo</span>
                                 </button>
+                                <button id="dashboard-btn" class="btn btn-secondary" title="Show/Hide processing dashboard" aria-label="Toggle dashboard">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </button>
                             </div>
                         </div>
                         <div class="progress-section">
@@ -101,6 +108,11 @@
                                 <span data-i18n="output.title">Output Preview</span>
                             </div>
                             <div class="section-actions">
+                                <select id="export-format" class="form-control" style="width:auto;margin-right:8px" aria-label="Export format">
+                                    <option value="jsonl" selected>JSONL</option>
+                                    <option value="json">JSON Array</option>
+                                    <option value="csv">CSV</option>
+                                </select>
                                 <button id="export-btn" class="btn btn-primary" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
                                     <i class="fas fa-download"></i> <span data-i18n="output.export">Export</span>
                                 </button>
@@ -322,6 +334,26 @@
                         </div>
                     </div>
                     <div class="settings-section">
+                        <h3><i class="fas fa-save"></i> <span data-i18n="settings.profiles">Configuration Profiles</span></h3>
+                        <div class="form-group">
+                            <label for="profile-select" class="form-label">
+                                <i class="fas fa-layer-group"></i>
+                                <span data-i18n="settings.profileSelect">Saved Profiles</span>
+                            </label>
+                            <select id="profile-select" class="form-control">
+                                <option value="" selected data-i18n="settings.profileSelect.default">-- Select a profile --</option>
+                            </select>
+                        </div>
+                        <div class="settings-actions" style="margin-bottom:12px">
+                            <button id="save-profile-btn" class="btn btn-secondary" aria-label="Save current settings as profile">
+                                <i class="fas fa-save"></i> <span data-i18n="settings.saveProfile">Save Profile</span>
+                            </button>
+                            <button id="delete-profile-btn" class="btn btn-secondary" aria-label="Delete selected profile">
+                                <i class="fas fa-trash"></i> <span data-i18n="settings.deleteProfile">Delete Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="settings-section">
                         <h3><i class="fas fa-cogs"></i> <span data-i18n="settings.processing">Processing</span></h3>
                         <div class="form-group">
                             <label for="auto-save" class="form-label">
@@ -336,6 +368,13 @@
                                 <span data-i18n="settings.autoCheckOllama">Auto-check Ollama Status</span>
                             </label>
                             <input type="checkbox" id="auto-check-ollama" class="form-checkbox" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="smart-sizing" class="form-label">
+                                <i class="fas fa-brain"></i>
+                                <span data-i18n="settings.smartSizing">Smart Sizing</span>
+                            </label>
+                            <input type="checkbox" id="smart-sizing" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="max-file-size" class="form-label">
@@ -370,6 +409,21 @@
                                 <option value="500" selected>500</option>
                                 <option value="1000">1,000</option>
                                 <option value="5000">5,000</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="max-parallel-files" class="form-label">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Max Parallel Files</span>
+                            </label>
+                            <select id="max-parallel-files" class="form-control">
+                                <option value="1" selected>1 (Sequential)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="8">8</option>
+                                <option value="10">10</option>
                             </select>
                         </div>
                     </div>
