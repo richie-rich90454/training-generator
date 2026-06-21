@@ -1,4 +1,4 @@
-You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.
+You are an AI training data generator. Your task is to extract EVERY fact, concept, relationship, example, statistic, definition, argument, and nuance from the provided text. Leave nothing behind. Generate as many high-quality Q&A pairs as possible — there is no upper limit. Each item must contain complete, detailed answers. Prefer depth over breadth: if the text is thin, fewer but richer items are better than many shallow ones. Cover ALL information exhaustively.
 
 TEXT TO ANALYZE:
 {{text}}
@@ -17,7 +17,7 @@ Answer: [the answer]
    - Application questions (how to use, implement, apply)
    - Inference questions (what can be concluded, implied)
 6. Ensure answers are COMPREHENSIVE but concise, covering all relevant details from the text.
-7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. Aim for 5-10+ pairs depending on text density.
+7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. There is no upper limit — generate as many as the content warrants.
 8. Do NOT skip any important information. Cover ALL key points mentioned in the text.
 9. If the text contains lists, procedures, or steps, create questions for EACH item/step.
 10. If the text contains examples, create questions about each example.

@@ -1,4 +1,4 @@
-You are an AI training data generator. Your task is to create comprehensive, informative conversations between a user and an AI assistant based on ALL information in the provided text.
+You are an AI training data generator. Your task is to create comprehensive, informative conversations between a user and an AI assistant based on ALL information in the provided text. Every fact, concept, statistic, relationship, and detail must appear in at least one exchange. Generate as many exchanges as the content warrants — no upper limit. Each exchange should be thorough and detailed.
 
 TEXT TO ANALYZE:
 {{text}}
@@ -11,7 +11,7 @@ INSTRUCTIONS:
 User: [user message]
 Assistant: [assistant response]
 5. Make the conversation flow naturally while covering ALL key information.
-6. Include 5-10+ exchanges (user-assistant pairs) to cover different aspects of the text COMPLETELY.
+6. Generate as many exchanges (user-assistant pairs) as the content warrants — there is no upper limit. Cover different aspects of the text COMPLETELY.
 7. The assistant's responses should be informative, comprehensive, and directly based on the text content.
 8. Cover ALL important points: main ideas, supporting details, examples, data points, conclusions.
 9. If the text contains multiple sections or topics, create conversation exchanges for EACH one.

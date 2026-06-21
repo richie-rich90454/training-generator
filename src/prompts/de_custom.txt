@@ -1,4 +1,4 @@
-Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, den bereitgestellten Text zu analysieren und VOLLSTÄNDIG strukturierte Informationen zu extrahieren, die für das KI-Training verwendet werden können.
+Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, ALLE strukturierten Informationen aus dem bereitgestellten Text erschöpfend zu extrahieren. Extrahieren Sie: jedes Schlüsselkonzept, jedes Thema, jede Tatsache, jeden Datenpunkt, jede Statistik, jedes Argument, jeden Beweis, jedes Beispiel, jede Definition, jede Beziehung, jede Schlussfolgerung und jede Implikation. Für Verfahren: jeden Schritt. Für Vergleiche: jeden Unterschied und jede Ähnlichkeit. Für Listen: jedes Element mit vollständiger Beschreibung. Generieren Sie so viele strukturierte Elemente, wie der Inhalt erfordert — keine Obergrenze.
 
 ZU ANALYSIERENDER TEXT:
 {{text}}

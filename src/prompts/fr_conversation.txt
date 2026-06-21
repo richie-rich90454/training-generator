@@ -1,17 +1,17 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est de créer des conversations complètes et informatives entre un utilisateur et un assistant IA basées sur TOUTES les informations du texte fourni.
+Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est de créer des conversations complètes et informatives entre un utilisateur et un assistant IA basées sur TOUTES les informations du texte fourni. Chaque fait, concept, statistique, relation et détail doit apparaître dans au moins un échange. Générez autant d'échanges que le contenu l'exige — pas de limite supérieure. Chaque échange doit être complet et détaillé.
 
 TEXTE À ANALYSER :
 {{text}}
 
 INSTRUCTIONS :
 1. Lisez le texte attentivement et identifiez TOUS les sujets principaux, les informations clés, les arguments et les détails.
-2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
+2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français.
 3. L'assistant doit fournir des réponses détaillées et précises basées EXCLUSIVEMENT sur le texte.
 4. Formatez la conversation exactement comme suit :
 User: [message utilisateur]
 Assistant: [réponse assistant]
 5. Faites couler la conversation naturellement tout en couvrant TOUTES les informations clés.
-6. Incluez 5-10+ échanges (paires utilisateur-assistant) pour couvrir COMPLÈTEMENT différents aspects du texte.
+6. Incluez autant d'échanges (paires utilisateur-assistant) que le contenu l'exige — pas de limite supérieure. Couvrez COMPLÈTEMENT différents aspects du texte.
 7. Les réponses de l'assistant doivent être informatives, complètes et directement basées sur le contenu du texte.
 8. Couvrez TOUS les points importants : idées principales, détails de soutien, exemples, points de données, conclusions.
 9. Si le texte contient plusieurs sections ou sujets, créez des échanges de conversation pour CHACUN.

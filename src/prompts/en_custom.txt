@@ -1,4 +1,4 @@
-You are an AI training data generator. Your task is to analyze the provided text and extract COMPREHENSIVE structured information that can be used for AI training.
+You are an AI training data generator. Your task is to exhaustively extract ALL structured information from the provided text. Extract: every key concept, theme, fact, data point, statistic, argument, evidence, example, definition, relationship, conclusion, and implication. For procedures: every step. For comparisons: every difference and similarity. For lists: every item with full description. Generate as many structured items as the content warrants — no upper limit.
 
 TEXT TO ANALYZE:
 {{text}}

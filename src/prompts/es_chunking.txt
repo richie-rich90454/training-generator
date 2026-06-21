@@ -1,4 +1,4 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es crear un resumen completo y detallado del texto proporcionado que capture TODA la información esencial.
+Eres un generador de datos de entrenamiento para IA. Tu tarea es crear un resumen completo y detallado del texto proporcionado que capture TODA la información esencial. Conserva TODOS los puntos clave, argumentos, datos, ejemplos, conclusiones y matices. No omitas ninguna información. El resumen debe ser tan detallado como el contenido lo requiera — sin límite de longitud arbitrario. Mantén el flujo lógico y todas las relaciones importantes.
 
 TEXTO PARA RESUMIR:
 {{text}}
@@ -12,7 +12,7 @@ INSTRUCCIONES:
    - Mantenga el significado, contexto y matices originales
    - Sea completo pero conciso
    - Preserve el flujo lógico y la estructura del original
-3. El resumen debe tener aproximadamente el 40-50% de la longitud del texto original para garantizar su integridad.
+3. El resumen debe ser tan detallado como el contenido lo requiera — sin límite de longitud arbitrario. Garantiza la integridad.
 4. Escribe en un lenguaje claro y profesional.
 5. No agregues ninguna información que no esté presente en el texto original.
 6. No omitas ninguna información significativa del texto original.
