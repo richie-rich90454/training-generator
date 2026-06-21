@@ -942,6 +942,20 @@ html[data-platform="windows"] .app-container{
 ::-webkit-scrollbar-thumb:hover{
     background:var(--text-secondary);
 }
+:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+}
+@keyframes skeleton-pulse{
+    0%{opacity:0.6}
+    50%{opacity:1.0}
+    100%{opacity:0.6}
+}
+.skeleton{
+    background:var(--text-disabled);
+    border-radius:var(--radius-medium);
+    animation:skeleton-pulse 1.5s ease-in-out infinite;
+}
 @media (max-width:768px){
     .app-container{
         padding:var(--spacing-md);
@@ -1166,4 +1180,202 @@ html[data-platform="windows"] .app-container{
 }
 .file-status .fa-clock{
     color:#A19F9D;
+}
+/* Toast notifications */
+.toast-container{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    z-index:2000;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    pointer-events:none;
+}
+.toast{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px;
+    border-radius:var(--radius-medium);
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    box-shadow:var(--shadow-3);
+    min-width:280px;
+    max-width:420px;
+    pointer-events:auto;
+    opacity:0;
+    transform:translateX(100px);
+    transition:opacity .3s ease,transform .3s ease;
+}
+.toast-visible{
+    opacity:1;
+    transform:translateX(0);
+}
+.toast-hiding{
+    opacity:0;
+    transform:translateX(100px);
+}
+.toast-icon{
+    font-size:1.1rem;
+    flex-shrink:0;
+}
+.toast-message{
+    flex:1;
+    font-size:.875rem;
+    line-height:1.4;
+}
+.toast-close{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--text-secondary);
+    font-size:1.2rem;
+    padding:0 4px;
+    line-height:1;
+    flex-shrink:0;
+}
+.toast-close:hover{
+    color:var(--text-primary);
+}
+.toast-info{
+    border-left:4px solid var(--primary-color);
+}
+.toast-info .toast-icon{
+    color:var(--primary-color);
+}
+.toast-success{
+    border-left:4px solid var(--secondary-color);
+}
+.toast-success .toast-icon{
+    color:var(--secondary-color);
+}
+.toast-warning{
+    border-left:4px solid var(--warning-color);
+}
+.toast-warning .toast-icon{
+    color:var(--warning-color);
+}
+.toast-error{
+    border-left:4px solid var(--accent-color);
+}
+.toast-error .toast-icon{
+    color:var(--accent-color);
+}
+/* Virtual list container */
+.virtual-list-container{
+    overflow-y:auto;
+    position:relative;
+}
+.virtual-list-container .virtual-list-item{
+    position:absolute;
+    left:0;
+    right:0;
+    overflow:hidden;
+    font-family:monospace;
+    font-size:.875rem;
+    line-height:1.5;
+    padding:2px 8px;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+}
+/* Splitter */
+.splitter-bar{
+    width:4px;
+    background:var(--border-color);
+    cursor:col-resize;
+    flex-shrink:0;
+    transition:background var(--transition-fast);
+    position:relative;
+}
+.splitter-bar:hover,
+.splitter-bar.splitter-active{
+    background:var(--primary-color);
+}
+.splitter-bar:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:0;
+}
+/* Confirm dialog */
+.confirm-dialog{
+    max-width:420px;
+}
+.confirm-actions{
+    display:flex;
+    gap:var(--spacing-md);
+    justify-content:flex-end;
+    margin-top:var(--spacing-lg);
+}
+/* Accessibility */
+@media (prefers-contrast: more){
+    :root{
+        --primary-color:#0000FF;
+        --primary-hover:#0000CC;
+        --secondary-color:#008000;
+        --secondary-hover:#006600;
+        --accent-color:#CC0000;
+        --accent-hover:#990000;
+        --warning-color:#CC6600;
+        --warning-hover:#994C00;
+        --surface-color:#FFFFFF;
+        --surface-variant:#F0F0F0;
+        --background-color:#FFFFFF;
+        --text-primary:#000000;
+        --text-secondary:#333333;
+        --text-disabled:#666666;
+        --border-color:#000000;
+        --border-hover:#000000;
+    }
+    .card,.config-panel,.app-header,.app-footer{
+        border:2px solid var(--border-color);
+        box-shadow:none;
+        background:var(--surface-color);
+    }
+    .btn{
+        border:2px solid var(--text-primary);
+        box-shadow:none;
+    }
+    .progress-fill{
+        background:var(--primary-color);
+    }
+    input[type="range"]{
+        background:var(--surface-variant);
+    }
+}
+@media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+        transition-duration:0s !important;
+        animation-duration:0s !important;
+        animation:none !important;
+    }
+}
+@media (forced-colors: active){
+    .card,.config-panel,.app-header,.app-footer{
+        border:1px solid ButtonText;
+        background:Canvas;
+        color:CanvasText;
+    }
+    .btn{
+        border:1px solid ButtonText;
+        background:ButtonFace;
+        color:ButtonText;
+    }
+    .btn-primary{
+        background:Highlight;
+        color:HighlightText;
+        border-color:Highlight;
+    }
+    .btn:hover{
+        background:Highlight;
+        color:HighlightText;
+    }
+    .progress-fill{
+        background:Highlight;
+    }
+    .splitter-bar{
+        background:ButtonText;
+    }
+    .toast{
+        border:1px solid ButtonText;
+    }
 }
