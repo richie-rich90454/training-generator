@@ -1,4 +1,4 @@
-﻿// @vitest-environment node
+﻿﻿﻿﻿// @vitest-environment node
 import { describe, it, expect } from "vitest"
 import { semanticChunk, simpleChunk } from "../src/renderer/chunker.js"
 

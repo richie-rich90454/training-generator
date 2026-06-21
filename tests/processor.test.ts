@@ -65,6 +65,8 @@ describe("Processor",()=>{
         it("should skip empty chunk strings",async()=>{
             let chunks=["","  ","valid chunk"]
             processor.concurrency=1
+            // Set provider name to "ollama" to disable batching so empty chunks are filtered in queue path
+            mockProvider.name="ollama"
             let results=await processor.processChunks(
                 chunks,"llama2","instruction",
                 mockGeneratePrompt,mockCreateTrainingItem,
@@ -128,7 +130,7 @@ describe("Processor",()=>{
             let slowProvider:Provider={
                 name:"slow",
                 generate:vi.fn(async():Promise<ProviderResult>=>{
-                    await new Promise(resolve=>setTimeout(resolve,30))
+                    await new Promise(resolve=>setTimeout(resolve,100))
                     return{text:"response",tokens:10,provider:"slow"}
                 })
             }

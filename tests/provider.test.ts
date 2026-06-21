@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider } from "../src/renderer/provider.js"
+import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider, ProviderManager } from "../src/renderer/provider.js"
 import type { Provider, ProviderResult } from "../src/renderer/provider.js"
 
 // Mock window.electronAPI for provider tests
@@ -101,33 +101,38 @@ describe("retryWithBackoff", () => {
 })
 
 describe("createProvider", () => {
-  it("should create OllamaProvider for ollama type", () => {
+  it("should create ProviderManager for ollama type", () => {
     let provider = createProvider("ollama")
-    expect(provider.name).toBe("ollama")
-    expect(provider).toBeInstanceOf(OllamaProvider)
+    expect(provider).toBeInstanceOf(ProviderManager)
+    expect(provider.name).toBe("provider-manager")
+    expect(provider.getCurrentProvider().name).toBe("ollama")
   })
 
-  it("should create OpenAIProvider for openai type", () => {
+  it("should create ProviderManager for openai type", () => {
     let provider = createProvider("openai", { apiKey: "sk-test" })
-    expect(provider.name).toBe("openai")
-    expect(provider).toBeInstanceOf(OpenAIProvider)
+    expect(provider).toBeInstanceOf(ProviderManager)
+    expect(provider.getCurrentProvider().name).toBe("openai")
+    expect(provider.getCurrentProvider()).toBeInstanceOf(OpenAIProvider)
   })
 
-  it("should create OpenAIProvider for anthropic type", () => {
+  it("should create ProviderManager for anthropic type", () => {
     let provider = createProvider("anthropic", { apiKey: "sk-test" })
-    expect(provider.name).toBe("openai")
-    expect(provider).toBeInstanceOf(OpenAIProvider)
+    expect(provider).toBeInstanceOf(ProviderManager)
+    expect(provider.getCurrentProvider().name).toBe("openai")
+    expect(provider.getCurrentProvider()).toBeInstanceOf(OpenAIProvider)
   })
 
-  it("should create OpenAIProvider for gemini type", () => {
+  it("should create ProviderManager for gemini type", () => {
     let provider = createProvider("gemini", { apiKey: "sk-test" })
-    expect(provider.name).toBe("openai")
-    expect(provider).toBeInstanceOf(OpenAIProvider)
+    expect(provider).toBeInstanceOf(ProviderManager)
+    expect(provider.getCurrentProvider().name).toBe("openai")
+    expect(provider.getCurrentProvider()).toBeInstanceOf(OpenAIProvider)
   })
 
   it("should default to OllamaProvider for unknown type", () => {
     let provider = createProvider("unknown")
-    expect(provider.name).toBe("ollama")
+    expect(provider).toBeInstanceOf(ProviderManager)
+    expect(provider.getCurrentProvider().name).toBe("ollama")
   })
 })
 
