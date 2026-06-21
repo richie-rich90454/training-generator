@@ -84,19 +84,22 @@ class Processor{
             getDemoResponse:(chunk:string,processingType:string)=>string,
             allItems:TrainingItem[],
             onDone:()=>void,
-            provider:Provider|null
+            provider:Provider|null,
+            chunksArr:string[]
         ):Promise<void>{
             try{
                 if(sig.aborted)return
                 if(!chunk||chunk.trim().length===0)return
                 let prompt=await genPrompt(chunk,processingType)
                 if(!prompt||prompt.trim().length===0||sig.aborted)return
+                stats.recordPromptTokens(prompt)
                 let cached=await getCachedResult(chunk,model,prompt)
                 if(cached){
                     let items=createItem(chunk,cached.response,processingType)
                     allItems.push(...items)
                     onComplete(idx,total,items)
                     stats.recordChunkSuccess(cached.tokens)
+                    chunksArr[idx]=(null as any) // Release chunk for GC
                     return
                 }
                 let response:string
@@ -119,6 +122,7 @@ class Processor{
                 let items=createItem(chunk,response,processingType)
                 allItems.push(...items)
                 onComplete(idx,total,items)
+                chunksArr[idx]=(null as any) // Release chunk for GC
             }
             catch(err){
                 stats.recordChunkFailure()
@@ -142,7 +146,7 @@ class Processor{
                         generatePrompt,createTrainingItem,
                         onChunkComplete,onChunkError,signal,
                         this.demoMode,this.getDemoResponse.bind(this),
-                        allItems,onDone,selfProvider
+                        allItems,onDone,selfProvider,chunks
                     )
                 }
                 else if(running===0){
@@ -160,7 +164,7 @@ class Processor{
                     generatePrompt,createTrainingItem,
                     onChunkComplete,onChunkError,signal,
                     this.demoMode,this.getDemoResponse.bind(this),
-                    allItems,onDone,selfProvider
+                    allItems,onDone,selfProvider,chunks
                 )
             }
             if(initial===0){
