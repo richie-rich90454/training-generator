@@ -128,4 +128,6 @@ export interface FullAppSettings{
     "start-maximized"?:boolean
     "remember-window-size"?:boolean
     "max-file-size"?:number
+    maxOutputItems?:number
+    maxChunks?:number
 }
