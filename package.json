@@ -16,7 +16,9 @@
     "test": "vitest run",
     "test:unit": "vitest run --reporter=verbose",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cli": "tsx src/cli/index.ts",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
     "electron",
@@ -39,6 +41,7 @@
     },
     "files": [
       "dist/**/*",
+      "node_modules/**/*",
       "src/**/*",
       "tsconfig.json",
       "tsconfig.json",
@@ -67,6 +70,7 @@
     "asar": true,
     "asarUnpack": [
       "**/*.node",
+      "node_modules/better-sqlite3/**",
       "native-splash/**",
       "**/pdf-parse/**/*",
       "**/officeparser/**/*",
