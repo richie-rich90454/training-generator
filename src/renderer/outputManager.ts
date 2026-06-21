@@ -220,37 +220,42 @@ class OutputManager{
         }
         try{
             let format=this.app.uiManager.outputFormat.value
-            let content=""
+            let SPLIT_THRESHOLD=100000
+            if(this.outputData.length>SPLIT_THRESHOLD){
+                let partCount=Math.ceil(this.outputData.length/SPLIT_THRESHOLD)
+                this.app.addLog(`Output exceeds ${SPLIT_THRESHOLD} items, splitting into ${partCount} files`,"info")
+                for(let i=0;i<partCount;i++){
+                    let start=i*SPLIT_THRESHOLD
+                    let end=Math.min((i+1)*SPLIT_THRESHOLD,this.outputData.length)
+                    let partData=this.outputData.slice(start,end)
+                    let content=this.formatData(partData,format)
+                    let partFilename=`training_data-${i+1}`
+                    if(format=="jsonl")partFilename+=".jsonl"
+                    else if(format=="json")partFilename+=".json"
+                    else if(format=="csv")partFilename+=".csv"
+                    else partFilename+=".txt"
+                    let savePath=await window.electronAPI.saveFileDialog(partFilename)
+                    if(!savePath){
+                        this.app.addLog("Export cancelled","info")
+                        return
+                    }
+                    let result=await window.electronAPI.saveFile(savePath,content)
+                    if(result.success){
+                        this.app.addLog(`Exported part ${i+1}/${partCount} to ${savePath}`,"success")
+                    }
+                    else{
+                        this.app.addLog(`Failed to export part ${i+1}: ${result.error}`,"error")
+                        return
+                    }
+                }
+                return
+            }
+            let content=this.formatData(this.outputData,format)
             let defaultFilename="training_data"
-            if(format=="jsonl"){
-                content=this.outputData.map(item=>JSON.stringify(item)).join("\n")
-                defaultFilename+=".jsonl"
-            }
-            else if(format=="json"){
-                content=JSON.stringify(this.outputData,null,2)
-                defaultFilename+=".json"
-            }
-            else if(format=="csv"){
-                let headers=["input","output"]
-                let rows=this.outputData.map(item=>{
-                    let input=this.app.uiManager.escapeCsvField(item.input||"")
-                    let output=this.app.uiManager.escapeCsvField(item.output||"")
-                    if(item.messages){
-                        output=JSON.stringify(item.messages).replace(/"/g,'""')
-                        if(/^[=+\-@]/.test(output))output="'"+output
-                    }
-                    if(item.text){
-                        output=this.app.uiManager.escapeCsvField(item.text)
-                    }
-                    return `"${input}","${output}"`
-                })
-                content=headers.join(",")+"\n"+rows.join("\n")
-                defaultFilename+=".csv"
-            }
-            else if(format=="text"){
-                content=this.outputData.map(item=>item.output||"").join("\n\n")
-                defaultFilename+=".txt"
-            }
+            if(format=="jsonl")defaultFilename+=".jsonl"
+            else if(format=="json")defaultFilename+=".json"
+            else if(format=="csv")defaultFilename+=".csv"
+            else defaultFilename+=".txt"
             let savePath=await window.electronAPI.saveFileDialog(defaultFilename)
             if(!savePath){
                 this.app.addLog("Export cancelled","info")
@@ -267,6 +272,34 @@ class OutputManager{
         catch(error){
             this.app.addLog(`Export failed: ${(error as Error).message}`,"error")
         }
+    }
+    private formatData(data:TrainingItem[],format:string):string{
+        if(format=="jsonl"){
+            return data.map(item=>JSON.stringify(item)).join("\n")
+        }
+        else if(format=="json"){
+            return JSON.stringify(data,null,2)
+        }
+        else if(format=="csv"){
+            let headers=["input","output"]
+            let rows=data.map(item=>{
+                let input=this.app.uiManager.escapeCsvField(item.input||"")
+                let output=this.app.uiManager.escapeCsvField(item.output||"")
+                if(item.messages){
+                    output=JSON.stringify(item.messages).replace(/"/g,'""')
+                    if(/^[=+\-@]/.test(output))output="'"+output
+                }
+                if(item.text){
+                    output=this.app.uiManager.escapeCsvField(item.text)
+                }
+                return `"${input}","${output}"`
+            })
+            return headers.join(",")+"\n"+rows.join("\n")
+        }
+        else if(format=="text"){
+            return data.map(item=>item.output||"").join("\n\n")
+        }
+        return data.map(item=>JSON.stringify(item)).join("\n")
     }
     async copyOutput():Promise<void>{
         if(this.outputData.length==0){
