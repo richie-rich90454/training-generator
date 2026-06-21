@@ -8,6 +8,9 @@ import Processor from"./processor.js"
 import{createProvider}from"./provider.js"
 import{semanticChunk,simpleChunk}from"./chunker.js"
 import{deduplicate}from"./deduplicator.js"
+import{showToast}from"./toast.js"
+import{chunkInWorker,dedupInWorker}from"./workers/workerPool.js"
+import{showConfirm}from"./confirm.js"
 
 class TrainGeneratorApp{
     fileManager:FileManager
@@ -82,12 +85,14 @@ class TrainGeneratorApp{
         await this.detectPlatform()
         await this.checkForProgress()
         this.bindEvents()
+        this.setupSplitter()
         this.uiManager.loadSettings()
         this.initProvider()
         this.processor.concurrency=parseInt(this.uiManager.concurrencySelect.value)||3
         this.uiManager.initSettings()
         await this.uiManager.checkOllamaStatus()
         this.uiManager.startOllamaMonitor()
+        this.registerServiceWorker()
     }
     bindEvents():void{
         this.addEventListener(this.fileManager.dropZone,"dragover",this.fileManager.handleDragOver.bind(this.fileManager) as EventListener)
@@ -105,7 +110,10 @@ class TrainGeneratorApp{
         this.addEventListener(this.uiManager.settingsModal,"click",(e:Event)=>{
             if((e as MouseEvent).target==this.uiManager.settingsModal)this.uiManager.showModal(false)
         })
-        this.addEventListener(this.uiManager.helpBtn,"click",()=>this.uiManager.showHelp())
+        this.addEventListener(this.uiManager.helpBtn,"click",async()=>{
+            let module=await import("./helpContent.js")
+            this.uiManager.showHelp()
+        })
         this.addEventListener(this.uiManager.providerSelect,"change",()=>{
             this.uiManager.updateProviderVisibility()
             this.initProvider()
@@ -168,6 +176,12 @@ class TrainGeneratorApp{
                 }
             }
         }) as EventListener)
+        this.addEventListener(window,"beforeunload",(e:Event)=>{
+            if(this.isProcessing){
+                e.preventDefault();
+                (e as BeforeUnloadEvent).returnValue=""
+            }
+        })
     }
     stopProcessing():void{
         this.processor.abort()
@@ -210,6 +224,26 @@ class TrainGeneratorApp{
         }
         this.processor.provider=createProvider(type,config)
         this.addLog(`Provider set to ${type}`,"info")
+    }
+    async registerServiceWorker():Promise<void>{
+        if(!("serviceWorker" in navigator))return
+        try{
+            let registration=await navigator.serviceWorker.register("./sw.js")
+            this.addLog("Service Worker registered for offline support","info")
+            registration.addEventListener("updatefound",()=>{
+                let newWorker=registration.installing
+                if(newWorker){
+                    newWorker.addEventListener("statechange",()=>{
+                        if(newWorker.state==="installed"&&navigator.serviceWorker.controller){
+                            this.addLog("New version available - reload to update","info")
+                        }
+                    })
+                }
+            })
+        }
+        catch(error){
+            console.warn("Service Worker registration failed:",error)
+        }
     }
     async processFiles():Promise<void>{
         if(this.isProcessing){
@@ -666,6 +700,25 @@ Provide your analysis in a well-structured,comprehensive format.`
         catch{}
     }
     clearAll():void{
+        let hasFiles=this.fileManager.selectedFiles.length>0
+        let hasOutput=this.outputManager.outputData.length>0
+        if(hasFiles||hasOutput){
+            showConfirm("Are you sure you want to clear all files and output?").then(confirmed=>{
+                if(confirmed){
+                    this.fileManager.selectedFiles=[]
+                    this.fileManager.fileStatuses.clear()
+                    this.outputManager.outputData=[]
+                    this.fileManager.updateFileList()
+                    this.updateOutputPreview()
+                    this.uiManager.exportBtn.disabled=true
+                    this.uiManager.copyBtn.disabled=true
+                    this.setProgress(0,"Ready to process")
+                    this.addLog("Cleared all files and output","info")
+                    showToast("All files and output cleared","success")
+                }
+            })
+            return
+        }
         this.fileManager.selectedFiles=[]
         this.fileManager.fileStatuses.clear()
         this.outputManager.outputData=[]
