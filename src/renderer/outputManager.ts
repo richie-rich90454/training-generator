@@ -1,4 +1,5 @@
 import type{TrainingItem,QAPair,ConversationTurn}from"../types/index.js"
+import{exportJSONL,exportJSONArray,exportCSV}from"./exportFormats.js"
 
 class OutputManager{
     app:any
@@ -213,13 +214,13 @@ class OutputManager{
         }
         return turns
     }
-    async exportOutput():Promise<void>{
+    async exportOutput(exportFormat?:string):Promise<void>{
         if(this.outputData.length==0){
             this.app.addLog("No data to export","warning")
             return
         }
         try{
-            let format=this.app.uiManager.outputFormat.value
+            let format=exportFormat||this.app.uiManager.exportFormat?.value||this.app.uiManager.outputFormat.value
             let SPLIT_THRESHOLD=100000
             if(this.outputData.length>SPLIT_THRESHOLD){
                 let partCount=Math.ceil(this.outputData.length/SPLIT_THRESHOLD)
@@ -275,26 +276,13 @@ class OutputManager{
     }
     private formatData(data:TrainingItem[],format:string):string{
         if(format=="jsonl"){
-            return data.map(item=>JSON.stringify(item)).join("\n")
+            return exportJSONL(data)
         }
         else if(format=="json"){
-            return JSON.stringify(data,null,2)
+            return exportJSONArray(data)
         }
         else if(format=="csv"){
-            let headers=["input","output"]
-            let rows=data.map(item=>{
-                let input=this.app.uiManager.escapeCsvField(item.input||"")
-                let output=this.app.uiManager.escapeCsvField(item.output||"")
-                if(item.messages){
-                    output=JSON.stringify(item.messages).replace(/"/g,'""')
-                    if(/^[=+\-@]/.test(output))output="'"+output
-                }
-                if(item.text){
-                    output=this.app.uiManager.escapeCsvField(item.text)
-                }
-                return `"${input}","${output}"`
-            })
-            return headers.join(",")+"\n"+rows.join("\n")
+            return exportCSV(data)
         }
         else if(format=="text"){
             return data.map(item=>item.output||"").join("\n\n")
@@ -307,29 +295,16 @@ class OutputManager{
             return
         }
         try{
-            let format=this.app.uiManager.outputFormat.value
+            let format=this.app.uiManager.exportFormat?.value||this.app.uiManager.outputFormat.value
             let content=""
             if(format=="jsonl"){
-                content=this.outputData.map(item=>JSON.stringify(item)).join("\n")
+                content=exportJSONL(this.outputData)
             }
             else if(format=="json"){
-                content=JSON.stringify(this.outputData,null,2)
+                content=exportJSONArray(this.outputData)
             }
             else if(format=="csv"){
-                let headers=["input","output"]
-                let rows=this.outputData.map(item=>{
-                    let input=this.app.uiManager.escapeCsvField(item.input||"")
-                    let output=this.app.uiManager.escapeCsvField(item.output||"")
-                    if(item.messages){
-                        output=JSON.stringify(item.messages).replace(/"/g,'""')
-                        if(/^[=+\-@]/.test(output))output="'"+output
-                    }
-                    if(item.text){
-                        output=this.app.uiManager.escapeCsvField(item.text)
-                    }
-                    return `"${input}","${output}"`
-                })
-                content=headers.join(",")+"\n"+rows.join("\n")
+                content=exportCSV(this.outputData)
             }
             else if(format=="text"){
                 content=this.outputData.map(item=>item.output||"").join("\n\n")

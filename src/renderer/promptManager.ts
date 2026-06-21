@@ -28,7 +28,10 @@ class PromptManager{
                         this.cache.set(fileName,result.content)
                         return result.content
                     }
-                }catch{}
+                }
+                catch(error){
+                    console.error(`PromptManager: failed to read prompt file ${filePath}`,(error as Error).message)
+                }
             }
         }
         for(let filePath of possiblePaths){
@@ -39,7 +42,10 @@ class PromptManager{
                     this.cache.set(fileName,text)
                     return text
                 }
-            }catch{}
+            }
+            catch(error){
+                console.error(`PromptManager: failed to fetch prompt file ${filePath}`,(error as Error).message)
+            }
         }
         return null
     }

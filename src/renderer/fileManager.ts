@@ -91,6 +91,7 @@ class FileManager{
             }
             this.selectedFiles.push(fileObj)
             this.addFileToList(fileObj)
+            this.app.audit.record("file_added",{fileName:file.name,fileSize:file.size,fileType:fileObj.type})
             addedCount++
         }
         this.updateProcessButton()
@@ -104,7 +105,7 @@ class FileManager{
     addFileToList(fileObj:SelectedFile):void{
         let fileItem=document.createElement("div")
         fileItem.className="file-item"
-        let escapedName=this.app.escapeHtml(fileObj.name)
+        let escapedName=this.app.sanitizeText(fileObj.name)
         fileItem.setAttribute("data-name",escapedName)
         fileItem.innerHTML=`
             <div class="file-info">
@@ -154,7 +155,7 @@ class FileManager{
         this.updateFileStatusIcon(fileName,status)
     }
     updateFileStatusIcon(fileName:string,status:string):void{
-        let escapedName=this.app.escapeHtml(fileName)
+        let escapedName=this.app.sanitizeText(fileName)
         let fileItem=this.fileList.querySelector(`.file-item[data-name="${escapedName}"]`)
         if(!fileItem)return
         let statusEl=fileItem.querySelector(".file-status") as HTMLElement|null
