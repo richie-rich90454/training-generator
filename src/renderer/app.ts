@@ -256,6 +256,7 @@ class TrainGeneratorApp{
         }
         if(!this.uiManager.ollamaStatus.running){
             this.addLog("Cannot process:Ollama is not running","error")
+            showToast("Ollama is not running","error")
             return
         }
         this.isProcessing=true
@@ -307,18 +308,10 @@ class TrainGeneratorApp{
                 processedChunks+=estimatedFileChunks
                 if(result.success){
                     this.fileManager.setFileStatus(file.name,"completed")
-                    if(this.outputManager.outputData.length+result.data!.length>50000){
-                        let remaining=Math.max(0,50000-this.outputManager.outputData.length)
-                        if(remaining>0)this.outputManager.outputData.push(...result.data!.slice(0,remaining))
-                        totalItemsGenerated+=Math.min(result.data!.length,remaining)
-                        successfulFiles++
-                        this.addLog(`鉁?Processed ${file.name}(truncated to ${this.outputManager.outputData.length}total items)`,"warning")
-                        break
-                    }
                     this.outputManager.outputData.push(...result.data!)
                     totalItemsGenerated+=result.data!.length
                     successfulFiles++
-                    this.addLog(`鉁?Successfully processed ${file.name}(${result.data!.length}items)`,"success")
+                    this.addLog(`✅ Successfully processed ${file.name}(${result.data!.length}items)`,"success")
                 }
                 else{
                     this.fileManager.setFileStatus(file.name,"failed")
@@ -339,6 +332,7 @@ class TrainGeneratorApp{
                 summaryMessage+=`${failedFiles}file(s)failed to process.`
             }
             this.addLog(summaryMessage,successfulFiles>0?"success":"warning")
+            showToast(summaryMessage,successfulFiles>0?"success":"warning")
             this.uiManager.updateOutputPreview()
             if(this.outputManager.outputData.length>0){
                 this.uiManager.exportBtn.disabled=false
@@ -350,6 +344,7 @@ class TrainGeneratorApp{
         }
         catch(error){
             this.addLog("Processing failed due to an unexpected error","error")
+            showToast("Processing failed due to an unexpected error","error")
             this.setProgress(0,"Processing failed")
             this.addLog("Please check your Ollama connection and try again.","warning")
         }
@@ -369,6 +364,11 @@ class TrainGeneratorApp{
     }
     showStats():void{
         let r=this.processor.stats.report
+        let warnings=this.processor.stats.checkWarnings(this.outputManager.outputData.length)
+        let warningsHtml=""
+        if(warnings.length>0){
+            warningsHtml='<div class="stats-warnings">'+warnings.map(w=>`<p class="warning">${w}</p>`).join("")+'</div>'
+        }
         let html=`<div class="stats-panel">
             <h3>Processing Statistics</h3>
             <table>
@@ -376,11 +376,13 @@ class TrainGeneratorApp{
                 <tr><td>Successful:</td><td>${r.successfulChunks}</td></tr>
                 <tr><td>Failed:</td><td>${r.failedChunks}</td></tr>
                 <tr><td>Success Rate:</td><td>${r.successRate}%</td></tr>
-                <tr><td>Total Tokens:</td><td>${r.totalTokens.toLocaleString()}</td></tr>
+                <tr><td>Prompt Tokens:</td><td>${r.promptTokens.toLocaleString()}</td></tr>
+                <tr><td>Response Tokens:</td><td>${r.totalTokens.toLocaleString()}</td></tr>
                 <tr><td>Time Elapsed:</td><td>${r.elapsedFormatted}</td></tr>
                 <tr><td>Tokens/Second:</td><td>${r.tokensPerSecond.toLocaleString()}</td></tr>
                 <tr><td>Duplicates Removed:</td><td>${r.deduplicatedCount}</td></tr>
             </table>
+            ${warningsHtml}
         </div>`
         this.addLog(`Processing complete: ${r.successfulChunks}/${r.totalChunks} chunks (${r.successRate}%), ${r.totalTokens.toLocaleString()} tokens, ${r.elapsedFormatted}`,"info")
         this.uiManager.showCustomModal(html)
@@ -423,22 +425,14 @@ class TrainGeneratorApp{
             if(!textContent||textContent.trim().length==0){
                 throw new Error("No text content extracted from file")
             }
-            if(textContent.length>5*1024*1024){
-                this.addLog(`Truncating large text from ${fileObj.name}(exceeds 5MB limit)`,"warning")
-                textContent=textContent.substring(0,5*1024*1024)
-            }
             let chunkSize=Math.min(10000,Math.max(500,parseInt(this.uiManager.chunkSize.value)||2000))
-            let chunks=semanticChunk(textContent,chunkSize,100)
+            let chunks=await chunkInWorker(textContent,chunkSize,100)
             if(chunks.length===0){
                 chunks=simpleChunk(textContent,chunkSize)
             }
+            textContent=(null as any) // Allow GC of text content
             if(chunks.length==0){
                 throw new Error("No text chunks created from file content")
-            }
-            let maxChunks=200
-            if(chunks.length>maxChunks){
-                this.addLog(`File has ${chunks.length}chunks, limiting to ${maxChunks}to prevent excessive API calls`,"warning")
-                chunks=chunks.slice(0,maxChunks)
             }
             let processedChunks:TrainingItem[]=[]
             let model=this.uiManager.modelSelect.value
@@ -462,11 +456,12 @@ class TrainGeneratorApp{
                     this.addLog(`Failed to process chunk ${index+1}: ${error}`,"warning")
                 }
             )
-            let{items:dedupedItems,removed}=deduplicate(processedChunks)
+            let{items:dedupedItems,removed}=await dedupInWorker(processedChunks)
             if(removed>0){
                 this.addLog(`Removed ${removed} duplicate items from output`,"info")
             }
             this.processor.stats.deduplicatedCount=removed
+            processedChunks=[] // Release pre-dedup array
             return{
                 success:true,
                 data:dedupedItems
@@ -583,99 +578,44 @@ class TrainGeneratorApp{
         this.addLog(`Using hardcoded fallback prompt for ${language}`,"warning")
         return this.getFallbackPrompt(text,processingType,language)
     }
+    // Fallback system prompts (compact, token-efficient). If distinguishing system vs user
+    // prompts is needed, use {prompt_type} marker: replace with "system" or "user" at runtime.
     getFallbackPrompt(text:string,processingType:string,language:string="en"):string{
         let fallbackPrompts:Record<string,string>={
-            instruction:`You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.
-TEXT TO ANALYZE:
+            instruction:`Extract Q&A pairs from the text. Cover all key concepts, facts, and data points.
+TEXT:
 ${text}
-INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL key concepts,facts,arguments,data points,and important information.
-2. For EACH significant piece of information,create a clear,specific question that someone might ask about it. Questions and answers should be in the same language as the source text.
-3. Provide detailed,accurate answers based EXCLUSIVELY on the text content.
-4. Format each pair exactly as:
-Question: [the question]
-Answer: [the answer]
-5. Create DIVERSE question types:
-   -Factual questions(who,what,when,where)
-   -Conceptual questions(how,why,explain)
-   -Analytical questions(compare,contrast,analyze)
-   -Application questions(how to use,implement,apply)
-   -Inference questions(what can be concluded,implied)
-6. Ensure answers are COMPREHENSIVE but concise,covering all relevant details from the text.
-7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. Aim for 5-10+pairs depending on text density.
-8. Do NOT skip any important information. Cover ALL key points mentioned in the text.
-9. If the text contains lists,procedures,or steps,create questions for EACH item/step.
-10. If the text contains examples,create questions about each example.
-OUTPUT FORMAT:
-Question: [First question]
-Answer: [First answer]
-
-Question: [Second question]
-Answer: [Second answer]
-
-[Continue with as many pairs as needed to cover all information, with a blank line between each question-answer pair]`,
-            conversation:`You are an AI training data generator. Your task is to create comprehensive,informative conversations between a user and an AI assistant based on ALL information in the provided text.
-TEXT TO ANALYZE:
+RULES:
+- Same language as source text.
+- One Q&A per important point; for lists/procedures, one question per item.
+- Answers based exclusively on the text.
+OUTPUT (blank line between pairs):
+Question: [question]
+Answer: [answer]`,
+            conversation:`Generate a natural User-Assistant conversation covering all information below.
+TEXT:
 ${text}
-INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL main topics,key information,arguments,and details.
-2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text. Questions and responses should match the source text language.
-3. The assistant should provide detailed,accurate responses based EXCLUSIVELY on the text.
-4. Format the conversation exactly as:
-User: [user message]
-Assistant: [assistant response]
-5. Make the conversation flow naturally while covering ALL key information.
-6. Include 5-10+exchanges(user-assistant pairs)to cover different aspects of the text COMPLETELY.
-7. The assistant"s responses should be informative,comprehensive,and directly based on the text content.
-8. Cover ALL important points:main ideas,supporting details,examples,data points,conclusions.
-9. If the text contains multiple sections or topics,create conversation exchanges for EACH one.
-10. Ensure the conversation explores the text DEEPLY,not just superficially.
-OUTPUT FORMAT:
-User: [First user message]
-Assistant: [First assistant response]
-
-User: [Second user message]
-Assistant: [Second assistant response]
-
-[Continue with as many exchanges as needed to cover all information, with a blank line between each user-assistant pair]`,
-            chunking:`You are an AI training data generator. Your task is to create a comprehensive,detailed summary of the provided text that captures ALL essential information.
-TEXT TO SUMMARIZE:
+RULES:
+- Same language as source; answers based exclusively on the text.
+- Cover every main topic and key detail in separate exchanges.
+OUTPUT (blank line between exchanges):
+User: [message]
+Assistant: [response]`,
+            chunking:`Summarize the text below. Preserve all key points, arguments, data, examples, and conclusions.
+TEXT:
 ${text}
-INSTRUCTIONS:
-1. Read the text carefully and identify ALL main points,key arguments,essential information,supporting details,and conclusions.
-2. Create a summary that:
-   -Captures the COMPLETE core message and purpose of the text
-   -Includes ALL important facts,data points,and details
-   -Maintains the original meaning,context,and nuance
-   -Is comprehensive yet concise
-   -Preserves the logical flow and structure of the original
-3. The summary should be approximately 40-50%of the original text length to ensure completeness.
-4. Write in clear,professional language.
-5. Do not add any information not present in the original text.
-6. Do not omit any significant information from the original text.
-7. Include ALL key examples,evidence,and supporting points mentioned.
-OUTPUT FORMAT:
-Provide only the summary text.`,
-            custom:`You are an AI training data generator. Your task is to analyze the provided text and extract COMPREHENSIVE structured information that can be used for AI training.
-TEXT TO ANALYZE:
+RULES:
+- Target ~40-50% of original length; preserve logical flow.
+- No information absent from the original text.
+OUTPUT: summary text only.`,
+            custom:`Extract structured information from the text below.
+TEXT:
 ${text}
-INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL:
-   -Key concepts,themes,and topics
-   -Important facts,data points,statistics
-   -Main arguments,narratives,thesis statements
-   -Supporting evidence,examples,case studies
-   -Technical terms,definitions,jargon(with explanations)
-   -Relationships,connections,dependencies between information
-   -Conclusions,implications,recommendations
-2. Organize ALL information in a structured,hierarchical way that would be optimal for AI training.
-3. Focus on extracting COMPLETE,factual,verifiable information from the text.
-4. If the text contains instructions or procedures,extract ALL steps in detail.
-5. If the text contains comparisons or contrasts,highlight ALL key differences and similarities.
-6. If the text contains lists,extract ALL items with their descriptions.
-7. Format your analysis in a clear,organized,comprehensive manner that captures EVERYTHING important from the text.
-OUTPUT FORMAT:
-Provide your analysis in a well-structured,comprehensive format.`
+RULES:
+Extract: key concepts, themes, facts, data, statistics, arguments, evidence, examples,
+definitions, relationships, conclusions, implications. For procedures: all steps.
+For comparisons: key differences/similarities. For lists: all items with descriptions.
+OUTPUT: structured analysis covering everything important.`
         }
         return fallbackPrompts[processingType]||fallbackPrompts.instruction
     }
@@ -758,6 +698,74 @@ Provide your analysis in a well-structured,comprehensive format.`
         if(window.app==this){
             window.app=null
         }
+    }
+    setupSplitter():void{
+        let splitter=document.getElementById("splitter-bar") as HTMLElement|null
+        if(!splitter)return
+        let leftColumn=document.querySelector(".left-column") as HTMLElement|null
+        let rightColumn=document.querySelector(".right-column") as HTMLElement|null
+        let contentGrid=document.querySelector(".content-grid") as HTMLElement|null
+        if(!leftColumn||!rightColumn||!contentGrid)return
+
+        let savedRatio=localStorage.getItem("train-generator-splitter")
+        let leftPercent=50
+        if(savedRatio){
+            let n=parseFloat(savedRatio)
+            if(!isNaN(n)&&n>=10&&n<=90)leftPercent=n
+        }
+        contentGrid.style.gridTemplateColumns=`${leftPercent}fr 4px ${100-leftPercent}fr`
+
+        let isDragging=false
+        let startX=0
+        let startLeftPercent=0
+
+        let onMouseDown=(e:MouseEvent)=>{
+            isDragging=true
+            startX=e.clientX
+            startLeftPercent=leftPercent
+            splitter.classList.add("splitter-active")
+            document.body.style.cursor="col-resize"
+            document.body.style.userSelect="none"
+            e.preventDefault()
+        }
+
+        let onMouseMove=(e:MouseEvent)=>{
+            if(!isDragging)return
+            let gridWidth=contentGrid.getBoundingClientRect().width
+            let dx=e.clientX-startX
+            let newLeftPercent=startLeftPercent+(dx/gridWidth)*100
+            newLeftPercent=Math.max(10,Math.min(90,newLeftPercent))
+            leftPercent=newLeftPercent
+            contentGrid.style.gridTemplateColumns=`${leftPercent}fr 4px ${100-leftPercent}fr`
+        }
+
+        let onMouseUp=()=>{
+            if(!isDragging)return
+            isDragging=false
+            splitter.classList.remove("splitter-active")
+            document.body.style.cursor=""
+            document.body.style.userSelect=""
+            localStorage.setItem("train-generator-splitter",String(Math.round(leftPercent)))
+        }
+
+        splitter.addEventListener("mousedown",onMouseDown as EventListener)
+        document.addEventListener("mousemove",onMouseMove as EventListener)
+        document.addEventListener("mouseup",onMouseUp as EventListener)
+
+        // Keyboard resize
+        splitter.addEventListener("keydown",(e:Event)=>{
+            let ke=e as KeyboardEvent
+            if(ke.key==="ArrowLeft"){
+                leftPercent=Math.max(10,leftPercent-5)
+                contentGrid.style.gridTemplateColumns=`${leftPercent}fr 4px ${100-leftPercent}fr`
+                localStorage.setItem("train-generator-splitter",String(Math.round(leftPercent)))
+            }
+            else if(ke.key==="ArrowRight"){
+                leftPercent=Math.min(90,leftPercent+5)
+                contentGrid.style.gridTemplateColumns=`${leftPercent}fr 4px ${100-leftPercent}fr`
+                localStorage.setItem("train-generator-splitter",String(Math.round(leftPercent)))
+            }
+        })
     }
 }
 
