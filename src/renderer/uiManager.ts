@@ -1,4 +1,6 @@
 import type{OllamaModel,OllamaStatus,AppSettings,FullAppSettings}from"../types/index.js"
+import{createVirtualList}from"./virtualList.js"
+import{applyLanguage}from"./i18n.js"
 
 class UIManager{
     app:any
@@ -31,14 +33,18 @@ class UIManager{
     intervals:number[]
     timeouts:number[]
     selectedLanguage:string
+    uiLanguage:string
     logCount:number=0
+    lastFocusedElement:HTMLElement|null=null
 
     constructor(app:any){
         this.app=app
         this.ollamaStatus={running:false,models:[]}
         this.selectedLanguage="en"
+        this.uiLanguage="en"
         this.intervals=[]
         this.timeouts=[]
+        this.lastFocusedElement=null
         this.cacheElements()
     }
     cacheElements():void{
@@ -121,9 +127,28 @@ class UIManager{
     updateOutputPreview():void{
         let data=this.app.outputManager.outputData
         if(data.length===0){
-            this.outputPreview.innerHTML="<pre><code>//No output data yet</code></pre>"
+            if(this.app.isProcessing){
+                this.outputPreview.innerHTML='<pre><code><div class="skeleton" style="height:20px;width:60%;margin-bottom:8px"></div><div class="skeleton" style="height:20px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:20px;width:40%"></div></code></pre>'
+            }
+            else{
+                this.outputPreview.innerHTML="<pre><code>//No output data yet</code></pre>"
+            }
             return
         }
+        if(data.length>100){
+            const ITEM_HEIGHT=28
+            this.outputPreview.classList.add("virtual-list-container")
+            createVirtualList({
+                container:this.outputPreview,
+                items:data,
+                itemHeight:ITEM_HEIGHT,
+                renderItem:(item)=>{
+                    return `<pre style="margin:0;font-family:monospace;font-size:.875rem;line-height:${ITEM_HEIGHT}px;white-space:pre-wrap;word-wrap:break-word">${this.escapeHtml(JSON.stringify(item))}</pre>`
+                }
+            })
+            return
+        }
+        this.outputPreview.classList.remove("virtual-list-container")
         let sample=data.slice(-3)
         let jsonStr=JSON.stringify(sample,null,2)
         let totalCount=data.length
@@ -145,11 +170,15 @@ class UIManager{
         this.settingsModal.style.display=show?"flex":"none"
         this.settingsModal.classList.toggle("active",show)
         if(show){
-            // Focus first focusable element in modal
+            this.lastFocusedElement=document.activeElement as HTMLElement
+            this.trapFocus(this.settingsModal)
             let focusable=this.settingsModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
             if(focusable.length>0){
                 (focusable[0] as HTMLElement).focus()
             }
+        }
+        else{
+            this.restoreFocus()
         }
     }
     showCustomModal(content:string):void{
@@ -157,6 +186,35 @@ class UIManager{
         if(body){
             body.innerHTML=content
             this.showModal(true)
+        }
+    }
+    trapFocus(modalElement:HTMLElement):void{
+        let focusableSelector='button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        modalElement.addEventListener("keydown",(e:Event)=>{
+            let ke=e as KeyboardEvent
+            if(ke.key!=="Tab")return
+            let focusable=modalElement.querySelectorAll(focusableSelector)
+            if(focusable.length===0)return
+            let first=focusable[0] as HTMLElement
+            let last=focusable[focusable.length-1] as HTMLElement
+            if(ke.shiftKey){
+                if(document.activeElement===first){
+                    ke.preventDefault()
+                    last.focus()
+                }
+            }
+            else{
+                if(document.activeElement===last){
+                    ke.preventDefault()
+                    first.focus()
+                }
+            }
+        })
+    }
+    restoreFocus():void{
+        if(this.lastFocusedElement){
+            this.lastFocusedElement.focus()
+            this.lastFocusedElement=null
         }
     }
     showHelp():void{
@@ -192,6 +250,9 @@ class UIManager{
             helpModal=document.createElement("div")
             helpModal.id="help-modal"
             helpModal.className="modal"
+            helpModal.setAttribute("role","dialog")
+            helpModal.setAttribute("aria-modal","true")
+            helpModal.setAttribute("aria-label","Help")
             helpModal.innerHTML=`
                 <div class="modal-content">
                     <div class="modal-header">
@@ -333,6 +394,17 @@ class UIManager{
         if(saveSettingsBtn){
             saveSettingsBtn.addEventListener("click",()=>this.saveAppSettings())
         }
+        let uiLanguageSelect=document.getElementById("ui-language-select") as HTMLSelectElement|null
+        if(uiLanguageSelect){
+            let savedLang=localStorage.getItem("train-generator-ui-lang")
+            if(savedLang){
+                uiLanguageSelect.value=savedLang
+                this.applyLanguage(savedLang)
+            }
+            uiLanguageSelect.addEventListener("change",()=>{
+                this.applyLanguage(uiLanguageSelect.value)
+            })
+        }
         let settingsInputs=document.querySelectorAll("#settings-modal input,#settings-modal select")
         settingsInputs.forEach(input=>{
             input.addEventListener("change",()=>{
@@ -369,6 +441,14 @@ class UIManager{
                     let n=parseInt(String(settings["max-file-size"]))
                     if(!isNaN(n)&&n>=10&&n<=1000)maxFileSize.value=String(n)
                 }
+            }
+            if(settings.maxOutputItems!=undefined){
+                let maxOutputItems=document.getElementById("max-output-items") as HTMLSelectElement|null
+                if(maxOutputItems)maxOutputItems.value=String(settings.maxOutputItems)
+            }
+            if(settings.maxChunks!=undefined){
+                let maxChunks=document.getElementById("max-chunks") as HTMLSelectElement|null
+                if(maxChunks)maxChunks.value=String(settings.maxChunks)
             }
             this.addLog("Application settings loaded","info")
         }
@@ -423,6 +503,10 @@ class UIManager{
             if(rememberWindowSize)rememberWindowSize.checked=true
             let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
             if(maxFileSize)maxFileSize.value="100"
+            let maxOutputItems=document.getElementById("max-output-items") as HTMLSelectElement|null
+            if(maxOutputItems)maxOutputItems.value="100000"
+            let maxChunks=document.getElementById("max-chunks") as HTMLSelectElement|null
+            if(maxChunks)maxChunks.value="500"
             this.applyTheme("auto")
             this.applyFontSize("medium")
             this.saveAppSettings()
@@ -461,14 +545,20 @@ class UIManager{
             document.body.classList.add("font-medium")
         }
     }
+    applyLanguage(lang:string):void{
+        this.uiLanguage=lang
+        applyLanguage(lang)
+        localStorage.setItem("train-generator-ui-lang",lang)
+    }
     updateModelSelect(models:OllamaModel[]):void{
         this.modelSelect.innerHTML=""
         if(models.length==0){
             let option=document.createElement("option")
             option.value=""
-            option.textContent="No models found in Ollama"
+            option.textContent="Loading models..."
             option.disabled=true
             option.selected=true
+            option.classList.add("skeleton")
             this.modelSelect.appendChild(option)
             return
         }
