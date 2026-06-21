@@ -16,29 +16,30 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div>
-                        <h1>Training Generator</h1>
-                        <p class="subtitle">Convert documents to AI training data using Ollama</p>
+                        <h1 data-i18n="app.title">Training Generator</h1>
+                        <p class="subtitle" data-i18n="app.subtitle">Convert documents to AI training data using Ollama</p>
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button id="settings-btn" class="btn-icon" title="Settings" aria-label="Open settings">
+                    <button id="settings-btn" class="btn-icon" title="Settings" aria-label="Open settings" data-i18n="header.settings">
                         <i class="fas fa-cog"></i>
                     </button>
-                    <button id="help-btn" class="btn-icon" title="Help" aria-label="Show help">
+                    <button id="help-btn" class="btn-icon" title="Help" aria-label="Show help" data-i18n="header.help">
                         <i class="fas fa-question-circle"></i>
                     </button>
                 </div>
             </header>
+            <div class="toast-container" id="toast-container"></div>
             <div class="content-grid">
                 <div class="left-column">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Upload Documents</span>
+                                <span data-i18n="upload.title">Upload Documents</span>
                             </div>
                             <button id="clear-btn" class=" btn btn-secondary" aria-label="Clear all files">
-                                <i class="fas fa-trash"></i> Clear All
+                                <i class="fas fa-trash"></i> <span data-i18n="upload.clear">Clear All</span>
                             </button>
                         </div>
                         <div id="drop-zone" class="file-upload-area" role="button" aria-label="Drop files here or click to browse" tabindex="0">
@@ -46,18 +47,18 @@
                                 <i class="fas fa-file-upload"></i>
                             </div>
                             <div class="upload-text">
-                                <h3>Drop files here or click to browse</h3>
-                                <p>Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
+                                <h3 data-i18n="upload.dropzone">Drop files here or click to browse</h3>
+                                <p data-i18n="upload.formats">Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
                             </div>
                             <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.html">
                             <button id="browse-btn" class="btn btn-primary" title="Ctrl+O" aria-label="Browse for files (Ctrl+O)">
-                                <i class="fas fa-folder-open"></i> Browse Files
+                                <i class="fas fa-folder-open"></i> <span data-i18n="upload.browse">Browse Files</span>
                             </button>
                         </div>
                         <div class="file-list-section">
-                            <h3><i class="fas fa-file-alt"></i> Selected Files</h3>
+                            <h3><i class="fas fa-file-alt"></i> <span data-i18n="files.selected">Selected Files</span></h3>
                             <div id="file-list" class="file-list" role="list" aria-label="Selected files">
-                                <p class="empty-state">No files selected</p>
+                                <p class="empty-state" data-i18n="files.empty">No files selected</p>
                             </div>
                         </div>
                     </div>
@@ -65,21 +66,21 @@
                         <div class="card-header">
                             <div class="card-title">
                                 <i class="fas fa-cogs"></i>
-                                <span>Processing</span>
+                                <span data-i18n="processing.title">Processing</span>
                             </div>
                             <div class="section-actions">
                                 <button id="process-btn" class="btn btn-primary" disabled title="Ctrl+Enter" aria-label="Process files (Ctrl+Enter)">
-                                    <i class="fas fa-play"></i> Process Files
+                                    <i class="fas fa-play"></i> <span data-i18n="processing.start">Process Files</span>
                                 </button>
                                 <button id="demo-btn" class="btn btn-secondary" title="Run without Ollama using demo data" aria-label="Toggle demo mode">
                                     <i class="fas fa-magic"></i>
-                                    Demo
+                                    <span data-i18n="processing.demo">Demo</span>
                                 </button>
                             </div>
                         </div>
                         <div class="progress-section">
                             <div class="progress-header">
-                                <span id="progress-text">Ready to process</span>
+                                <span id="progress-text" data-i18n="processing.ready">Ready to process</span>
                                 <span id="progress-percent">0%</span>
                             </div>
                             <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Processing progress">
@@ -89,7 +90,7 @@
                         <div id="processing-log" class="processing-log" role="log" aria-live="polite" aria-label="Processing log">
                             <div class="log-entry info">
                                 <i class="fas fa-info-circle"></i>
-                                <span>Welcome to Training Generator! Upload files to begin.</span>
+                                <span data-i18n="processing.welcome">Welcome to Training Generator! Upload files to begin.</span>
                             </div>
                         </div>
                     </div>
@@ -97,19 +98,19 @@
                         <div class="card-header">
                             <div class="card-title">
                                 <i class="fas fa-file-code"></i>
-                                <span>Output Preview</span>
+                                <span data-i18n="output.title">Output Preview</span>
                             </div>
                             <div class="section-actions">
                                 <button id="export-btn" class="btn btn-primary" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
-                                    <i class="fas fa-download"></i> Export
+                                    <i class="fas fa-download"></i> <span data-i18n="output.export">Export</span>
                                 </button>
                                 <button id="copy-btn" class="btn btn-secondary" disabled title="Ctrl+Shift+C" aria-label="Copy output to clipboard (Ctrl+Shift+C)">
-                                    <i class="fas fa-copy"></i> Copy
+                                    <i class="fas fa-copy"></i> <span data-i18n="output.copy">Copy</span>
                                 </button>
                             </div>
                         </div>
                         <div id="output-preview" class="output-preview" role="region" aria-label="Output preview">
-                            <pre><code>// Output will appear here after processing
+                            <pre><code data-i18n="output.placeholder">// Output will appear here after processing
     // Example format (JSONL):
     {
     "instruction": "What is machine learning?",
@@ -119,22 +120,23 @@
                         </div>
                     </div>
                 </div>
+                <div class="splitter-bar" id="splitter-bar" tabindex="0" role="separator" aria-valuenow="50" aria-valuemin="10" aria-valuemax="90" aria-label="Resize panels"></div>
                 <div class="right-column">
                     <div class="config-panel" role="form" aria-label="Processing configuration">
-                        <h3><i class="fas fa-sliders-h"></i> Configuration</h3>
+                        <h3><i class="fas fa-sliders-h"></i> <span data-i18n="config.title">Configuration</span></h3>
                         <div class="form-group">
                             <label for="model-select" class="form-label">
                                 <i class="fas fa-brain"></i>
-                                <span>Ollama Model</span>
+                                <span data-i18n="config.model">Ollama Model</span>
                             </label>
                             <select id="model-select" class="form-control">
-                                <option value="" disabled selected>Loading models from Ollama...</option>
+                                <option value="" disabled selected data-i18n="config.model.loading">Loading models from Ollama...</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="provider" class="form-label">
                                 <i class="fas fa-cloud"></i>
-                                <span>Provider</span>
+                                <span data-i18n="config.provider">Provider</span>
                             </label>
                             <select id="provider" class="form-control">
                                 <option value="ollama">Ollama (Local)</option>
@@ -146,45 +148,45 @@
                         <div class="form-group" id="api-key-group" style="display:none">
                             <label for="api-key" class="form-label">
                                 <i class="fas fa-key"></i>
-                                <span>API Key</span>
+                                <span data-i18n="config.apiKey">API Key</span>
                             </label>
-                            <input type="password" id="api-key" class="form-control" placeholder="sk-..." autocomplete="off">
+                            <input type="password" id="api-key" class="form-control" data-i18n-placeholder="config.apiKey.placeholder" placeholder="sk-..." autocomplete="off">
                         </div>
                         <div class="form-group" id="base-url-group" style="display:none">
                             <label for="base-url" class="form-label">
                                 <i class="fas fa-link"></i>
-                                <span>Base URL</span>
+                                <span data-i18n="config.baseUrl">Base URL</span>
                             </label>
-                            <input type="text" id="base-url" class="form-control" placeholder="https://api.openai.com">
+                            <input type="text" id="base-url" class="form-control" data-i18n-placeholder="config.baseUrl.placeholder" placeholder="https://api.openai.com">
                         </div>
                         <div class="form-group">
                             <label for="processing-type" class="form-label">
                                 <i class="fas fa-cogs"></i>
-                                <span>Processing Type</span>
+                                <span data-i18n="config.processingType">Processing Type</span>
                             </label>
                             <select id="processing-type" class="form-control">
-                                <option value="instruction" selected>Instruction Tuning (Q&A)</option>
-                                <option value="conversation">Conversation Generation</option>
-                                <option value="chunking">Text Chunking</option>
-                                <option value="custom">Custom Prompt</option>
+                                <option value="instruction" selected data-i18n="config.processingType.instruction">Instruction Tuning (Q&A)</option>
+                                <option value="conversation" data-i18n="config.processingType.conversation">Conversation Generation</option>
+                                <option value="chunking" data-i18n="config.processingType.chunking">Text Chunking</option>
+                                <option value="custom" data-i18n="config.processingType.custom">Custom Prompt</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="output-format" class="form-label">
                                 <i class="fas fa-file-export"></i>
-                                <span>Output Format</span>
+                                <span data-i18n="config.outputFormat">Output Format</span>
                             </label>
                             <select id="output-format" class="form-control">
-                                <option value="jsonl" selected>JSONL (Alpaca style)</option>
-                                <option value="chatml">ChatML Format</option>
-                                <option value="text">Plain Text</option>
-                                <option value="csv">CSV</option>
+                                <option value="jsonl" selected data-i18n="config.outputFormat.jsonl">JSONL (Alpaca style)</option>
+                                <option value="chatml" data-i18n="config.outputFormat.chatml">ChatML Format</option>
+                                <option value="text" data-i18n="config.outputFormat.text">Plain Text</option>
+                                <option value="csv" data-i18n="config.outputFormat.csv">CSV</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="language-select" class="form-label">
                                 <i class="fas fa-language"></i>
-                                <span>Output Language</span>
+                                <span data-i18n="config.outputLanguage">Output Language</span>
                             </label>
                             <select id="language-select" class="form-control">
                                 <option value="en" selected>English</option>
@@ -200,27 +202,27 @@
                         <div class="form-group">
                             <label for="chunk-size" class="form-label">
                                 <i class="fas fa-cut"></i>
-                                <span>Chunk Size (characters)</span>
+                                <span data-i18n="config.chunkSize">Chunk Size (characters)</span>
                             </label>
                             <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
                         </div>
                         <div class="form-group">
                             <label for="concurrency" class="form-label">
                                 <i class="fas fa-bolt"></i>
-                                <span>Concurrency</span>
+                                <span data-i18n="config.concurrency">Concurrency</span>
                             </label>
                             <select id="concurrency" class="form-control">
-                                <option value="1">1 (Serial)</option>
+                                <option value="1" data-i18n="config.concurrency.serial">1 (Serial)</option>
                                 <option value="2">2</option>
-                                <option value="3" selected>3 (Recommended)</option>
+                                <option value="3" selected data-i18n="config.concurrency.recommended">3 (Recommended)</option>
                                 <option value="4">4</option>
-                                <option value="5">5 (Fast)</option>
+                                <option value="5" data-i18n="config.concurrency.fast">5 (Fast)</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="temperature" class="form-label">
                                 <i class="fas fa-thermometer-half"></i>
-                                <span>Temperature</span>
+                                <span data-i18n="config.temperature">Temperature</span>
                             </label>
                             <input type="range" id="temperature" class="form-control" min="0" max="1" step="0.1" value="0.7">
                             <div class="range-value">
@@ -228,29 +230,29 @@
                             </div>
                         </div>
                         <button id="save-preset" class="btn btn-secondary" aria-label="Save preset">
-                            <i class="fas fa-save"></i> Save Preset
+                            <i class="fas fa-save"></i> <span data-i18n="config.savePreset">Save Preset</span>
                         </button>
                     </div>
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
                                 <i class="fas fa-server"></i>
-                                <span>System Status</span>
+                                <span data-i18n="status.title">System Status</span>
                             </div>
                         </div>
                         <div class="status-panel">
                             <div class="status-indicator" id="ollama-status">
                                 <div class="status-dot"></div>
-                                <span>Ollama: Checking...</span>
+                                <span data-i18n="status.ollamaChecking">Ollama: Checking...</span>
                             </div>
                             <div class="status-info">
                                 <div class="status-item">
                                     <i class="fas fa-database"></i>
-                                    <span>Files Processed: <strong id="files-count">0</strong></span>
+                                    <span><span data-i18n="status.filesProcessed">Files Processed:</span> <strong id="files-count">0</strong></span>
                                 </div>
                                 <div class="status-item">
                                     <i class="fas fa-clock"></i>
-                                    <span>Last Processed: <strong id="last-processed">Never</strong></span>
+                                    <span><span data-i18n="status.lastProcessed">Last Processed:</span> <strong id="last-processed" data-i18n="status.lastProcessedNever">Never</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -261,12 +263,12 @@
                 <div class="footer-status">
                     <div class="status-indicator" id="app-status">
                         <div class="status-dot"></div>
-                        <span>Training Generator v1.0.0</span>
+                        <span data-i18n="status.version">Training Generator v1.0.0</span>
                     </div>
                     <div class="footer-links">
-                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><i class="fas fa-book"></i> Documentation</a>
-                        <a href="https://github.com/richie-rich90454/training-generator/issues" class="footer-link" target="_blank"><i class="fas fa-bug"></i> Report Issue</a>
-                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><i class="fas fa-star"></i> Star on GitHub</a>
+                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><i class="fas fa-book"></i> <span data-i18n="footer.documentation">Documentation</span></a>
+                        <a href="https://github.com/richie-rich90454/training-generator/issues" class="footer-link" target="_blank"><i class="fas fa-bug"></i> <span data-i18n="footer.reportIssue">Report Issue</span></a>
+                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><i class="fas fa-star"></i> <span data-i18n="footer.star">Star on GitHub</span></a>
                     </div>
                 </div>
             </footer>
@@ -274,82 +276,126 @@
         <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-label="Settings">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2><i class="fas fa-cog"></i> Settings</h2>
+                    <h2><i class="fas fa-cog"></i> <span data-i18n="settings.title">Settings</span></h2>
                     <button class="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="settings-section">
-                        <h3><i class="fas fa-display"></i> Appearance</h3>
+                        <h3><i class="fas fa-display"></i> <span data-i18n="settings.appearance">Appearance</span></h3>
                         <div class="form-group">
                             <label for="theme-select" class="form-label">
                                 <i class="fas fa-palette"></i>
-                                <span>Theme</span>
+                                <span data-i18n="settings.theme">Theme</span>
                             </label>
                             <select id="theme-select" class="form-control">
-                                <option value="auto" selected>Auto (System)</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
+                                <option value="auto" selected data-i18n="settings.theme.auto">Auto (System)</option>
+                                <option value="light" data-i18n="settings.theme.light">Light</option>
+                                <option value="dark" data-i18n="settings.theme.dark">Dark</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="font-size" class="form-label">
                                 <i class="fas fa-text-height"></i>
-                                <span>Font Size</span>
+                                <span data-i18n="settings.fontSize">Font Size</span>
                             </label>
                             <select id="font-size" class="form-control">
-                                <option value="small">Small</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="large">Large</option>
+                                <option value="small" data-i18n="settings.fontSize.small">Small</option>
+                                <option value="medium" selected data-i18n="settings.fontSize.medium">Medium</option>
+                                <option value="large" data-i18n="settings.fontSize.large">Large</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ui-language-select" class="form-label">
+                                <i class="fas fa-language"></i>
+                                <span data-i18n="settings.uiLanguage">UI Language</span>
+                            </label>
+                            <select id="ui-language-select" class="form-control">
+                                <option value="en" selected>English</option>
+                                <option value="zh-Hans">中文（简体）</option>
+                                <option value="zh-Hant">中文（繁體）</option>
+                                <option value="ja">日本語</option>
+                                <option value="ko">한국어</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
                             </select>
                         </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-cogs"></i> Processing</h3>
+                        <h3><i class="fas fa-cogs"></i> <span data-i18n="settings.processing">Processing</span></h3>
                         <div class="form-group">
                             <label for="auto-save" class="form-label">
                                 <i class="fas fa-save"></i>
-                                <span>Auto-save Presets</span>
+                                <span data-i18n="settings.autoSave">Auto-save Presets</span>
                             </label>
                             <input type="checkbox" id="auto-save" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="auto-check-ollama" class="form-label">
                                 <i class="fas fa-heartbeat"></i>
-                                <span>Auto-check Ollama Status</span>
+                                <span data-i18n="settings.autoCheckOllama">Auto-check Ollama Status</span>
                             </label>
                             <input type="checkbox" id="auto-check-ollama" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="max-file-size" class="form-label">
                                 <i class="fas fa-hdd"></i>
-                                <span>Max File Size (MB)</span>
+                                <span data-i18n="settings.maxFileSize">Max File Size (MB)</span>
                             </label>
                             <input type="number" id="max-file-size" class="form-control" value="100" min="10" max="1000">
                         </div>
+                        <div class="form-group">
+                            <label for="max-output-items" class="form-label">
+                                <i class="fas fa-list-ol"></i>
+                                <span data-i18n="settings.maxOutputItems">Max Output Items per File</span>
+                            </label>
+                            <select id="max-output-items" class="form-control">
+                                <option value="0" data-i18n="settings.maxOutputItems.unlimited">Unlimited</option>
+                                <option value="10000">10,000</option>
+                                <option value="50000">50,000</option>
+                                <option value="100000" selected>100,000</option>
+                                <option value="500000">500,000</option>
+                                <option value="1000000">1,000,000</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="max-chunks" class="form-label">
+                                <i class="fas fa-puzzle-piece"></i>
+                                <span data-i18n="settings.maxChunks">Max Chunks per File</span>
+                            </label>
+                            <select id="max-chunks" class="form-control">
+                                <option value="0" data-i18n="settings.maxChunks.unlimited">Unlimited</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500" selected>500</option>
+                                <option value="1000">1,000</option>
+                                <option value="5000">5,000</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-window-restore"></i> Window</h3>
+                        <h3><i class="fas fa-window-restore"></i> <span data-i18n="settings.window">Window</span></h3>
                         <div class="form-group">
                             <label for="start-maximized" class="form-label">
                                 <i class="fas fa-expand"></i>
-                                <span>Start Maximized</span>
+                                <span data-i18n="settings.startMaximized">Start Maximized</span>
                             </label>
                             <input type="checkbox" id="start-maximized" class="form-checkbox">
                         </div>
                         <div class="form-group">
                             <label for="remember-window-size" class="form-label">
                                 <i class="fas fa-memory"></i>
-                                <span>Remember Window Size</span>
+                                <span data-i18n="settings.rememberWindowSize">Remember Window Size</span>
                             </label>
                             <input type="checkbox" id="remember-window-size" class="form-checkbox" checked>
                         </div>
                     </div>
                     <div class="settings-actions">
                         <button id="reset-settings" class="btn btn-secondary" aria-label="Reset settings to defaults">
-                            <i class="fas fa-undo"></i> Reset to Defaults
+                            <i class="fas fa-undo"></i> <span data-i18n="settings.reset">Reset to Defaults</span>
                         </button>
                         <button id="save-settings" class="btn btn-primary" aria-label="Save settings">
-                            <i class="fas fa-check"></i> Save Settings
+                            <i class="fas fa-check"></i> <span data-i18n="settings.save">Save Settings</span>
                         </button>
                     </div>
                 </div>
