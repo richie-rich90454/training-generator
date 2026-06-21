@@ -1,6 +1,8 @@
 import type{OllamaModel,OllamaStatus,AppSettings,FullAppSettings}from"../types/index.js"
 import{createVirtualList}from"./virtualList.js"
 import{applyLanguage}from"./i18n.js"
+import{encryptKey,decryptKey}from"./security.js"
+import{listProfiles,saveProfile,loadProfile,deleteProfile}from"./configProfiles.js"
 
 class UIManager{
     app:any
@@ -11,6 +13,7 @@ class UIManager{
     outputPreview!:HTMLElement
     exportBtn!:HTMLButtonElement
     copyBtn!:HTMLButtonElement
+    exportFormat!:HTMLSelectElement
     ollamaStatusEl!:HTMLElement
     settingsBtn!:HTMLElement
     settingsModal!:HTMLElement
@@ -29,6 +32,13 @@ class UIManager{
     baseUrlInput!:HTMLInputElement
     apiKeyGroup!:HTMLElement
     baseUrlGroup!:HTMLElement
+    smartSizingCheckbox!:HTMLInputElement
+    profileSelect!:HTMLSelectElement
+    saveProfileBtn!:HTMLElement
+    deleteProfileBtn!:HTMLElement
+    editTemplatesBtn!:HTMLElement
+    dashboardBtn!:HTMLElement
+    maxParallelFilesSelect!:HTMLSelectElement
     ollamaStatus:OllamaStatus
     intervals:number[]
     timeouts:number[]
@@ -55,6 +65,7 @@ class UIManager{
         this.outputPreview=document.getElementById("output-preview") as HTMLElement
         this.exportBtn=document.getElementById("export-btn") as HTMLButtonElement
         this.copyBtn=document.getElementById("copy-btn") as HTMLButtonElement
+        this.exportFormat=document.getElementById("export-format") as HTMLSelectElement
         this.ollamaStatusEl=document.getElementById("ollama-status") as HTMLElement
         this.settingsBtn=document.getElementById("settings-btn") as HTMLElement
         this.settingsModal=document.getElementById("settings-modal") as HTMLElement
@@ -73,6 +84,13 @@ class UIManager{
         this.baseUrlInput=document.getElementById("base-url") as HTMLInputElement
         this.apiKeyGroup=document.getElementById("api-key-group") as HTMLElement
         this.baseUrlGroup=document.getElementById("base-url-group") as HTMLElement
+        this.smartSizingCheckbox=document.getElementById("smart-sizing") as HTMLInputElement
+        this.profileSelect=document.getElementById("profile-select") as HTMLSelectElement
+        this.saveProfileBtn=document.getElementById("save-profile-btn") as HTMLElement
+        this.deleteProfileBtn=document.getElementById("delete-profile-btn") as HTMLElement
+        this.editTemplatesBtn=document.getElementById("edit-templates-btn") as HTMLElement
+        this.dashboardBtn=document.getElementById("dashboard-btn") as HTMLElement
+        this.maxParallelFilesSelect=document.getElementById("max-parallel-files") as HTMLSelectElement
     }
     setProgress(percent:number,text:string):void{
         if(isNaN(percent)||!isFinite(percent))percent=0
@@ -92,7 +110,7 @@ class UIManager{
         logEntry.className=`log-entry ${type}`
         logEntry.innerHTML=`
             <i class="fas fa-${this.getLogIcon(type)}"></i>
-            <span>${this.escapeHtml(message)}</span>
+            <span>${this.sanitizeText(message)}</span>
         `
         this.processingLog.appendChild(logEntry)
         this.processingLog.scrollTop=this.processingLog.scrollHeight
@@ -161,6 +179,12 @@ class UIManager{
         div.textContent=String(text)
         return div.innerHTML
     }
+    sanitizeText(text:string):string{
+        if(text==null)return""
+        // Remove null bytes and control characters except whitespace
+        let sanitized=String(text).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
+        return this.escapeHtml(sanitized)
+    }
     escapeCsvField(value:string):string{
         let escaped=value.replace(/"/g,'""')
         if(/^[=+\-@]/.test(escaped))escaped="'"+escaped
@@ -170,6 +194,7 @@ class UIManager{
         this.settingsModal.style.display=show?"flex":"none"
         this.settingsModal.classList.toggle("active",show)
         if(show){
+            this.refreshProfiles()
             this.lastFocusedElement=document.activeElement as HTMLElement
             this.trapFocus(this.settingsModal)
             let focusable=this.settingsModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
@@ -277,7 +302,7 @@ class UIManager{
         helpModal.classList.add("active")
         this.addLog("Help documentation opened","success")
     }
-    loadSettings():void{
+    async loadSettings():Promise<void>{
         try{
             let settings=JSON.parse(localStorage.getItem("train-generator-settings")||"{}") as AppSettings
             let validProcessingTypes=["instruction","conversation","chunking","custom"]
@@ -292,7 +317,17 @@ class UIManager{
                 if(!isNaN(n)&&n>=500&&n<=10000)this.chunkSize.value=String(n)
             }
             if(settings.provider)this.providerSelect.value=settings.provider
-            if(settings.apiKey)this.apiKeyInput.value=settings.apiKey
+            if(settings.apiKey){
+                let decrypted=await decryptKey(settings.apiKey)
+                this.apiKeyInput.value=decrypted
+                // Migration: if the key was unencrypted (decrypt returned same value), re-save it encrypted
+                if(decrypted===settings.apiKey && decrypted.length>0){
+                    // Key was not encrypted, migrate it
+                    let encrypted=await encryptKey(decrypted)
+                    settings.apiKey=encrypted
+                    localStorage.setItem("train-generator-settings",JSON.stringify(settings))
+                }
+            }
             if(settings.baseUrl)this.baseUrlInput.value=settings.baseUrl
             this.updateProviderVisibility()
             this.selectedLanguage=this.languageSelect.value||"en"
@@ -303,6 +338,11 @@ class UIManager{
         }
     }
     async savePreset():Promise<void>{
+        let apiKeyValue=this.apiKeyInput.value
+        let encryptedApiKey=""
+        if(apiKeyValue){
+            encryptedApiKey=await encryptKey(apiKeyValue)
+        }
         let settings:AppSettings={
             model:this.modelSelect.value,
             processingType:this.processingType.value,
@@ -311,7 +351,7 @@ class UIManager{
             chunkSize:this.chunkSize.value,
             concurrency:this.concurrencySelect.value,
             provider:this.providerSelect.value,
-            apiKey:this.apiKeyInput.value,
+            apiKey:encryptedApiKey,
             baseUrl:this.baseUrlInput.value
         }
         try{
@@ -344,7 +384,7 @@ class UIManager{
                                 previewLines=previewLines.substring(0,100)+"..."
                             }
                             if(loadedPrompt.includes("{{text}}")){
-                                let escapedPreviewLines=this.escapeHtml(previewLines)
+                                let escapedPreviewLines=this.sanitizeText(previewLines)
                                 promptPreview=`(prompt:"${escapedPreviewLines}")`
                             }
                             else{
@@ -364,7 +404,7 @@ class UIManager{
                         if(previewLines.length>100){
                             previewLines=previewLines.substring(0,100)+"..."
                         }
-                        let escapedPreviewLines=this.escapeHtml(previewLines)
+                        let escapedPreviewLines=this.sanitizeText(previewLines)
                         promptPreview=`(prompt:"${escapedPreviewLines}")`
                         break
                     }
@@ -393,6 +433,23 @@ class UIManager{
         }
         if(saveSettingsBtn){
             saveSettingsBtn.addEventListener("click",()=>this.saveAppSettings())
+        }
+        if(this.profileSelect){
+            this.profileSelect.addEventListener("change",()=>{
+                let name=this.profileSelect.value
+                if(name)this.applyProfile(name)
+            })
+        }
+        if(this.saveProfileBtn){
+            this.saveProfileBtn.addEventListener("click",()=>{
+                let name=window.prompt("Enter a name for this profile:")
+                if(name&&name.trim()){
+                    this.saveCurrentProfile(name.trim())
+                }
+            })
+        }
+        if(this.deleteProfileBtn){
+            this.deleteProfileBtn.addEventListener("click",()=>this.deleteCurrentProfile())
         }
         let uiLanguageSelect=document.getElementById("ui-language-select") as HTMLSelectElement|null
         if(uiLanguageSelect){
@@ -428,7 +485,7 @@ class UIManager{
                 if(fontSizeSelect)fontSizeSelect.value=settings.fontSize
                 this.applyFontSize(settings.fontSize)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size"]
+            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smartSizing"]
             checkboxes.forEach(id=>{
                 let checkbox=document.getElementById(id as string) as HTMLInputElement|null
                 if(checkbox&&settings[id]!=undefined){
@@ -450,6 +507,10 @@ class UIManager{
                 let maxChunks=document.getElementById("max-chunks") as HTMLSelectElement|null
                 if(maxChunks)maxChunks.value=String(settings.maxChunks)
             }
+            if(settings.maxParallelFiles!=undefined){
+                let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
+                if(maxParallelFiles)maxParallelFiles.value=settings.maxParallelFiles
+            }
             this.addLog("Application settings loaded","info")
         }
         catch(error){
@@ -469,7 +530,7 @@ class UIManager{
                 settings.fontSize=fontSizeSelect.value
                 this.applyFontSize(fontSizeSelect.value)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size"]
+            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smartSizing"]
             checkboxes.forEach(id=>{
                 let checkbox=document.getElementById(id as string) as HTMLInputElement|null
                 if(checkbox){
@@ -479,6 +540,10 @@ class UIManager{
             let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
             if(maxFileSize){
                 settings["max-file-size"]=parseInt(maxFileSize.value)||100
+            }
+            let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
+            if(maxParallelFiles){
+                settings.maxParallelFiles=maxParallelFiles.value
             }
             localStorage.setItem("training-generator-app-settings",JSON.stringify(settings))
             this.addLog("Application settings saved","success")
@@ -501,12 +566,16 @@ class UIManager{
             if(startMaximized)startMaximized.checked=false
             let rememberWindowSize=document.getElementById("remember-window-size") as HTMLInputElement|null
             if(rememberWindowSize)rememberWindowSize.checked=true
+            let smartSizing=document.getElementById("smart-sizing") as HTMLInputElement|null
+            if(smartSizing)smartSizing.checked=true
             let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
             if(maxFileSize)maxFileSize.value="100"
             let maxOutputItems=document.getElementById("max-output-items") as HTMLSelectElement|null
             if(maxOutputItems)maxOutputItems.value="100000"
             let maxChunks=document.getElementById("max-chunks") as HTMLSelectElement|null
             if(maxChunks)maxChunks.value="500"
+            let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
+            if(maxParallelFiles)maxParallelFiles.value="1"
             this.applyTheme("auto")
             this.applyFontSize("medium")
             this.saveAppSettings()
@@ -549,6 +618,66 @@ class UIManager{
         this.uiLanguage=lang
         applyLanguage(lang)
         localStorage.setItem("train-generator-ui-lang",lang)
+    }
+    async refreshProfiles():Promise<void>{
+        let profiles=await listProfiles()
+        let currentValue=this.profileSelect.value
+        this.profileSelect.innerHTML='<option value="" data-i18n="settings.profileSelect.default">-- Select a profile --</option>'
+        for(let p of profiles){
+            let option=document.createElement("option")
+            option.value=p.name
+            option.textContent=p.name
+            this.profileSelect.appendChild(option)
+        }
+        if(currentValue&&profiles.some(p=>p.name===currentValue)){
+            this.profileSelect.value=currentValue
+        }
+    }
+    async applyProfile(name:string):Promise<void>{
+        if(!name)return
+        let profile=await loadProfile(name)
+        if(!profile)return
+        this.modelSelect.value=profile.model||""
+        this.processingType.value=profile.processingType||"instruction"
+        this.outputFormat.value=profile.outputFormat||"jsonl"
+        this.languageSelect.value=profile.language||"en"
+        this.chunkSize.value=profile.chunkSize||"2000"
+        this.concurrencySelect.value=profile.concurrency||"3"
+        this.providerSelect.value=profile.provider||"ollama"
+        if(profile.baseUrl)this.baseUrlInput.value=profile.baseUrl
+        if(profile.smartSizing!==undefined&&this.smartSizingCheckbox)this.smartSizingCheckbox.checked=profile.smartSizing
+        this.updateProviderVisibility()
+        this.selectedLanguage=profile.language||"en"
+        if(this.app&&this.app.initProvider)this.app.initProvider()
+        this.addLog(`Profile "${name}" applied`,"success")
+    }
+    async saveCurrentProfile(name:string):Promise<void>{
+        let profile={
+            name,
+            model:this.modelSelect.value,
+            processingType:this.processingType.value,
+            outputFormat:this.outputFormat.value,
+            language:this.languageSelect.value,
+            chunkSize:this.chunkSize.value,
+            concurrency:this.concurrencySelect.value,
+            provider:this.providerSelect.value,
+            baseUrl:this.baseUrlInput.value,
+            smartSizing:this.smartSizingCheckbox?.checked??false,
+            createdAt:new Date().toISOString()
+        }
+        await saveProfile(profile)
+        await this.refreshProfiles()
+        this.profileSelect.value=name
+        this.addLog(`Profile "${name}" saved`,"success")
+    }
+    async deleteCurrentProfile():Promise<void>{
+        let name=this.profileSelect.value
+        if(!name)return
+        let confirmed=window.confirm(`Delete profile "${name}"?`)
+        if(!confirmed)return
+        await deleteProfile(name)
+        await this.refreshProfiles()
+        this.addLog(`Profile "${name}" deleted`,"success")
     }
     updateModelSelect(models:OllamaModel[]):void{
         this.modelSelect.innerHTML=""
