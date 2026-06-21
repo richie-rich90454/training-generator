@@ -34,14 +34,15 @@ function getDedupWorker(): Worker | null {
 export function chunkInWorker(
   text: string,
   chunkSize: number,
-  overlap: number
+  overlap: number,
+  smartSizing: boolean = false
 ): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const worker = getChunkWorker()
     if (!worker) {
       // Fallback: import and run on main thread
       import("../chunker.js").then(({ semanticChunk }) => {
-        resolve(semanticChunk(text, chunkSize, overlap))
+        resolve(semanticChunk(text, chunkSize, overlap, smartSizing))
       }).catch(reject)
       return
     }
@@ -56,7 +57,9 @@ export function chunkInWorker(
     }
 
     worker.addEventListener("message", handler)
-    worker.postMessage({ text, chunkSize, overlap })
+    // Transferable objects not applicable here: all data is text (strings/objects),
+    // not ArrayBuffer, so structured clone is the correct transfer mechanism.
+    worker.postMessage({ text, chunkSize, overlap, smartSizing })
   })
 }
 
@@ -84,6 +87,8 @@ export function dedupInWorker(
     }
 
     worker.addEventListener("message", handler)
+    // Transferable objects not applicable here: data is JSON-serializable objects (items array),
+    // not ArrayBuffer, so structured clone is the correct transfer mechanism.
     worker.postMessage({ items, threshold })
   })
 }
