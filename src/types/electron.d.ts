@@ -1,4 +1,4 @@
-﻿import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,OllamaStatus,OllamaGenerateResult}from"./index.js"
+﻿﻿import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,OllamaStatus,OllamaGenerateResult,LogEntry}from"./index.js"
 
 export interface ElectronAPI{
     openFileDialog:()=>Promise<FileObj[]>
@@ -19,6 +19,11 @@ export interface ElectronAPI{
     saveProgress:(data:any)=>Promise<{success:boolean}>
     loadProgress:()=>Promise<{success:boolean;data?:any}>
     clearProgress:()=>Promise<{success:boolean}>
+    saveCheckpoint:(data:any)=>Promise<{success:boolean}>
+    loadCheckpoint:()=>Promise<{success:boolean;data?:any}>
+    clearCheckpoint:()=>Promise<{success:boolean}>
+    writeLog:(entry:LogEntry)=>Promise<void>
+    exportLogs:(data:string)=>Promise<{success:boolean;error?:string}>
     onOllamaStatusUpdate:(callback:(status:OllamaStatus)=>void)=>()=>void
 }
 

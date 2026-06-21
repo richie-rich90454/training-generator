@@ -77,6 +77,7 @@ export interface TrainingItem{
     output?:string
     text?:string
     messages?:Array<{role:string;content:string}>
+    _provenance?:unknown
 }
 
 export interface QAPair{
@@ -130,4 +131,14 @@ export interface FullAppSettings{
     "max-file-size"?:number
     maxOutputItems?:number
     maxChunks?:number
+    smartSizing?:boolean
+    maxParallelFiles?:string
+}
+
+export interface LogEntry{
+    timestamp:string
+    level:'debug'|'info'|'warn'|'error'
+    module:string
+    message:string
+    context?:Record<string,unknown>
 }
