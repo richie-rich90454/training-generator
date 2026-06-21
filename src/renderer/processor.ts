@@ -2,6 +2,8 @@ import type{TrainingItem}from"../types/index.js"
 import type{Provider,ProviderResult}from"./provider.js"
 import{StatsTracker}from"./statsTracker.js"
 import{getCachedResult,setCachedResult}from"./cache.js"
+import type{ProvenanceData}from"./provenance.js"
+import{tagItem}from"./provenance.js"
 
 class Processor{
     private abortController:AbortController|null=null
@@ -16,6 +18,97 @@ class Processor{
 
     get isAborted():boolean{
         return this.abortController?.signal.aborted??false
+    }
+
+    splitBatchedResponse(response:string,count:number):string[]{
+        let parts=response.split(/--- CHUNK \d+ ---/)
+        if(parts.length>0&&parts[0].trim()==="")parts.shift()
+        while(parts.length<count)parts.push("")
+        return parts.slice(0,count).map(p=>p.trim())
+    }
+
+    private async batchSmallChunks(
+        smallChunks:{chunk:string;index:number}[],
+        model:string,
+        processingType:string,
+        generatePrompt:(chunk:string,processingType:string)=>Promise<string>,
+        createTrainingItem:(input:string,output:string,processingType:string)=>TrainingItem[],
+        onChunkComplete:(index:number,total:number,items:TrainingItem[])=>void,
+        onChunkError:(index:number,error:string)=>void,
+        signal:AbortSignal,
+        total:number,
+        provider:Provider,
+        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
+    ):Promise<TrainingItem[]>{
+        let allItems:TrainingItem[]=[]
+        let MAX_CHARS_PER_BATCH=100000
+        let stats=this.stats
+
+        let batches:{chunk:string;index:number}[][]=[]
+        let currentBatch:{chunk:string;index:number}[]=[]
+        let currentBatchSize=0
+        let estimatedPromptMultiplier=3
+
+        for(let item of smallChunks){
+            let estimatedSize=item.chunk.length*estimatedPromptMultiplier+50
+            if(currentBatch.length>0&&currentBatchSize+estimatedSize>MAX_CHARS_PER_BATCH){
+                batches.push(currentBatch)
+                currentBatch=[]
+                currentBatchSize=0
+            }
+            currentBatch.push(item)
+            currentBatchSize+=estimatedSize
+        }
+        if(currentBatch.length>0)batches.push(currentBatch)
+
+        for(let batch of batches){
+            if(signal.aborted)break
+            try{
+                let prompts:string[]=[]
+                for(let item of batch){
+                    if(signal.aborted)break
+                    let prompt=await generatePrompt(item.chunk,processingType)
+                    prompts.push(prompt)
+                }
+                if(signal.aborted||prompts.length===0)continue
+
+                let combined=prompts.map((p,j)=>`--- CHUNK ${j+1} ---\n${p}`).join("\n\n")
+                stats.recordPromptTokens(combined)
+
+                let result=await provider.generate(combined,model,{
+                    temperature:0.7,
+                    top_p:0.9,
+                    max_tokens:16384
+                })
+
+                if(signal.aborted)continue
+
+                let responses=this.splitBatchedResponse(result.text,batch.length)
+
+                for(let j=0;j<batch.length;j++){
+                    let items=createTrainingItem(batch[j].chunk,responses[j]||"",processingType)
+                    if(provenanceBase){
+                        let prov:ProvenanceData={...provenanceBase,chunkIndex:batch[j].index}
+                        items=items.map(item=>tagItem(item,prov))
+                    }
+                    allItems.push(...items)
+                    let tokens=Math.ceil((responses[j]||"").length/4)
+                    stats.recordChunkSuccess(tokens)
+                    onChunkComplete(batch[j].index,total,items)
+                }
+            }
+            catch(err){
+                if(!signal.aborted){
+                    console.error("Batch processing failed:",(err as Error).message)
+                    for(let item of batch){
+                        stats.recordChunkFailure()
+                        onChunkError(item.index,"Batch processing failed: "+(err as Error).message)
+                    }
+                }
+            }
+        }
+
+        return allItems
     }
 
     abort():void{
@@ -58,7 +151,8 @@ class Processor{
         generatePrompt:(chunk:string,processingType:string)=>Promise<string>,
         createTrainingItem:(input:string,output:string,processingType:string)=>TrainingItem[],
         onChunkComplete:(index:number,total:number,items:TrainingItem[])=>void,
-        onChunkError:(index:number,error:string)=>void
+        onChunkError:(index:number,error:string)=>void,
+        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
     ):Promise<TrainingItem[]>{
         this.reset()
         this.stats.start()
@@ -66,9 +160,47 @@ class Processor{
         let signal=this.abortController!.signal
         let allItems:TrainingItem[]=[]
         let total=chunks.length
-        let queue=chunks.map((chunk,i)=>({chunk,index:i}))
-        let running=0
         let selfProvider=this.provider
+        let batchingEnabled=selfProvider!==null&&selfProvider.name!=="ollama"
+        let queue:{chunk:string;index:number}[]=[]
+
+        if(batchingEnabled){
+            let smallChunks:{chunk:string;index:number}[]=[]
+            for(let i=0;i<chunks.length;i++){
+                if(chunks[i]&&chunks[i].length<500){
+                    smallChunks.push({chunk:chunks[i],index:i})
+                }
+                else{
+                    queue.push({chunk:chunks[i],index:i})
+                }
+            }
+            if(smallChunks.length>0&&!signal.aborted){
+                try{
+                    let batchedItems=await this.batchSmallChunks(
+                        smallChunks,model,processingType,
+                        generatePrompt,createTrainingItem,
+                        onChunkComplete,onChunkError,
+                        signal,total,selfProvider!,
+                        provenanceBase
+                    )
+                    allItems.push(...batchedItems)
+                }
+                catch(err){
+                    if(!signal.aborted){
+                        console.error("Batch processing failed, falling back to individual:",(err as Error).message)
+                        for(let sc of smallChunks){
+                            queue.push(sc)
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            queue=chunks.map((chunk,i)=>({chunk,index:i}))
+        }
+
+        let running=0
+        let pending=0
 
         async function processOne(
             chunk:string,
@@ -83,19 +215,33 @@ class Processor{
             demoMode:boolean,
             getDemoResponse:(chunk:string,processingType:string)=>string,
             allItems:TrainingItem[],
+            onSlotFree:()=>void,
             onDone:()=>void,
             provider:Provider|null,
-            chunksArr:string[]
+            chunksArr:string[],
+            provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
         ):Promise<void>{
+            let slotFreed=false
+            let freeSlot=()=>{
+                if(!slotFreed){
+                    slotFreed=true
+                    onSlotFree()
+                }
+            }
             try{
-                if(sig.aborted)return
-                if(!chunk||chunk.trim().length===0)return
+                if(sig.aborted){freeSlot();return}
+                if(!chunk||chunk.trim().length===0){freeSlot();return}
                 let prompt=await genPrompt(chunk,processingType)
-                if(!prompt||prompt.trim().length===0||sig.aborted)return
+                if(!prompt||prompt.trim().length===0||sig.aborted){freeSlot();return}
                 stats.recordPromptTokens(prompt)
                 let cached=await getCachedResult(chunk,model,prompt)
                 if(cached){
+                    freeSlot() // Free slot immediately — result is already available
                     let items=createItem(chunk,cached.response,processingType)
+                    if(provenanceBase){
+                        let prov:ProvenanceData={...provenanceBase,chunkIndex:idx}
+                        items=items.map(item=>tagItem(item,prov))
+                    }
                     allItems.push(...items)
                     onComplete(idx,total,items)
                     stats.recordChunkSuccess(cached.tokens)
@@ -104,15 +250,20 @@ class Processor{
                 }
                 let response:string
                 if(demoMode){
-                    await new Promise(resolve=>setTimeout(resolve,500+Math.random()*1000))
+                    let demoPromise=new Promise(resolve=>setTimeout(resolve,500+Math.random()*1000))
+                    freeSlot() // Free slot immediately — next chunk can start
+                    await demoPromise
                     response=getDemoResponse(chunk,processingType)
                 }
                 else{
                     if(!provider)throw new Error("No provider configured")
-                    let result=await provider.generate(prompt,model,{
+                    let responsePromise=provider.generate(prompt,model,{
                         temperature:0.7,
-                        top_p:0.9
+                        top_p:0.9,
+                        max_tokens:16384
                     })
+                    setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
+                    let result=await responsePromise
                     response=result.text
                 }
                 if(sig.aborted)return
@@ -120,6 +271,10 @@ class Processor{
                 stats.recordChunkSuccess(tokens)
                 await setCachedResult(chunk,model,prompt,response,tokens)
                 let items=createItem(chunk,response,processingType)
+                if(provenanceBase){
+                    let prov:ProvenanceData={...provenanceBase,chunkIndex:idx}
+                    items=items.map(item=>tagItem(item,prov))
+                }
                 allItems.push(...items)
                 onComplete(idx,total,items)
                 chunksArr[idx]=(null as any) // Release chunk for GC
@@ -127,6 +282,7 @@ class Processor{
             catch(err){
                 stats.recordChunkFailure()
                 if(!sig.aborted){
+                    console.error(`Processor: chunk ${idx} failed for model ${model}`,(err as Error).message)
                     onError(idx,(err as Error).message)
                 }
             }
@@ -136,20 +292,30 @@ class Processor{
         }
 
         return new Promise((resolve)=>{
-            let onDone=()=>{
+            let onSlotFree=()=>{
                 running--
                 if(queue.length>0&&!signal.aborted){
                     let{chunk,index}=queue.shift()!
                     running++
+                    pending++
                     processOne(
                         chunk,index,model,processingType,
                         generatePrompt,createTrainingItem,
                         onChunkComplete,onChunkError,signal,
                         this.demoMode,this.getDemoResponse.bind(this),
-                        allItems,onDone,selfProvider,chunks
+                        allItems,onSlotFree,onDone,selfProvider,chunks,
+                        provenanceBase
                     )
                 }
-                else if(running===0){
+                else if(pending===0&&running===0){
+                    stats.finish()
+                    resolve(allItems)
+                }
+            }
+
+            let onDone=()=>{
+                pending--
+                if(pending===0&&running===0){
                     stats.finish()
                     resolve(allItems)
                 }
@@ -159,12 +325,14 @@ class Processor{
             for(let i=0;i<initial;i++){
                 let{chunk,index}=queue.shift()!
                 running++
+                pending++
                 processOne(
                     chunk,index,model,processingType,
                     generatePrompt,createTrainingItem,
                     onChunkComplete,onChunkError,signal,
                     this.demoMode,this.getDemoResponse.bind(this),
-                    allItems,onDone,selfProvider,chunks
+                    allItems,onSlotFree,onDone,selfProvider,chunks,
+                    provenanceBase
                 )
             }
             if(initial===0){
