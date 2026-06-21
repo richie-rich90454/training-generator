@@ -1,348 +1,393 @@
-# 🤖 Training Generator
+# Training Generator
 
 [![CI](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/github/v/release/richie-rich90454/training-generator?color=blue&label=latest%20release)](https://github.com/richie-rich90454/training-generator/releases)
 [![Stars](https://img.shields.io/github/stars/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/stargazers)
-[![Forks](https://img.shields.io/github/forks/richie-rich90454/training-generator?style=social)](https://github.com/richie-rich90454/training-generator/network/members)
-[![Contributors](https://img.shields.io/github/contributors/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/graphs/contributors)
-[![Open Issues](https://img.shields.io/github/issues/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/issues)
-[![Open Pull Requests](https://img.shields.io/github/issues-pr/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/pulls)
 [![Last Commit](https://img.shields.io/github/last-commit/richie-rich90454/training-generator)](https://github.com/richie-rich90454/training-generator/commits/main)
-[![Discussions](https://img.shields.io/badge/Discussions-join-blue)](https://github.com/richie-rich90454/training-generator/discussions)
-[![Downloads](https://img.shields.io/github/downloads/richie-rich90454/training-generator/total?color=blue)](https://github.com/richie-rich90454/training-generator/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/richie-rich90454/training-generator/ci.yml?branch=main)](https://github.com/richie-rich90454/training-generator/actions/workflows/ci.yml)
 
 ---
 
-### 🚀 Built With
+### Built With
 
-[![Electron](https://img.shields.io/badge/Electron-39.2.7-47848F.svg)](https://www.electronjs.org/)  [![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)  [![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-9cf)](https://ollama.com/)  [![Vite](https://img.shields.io/badge/Vite-7.3.0-646cff.svg)](https://vitejs.dev/)  [![Axios](https://img.shields.io/badge/Axios-1.7.9-0055ff.svg)](https://axios-http.com/)  [![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)  [![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)  [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Electron](https://img.shields.io/badge/Electron-42.3.3-47848F.svg)](https://www.electronjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.0-646cff.svg)](https://vitejs.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-4.1-6E9F18.svg)](https://vitest.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
+[![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-9cf)](https://ollama.com/)
 
-**Training Generator** is a cross-platform **desktop application** built with **Electron** and **Node.js** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into **AI training data** using **local Ollama models**. Extract instructions, Q&A pairs, conversation data, and structured output for machine learning, NLP workflows, or AI fine-tuning — all processed offline for privacy and speed.
+**Training Generator** is a production-grade, cross-platform **desktop application** built with **Electron** and **TypeScript** that converts documents (PDF, DOCX, DOC, RTF, TXT, MD, HTML) into **AI training data** using local or cloud LLM providers. Supports instruction extraction, Q&A generation, conversation datasets, and custom processing — all with enterprise-grade security, observability, and resilience.
 
-- Convert PDF, DOCX, TXT, MD, HTML, RTF documents to AI training data
-- Generate instruction/Q&A pairs & conversation datasets
-- Multi-language support: EN, CN, FR, DE, ES, JP, KR
-- Real-time output preview & batch processing
-- Local processing for privacy — no data leaves your computer
+---
 
-## ✨ Features
+## Features
 
-### 📁 **File Support**
-- **Multi-format Processing**: PDF, DOCX, DOC, RTF, TXT, MD, and HTML files
-- **Smart Text Extraction**: Advanced parsing for complex document structures
-- **Large File Handling**: Support for files up to 100MB with efficient chunking
+### File Processing
+- **Multi-format Support**: PDF, DOCX, DOC, RTF, TXT, MD, HTML
+- **Smart Text Extraction**: Advanced parsing preserving document structure
+- **Large File Handling**: Efficient chunking with configurable limits and automatic file splitting
 
-### 🧠 **AI Processing**
-- **Ollama Integration**: Uses local Ollama API for private AI processing
-- **Multiple Processing Types**:
-  - 📝 **Instruction Extraction** (Q&A pairs for fine-tuning)
-  - 💬 **Conversation Generation** (Dialog-style training data)
-  - 🔪 **Text Chunking** (Intelligent document segmentation)
-  - 🎨 **Custom Analysis** (User-defined prompt templates)
-- **Multi-language Support**: English, Chinese, Spanish, French, German, Japanese, Korean
+### AI Processing
+- **Multi-Provider Architecture**: Ollama, OpenAI, Anthropic, Google Gemini
+- **Processing Types**:
+  - Instruction Extraction (Q&A pairs for fine-tuning)
+  - Conversation Generation (dialog-style training data)
+  - Semantic Chunking (intelligent document segmentation)
+  - Custom Analysis (user-defined prompt templates)
+- **Semantic Chunking**: Preserves words, sentences, tables, code blocks, and lists with context overlap
+- **Simhash Deduplication**: Near-duplicate detection with configurable thresholds
+- **Token-Efficient Prompts**: 32 templates across 8 languages with full-attention (max_tokens=16384) and 50-60% prompt compaction
 
-### 📊 **Output & Export**
-- **Flexible Formats**: JSONL (Alpaca style), ChatML, CSV, Plain Text
-- **Batch Processing**: Process multiple files simultaneously
-- **Progress Tracking**: Real-time progress bars and detailed logging
+### Multi-Language
+- **8 Languages**: English, Chinese (Simplified), Chinese (Traditional), Spanish, French, German, Japanese, Korean
+- Full i18n framework with locale detection and dynamic UI translation
 
-### 🎨 **User Experience**
-- **Modern UI**: Clean, responsive interface with drag & drop support
-- **Native Splash Screen**: C++/WinAPI native splash screen on Windows for fast startup
+### Output & Export
+- **Multiple Formats**: JSONL (Alpaca), ChatML, CSV, JSON, Plain Text
+- **Batch Processing**: Process multiple files simultaneously with parallel worker pools
+- **Quality Validation**: Automatic quality scoring and validation of generated data
+- **Provenance Tracking**: Full lineage tracking from source document to output item
+
+### Performance
+- **Web Worker Offloading**: Chunking and deduplication run in background workers
+- **Virtual Scrolling**: Efficient rendering of large output lists
+- **SQLite Caching**: Persistent cache with eviction policies
+- **Exponential Backoff**: Retry with jitter for API resilience
+- **Rate Limiting**: Configurable rate limits per provider
+- **Memory-Efficient Processing**: Streaming and batching for large datasets
+
+### Security
+- **AES-256-GCM Encryption**: API key encryption at rest
+- **Input Sanitization**: Path traversal prevention and safe file I/O
+- **CSP Headers**: Content Security Policy enforcement
+- **Local-First**: All processing runs locally by default — no data leaves your machine
+
+### Resilience
+- **Auto-Save Checkpoints**: State persisted every 30 seconds with resume support
+- **Structured JSON Logging**: Log levels, rotation, and file output
+- **Audit Trail**: Full event logging for compliance and debugging
+- **Observability Dashboard**: Real-time processing metrics and statistics
+- **Error Recovery**: Graceful degradation and error boundary handling
+
+### User Experience
+- **Modern UI**: Clean, responsive interface with drag & drop
 - **Dark/Light Themes**: System-aware theme switching
-- **Preset Management**: Save and load processing configurations
-- **Real-time Preview**: Live output preview before export
+- **Toast Notifications**: Non-intrusive user feedback
+- **Resizable Panels**: Adjustable split-pane layout
+- **Skeleton Loading States**: Perceived performance improvements
+- **Keyboard Shortcuts**: Full keyboard navigation support
+- **ARIA Accessibility**: Screen reader support and focus management
+- **Focus Trapping**: Modal dialog accessibility
+- **Confirmation Dialogs**: Critical action safeguards
 
-## 🚀 Quick Start
+### Developer Experience
+- **Headless CLI Mode**: Batch processing and automation via command line
+- **Config Profiles**: Save and load named processing configurations
+- **Template Editor**: Visual prompt template editing
+- **Developer Tools Panel**: Diagnostics, state inspection, and debugging
+- **Service Worker**: Offline app shell caching
+- **Lazy Loading**: On-demand module loading for settings and help
+
+### Testing
+- **565+ Tests**: 30 test files covering unit, integration, and system tests
+- **TypeScript Strict Mode**: Full type safety with `tsc --noEmit`
+- **CI/CD**: Automated testing and release packaging via GitHub Actions
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- **Node.js 18+** and npm (Recommended: Node.js 24+ for best compatibility)
-- **Ollama** (for AI processing) - [Download here](https://ollama.com/)
+- **Node.js 18+** (Recommended: Node.js 24+)
+- **Ollama** (for local AI processing) — [Download](https://ollama.com/)
 
-### Dependency Compatibility
-All project dependencies are verified to be compatible with Node.js 18+:
-
-| Dependency | Version | Node.js Compatibility | Purpose |
-|------------|---------|----------------------|---------|
-| **Electron** | ^39.2.7 | 18+ (uses Node.js 20.9.0) | Desktop application framework |
-| **Vite** | ^7.3.0 | 18+ | Build tool and dev server |
-| **Axios** | ^1.7.9 | 18+ | HTTP client for Ollama API |
-| **html-to-text** | ^9.0.5 | 18+ | HTML document parsing |
-| **mammoth** | ^1.11.0 | 18+ | DOCX document parsing |
-| **officeparser** | ^3.0.0 | 18+ | DOC document parsing |
-| **pdf-parse** | ^1.1.4 | 18+ | PDF document parsing |
-| **rtf-parser-fixes** | ^1.3.4 | 18+ | RTF document parsing |
-| **electron-builder** | ^26.0.12 | 18+ | Application packaging |
-
-**Note**: The `fs` package (`^0.0.1-security`) is a placeholder package and works with all Node.js versions.
-
-### Installation & Running
+### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/richie-rich90454/training-generator.git
 cd training-generator
-
-# Install dependencies
 npm install
+```
 
-# Start Ollama (in a separate terminal)
+### Running
+
+```bash
+# Start Ollama (separate terminal)
 ollama serve
 
-# Pull a model (example)
+# Pull a model
 ollama pull llama3.2
 
-# Run the application
+# Development mode (hot reload)
 npm run dev
-```
 
-### Quick Demo
-```bash
-# Test basic functionality
-node test-app.js
-
-# Test Ollama connection
-node test-ollama.js
-
-# Run complete system test
-node test-complete.js
-```
-
-## 📖 Detailed Usage
-
-### Development Mode
-```bash
-npm run dev
-```
-Starts Vite dev server and Electron app with hot reload. Perfect for development and testing.
-
-### Production Mode
-```bash
+# Production mode
 npm start
-```
-Runs the built Electron application from the distribution.
 
-### Building for Distribution
+# CLI mode (headless)
+npm run cli -- --input ./docs --output ./output --model llama3.2
+```
+
+---
+
+## Usage
+
+### GUI Mode
+
 ```bash
-# Build the application
-npm run build
-
-# Create platform-specific packages
-npm run package           # All platforms
-npm run package:win       # Windows only
-npm run package:mac       # macOS only  
-npm run package:linux     # Linux only
+npm run dev       # Development with hot reload
+npm start         # Production build
 ```
 
-### Automated Release Packaging
-When a new GitHub release is created, the following packages are automatically built and attached to the release:
+### CLI Mode
 
-**macOS (Apple Silicon/M-series only):**
-- DMG installer (`.dmg`)
-- Portable ZIP archive (`.zip`) - unpacked application bundle
+```bash
+npm run cli -- [options]
 
-**Linux (x64 & arm64):**
-- AppImage (`.AppImage`) - portable executable
-- Snap package (`.snap`) - universal Linux package
-- DEB package (`.deb`) - Debian/Ubuntu installer
+Options:
+  --input <path>       Input file or directory
+  --output <path>      Output directory
+  --model <name>       Ollama model name (default: llama3.2)
+  --type <type>        Processing type: instruction|conversation|chunking|custom
+  --format <format>    Output format: jsonl|chatml|csv|json|text
+  --language <lang>    Output language code (e.g., en, zh-Hans, ja)
+  --config <path>      Config profile JSON file
+  --chunk-size <n>     Characters per chunk (default: 2000)
+  --temperature <n>    Model temperature 0.0-1.0 (default: 0.7)
+```
 
-**Note:** Windows packages are not automatically built but can be created manually using `npm run package:win`.
+### Building
 
-The automated packaging workflow only runs on stable releases (skips alpha/beta tags).
+```bash
+npm run build           # Build application
+npm run package         # Package all platforms
+npm run package:win     # Windows only
+npm run package:mac     # macOS only
+npm run package:linux   # Linux only
+```
 
-## 🏗️ Project Structure
+### Testing
+
+```bash
+npm test                # Run all tests (565+ tests)
+npm run test:watch      # Watch mode
+npm run typecheck       # TypeScript strict type checking
+```
+
+---
+
+## Project Structure
 
 ```
 training-generator/
-├── src/                    # Source code
-│   ├── main.js            # Electron main process
-│   ├── preload.js         # IPC bridge between main and renderer
-│   ├── bootstrap.js       # Application bootstrap logic
-│   ├── renderer/
-│   │   └── main.js        # Frontend application logic
+├── src/
+│   ├── main.ts              # Electron main process + IPC handlers
+│   ├── preload.ts           # Secure context bridge APIs
+│   ├── bootstrap.ts         # Application bootstrap
+│   ├── sw.ts                # Service Worker (offline caching)
+│   ├── splash.html          # Native C++ splash screen
+│   ├── cli/
+│   │   ├── index.ts         # Headless CLI entry point
+│   │   └── provider.ts      # CLI provider configuration
 │   ├── core/
-│   │   └── fileParser.js  # Multi-format document parser
+│   │   ├── fileParser.ts    # Multi-format document parser
+│   │   └── fileParserLazy.ts # Lazy-loaded parser variant
+│   ├── renderer/
+│   │   ├── app.ts           # Main application entry point
+│   │   ├── provider.ts      # Multi-provider abstraction (Ollama, OpenAI, Anthropic, Gemini)
+│   │   ├── processor.ts     # Processing pipeline orchestration
+│   │   ├── chunker.ts       # Semantic chunking with context overlap
+│   │   ├── deduplicator.ts  # Simhash-based near-duplicate detection
+│   │   ├── cache.ts         # SQLite caching with persistence
+│   │   ├── promptManager.ts # Multi-language prompt template management
+│   │   ├── fileManager.ts   # File drag-drop, selection, validation
+│   │   ├── outputManager.ts # Output formatting and export
+│   │   ├── uiManager.ts     # UI state, modals, themes, tooltips
+│   │   ├── statsTracker.ts  # Processing statistics aggregation
+│   │   ├── i18n.ts          # Internationalization framework (8 languages)
+│   │   ├── toast.ts         # Toast notification system
+│   │   ├── virtualList.ts   # Virtual scrolling for large lists
+│   │   ├── confirm.ts       # Confirmation modal dialogs
+│   │   ├── settingsPanel.ts # Settings management
+│   │   ├── helpContent.ts   # Lazy-loaded help content
+│   │   ├── logger.ts        # Structured JSON logging
+│   │   ├── security.ts      # AES-256-GCM encryption, input sanitization
+│   │   ├── checkpoint.ts    # Auto-save state (30s interval)
+│   │   ├── audit.ts         # Audit trail and event logging
+│   │   ├── provenance.ts    # Output lineage tracking
+│   │   ├── qualityValidator.ts # Training data quality validation
+│   │   ├── rateLimiter.ts   # API rate limiting with backoff
+│   │   ├── dashboard.ts     # Real-time observability dashboard
+│   │   ├── devtools.ts      # Developer diagnostics panel
+│   │   ├── configProfiles.ts # Named configuration profiles
+│   │   ├── templateEditor.ts # Visual prompt template editor
+│   │   ├── exportFormats.ts # Multi-format export definitions
+│   │   └── workers/
+│   │       ├── chunk.worker.ts  # Web Worker for chunking
+│   │       ├── dedup.worker.ts  # Web Worker for deduplication
+│   │       └── workerPool.ts    # Worker pool management
+│   ├── prompts/             # 32 prompt templates (8 languages x 4 types)
 │   ├── styles/
-│   │   └── main.css       # Application styles
-│   ├── prompts/           # AI prompt templates (multiple languages)
-│   └── workers/           # Web workers for background processing
-├── assets/                # Application assets (icons, fonts)
-├── native-splash/         # Native C++/WinAPI splash screen (Windows)
-├── index.html            # Main application window
-├── vite.config.js        # Vite build configuration
-├── package.json          # Project dependencies and scripts
-└── README.md            # This file
+│   │   └── main.css         # Application styles with a11y support
+│   ├── types/
+│   │   ├── index.ts         # Core type definitions
+│   │   ├── interfaces.ts    # Application state interfaces
+│   │   ├── ipc.ts           # IPC channel type contracts
+│   │   ├── electron.d.ts    # Electron API type extensions
+│   │   └── modules.d.ts     # Module declaration types
+│   └── workers/
+│       └── pdfWorker.ts     # PDF parsing worker
+├── tests/                   # 30 test files, 565+ tests
+├── assets/                  # Icons, fonts, favicons
+├── native-splash/           # Native C++/WinAPI splash screen (Windows)
+├── examples/                # Sample documents for testing
+├── index.html              # Main application window
+├── vite.config.ts          # Vite build configuration
+├── vitest.config.ts        # Vitest test configuration
+├── jest.config.ts          # Jest test configuration
+├── tsconfig.json           # TypeScript configuration (strict mode)
+└── package.json            # Dependencies and scripts
 ```
 
-## ⚙️ Configuration
+---
 
-The application provides extensive configuration options:
+## Configuration
 
 ### Processing Settings
-- **Model Selection**: Choose from available Ollama models
+- **Model Selection**: Choose from available Ollama/cloud models
 - **Chunk Size**: Adjust text segmentation (500-10000 characters)
 - **Temperature**: Control AI creativity (0.0-1.0)
-- **Output Format**: JSONL, ChatML, CSV, or Plain Text
-- **Language**: Multiple output language options
+- **Output Format**: JSONL, ChatML, CSV, JSON, Plain Text
+- **Language**: 8 output languages
+- **Max Output Items**: Configurable limit with automatic file splitting
+- **Max Chunks**: Configurable maximum chunks per processing run
 
 ### Application Preferences
 - **Theme**: Auto, Light, or Dark mode
 - **Window Behavior**: Remember size/position, start maximized
-- **Auto-save**: Automatic preset saving
-- **File Size Limits**: Configure maximum file size (10-1000MB)
+- **Config Profiles**: Save and load named configuration presets
+- **File Size Limits**: Configure maximum file size
+
+### Provider Configuration
+- **Ollama**: Local auto-detection with custom endpoint support
+- **OpenAI**: API key with AES-256-GCM encryption
+- **Anthropic**: API key with secure storage
+- **Google Gemini**: API key with secure storage
 
 ### System Integration
-- **Ollama Auto-detection**: Automatic connection to local Ollama instance
-- **Progress Persistence**: Resume interrupted processing sessions
-- **Export Location**: Remember last used export directory
+- **Auto-Save**: State persisted every 30 seconds
+- **Resume Support**: Recover from interrupted sessions
+- **Export Location**: Remember last used directory
 
-## 🔧 Troubleshooting
+---
 
-### Common Issues & Solutions
+## Troubleshooting
 
-#### 🚫 Ollama Connection Issues
+### Ollama Connection
+
 ```bash
 # Check if Ollama is running
 curl http://localhost:11434/api/tags
 
-# Start Ollama if not running
+# Start Ollama
 ollama serve
 
-# Verify service status (Windows)
+# Verify on Windows
 netstat -ano | findstr :11434
 ```
 
-#### 📄 File Parsing Problems
+### File Parsing Issues
 - **Scanned PDFs**: Use OCR software first for image-based PDFs
 - **Large Files**: Reduce chunk size or split files manually
-- **Encoding Issues**: Convert files to UTF-8 text format first
+- **Encoding Issues**: Convert files to UTF-8 first
 
-#### ⚡ Performance Optimization
-- **GPU Acceleration**: Ensure Ollama is using GPU (check Ollama logs)
+### Performance Optimization
+- **GPU Acceleration**: Ensure Ollama is using GPU
 - **Memory Management**: Close other GPU-intensive applications
-- **Chunk Size**: Adjust based on model context window (2000-4000 tokens optimal)
-
-#### 🐛 Application Errors
-```bash
-# Clear dependencies and rebuild
-npm cache clean --force
-npm ci
-
-# Check Node.js version
-node --version  # Should be 18+
-
-# Run in debug mode
-npm run dev -- --debug
-```
+- **Chunk Size**: Adjust based on model context window
 
 ### Debug Mode
-For advanced troubleshooting, enable debug logging:
+
 ```bash
 npm run dev -- --debug
 ```
-Logs are available in:
+
+Logs are available at:
 - **Windows**: Application console output
 - **macOS/Linux**: `~/.config/Training Generator/logs/`
 
-## 🧪 Testing
+---
 
-The project includes comprehensive test suites:
+## Roadmap
 
-```bash
-# Run all tests
-npm test
+### Completed
+- Multi-provider architecture (Ollama, OpenAI, Anthropic, Gemini)
+- Semantic chunking with context preservation
+- Simhash deduplication
+- SQLite caching with persistence
+- 8-language i18n framework
+- AES-256-GCM API key encryption
+- Structured JSON logging
+- Auto-save checkpointing (30s)
+- Audit trail and provenance tracking
+- Headless CLI mode
+- Web Worker offloading
+- Virtual scrolling
+- Toast notifications
+- ARIA accessibility
+- Service Worker offline caching
+- 565+ test suite
 
-# Individual test scripts
-node test_language_prompts.js  # Language prompt validation
-node test-app.js              # Basic application functionality
-node test-complete.js         # Complete system integration test
-node test-ollama.js           # Ollama connection and model testing
-```
+### Planned
+- Plugin system for extensible processing pipelines
+- Folder monitoring for automatic batch processing
+- Advanced analytics and quality metrics
+- REST API server mode for remote operation
+- Mobile companion app for monitoring
 
-## 🛣️ Roadmap & Future Features
+---
 
-### Planned Enhancements
-- **🔌 Plugin System**: Extensible processing pipelines
-- **🌐 Cloud Integration**: Optional cloud model support (OpenAI, Anthropic, etc.)
-- **📈 Advanced Analytics**: Processing statistics and quality metrics
-- **🔄 Batch Scheduling**: Automated processing queues
-- **🔍 Content Filtering**: Smart filtering of sensitive information
+## Contributing
 
-### In Development
-- **🧩 Modular Architecture**: Plugin-based file parser system
-- **📊 Performance Dashboard**: Real-time processing metrics
-- **🔗 API Server Mode**: REST API for headless operation
-
-### Community Requests
-- **🗂️ Folder Monitoring**: Watch folders for automatic processing
-- **📱 Mobile Companion**: Mobile app for remote monitoring
-- **🔐 Enterprise Features**: User management, audit logging, compliance tools
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes**
-4. **Run tests**: `npm test`
-5. **Submit a pull request**
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run tests: `npm test`
+5. Run typecheck: `npm run typecheck`
+6. Submit a pull request
 
 ### Development Setup
+
 ```bash
-# Install development dependencies
 npm install
-
-# Set up pre-commit hooks (if configured)
-npm run prepare
-
-# Start development server
 npm run dev
 ```
 
 ### Code Style
-- Use consistent formatting (Prettier configuration coming soon)
+- TypeScript strict mode enforced
+- Consistent formatting
 - Add comments for complex logic
-- Update documentation for new features
 - Include tests for new functionality
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Support
-
-- **Documentation**: [GitHub Wiki](https://github.com/richie-rich90454/training-generator/wiki)
-- **Issue Tracker**: [Report Bugs](https://github.com/richie-rich90454/training-generator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/richie-rich90454/training-generator/discussions)
-- If this project helps you, please ⭐ **Star** the repo and share feedback via [Discussions](https://github.com/richie-rich90454/training-generator/discussions)!
-
-## 📸 Screenshots
-
-<!--
-![Main Application Interface](./screenshots/main-app.png)
-*Modern interface with drag & drop file upload*
-
-![Processing Configuration](./screenshots/configuration.png)
-*Flexible processing options and model selection*
-
-![Output Preview](./screenshots/output-preview.png)
-*Real-time output preview with export options*
--->
-
-*Screenshot placeholders - add actual screenshots to the `screenshots/` directory*
-
-## In Development
-- 🟢 Modular Architecture
-- 🟡 Performance Dashboard
-- 🔴 API Server Mode
 
 ---
 
-**🔒 Privacy Note**: This application processes documents locally using your own Ollama instance. No data is sent to external servers unless you configure custom API endpoints.
+## License
 
-**⚡ Performance Tip**: For best results, use GPU-accelerated Ollama models and ensure sufficient system memory for large documents.
+MIT License — see [LICENSE](LICENSE) for details.
 
-**🐛 Found a Bug?** Please report it on the [issue tracker](https://github.com/richie-rich90454/training-generator/issues) with detailed steps to reproduce.
+---
+
+## Support
+
+- **Documentation**: [GitHub Wiki](https://github.com/richie-rich90454/training-generator/wiki)
+- **Issues**: [Report Bugs](https://github.com/richie-rich90454/training-generator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/richie-rich90454/training-generator/discussions)
+- If this project helps you, please star the repo!
+
+---
+
+**Privacy Note**: This application processes documents locally using your own Ollama instance. No data is sent to external servers unless you configure cloud API endpoints.
+
+**Performance Tip**: For best results, use GPU-accelerated Ollama models and ensure sufficient system memory for large documents.
