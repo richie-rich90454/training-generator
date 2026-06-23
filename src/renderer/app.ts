@@ -181,12 +181,14 @@ class TrainGeneratorApp{
                 this.uiManager.demoBtn.innerHTML='<i class="fas fa-magic"></i> Demo'
                 this.uiManager.demoBtn.classList.remove("active")
                 this.logger.info("app","Demo mode disabled")
+                this.fileManager.updateProcessButton()
             }
             else{
                 this.processor.enableDemoMode()
                 this.uiManager.demoBtn.innerHTML='<i class="fas fa-magic"></i> Demo (Active)'
                 this.uiManager.demoBtn.classList.add("active")
                 this.logger.info("app","Demo mode enabled - processing without Ollama")
+                this.fileManager.updateProcessButton()
             }
         })
         this.addEventListener(this.uiManager.editTemplatesBtn,"click",()=>{
@@ -293,6 +295,7 @@ class TrainGeneratorApp{
     }
     initProvider():void{
         try{
+            this.providerManager?.stopHealthChecks()
             let type=this.uiManager.providerSelect.value
             let config={
                 apiKey:this.uiManager.apiKeyInput.value,
@@ -982,6 +985,7 @@ OUTPUT: structured analysis covering everything important.`
     }
     async saveProgress():Promise<void>{
         try{
+            if(!window.electronAPI?.saveProgress)return
             let data={
                 files:this.fileManager.selectedFiles,
                 outputData:this.outputManager.outputData,
@@ -995,6 +999,7 @@ OUTPUT: structured analysis covering everything important.`
     }
     async checkForProgress():Promise<void>{
         try{
+            if(!window.electronAPI?.loadProgress)return
             let result=await window.electronAPI.loadProgress()
             if(result.success&&result.data&&result.data.outputData?.length>0){
                 this.logger.info("app","Found saved progress from previous session")

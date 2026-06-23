@@ -161,7 +161,7 @@ class UIManager{
                 items:data,
                 itemHeight:ITEM_HEIGHT,
                 renderItem:(item)=>{
-                    return `<pre style="margin:0;font-family:monospace;font-size:.875rem;line-height:${ITEM_HEIGHT}px;white-space:pre-wrap;word-wrap:break-word">${this.escapeHtml(JSON.stringify(item))}</pre>`
+                    return `<pre style="margin:0;font-family:'Noto Sans',sans-serif;font-size:.875rem;line-height:${ITEM_HEIGHT}px;white-space:pre-wrap;word-wrap:break-word">${this.escapeHtml(JSON.stringify(item))}</pre>`
                 }
             })
             return

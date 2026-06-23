@@ -9,6 +9,12 @@ class OutputManager{
         this.app=app
         this.outputData=[]
     }
+    private getItemText(item:TrainingItem):string{
+        if(item.output)return item.output
+        if(item.messages)return item.messages.map(m=>m.content).join(" ")
+        if(item.text)return item.text
+        return""
+    }
     createTrainingItem(input:string,output:string,processingType:string):TrainingItem[]{
         let format=this.app.uiManager.outputFormat.value
         let items:TrainingItem[]=[]
@@ -285,7 +291,7 @@ class OutputManager{
             return exportCSV(data)
         }
         else if(format=="text"){
-            return data.map(item=>item.output||"").join("\n\n")
+            return data.map(item=>this.getItemText(item)).join("\n\n")
         }
         return data.map(item=>JSON.stringify(item)).join("\n")
     }
@@ -307,7 +313,7 @@ class OutputManager{
                 content=exportCSV(this.outputData)
             }
             else if(format=="text"){
-                content=this.outputData.map(item=>item.output||"").join("\n\n")
+                content=this.outputData.map(item=>this.getItemText(item)).join("\n\n")
             }
             await navigator.clipboard.writeText(content)
             this.app.addLog("Copied to clipboard","success")

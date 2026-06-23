@@ -1,5 +1,5 @@
-﻿﻿﻿﻿import{contextBridge,ipcRenderer}from "electron"
-import type{OllamaStatus}from "./types/index.js"
+﻿import{contextBridge,ipcRenderer}from "electron"
+import type{OllamaStatus}from "./types/index.ts"
 
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>ipcRenderer.invoke("dialog:openFile"),

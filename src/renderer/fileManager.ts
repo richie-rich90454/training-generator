@@ -179,9 +179,14 @@ class FileManager{
         statusEl.innerHTML=`<i class="fas ${iconMap[status]||"fa-clock"}" style="color:${colorMap[status]||"#A19F9D"}"></i>`
     }
     updateProcessButton():void{
-        this.processBtn.disabled=this.selectedFiles.length==0 ||!this.app.uiManager.ollamaStatus.running
-        if(!this.app.uiManager.ollamaStatus.running){
+        let ollamaReady=this.app.uiManager.ollamaStatus.running
+        let demoActive=this.app.processor?.demoMode??false
+        this.processBtn.disabled=this.selectedFiles.length==0||(!ollamaReady&&!demoActive)
+        if(!ollamaReady&&!demoActive){
             this.processBtn.title="Ollama is not running"
+        }
+        else if(demoActive){
+            this.processBtn.title="Demo mode active"
         }
         else{
             this.processBtn.title=""

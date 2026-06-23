@@ -13,6 +13,7 @@
         "resolveJsonModule":true,
         "isolatedModules":true,
         "noEmit":true,
+        "allowImportingTsExtensions":true,
         "lib":["ES2020","DOM","DOM.Iterable"]
     },
     "include":[

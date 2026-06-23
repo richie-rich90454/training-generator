@@ -7,8 +7,8 @@ import{fileURLToPath}from "url"
 import http from "http"
 import https from "https"
 import axios from "axios"
-import FileParserLazy from "./core/fileParserLazy.js"
-import type{FileObj,OllamaGenerateOptions}from "./types/index.js"
+import FileParserLazy from "./core/fileParserLazy.ts"
+import type{FileObj,OllamaGenerateOptions}from "./types/index.ts"
 
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
@@ -194,7 +194,7 @@ function createMainWindow(){
         titleBarStyle:"default",
         useContentSize:true,
         webPreferences:{
-            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),process.env.NODE_ENV==="development"?"preload.ts":"preload.js"),
+            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.ts"),
             nodeIntegration:false,
             contextIsolation:true,
             spellcheck:false,

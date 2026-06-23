@@ -1,12 +1,12 @@
 import fs from "fs"
 import path from "path"
-import { createCliProvider } from "./provider.js"
-import Processor from "../renderer/processor.js"
-import { semanticChunk, simpleChunk } from "../renderer/chunker.js"
-import { deduplicate } from "../renderer/deduplicator.js"
-import type { TrainingItem } from "../types/index.js"
-import FileParser from "../core/fileParser.js"
-import { exportJSONL, exportJSONArray, exportCSV } from "../renderer/exportFormats.js"
+import { createCliProvider } from "./provider.ts"
+import Processor from "../renderer/processor.ts"
+import { semanticChunk, simpleChunk } from "../renderer/chunker.ts"
+import { deduplicate } from "../renderer/deduplicator.ts"
+import type { TrainingItem } from "../types/index.ts"
+import FileParser from "../core/fileParser.ts"
+import { exportJSONL, exportJSONArray, exportCSV } from "../renderer/exportFormats.ts"
 
 interface CliArgs {
     input: string

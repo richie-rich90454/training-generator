@@ -1,5 +1,5 @@
-import type { Provider, ProviderOptions, ProviderResult } from "../renderer/provider.js"
-import { RateLimiter } from "../renderer/rateLimiter.js"
+import type { Provider, ProviderOptions, ProviderResult } from "../renderer/provider.ts"
+import { RateLimiter } from "../renderer/rateLimiter.ts"
 import axios from "axios"
 
 async function retryWithBackoff<T>(

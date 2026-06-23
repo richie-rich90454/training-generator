@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 import{Worker}from "worker_threads"
 import{fileURLToPath}from "url"
-import type{ParseBatchItem}from "../types/index.js"
+import type{ParseBatchItem}from "../types/index.ts"
 
 class FileParserLazy{
     supportedFormats:string[]

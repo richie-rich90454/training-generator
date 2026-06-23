@@ -37,7 +37,7 @@
 }
 @font-face{
     font-family: "Noto Sans";
-    src: url("/assets/NotoSans-VariableFont_wdth_wght.ttf") format("truetype");
+    src: url("../../assets/NotoSans-VariableFont_wdth_wght.ttf") format("truetype");
     font-display: swap;
     font-weight: 1 1000;
 }
@@ -315,7 +315,7 @@ html{
     -moz-osx-font-smoothing:grayscale;
 }
 body{
-    font-family:"Noto Sans",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    font-family:'Noto Sans',sans-serif;
     background-color:var(--background-color);
     color:var(--text-primary);
     line-height:1.5;
@@ -553,7 +553,7 @@ html[data-platform="windows"] .app-container{
     padding:var(--spacing-md);
     max-height:200px;
     overflow-y:auto;
-    font-family:monospace;
+    font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
 }
 .log-entry{
@@ -636,7 +636,7 @@ html[data-platform="windows"] .app-container{
     cursor:pointer;
     transition:none;
     text-decoration:none;
-    font-family:inherit;
+    font-family:'Noto Sans',sans-serif;
     position:relative;
     overflow:hidden;
     backdrop-filter:none;
@@ -782,7 +782,7 @@ html[data-platform="windows"] .app-container{
     padding:var(--spacing-md);
     max-height:400px;
     overflow-y:auto;
-    font-family:monospace;
+    font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
     line-height:1.6;
 }
@@ -792,7 +792,7 @@ html[data-platform="windows"] .app-container{
     word-wrap:break-word;
 }
 .output-preview code{
-    font-family:inherit;
+    font-family:'Noto Sans',sans-serif;
     color:var(--text-primary);
 }
 .app-footer{
@@ -1067,7 +1067,7 @@ html[data-platform="windows"] .app-container{
     background:var(--surface-variant);
     padding:.125rem .25rem;
     border-radius:var(--radius-small);
-    font-family:monospace;
+    font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
 }
 @media (max-width:768px){
@@ -1272,7 +1272,7 @@ html[data-platform="windows"] .app-container{
     left:0;
     right:0;
     overflow:hidden;
-    font-family:monospace;
+    font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
     line-height:1.5;
     padding:2px 8px;

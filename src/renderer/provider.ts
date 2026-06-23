@@ -79,6 +79,7 @@ export class OllamaProvider implements Provider{
     rateLimiter?:RateLimiter=undefined
 
     async healthCheck():Promise<boolean>{
+        if(!window.electronAPI?.checkOllama)return false
         try{
             let status=await window.electronAPI.checkOllama()
             return status.running
@@ -89,6 +90,7 @@ export class OllamaProvider implements Provider{
     }
 
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        if(!window.electronAPI?.generateWithOllamaStream)throw new Error("Electron API not available")
         try{
             let result=await retryWithBackoff(async()=>{
                 let r=await window.electronAPI.generateWithOllamaStream(model,prompt,{
@@ -137,6 +139,7 @@ export class OpenAIProvider implements Provider{
     }
 
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        if(!window.electronAPI?.generateWithOpenAI)throw new Error("Electron API not available")
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{

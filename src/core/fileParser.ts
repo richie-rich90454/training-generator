@@ -5,7 +5,7 @@ import{RtfParser}from "rtf-parser-fixes"
 import{htmlToText}from "html-to-text"
 import fs from "fs"
 import path from "path"
-import type{ParseBatchItem}from "../types/index.js"
+import type{ParseBatchItem}from "../types/index.ts"
 class FileParser{
     supportedFormats:string[]
     constructor(){
