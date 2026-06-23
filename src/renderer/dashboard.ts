@@ -105,7 +105,7 @@ export class Dashboard {
     this.metrics.chunksPerSecond = elapsed > 0 ? Math.round(this.metrics.chunksDone / elapsed) : 0
     this.metrics.elapsed = this.formatDuration(elapsed * 1000)
     if (elapsed > 0 && this.metrics.chunksTotal > 0) {
-      this.metrics.tokensPerSecond = Math.round(this.metrics.tokensPerSecond * 0.9 + 0)
+      this.metrics.tokensPerSecond = elapsed > 0 ? Math.round((this.metrics.chunksDone / elapsed) * 100) : 0
     }
     if (this.metrics.chunksPerSecond > 0 && this.metrics.chunksTotal > 0) {
       let remaining = this.metrics.chunksTotal - this.metrics.chunksDone

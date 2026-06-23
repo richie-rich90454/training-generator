@@ -73,11 +73,16 @@ class Toast {
     this.animateOut(toast.element, () => toast.element.remove())
   }
 
-  private animateOut(element: HTMLDivElement, callback: () => void): void {
+  private animateOut(element: HTMLElement, callback: () => void): void {
+    let called = false
+    let wrappedCallback = () => {
+      if (called) return
+      called = true
+      callback()
+    }
     element.classList.add("toast-hiding")
-    element.addEventListener("transitionend", callback, { once: true })
-    // Fallback if transitionend doesn't fire
-    setTimeout(callback, 400)
+    element.addEventListener("transitionend", wrappedCallback, { once: true })
+    setTimeout(wrappedCallback, 400)
   }
 
   private getIcon(type: ToastType): string {
