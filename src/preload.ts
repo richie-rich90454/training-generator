@@ -1,4 +1,4 @@
-﻿﻿import{contextBridge,ipcRenderer}from "electron"
+﻿﻿﻿﻿import{contextBridge,ipcRenderer}from "electron"
 import type{OllamaStatus}from "./types/index.js"
 import type{IpcChannel,IpcRequest,IpcResponse}from "./types/ipc.js"
 
