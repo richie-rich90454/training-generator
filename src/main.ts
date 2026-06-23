@@ -194,7 +194,7 @@ function createMainWindow(){
         titleBarStyle:"default",
         useContentSize:true,
         webPreferences:{
-            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.ts"),
+            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),process.env.NODE_ENV==="development"?"preload.ts":"preload.js"),
             nodeIntegration:false,
             contextIsolation:true,
             spellcheck:false,
@@ -703,6 +703,43 @@ ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
         return{success:false}
     }
 })
+
+ipcMain.handle("save-checkpoint",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+    try{
+        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+        fs.writeFileSync(checkpointPath,JSON.stringify(data))
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
+
+ipcMain.handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
+    try{
+        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+        if(fs.existsSync(checkpointPath)){
+            let data=JSON.parse(fs.readFileSync(checkpointPath,"utf-8"))
+            return{success:true,data}
+        }
+        return{success:true,data:null}
+    }
+    catch{
+        return{success:true,data:null}
+    }
+})
+
+ipcMain.handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
+    try{
+        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+        if(fs.existsSync(checkpointPath))fs.unlinkSync(checkpointPath)
+        return{success:true}
+    }
+    catch{
+        return{success:false}
+    }
+})
+
 const LOGS_DIR=path.join(userDataPath,"logs")
 const MAX_LOG_FILES=5
 const MAX_LOG_SIZE=1024*1024
