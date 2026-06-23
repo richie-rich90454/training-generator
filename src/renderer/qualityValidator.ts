@@ -21,29 +21,47 @@ export function validateItems(items: TrainingItem[], sourceText?: string): Quali
     let item = items[i]
     let reasons: string[] = []
     
-    // Check 1: Minimum answer length (20 chars)
-    let answer = item.output || ""
     if (item.messages) {
-      answer = item.messages.map(m => m.content).join(" ")
-    }
-    if (answer.length < 20) {
-      reasons.push("answer_too_short")
-    }
-    
-    // Check 2: Q&A pair completeness
-    if (item.instruction && !item.output) {
-      reasons.push("missing_answer")
-    }
-    if (!item.instruction && item.output) {
-      reasons.push("missing_question")
-    }
-    
-    // Check 3: Language consistency (basic check)
-    if (item.instruction && item.output) {
-      let qHasCJK = /[\u4e00-\u9fff]/.test(item.instruction)
-      let aHasCJK = /[\u4e00-\u9fff]/.test(item.output)
-      if (qHasCJK !== aHasCJK) {
-        reasons.push("language_mismatch")
+      // Messages format: check that messages is non-empty and each has role/content
+      if (!item.messages.length) {
+        reasons.push("missing_answer")
+      } else {
+        for (let msg of item.messages) {
+          if (!msg.role || !msg.content) {
+            reasons.push("missing_answer")
+            break
+          }
+        }
+        let answer = item.messages.map(m => m.content).join(" ")
+        if (answer.length < 20) {
+          reasons.push("answer_too_short")
+        }
+      }
+    } else if (item.text) {
+      // Text format: check that text is non-empty and has minimum length
+      if (!item.text) {
+        reasons.push("missing_answer")
+      } else if (item.text.length < 20) {
+        reasons.push("answer_too_short")
+      }
+    } else {
+      // Instruction format: existing checks
+      let answer = item.output || ""
+      if (answer.length < 20) {
+        reasons.push("answer_too_short")
+      }
+      if (item.instruction && !item.output) {
+        reasons.push("missing_answer")
+      }
+      if (!item.instruction && item.output) {
+        reasons.push("missing_question")
+      }
+      if (item.instruction && item.output) {
+        let qHasCJK = /[\u4e00-\u9fff]/.test(item.instruction)
+        let aHasCJK = /[\u4e00-\u9fff]/.test(item.output)
+        if (qHasCJK !== aHasCJK) {
+          reasons.push("language_mismatch")
+        }
       }
     }
     

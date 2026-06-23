@@ -9,14 +9,27 @@ export function exportJSONArray(items: TrainingItem[]): string {
 }
 
 export function exportCSV(items: TrainingItem[]): string {
-  let header = "instruction,input,output"
-  let rows = items.map(item => {
-    let instruction = csvEscape(item.instruction || "")
-    let input = csvEscape(item.input || "")
-    let output = csvEscape(item.output || "")
-    return `${instruction},${input},${output}`
-  })
-  return [header, ...rows].join("\n")
+    let header = "instruction,input,output"
+    let rows = items.map(item => {
+        let instruction: string
+        let input: string
+        let output: string
+        if (item.messages) {
+            instruction = ""
+            input = ""
+            output = csvEscape(JSON.stringify(item.messages))
+        } else if (item.text) {
+            instruction = ""
+            input = ""
+            output = csvEscape(item.text)
+        } else {
+            instruction = csvEscape(item.instruction || "")
+            input = csvEscape(item.input || "")
+            output = csvEscape(item.output || "")
+        }
+        return `${instruction},${input},${output}`
+    })
+    return [header, ...rows].join("\n")
 }
 
 function csvEscape(value: string): string {
