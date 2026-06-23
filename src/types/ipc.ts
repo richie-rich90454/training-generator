@@ -1,60 +1,109 @@
 // IPC Channel definitions with typed request/response contracts
 
 export interface IpcChannels {
-  'parse-file': {
-    request: { path: string; type: string }
+  'file:parse': {
+    request: { filePath: string; fileType: string }
     response: { success: boolean; content?: string; error?: string }
   }
-  'parse-batch': {
-    request: { files: { filePath: string; type: string }[] }
-    response: { success: boolean; results?: { filePath: string; success: boolean; text: string; error: string | null }[]; error?: string }
+  'file:parseBatch': {
+    request: FileObj[]
+    response: { success: boolean; results?: unknown[]; error?: string }
   }
-  'save-file': {
-    request: { path: string; content: string }
+  'file:save': {
+    request: { filePath: string; content: string }
     response: { success: boolean; error?: string }
   }
-  'export-logs': {
-    request: { data: string }
-    response: { success: boolean; error?: string }
+  'file:read': {
+    request: { filePath: string }
+    response: { success: boolean; content?: string; error?: string }
   }
-  'write-log': {
-    request: { entry: unknown }
-    response: void
-  }
-  'save-checkpoint': {
-    request: { data: unknown }
-    response: void
-  }
-  'load-checkpoint': {
+  'dialog:openFile': {
     request: void
-    response: { success: boolean; data?: unknown }
+    response: FileObj[]
   }
-  'clear-checkpoint': {
+  'dialog:saveFile': {
+    request: { defaultFilename?: string }
+    response: string | null
+  }
+  'ollama:check': {
     request: void
-    response: void
-  }
-  'save-profile': {
-    request: { profile: unknown }
-    response: { success: boolean; error?: string }
-  }
-  'load-profile': {
-    request: { name: string }
-    response: { success: boolean; data?: unknown }
-  }
-  'list-profiles': {
-    request: void
-    response: { success: boolean; profiles?: unknown[] }
+    response: { running: boolean; models: unknown[]; version: string } | { running: false; models: never[]; error: string }
   }
   'ollama:generate': {
     request: { model: string; prompt: string; options?: Record<string, unknown> }
     response: { success: boolean; response?: string; error?: string }
   }
+  'ollama:generateStream': {
+    request: { model: string; prompt: string; options?: Record<string, unknown> }
+    response: AsyncIterable<{ done: boolean; content?: string }>
+  }
   'openai:generate': {
     request: { apiKey: string; baseUrl: string; model: string; prompt: string; options?: Record<string, unknown> }
     response: { success: boolean; response?: string; usage?: { total_tokens: number }; error?: string }
+  }
+  'app:getVersion': {
+    request: void
+    response: string
+  }
+  'app:getPlatform': {
+    request: void
+    response: string
+  }
+  'cache:load': {
+    request: void
+    response: { success: boolean; data?: Record<string, any> }
+  }
+  'cache:save': {
+    request: { data: Record<string, any> }
+    response: { success: boolean }
+  }
+  'cache:clear': {
+    request: void
+    response: { success: boolean }
+  }
+  'progress:save': {
+    request: { data: any }
+    response: { success: boolean }
+  }
+  'progress:load': {
+    request: void
+    response: { success: boolean; data?: any }
+  }
+  'progress:clear': {
+    request: void
+    response: { success: boolean }
+  }
+  'save-checkpoint': {
+    request: { data: any }
+    response: { success: boolean }
+  }
+  'load-checkpoint': {
+    request: void
+    response: { success: boolean; data?: any }
+  }
+  'clear-checkpoint': {
+    request: void
+    response: { success: boolean }
+  }
+  'write-log': {
+    request: { entry: unknown }
+    response: void
+  }
+  'export-logs': {
+    request: { data: string }
+    response: { success: boolean; error?: string }
   }
 }
 
 export type IpcChannel = keyof IpcChannels
 export type IpcRequest<C extends IpcChannel> = IpcChannels[C]['request']
 export type IpcResponse<C extends IpcChannel> = IpcChannels[C]['response']
+
+// Re-export FileObj used by dialog channels
+export interface FileObj {
+  path: string
+  name: string
+  size: number
+  type: string
+  lastModified: Date
+}
