@@ -134,7 +134,7 @@ class TrainGeneratorApp{
         this.uiManager.initSettings()
         await this.uiManager.checkOllamaStatus()
         this.uiManager.startOllamaMonitor()
-        this.registerServiceWorker()
+
     }
     bindEvents():void{
         this.addEventListener(this.fileManager.dropZone,"dragover",this.fileManager.handleDragOver.bind(this.fileManager) as EventListener)
@@ -307,26 +307,7 @@ class TrainGeneratorApp{
             this.logger.error("app","Failed to initialize provider",{error:(error as Error).message})
         }
     }
-    async registerServiceWorker():Promise<void>{
-        if(!("serviceWorker" in navigator))return
-        try{
-            let registration=await navigator.serviceWorker.register("./sw.js")
-            this.logger.info("app","Service Worker registered for offline support")
-            registration.addEventListener("updatefound",()=>{
-                let newWorker=registration.installing
-                if(newWorker){
-                    newWorker.addEventListener("statechange",()=>{
-                        if(newWorker.state==="installed"&&navigator.serviceWorker.controller){
-                            this.logger.info("app","New version available - reload to update")
-                        }
-                    })
-                }
-            })
-        }
-        catch(error){
-            console.warn("Service Worker registration failed:",error)
-        }
-    }
+
     async processFiles():Promise<void>{
         if(this.isProcessing){
             this.logger.warn("app","Processing already in progress")
@@ -336,7 +317,7 @@ class TrainGeneratorApp{
             this.logger.warn("app","No files to process")
             return
         }
-        if(!this.uiManager.ollamaStatus.running){
+        if(!this.uiManager.ollamaStatus.running && !this.processor.demoMode){
             this.logger.error("app","Cannot process:Ollama is not running")
             showToast("Ollama is not running","error")
             return
