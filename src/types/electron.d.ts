@@ -13,6 +13,7 @@ export interface ElectronAPI{
     generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
     getAppVersion:()=>Promise<string>
     getPlatform:()=>Promise<string>
+    openUserGuide:()=>Promise<{success:boolean;error?:string}>
     loadCache:()=>Promise<{success:boolean;data?:Record<string,any>}>
     saveCache:(data:Record<string,any>)=>Promise<{success:boolean}>
     clearCache:()=>Promise<{success:boolean}>

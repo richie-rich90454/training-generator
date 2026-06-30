@@ -1,4 +1,4 @@
-import{app,BrowserWindow,ipcMain,dialog}from "electron"
+import{app,BrowserWindow,ipcMain,dialog,shell}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
@@ -713,6 +713,34 @@ function registerCriticalIpcHandlers():void{
     })
     ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
     ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
+    ipcMain.handle("docs:openUserGuide",async(_:Electron.IpcMainInvokeEvent):Promise<{success:boolean;error?:string}>=>{
+        try{
+            let candidates=[
+                path.join(app.getAppPath(),"docs","user-guide.md"),
+                path.join(process.resourcesPath,"docs","user-guide.md"),
+                path.join(path.dirname(app.getPath("exe")),"docs","user-guide.md"),
+                path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","docs","user-guide.md")
+            ]
+            let guidePath:string|null=null
+            for(let p of candidates){
+                if(fs.existsSync(p)){
+                    guidePath=p
+                    break
+                }
+            }
+            if(!guidePath){
+                return{success:false,error:"User guide not found"}
+            }
+            let error=await shell.openPath(guidePath)
+            if(error){
+                return{success:false,error}
+            }
+            return{success:true}
+        }
+        catch(error){
+            return{success:false,error:(error as Error).message}
+        }
+    })
 }
 function registerDeferredIpcHandlers():void{
     if(deferredIpcRegistered)return

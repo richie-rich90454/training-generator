@@ -184,6 +184,13 @@ class TrainGeneratorApp{
             let module=await import("./helpContent.js")
             this.uiManager.showHelp()
         })
+        let docsLink=document.getElementById("docs-link")
+        if(docsLink){
+            this.addEventListener(docsLink,"click",(e:Event)=>{
+                e.preventDefault()
+                this.openUserGuide()
+            })
+        }
         this.addEventListener(this.uiManager.providerSelect,"change",()=>{
             this.uiManager.updateProviderVisibility()
             this.initProvider()
@@ -318,6 +325,25 @@ class TrainGeneratorApp{
         }
         html+='</table></div>'
         this.uiManager.showCustomModal(html)
+    }
+    async openUserGuide():Promise<void>{
+        try{
+            if(window.electronAPI&&window.electronAPI.openUserGuide){
+                let result=await window.electronAPI.openUserGuide()
+                if(!result.success){
+                    this.addLog(`Failed to open user guide: ${result.error}`,"error")
+                }
+                else{
+                    this.addLog("Opened user guide","success")
+                }
+            }
+            else{
+                this.addLog("User guide opening is only available in the Electron app","warning")
+            }
+        }
+        catch(error){
+            this.addLog(`Failed to open user guide: ${(error as Error).message}`,"error")
+        }
     }
     initProvider():void{
         try{
