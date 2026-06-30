@@ -196,12 +196,15 @@ function startSplash(){
 }
 function stopSplash(){
     console.log("[splash] stopSplash called, splashProcess:",splashProcess?splashProcess.pid:null,"splashWindow:",!!splashWindow)
+    if(!splashProcess&&!splashWindow){
+        console.log("[splash] already stopped")
+        return
+    }
     if(isWin&&splashProcess){
         console.log("[splash] killing splash process:",splashProcess.pid)
         try{splashProcess.kill()}
         catch{}
         splashProcess=null
-        return
     }
     if(splashWindow&&!splashWindow.isDestroyed()){
         console.log("[splash] closing splash window")
