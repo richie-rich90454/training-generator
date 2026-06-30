@@ -134,11 +134,16 @@ function startSplash(){
     // to resources/native-splash via extraResources, so path priority must
     // differ between the two modes.
     if(isWin){
-        let exePaths=[
-            path.join(process.resourcesPath,"native-splash","splash.exe"),
-            path.join(path.dirname(fileURLToPath(import.meta.url)),"..","native-splash","splash.exe"),
-            path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","native-splash","splash.exe"),
-        ]
+        let metaDir=path.dirname(fileURLToPath(import.meta.url))
+        let exePaths:string[]=[]
+        if(app.isPackaged){
+            exePaths.push(path.join(process.resourcesPath,"native-splash","splash.exe"))
+        }
+        else{
+            exePaths.push(path.join(metaDir,"..","native-splash","splash.exe"))
+            exePaths.push(path.join(metaDir,"..","..","native-splash","splash.exe"))
+            exePaths.push(path.join(process.cwd(),"native-splash","splash.exe"))
+        }
         let exePath:string|null=null
         for(let p of exePaths){
             console.log("[splash] checking candidate:",p,"exists:",fs.existsSync(p))
