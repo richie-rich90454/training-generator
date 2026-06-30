@@ -144,6 +144,13 @@ function startSplash(){
             }
         }
         if(exePath){
+            try{
+                let stats=fs.statSync(exePath)
+                console.log("[splash] found executable:",exePath,"size:",stats.size,"isFile:",stats.isFile())
+            }
+            catch{
+                console.error("[splash] failed to stat executable:",exePath)
+            }
             console.log("[splash] spawning:",exePath)
             splashProcess=spawn(exePath,[],{
                 detached:true,
