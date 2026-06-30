@@ -465,6 +465,8 @@ html[data-platform="windows"] .app-container{
     display:flex;
     gap:var(--spacing-sm);
     align-items:center;
+    flex-wrap:wrap;
+    justify-content:flex-end;
 }
 .file-list{
     max-height:300px;
@@ -558,10 +560,6 @@ html[data-platform="windows"] .app-container{
 .file-remove:hover{
     background:rgba(234,67,53,.1);
 }
-.file-remove:focus-visible{
-    outline:2px solid var(--primary-color);
-    outline-offset:2px;
-}
 .progress-section{
     margin-top:var(--spacing-xl);
 }
@@ -646,11 +644,14 @@ html[data-platform="windows"] .app-container{
     padding:var(--spacing-lg);
     border:1px solid var(--border-color);
 }
-.config-panel h3{
+.config-panel>h3{
     margin-bottom:var(--spacing-lg);
+    padding-bottom:var(--spacing-md);
+    border-bottom:1px solid var(--border-color);
     display:flex;
     align-items:center;
     gap:var(--spacing-sm);
+    font-size:1rem;
 }
 .range-value{
     text-align:center;
@@ -797,6 +798,12 @@ html[data-platform="windows"] .app-container{
     opacity:.5;
     cursor:not-allowed;
 }
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.file-remove:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+}
 #browse-btn{
     background:var(--secondary-color);
     color:white;
@@ -908,8 +915,9 @@ html[data-platform="windows"] .app-container{
 }
 .footer-links{
     display:flex;
-    gap:var(--spacing-md);
+    gap:var(--spacing-sm);
     flex-wrap:wrap;
+    align-items:center;
 }
 .footer-link{
     color:var(--text-secondary);
@@ -917,13 +925,14 @@ html[data-platform="windows"] .app-container{
     display:inline-flex;
     align-items:center;
     gap:var(--spacing-xs);
-    transition:color var(--transition-fast);
+    transition:color var(--transition-fast),background-color var(--transition-fast);
     font-size:.875rem;
-    padding:var(--spacing-xs);
+    padding:var(--spacing-xs) var(--spacing-sm);
     border-radius:var(--radius-small);
 }
 .footer-link:hover{
     color:var(--primary-color);
+    background:var(--surface-variant);
 }
 .footer-link:focus-visible{
     outline:2px solid var(--primary-color);
@@ -955,8 +964,8 @@ html[data-platform="windows"] .app-container{
     gap:var(--spacing-md);
 }
 .status-info{
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:var(--spacing-sm);
 }
 .status-item{
@@ -965,11 +974,13 @@ html[data-platform="windows"] .app-container{
     gap:var(--spacing-sm);
     color:var(--text-secondary);
     font-size:.875rem;
+    min-width:0;
 }
 .status-item i{
     width:16px;
     text-align:center;
     color:var(--text-secondary);
+    flex-shrink:0;
 }
 .status-item strong{
     color:var(--text-primary);
@@ -1200,6 +1211,14 @@ html[data-platform="windows"] .app-container{
     font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
 }
+@media (max-width:1024px){
+    .content-grid{
+        grid-template-columns:1fr;
+    }
+    .splitter-bar{
+        display:none;
+    }
+}
 @media (max-width:768px){
     .app-container{
         padding:var(--spacing-md);
@@ -1208,14 +1227,38 @@ html[data-platform="windows"] .app-container{
         flex-direction:column;
         gap:var(--spacing-md);
         text-align:center;
+        min-height:auto;
     }
-    .content-grid{
-        grid-template-columns:1fr;
+    .header-content{
+        justify-content:center;
+    }
+    .header-text h1,
+    .header-text .subtitle{
+        white-space:normal;
     }
     .app-footer{
         flex-direction:column;
         gap:var(--spacing-md);
         text-align:center;
+        min-height:auto;
+    }
+    .footer-status{
+        justify-content:center;
+    }
+    .footer-links{
+        justify-content:center;
+    }
+    .card-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:var(--spacing-md);
+    }
+    .section-actions{
+        justify-content:flex-start;
+        width:100%;
+    }
+    .status-info{
+        grid-template-columns:1fr;
     }
     h1{
         font-size:1.25rem;
@@ -1229,55 +1272,59 @@ html[data-platform="windows"] .app-container{
     .subtitle{
         font-size:0.75rem;
     }
-    .fade-in{
-        animation:fadeIn var(--transition-medium) ease-out;
+}
+.fade-in{
+    animation:fadeIn var(--transition-medium) ease-out;
+}
+@keyframes fadeIn{
+    from{
+        opacity:0;
     }
-    @keyframes spin{
-        from{
-            transform:rotate(0deg);
-        }
-        to{
-            transform:rotate(360deg);
-        }
+    to{
+        opacity:1;
     }
-    .fa-spinner{
-        animation:spin 1s linear infinite;
+}
+@keyframes spin{
+    from{
+        transform:rotate(0deg);
     }
-    ::selection{
-        background-color:rgba(26,115,232,.2);
-        color:var(--text-primary);
+    to{
+        transform:rotate(360deg);
     }
-    :focus-visible{
-        outline:2px solid var(--primary-color);
-        outline-offset:2px;
-    }
-    .text-center{
-        text-align:center;
-    }
-    .mt-1{
-        margin-top:var(--spacing-sm);
-    }
-    .mt-2{
-        margin-top:var(--spacing-md);
-    }
-    .mt-3{
-        margin-top:var(--spacing-lg);
-    }
-    .mt-4{
-        margin-top:var(--spacing-xl);
-    }
-    .mb-1{
-        margin-bottom:var(--spacing-sm);
-    }
-    .mb-2{
-        margin-bottom:var(--spacing-md);
-    }
-    .mb-3{
-        margin-bottom:var(--spacing-lg);
-    }
-    .mb-4{
-        margin-bottom:var(--spacing-xl);
-    }
+}
+.fa-spinner{
+    animation:spin 1s linear infinite;
+}
+::selection{
+    background-color:rgba(26,115,232,.2);
+    color:var(--text-primary);
+}
+.text-center{
+    text-align:center;
+}
+.mt-1{
+    margin-top:var(--spacing-sm);
+}
+.mt-2{
+    margin-top:var(--spacing-md);
+}
+.mt-3{
+    margin-top:var(--spacing-lg);
+}
+.mt-4{
+    margin-top:var(--spacing-xl);
+}
+.mb-1{
+    margin-bottom:var(--spacing-sm);
+}
+.mb-2{
+    margin-bottom:var(--spacing-md);
+}
+.mb-3{
+    margin-bottom:var(--spacing-lg);
+}
+.mb-4{
+    margin-bottom:var(--spacing-xl);
 }
 /* Toast notifications */
 .toast-container{
@@ -1313,6 +1360,14 @@ html[data-platform="windows"] .app-container{
 .toast-hiding{
     opacity:0;
     transform:translateX(100px);
+}
+@media (prefers-reduced-motion:reduce){
+    .toast,
+    .toast-visible,
+    .toast-hiding{
+        transition:none;
+        transform:none;
+    }
 }
 .toast-icon{
     font-size:1.1rem;

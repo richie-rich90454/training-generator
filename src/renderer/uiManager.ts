@@ -215,9 +215,9 @@ class UIManager{
         return escaped
     }
     showModal(show:boolean):void{
-        this.settingsModal.style.display=show?"flex":"none"
         this.settingsModal.classList.toggle("active",show)
         if(show){
+            this.settingsModal.style.display="flex"
             this.refreshProfiles()
             this.lastFocusedElement=document.activeElement as HTMLElement
             this.trapFocus(this.settingsModal)
@@ -227,7 +227,13 @@ class UIManager{
             }
         }
         else{
+            this.removeFocusTrap()
             this.restoreFocus()
+            window.setTimeout(()=>{
+                if(!this.settingsModal.classList.contains("active")){
+                    this.settingsModal.style.display="none"
+                }
+            },parseFloat(getComputedStyle(this.settingsModal).transitionDuration||"0.15s")*1000)
         }
     }
     showCustomModal(content:string):void{
@@ -244,8 +250,9 @@ class UIManager{
         this.focusTrapHandler=(e:Event)=>{
             let ke=e as KeyboardEvent
             if(ke.key!=="Tab")return
-            let activeModal=document.querySelector(".modal.active") as HTMLElement|null
-            if(!activeModal)return
+            let activeModals=document.querySelectorAll(".modal.active")
+            if(activeModals.length===0)return
+            let activeModal=activeModals[activeModals.length-1] as HTMLElement
             let focusable=activeModal.querySelectorAll(focusableSelector)
             if(focusable.length===0)return
             let first=focusable[0] as HTMLElement
@@ -264,6 +271,12 @@ class UIManager{
             }
         }
         document.addEventListener("keydown",this.focusTrapHandler)
+    }
+    removeFocusTrap():void{
+        if(this.focusTrapHandler){
+            document.removeEventListener("keydown",this.focusTrapHandler)
+            this.focusTrapHandler=null
+        }
     }
     restoreFocus():void{
         if(this.lastFocusedElement){
@@ -311,7 +324,7 @@ class UIManager{
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2><i class="fas fa-question-circle"></i>Help</h2>
-                        <button class="modal-close help-close">&times;</button>
+                        <button class="modal-close help-close" aria-label="Close help">&times;</button>
                     </div>
                     <div class="modal-body">
                         ${helpContent}
