@@ -71,7 +71,7 @@ void DrawRoundedRect(Graphics& g, RectF r, float radius, Color fill){
     g.FillPath(&brush, &path);
 }
 void DrawSpinner(Graphics& g, float cx, float cy, float r, float angle){
-    Pen pen(Color(255, 26, 115, 232), (REAL)Scale(4));
+    Pen pen(Color(255, 26, 115, 232), (REAL)Scale(3));
     pen.SetStartCap(LineCapRound);
     pen.SetEndCap(LineCapRound);
     RectF arc(cx-r, cy-r, r*2, r*2);
@@ -91,14 +91,16 @@ void Paint(HWND hwnd){
     SolidBrush bg(Color(255, 250, 250, 250));
     g.FillRectangle(&bg, 0, 0, rc.right, rc.bottom);
     float cx=rc.right/2.0f;
-    float cy=(REAL)Scale(110);
-    DrawSpinner(g, cx, cy, (REAL)Scale(42), state.spinnerAngle);
-    DrawSpinner(g, cx, cy, (REAL)Scale(28), -state.spinnerAngle*1.5f);
+    float cy=rc.bottom*0.28f;
+    float outerR=min((float)rc.right, (float)rc.bottom)*0.10f;
+    float innerR=outerR*0.65f;
+    DrawSpinner(g, cx, cy, outerR, state.spinnerAngle);
+    DrawSpinner(g, cx, cy, innerR, -state.spinnerAngle*1.5f);
     FontFamily segoe(L"Segoe UI");
     FontFamily tahoma(L"Tahoma");
     FontFamily* family=(segoe.GetLastStatus()== Ok)?&segoe:&tahoma;
-    Font title(family, (REAL)Scale(32), FontStyleBold);
-    Font body(family, (REAL)Scale(16), FontStyleRegular);
+    Font title(family, (REAL)Scale(24), FontStyleBold);
+    Font body(family, (REAL)Scale(13), FontStyleRegular);
     StringFormat center;
     center.SetAlignment(StringAlignmentCenter);
     SolidBrush titleBrush(Color(255, 26, 115, 232));
@@ -106,7 +108,7 @@ void Paint(HWND hwnd){
         L"Training Generator",
         -1,
         &title,
-        PointF(cx, cy+Scale(35)),
+        PointF(cx, rc.bottom*0.45f),
         &center,
         &titleBrush
     );
@@ -115,14 +117,14 @@ void Paint(HWND hwnd){
         steps[state.step],
         -1,
         &body,
-        PointF(cx, cy+Scale(105)),
+        PointF(cx, rc.bottom*0.62f),
         &center,
         &subBrush
     );
     float barW=rc.right*0.55f;
     float barH=(REAL)Scale(10);
     float barX=(rc.right-barW)/2.0f;
-    float barY=cy+Scale(145);
+    float barY=rc.bottom*0.78f;
     DrawRoundedRect(
         g,
         RectF(barX, barY, barW, barH),
@@ -146,6 +148,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp){
     switch (msg){
     case WM_CREATE:
         UpdateDPI(hwnd);
+        {
+            HMONITOR hmon=MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO mi;
+            mi.cbSize=sizeof(MONITORINFO);
+            if (GetMonitorInfoW(hmon, &mi)){
+                int sw=mi.rcWork.right-mi.rcWork.left;
+                int sh=mi.rcWork.bottom-mi.rcWork.top;
+                int w=min(Scale(480), (int)(sw*0.30));
+                int h=min(Scale(320), (int)(sh*0.40));
+                int x=mi.rcWork.left+(sw-w)/2;
+                int y=mi.rcWork.top+(sh-h)/2;
+                SetWindowPos(hwnd, nullptr, x, y, w, h, SWP_NOZORDER|SWP_NOACTIVATE);
+            }
+        }
         SetTimer(hwnd, 1, 16, nullptr);
         return 0;
     case WM_TIMER:
@@ -182,16 +198,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int){
     wc.lpszClassName=L"ModernSplashXP";
     wc.hCursor=LoadCursor(nullptr, IDC_ARROW);
     RegisterClass(&wc);
-    int w=Scale(640);
-    int h=Scale(420);
     HWND hwnd=CreateWindowEx(
         WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
         wc.lpszClassName,
         L"",
         WS_POPUP|WS_VISIBLE,
-        (GetSystemMetrics(SM_CXSCREEN)-w)/2,
-        (GetSystemMetrics(SM_CYSCREEN)-h)/2,
-        w, h,
+        0, 0, 1, 1,
         nullptr, nullptr, hInst, nullptr
     );
     MSG msg;
