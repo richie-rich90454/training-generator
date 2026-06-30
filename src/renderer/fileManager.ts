@@ -140,11 +140,11 @@ class FileManager{
     }
     updateFileList():void{
         this.fileList.innerHTML=""
+        this.fileStatuses.clear()
         if(this.selectedFiles.length==0){
             this.fileList.innerHTML="<p class=\"empty-state\">No files selected</p>"
             return
         }
-        this.fileStatuses.clear()
         this.selectedFiles.forEach(file=>{
             this.fileStatuses.set(file.name,"waiting")
             this.addFileToList(file)
