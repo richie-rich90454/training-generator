@@ -139,6 +139,7 @@ function startSplash(){
         if(app.isPackaged){
             exePaths.push(path.join(process.resourcesPath,"native-splash","splash.exe"))
             exePaths.push(path.join(path.dirname(app.getPath("exe")),"resources","native-splash","splash.exe"))
+            exePaths.push(path.join(path.dirname(app.getAppPath()),"native-splash","splash.exe"))
         }
         else{
             exePaths.push(path.join(metaDir,"..","native-splash","splash.exe"))
