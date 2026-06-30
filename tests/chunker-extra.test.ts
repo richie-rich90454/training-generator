@@ -329,7 +329,7 @@ describe("simpleChunk", () => {
     })
     it("does not lose content", () => {
         let text="Word ".repeat(200).trim()
-        let chunks=simpleChunk(text, 100, true)
+        let chunks=simpleChunk(text, 100)
         let joined=chunks.join(" ")
         expect(joined.length).toBeGreaterThan(text.length*0.8)
     })

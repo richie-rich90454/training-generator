@@ -254,21 +254,21 @@
 
   * [x] SubTask C11.4: Add tests for quality validator rules
 
-* [ ] Task C12: Add integration tests
+* [x] Task C12: Add integration tests
 
-  * [ ] SubTask C12.1: Add end-to-end processing flow test with mocked provider
+  * [x] SubTask C12.1: Add end-to-end processing flow test with mocked provider
 
-  * [ ] SubTask C12.2: Add checkpoint save/load flow test
+  * [x] SubTask C12.2: Add checkpoint save/load flow test
 
-  * [ ] SubTask C12.3: Add export/copy integration test
+  * [x] SubTask C12.3: Add export/copy integration test
 
-* [ ] Task C13: Verify coverage target
+* [x] Task C13: Verify coverage target
 
-  * [ ] SubTask C13.1: Count total test cases and verify the suite approaches 1000 cases
+  * [x] SubTask C13.1: Count total test cases and verify the suite approaches 1000 cases
 
-  * [ ] SubTask C13.2: Run `npm run test:unit` and ensure all tests pass
+  * [x] SubTask C13.2: Run `npm run test:unit` and ensure all tests pass
 
-  * [ ] SubTask C13.3: Run `npm run typecheck` and fix any test-related type errors
+  * [x] SubTask C13.3: Run `npm run typecheck` and fix any test-related type errors
 
 ## Workstream D: Documentation
 
