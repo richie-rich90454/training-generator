@@ -170,7 +170,8 @@ function startSplash(){
             console.log("[splash] spawned with pid:",splashProcess.pid)
         }
         else{
-            console.error("[splash] splash.exe not found in any candidate path")
+            console.error("[splash] splash.exe not found in any candidate path (mode:",(app.isPackaged?"packaged":"dev")+")")
+            console.error("[splash] tried:",exePaths.join("; "))
         }
         return
     }
