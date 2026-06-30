@@ -272,67 +272,67 @@
 
 ## Workstream D: Documentation
 
-* [ ] Task D1: Create documentation structure
+* [x] Task D1: Create documentation structure
 
-  * [ ] SubTask D1.1: Create `docs/` folder
+  * [x] SubTask D1.1: Create `docs/` folder
 
-  * [ ] SubTask D1.2: Add a `docs/README.md` index linking to all guides
+  * [x] SubTask D1.2: Add a `docs/README.md` index linking to all guides
 
-* [ ] Task D2: Write user guide
+* [x] Task D2: Write user guide
 
-  * [ ] SubTask D2.1: Document installation, first launch, file upload, configuration, processing, and export
+  * [x] SubTask D2.1: Document installation, first launch, file upload, configuration, processing, and export
 
-  * [ ] SubTask D2.2: Include screenshots or UI descriptions where helpful
+  * [x] SubTask D2.2: Include screenshots or UI descriptions where helpful
 
-* [ ] Task D3: Write configuration guide
+* [x] Task D3: Write configuration guide
 
-  * [ ] SubTask D3.1: Document every setting in the configuration panel
+  * [x] SubTask D3.1: Document every setting in the configuration panel
 
-  * [ ] SubTask D3.2: Document saved profiles and presets
+  * [x] SubTask D3.2: Document saved profiles and presets
 
-* [ ] Task D4: Write provider guide
+* [x] Task D4: Write provider guide
 
-  * [ ] SubTask D4.1: Document Ollama setup and model selection
+  * [x] SubTask D4.1: Document Ollama setup and model selection
 
-  * [ ] SubTask D4.2: Document OpenAI, Anthropic, and Gemini configuration
+  * [x] SubTask D4.2: Document OpenAI, Anthropic, and Gemini configuration
 
-* [ ] Task D5: Write architecture guide
+* [x] Task D5: Write architecture guide
 
-  * [ ] SubTask D5.1: Document main vs renderer process split
+  * [x] SubTask D5.1: Document main vs renderer process split
 
-  * [ ] SubTask D5.2: Document key modules and data flow
+  * [x] SubTask D5.2: Document key modules and data flow
 
-* [ ] Task D6: Write development guide
+* [x] Task D6: Write development guide
 
-  * [ ] SubTask D6.1: Document dev setup, scripts, testing, and build/packaging
+  * [x] SubTask D6.1: Document dev setup, scripts, testing, and build/packaging
 
-  * [ ] SubTask D6.2: Document code style and formatting rules from `AGENTS.md`
+  * [x] SubTask D6.2: Document code style and formatting rules from `AGENTS.md`
 
-* [ ] Task D7: Write troubleshooting guide
+* [x] Task D7: Write troubleshooting guide
 
-  * [ ] SubTask D7.1: Document common Ollama, PDF, and export issues
+  * [x] SubTask D7.1: Document common Ollama, PDF, and export issues
 
-  * [ ] SubTask D7.2: Document how to collect logs and report issues
+  * [x] SubTask D7.2: Document how to collect logs and report issues
 
-* [ ] Task D8: Write keyboard shortcuts guide
+* [x] Task D8: Write keyboard shortcuts guide
 
-  * [ ] SubTask D8.1: List all supported shortcuts with context and action
+  * [x] SubTask D8.1: List all supported shortcuts with context and action
 
-* [ ] Task D9: Link documentation
+* [x] Task D9: Link documentation
 
-  * [ ] SubTask D9.1: Update root `README.md` to point to `docs/`
+  * [x] SubTask D9.1: Update root `README.md` to point to `docs/`
 
-  * [ ] SubTask D9.2: Update footer documentation link to open local `docs/user-guide.md` when available
+  * [x] SubTask D9.2: Update footer documentation link to open local `docs/user-guide.md` when available
 
 ## Workstream E: Final Verification
 
-* [ ] Task E1: Quality gates
+* [x] Task E1: Quality gates
 
-  * [ ] SubTask E1.1: Run `npm run typecheck` and fix all errors
+  * [x] SubTask E1.1: Run `npm run typecheck` and fix all errors
 
-  * [ ] SubTask E1.2: Run `npm test` and fix all failures
+  * [x] SubTask E1.2: Run `npm test` and fix all failures
 
-  * [ ] SubTask E1.3: Run `npm run build` and fix all build errors
+  * [x] SubTask E1.3: Run `npm run build` and fix all build errors
 
 * [ ] Task E2: Packaging verification
 
