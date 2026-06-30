@@ -320,6 +320,21 @@ Logs are available at:
 
 ---
 
+## Documentation
+
+For detailed information about using and developing Training Generator, see the guides in the [`docs/`](docs/) folder:
+
+- [`docs/README.md`](docs/README.md) — Documentation overview
+- [`docs/user-guide.md`](docs/user-guide.md) — User guide
+- [`docs/configuration.md`](docs/configuration.md) — Configuration reference
+- [`docs/providers.md`](docs/providers.md) — Provider setup
+- [`docs/architecture.md`](docs/architecture.md) — Architecture overview
+- [`docs/development.md`](docs/development.md) — Development guide
+- [`docs/troubleshooting.md`](docs/troubleshooting.md) — Troubleshooting
+- [`docs/keyboard-shortcuts.md`](docs/keyboard-shortcuts.md) — Keyboard shortcuts
+
+---
+
 ## Roadmap
 
 ### Completed
