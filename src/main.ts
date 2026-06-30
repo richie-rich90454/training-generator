@@ -128,6 +128,7 @@ if(isWin){
     app.commandLine.appendSwitch("disable-prompt-on-repost")
 }
 function startSplash(){
+    console.log("[splash] startSplash called, platform=win32:",isWin)
     if(isWin){
         let exePaths=[
             path.join(process.resourcesPath,"native-splash","splash.exe"),
@@ -136,17 +137,23 @@ function startSplash(){
         ]
         let exePath:string|null=null
         for(let p of exePaths){
+            console.log("[splash] checking candidate:",p,"exists:",fs.existsSync(p))
             if(fs.existsSync(p)){
                 exePath=p
                 break
             }
         }
         if(exePath){
+            console.log("[splash] spawning:",exePath)
             splashProcess=spawn(exePath,[],{
                 detached:true,
                 stdio:"ignore"
             })
             splashProcess.unref()
+            console.log("[splash] spawned with pid:",splashProcess.pid)
+        }
+        else{
+            console.error("[splash] splash.exe not found in any candidate path")
         }
         return
     }
@@ -177,13 +184,16 @@ function startSplash(){
     }).catch(console.error)
 }
 function stopSplash(){
+    console.log("[splash] stopSplash called, splashProcess:",splashProcess?splashProcess.pid:null,"splashWindow:",!!splashWindow)
     if(isWin&&splashProcess){
+        console.log("[splash] killing splash process:",splashProcess.pid)
         try{splashProcess.kill()}
         catch{}
         splashProcess=null
         return
     }
     if(splashWindow&&!splashWindow.isDestroyed()){
+        console.log("[splash] closing splash window")
         splashWindow.close()
         splashWindow=null
     }
