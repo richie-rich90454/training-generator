@@ -7,6 +7,7 @@ import{tagItem}from"./provenance.js"
 
 class Processor{
     private abortController:AbortController|null=null
+    private aborted:boolean=false
     concurrency:number=3
     demoMode:boolean=false
     provider:Provider|null=null
@@ -17,7 +18,7 @@ class Processor{
     }
 
     get isAborted():boolean{
-        return this.abortController?.signal.aborted??false
+        return this.aborted||this.abortController?.signal.aborted||false
     }
 
     splitBatchedResponse(response:string,count:number):string[]{
@@ -44,12 +45,13 @@ class Processor{
         let MAX_CHARS_PER_BATCH=100000
         let stats=this.stats
 
+        let filtered=smallChunks.filter(item=>item.chunk&&item.chunk.trim().length>0)
         let batches:{chunk:string;index:number}[][]=[]
         let currentBatch:{chunk:string;index:number}[]=[]
         let currentBatchSize=0
         let estimatedPromptMultiplier=3
 
-        for(let item of smallChunks){
+        for(let item of filtered){
             let estimatedSize=item.chunk.length*estimatedPromptMultiplier+50
             if(currentBatch.length>0&&currentBatchSize+estimatedSize>MAX_CHARS_PER_BATCH){
                 batches.push(currentBatch)
@@ -112,6 +114,7 @@ class Processor{
     }
 
     abort():void{
+        this.aborted=true
         if(this.abortController){
             this.abortController.abort()
             this.abortController=null
@@ -119,6 +122,7 @@ class Processor{
     }
 
     reset():void{
+        this.aborted=false
         this.abortController=new AbortController()
     }
 
@@ -287,6 +291,7 @@ class Processor{
                 }
             }
             finally{
+                freeSlot()
                 onDone()
             }
         }

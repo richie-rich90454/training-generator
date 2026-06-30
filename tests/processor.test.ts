@@ -146,7 +146,7 @@ describe("Processor",()=>{
             processor.abort()
             let results=await promise
             expect(results.length).toBeLessThan(10)
-            expect(processor.isAborted).toBe(false)
+            expect(processor.isAborted).toBe(true)
         })
     })
 
@@ -159,7 +159,7 @@ describe("Processor",()=>{
         it("should return true after abort when AbortController exists",()=>{
             processor.reset()
             processor.abort()
-            expect(processor.isAborted).toBe(false)
+            expect(processor.isAborted).toBe(true)
         })
     })
 
