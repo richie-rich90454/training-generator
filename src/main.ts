@@ -143,6 +143,7 @@ function startSplash(){
         else{
             exePaths.push(path.join(metaDir,"..","native-splash","splash.exe"))
             exePaths.push(path.join(metaDir,"..","..","native-splash","splash.exe"))
+            exePaths.push(path.join(path.resolve(app.getAppPath()),"..","native-splash","splash.exe"))
             exePaths.push(path.join(process.cwd(),"native-splash","splash.exe"))
         }
         let exePath:string|null=null
