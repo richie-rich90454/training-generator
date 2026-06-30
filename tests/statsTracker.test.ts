@@ -150,3 +150,68 @@ describe("StatsTracker", () => {
     expect(report.tokensPerSecond).toBe(0)
   })
 })
+describe("StatsTracker warnings", () => {
+  let tracker: StatsTracker
+  beforeEach(() => {
+    tracker = new StatsTracker()
+  })
+  it("should warn on large output count", () => {
+    let warnings = tracker.checkWarnings(100001)
+    expect(warnings.some(w => w.includes("Large output"))).toBe(true)
+  })
+  it("should not warn on small output count", () => {
+    let warnings = tracker.checkWarnings(100)
+    expect(warnings.some(w => w.includes("Large output"))).toBe(false)
+  })
+  it("should warn on high chunk count", () => {
+    tracker.totalChunks = 501
+    let warnings = tracker.checkWarnings(0)
+    expect(warnings.some(w => w.includes("High chunk count"))).toBe(true)
+  })
+  it("should not warn on normal chunk count", () => {
+    tracker.totalChunks = 100
+    let warnings = tracker.checkWarnings(0)
+    expect(warnings.some(w => w.includes("High chunk count"))).toBe(false)
+  })
+  it("should warn on high token usage", () => {
+    tracker.promptTokens = 500001
+    let warnings = tracker.checkWarnings(0)
+    expect(warnings.some(w => w.includes("High token usage"))).toBe(true)
+  })
+  it("should not warn on normal token usage", () => {
+    tracker.promptTokens = 1000
+    let warnings = tracker.checkWarnings(0)
+    expect(warnings.some(w => w.includes("High token usage"))).toBe(false)
+  })
+  it("should return multiple warnings", () => {
+    tracker.totalChunks = 1000
+    tracker.promptTokens = 600000
+    let warnings = tracker.checkWarnings(200000)
+    expect(warnings.length).toBe(3)
+  })
+  it("should return empty array when no thresholds crossed", () => {
+    tracker.totalChunks = 100
+    tracker.promptTokens = 1000
+    let warnings = tracker.checkWarnings(100)
+    expect(warnings.length).toBe(0)
+  })
+})
+describe("StatsTracker prompt tokens", () => {
+  let tracker: StatsTracker
+  beforeEach(() => {
+    tracker = new StatsTracker()
+  })
+  it("should count prompt tokens by character length", () => {
+    tracker.recordPromptTokens("a".repeat(40))
+    expect(tracker.promptTokens).toBe(10)
+  })
+  it("should accumulate prompt tokens", () => {
+    tracker.recordPromptTokens("a".repeat(40))
+    tracker.recordPromptTokens("a".repeat(80))
+    expect(tracker.promptTokens).toBe(30)
+  })
+  it("should handle empty prompt", () => {
+    tracker.recordPromptTokens("")
+    expect(tracker.promptTokens).toBe(0)
+  })
+})
