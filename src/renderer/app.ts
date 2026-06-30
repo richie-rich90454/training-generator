@@ -141,7 +141,22 @@ class TrainGeneratorApp{
         this.addEventListener(this.fileManager.dropZone,"dragleave",this.fileManager.handleDragLeave.bind(this.fileManager) as EventListener)
         this.addEventListener(this.fileManager.dropZone,"drop",this.fileManager.handleDrop.bind(this.fileManager) as unknown as EventListener)
         this.addEventListener(this.fileManager.fileInput,"change",this.fileManager.handleFileSelect.bind(this.fileManager))
-        this.addEventListener(this.fileManager.browseBtn,"click",()=>this.fileManager.fileInput.click())
+        this.addEventListener(this.fileManager.browseBtn,"click",(e)=>{
+            e.stopPropagation()
+            this.fileManager.fileInput.click()
+        })
+        this.addEventListener(this.fileManager.dropZone,"click",(e)=>{
+            if(e.target!==this.fileManager.browseBtn&&!this.fileManager.browseBtn.contains(e.target as Node)){
+                this.fileManager.fileInput.click()
+            }
+        })
+        this.addEventListener(this.fileManager.dropZone,"keydown",(e)=>{
+            let ke=e as KeyboardEvent
+            if(ke.key===" "||ke.key==="Enter"){
+                ke.preventDefault()
+                this.fileManager.fileInput.click()
+            }
+        })
         this.addEventListener(this.fileManager.processBtn,"click",this.processFiles.bind(this))
         this.addEventListener(this.fileManager.clearBtn,"click",this.clearAll.bind(this))
         this.addEventListener(this.uiManager.exportBtn,"click",()=>{
@@ -242,7 +257,16 @@ class TrainGeneratorApp{
                     this.stopProcessing()
                 }
                 else{
-                    this.uiManager.showModal(false)
+                    let activeModals=document.querySelectorAll(".modal.active")
+                    if(activeModals.length>0){
+                        let topModal=activeModals[activeModals.length-1] as HTMLElement
+                        if(topModal===this.uiManager.settingsModal){
+                            this.uiManager.showModal(false)
+                        }
+                        else{
+                            topModal.classList.remove("active")
+                        }
+                    }
                 }
             }
         }) as EventListener)
@@ -271,6 +295,8 @@ class TrainGeneratorApp{
             this.uiManager.copyBtn.disabled=false
         }
         this.setProgress(0,"Processing stopped")
+        let progressSection=this.uiManager.progressFill.closest(".progress-section")
+        if(progressSection)progressSection.classList.add("stopped")
         this.logger.warn("app","Processing stopped by user")
         this.audit.record("processing_stopped",{})
     }
@@ -328,6 +354,8 @@ class TrainGeneratorApp{
         this.isProcessing=true
         this.outputManager.outputData=[]
         this.processingQueue=[...this.fileManager.selectedFiles]
+        let progressSection=this.uiManager.progressFill.closest(".progress-section")
+        if(progressSection)progressSection.classList.remove("stopped")
         // Start checkpoint interval
         this.checkpointInterval=window.setInterval(()=>{
             let completedChunks:Record<string,number>={}

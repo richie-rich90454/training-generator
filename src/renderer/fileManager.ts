@@ -109,16 +109,16 @@ class FileManager{
         fileItem.setAttribute("data-name",escapedName)
         fileItem.innerHTML=`
             <div class="file-info">
-                <i class="fas fa-file-${this.getFileIcon(fileObj.type)}file-icon"></i>
-                <div>
-                    <div class="file-name">${escapedName}</div>
+                <i class="fas fa-file-${this.getFileIcon(fileObj.type)} file-icon"></i>
+                <div class="file-details">
+                    <div class="file-name" title="${escapedName}">${escapedName}</div>
                     <div class="file-size">${this.formatFileSize(fileObj.size)}</div>
                 </div>
             </div>
-            <button class="file-remove" data-name="${escapedName}">
+            <span class="file-status" aria-label="Status: waiting"></span>
+            <button class="file-remove" data-name="${escapedName}" aria-label="Remove ${escapedName}">
                 <i class="fas fa-times"></i>
             </button>
-            <span class="file-status"></span>
         `
         fileItem.querySelector(".file-remove")!.addEventListener("click",(e:Event)=>{
             e.stopPropagation()
@@ -170,13 +170,21 @@ class FileManager{
             completed:"fa-check-circle",
             failed:"fa-times-circle"
         }
+        let labelMap:Record<string,string>={
+            waiting:"Waiting",
+            processing:"Processing",
+            completed:"Completed",
+            failed:"Failed"
+        }
         let colorMap:Record<string,string>={
             waiting:"#A19F9D",
             processing:"#0078D4",
             completed:"#107C10",
             failed:"#D13438"
         }
-        statusEl.innerHTML=`<i class="fas ${iconMap[status]||"fa-clock"}" style="color:${colorMap[status]||"#A19F9D"}"></i>`
+        let label=labelMap[status]||"Waiting"
+        statusEl.setAttribute("aria-label",`Status: ${label}`)
+        statusEl.innerHTML=`<i class="fas ${iconMap[status]||"fa-clock"}" style="color:${colorMap[status]||"#A19F9D"}" aria-hidden="true"></i><span class="file-status-label">${label}</span>`
     }
     updateProcessButton():void{
         let ollamaReady=this.app.uiManager.ollamaStatus.running

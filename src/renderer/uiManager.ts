@@ -237,12 +237,16 @@ class UIManager{
             this.showModal(true)
         }
     }
+    focusTrapHandler:((e:Event)=>void)|null=null
     trapFocus(modalElement:HTMLElement):void{
+        if(this.focusTrapHandler)return
         let focusableSelector='button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        modalElement.addEventListener("keydown",(e:Event)=>{
+        this.focusTrapHandler=(e:Event)=>{
             let ke=e as KeyboardEvent
             if(ke.key!=="Tab")return
-            let focusable=modalElement.querySelectorAll(focusableSelector)
+            let activeModal=document.querySelector(".modal.active") as HTMLElement|null
+            if(!activeModal)return
+            let focusable=activeModal.querySelectorAll(focusableSelector)
             if(focusable.length===0)return
             let first=focusable[0] as HTMLElement
             let last=focusable[focusable.length-1] as HTMLElement
@@ -258,7 +262,8 @@ class UIManager{
                     first.focus()
                 }
             }
-        })
+        }
+        document.addEventListener("keydown",this.focusTrapHandler)
     }
     restoreFocus():void{
         if(this.lastFocusedElement){
@@ -771,8 +776,18 @@ class UIManager{
     }
     updateProviderVisibility():void{
         let isCloud=this.providerSelect.value!=="ollama"
-        this.apiKeyGroup.style.display=isCloud?"block":"none"
-        this.baseUrlGroup.style.display=isCloud?"block":"none"
+        if(isCloud){
+            this.apiKeyGroup.classList.remove("form-group-hidden")
+            this.apiKeyGroup.classList.add("form-group-visible")
+            this.baseUrlGroup.classList.remove("form-group-hidden")
+            this.baseUrlGroup.classList.add("form-group-visible")
+        }
+        else{
+            this.apiKeyGroup.classList.remove("form-group-visible")
+            this.apiKeyGroup.classList.add("form-group-hidden")
+            this.baseUrlGroup.classList.remove("form-group-visible")
+            this.baseUrlGroup.classList.add("form-group-hidden")
+        }
     }
     startOllamaMonitor():void{
         let intervalId=window.setInterval(()=>{
