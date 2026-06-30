@@ -190,6 +190,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp){
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int){
     EnableDPIAwareness();
     GdiplusStartupInput gsi;
+    gsi.GdiplusVersion=1;
     ULONG_PTR token;
     GdiplusStartup(&token, &gsi, nullptr);
     WNDCLASS wc={};
@@ -197,7 +198,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int){
     wc.hInstance=hInst;
     wc.lpszClassName=L"ModernSplashXP";
     wc.hCursor=LoadCursor(nullptr, IDC_ARROW);
-    RegisterClass(&wc);
+    wc.hbrBackground=(HBRUSH)GetStockObject(NULL_BRUSH);
+    if (!RegisterClass(&wc)){
+        GdiplusShutdown(token);
+        return 0;
+    }
     HWND hwnd=CreateWindowEx(
         WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
         wc.lpszClassName,
