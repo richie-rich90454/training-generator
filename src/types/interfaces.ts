@@ -119,6 +119,7 @@ export interface AppSettings{
     provider?:string
     apiKey?:string
     baseUrl?:string
+    temperature?:string
 }
 
 export interface FullAppSettings{

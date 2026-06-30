@@ -39,6 +39,8 @@ class UIManager{
     editTemplatesBtn!:HTMLElement
     dashboardBtn!:HTMLElement
     maxParallelFilesSelect!:HTMLSelectElement
+    temperatureInput!:HTMLInputElement
+    temperatureValue!:HTMLElement
     ollamaStatus:OllamaStatus
     intervals:number[]
     timeouts:number[]
@@ -56,6 +58,7 @@ class UIManager{
         this.timeouts=[]
         this.lastFocusedElement=null
         this.cacheElements()
+        this.initTemperatureSlider()
     }
     cacheElements():void{
         this.progressText=document.getElementById("progress-text") as HTMLElement
@@ -91,6 +94,27 @@ class UIManager{
         this.editTemplatesBtn=document.getElementById("edit-templates-btn") as HTMLElement
         this.dashboardBtn=document.getElementById("dashboard-btn") as HTMLElement
         this.maxParallelFilesSelect=document.getElementById("max-parallel-files") as HTMLSelectElement
+        this.temperatureInput=document.getElementById("temperature") as HTMLInputElement
+        this.temperatureValue=document.getElementById("temperature-value") as HTMLElement
+    }
+    initTemperatureSlider():void{
+        if(!this.temperatureInput||!this.temperatureValue)return
+        this.temperatureInput.addEventListener("input",()=>this.updateTemperatureDisplay())
+        this.temperatureInput.addEventListener("change",()=>{
+            this.updateTemperatureDisplay()
+            this.savePreset()
+        })
+        this.updateTemperatureDisplay()
+    }
+    updateTemperatureDisplay():void{
+        if(!this.temperatureInput||!this.temperatureValue)return
+        let value=parseFloat(this.temperatureInput.value)
+        let min=parseFloat(this.temperatureInput.min)||0
+        let max=parseFloat(this.temperatureInput.max)||1
+        if(isNaN(value))value=0.7
+        let percentage=((value-min)/(max-min))*100
+        this.temperatureInput.style.setProperty("--range-fill",`${percentage}%`)
+        this.temperatureValue.textContent=value.toFixed(1)
     }
     setProgress(percent:number,text:string):void{
         if(isNaN(percent)||!isFinite(percent))percent=0
@@ -329,6 +353,13 @@ class UIManager{
                 }
             }
             if(settings.baseUrl)this.baseUrlInput.value=settings.baseUrl
+            if(settings.temperature){
+                let t=parseFloat(settings.temperature)
+                if(!isNaN(t)&&t>=0&&t<=1){
+                    this.temperatureInput.value=String(t)
+                    this.updateTemperatureDisplay()
+                }
+            }
             this.updateProviderVisibility()
             this.selectedLanguage=this.languageSelect.value||"en"
             this.addLog("Settings loaded","info")
@@ -352,7 +383,8 @@ class UIManager{
             concurrency:this.concurrencySelect.value,
             provider:this.providerSelect.value,
             apiKey:encryptedApiKey,
-            baseUrl:this.baseUrlInput.value
+            baseUrl:this.baseUrlInput.value,
+            temperature:this.temperatureInput.value
         }
         try{
             localStorage.setItem("train-generator-settings",JSON.stringify(settings))
