@@ -835,8 +835,8 @@ function registerDeferredIpcHandlers():void{
     })
 }
 app.whenReady().then(()=>{
-    registerCriticalIpcHandlers()
     startSplash()
+    registerCriticalIpcHandlers()
     createMainWindow()
 })
 app.on("window-all-closed",()=>{
