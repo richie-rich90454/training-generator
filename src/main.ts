@@ -256,6 +256,9 @@ function createMainWindow(){
         mainWindow!.show()
         mainWindow!.focus()
     })
+    mainWindow.webContents.once("did-finish-load",()=>{
+        stopSplash()
+    })
     mainWindow.webContents.on("did-fail-load",(event,errorCode,errorDescription,validatedURL)=>{
         console.error(`Failed to load:${validatedURL},Code:${errorCode},${errorDescription}`)
         dialog.showErrorBox(
