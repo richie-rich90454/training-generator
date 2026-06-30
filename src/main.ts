@@ -128,7 +128,11 @@ if(isWin){
     app.commandLine.appendSwitch("disable-prompt-on-repost")
 }
 function startSplash(){
-    console.log("[splash] startSplash called, platform=win32:",isWin)
+    console.log("[splash] startSplash called, platform=win32:",isWin,"packaged:",app.isPackaged)
+    // Diagnosis: in dev mode process.resourcesPath points at Electron's own
+    // resources dir, while in packaged ASAR builds native-splash is unpacked
+    // to resources/native-splash via extraResources, so path priority must
+    // differ between the two modes.
     if(isWin){
         let exePaths=[
             path.join(process.resourcesPath,"native-splash","splash.exe"),
