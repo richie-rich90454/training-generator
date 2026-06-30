@@ -294,6 +294,7 @@ function createMainWindow(){
         }
     })
     mainWindow.on("closed",()=>{
+        stopSplash()
         mainWindow=null
     })
 }
