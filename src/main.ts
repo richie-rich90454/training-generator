@@ -19,6 +19,7 @@ let mainWindow:BrowserWindow|null=null
 let splashWindow:BrowserWindow|null=null
 let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
+let deferredIpcRegistered=false
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
 function isPathWithin(baseDir:string,targetPath:string):boolean{
@@ -229,6 +230,7 @@ function createMainWindow(){
         mainWindow.loadFile(path.join(path.dirname(fileURLToPath(import.meta.url)),"../dist/index.html"))
     }
     mainWindow.webContents.once("dom-ready",()=>{
+        registerDeferredIpcHandlers()
         stopSplash()
         mainWindow!.show()
         mainWindow!.focus()
@@ -259,273 +261,6 @@ function createMainWindow(){
         mainWindow=null
     })
 }
-app.whenReady().then(()=>{
-    startSplash()
-    createMainWindow()
-})
-app.on("window-all-closed",()=>{
-    if(!isMac)app.quit()
-})
-app.on("before-quit",async()=>{
-    if(splashProcess){
-        try{splashProcess.kill()}catch{}
-        splashProcess=null
-    }
-    if(fileParser){
-        try{await fileParser.dispose()}catch{}
-        fileParser=null
-    }
-})
-app.on("activate",()=>{
-    if(!mainWindow){
-        createMainWindow()
-    }
-})
-ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
-    let result=await dialog.showOpenDialog(mainWindow as Electron.BaseWindow,{
-        properties:["openFile","multiSelections"],
-        filters:[
-            {name:"Documents",extensions:["pdf","docx","doc","rtf","txt","md","html"]},
-            {name:"All Files",extensions:["*"]}
-        ]
-    })
-    if(result.canceled)return[]
-    let maxSize=100*1024*1024
-    let files=await Promise.all(result.filePaths.map(async filePath=>{
-        try{
-            if(filePath.includes("\x00")||filePath.includes(".."))return null
-            let resolvedPath=path.resolve(filePath)
-            let userHome=path.resolve(app.getPath("home"))
-            if(!isPathWithin(userHome,resolvedPath))return null
-            let stats=await fsp.stat(filePath)
-            if(!stats.isFile()||stats.size>maxSize)return null
-            return{
-                path:filePath,
-                name:path.basename(filePath),
-                size:stats.size,
-                type:path.extname(filePath).slice(1),
-                lastModified:stats.mtime
-            }as FileObj
-        }
-        catch{
-            return null
-        }
-    }))
-    return files.filter(Boolean)as FileObj[]
-})
-ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
-    let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
-        defaultPath:defaultFilename||"training_data.jsonl",
-        filters:[
-            {name:"JSON Lines",extensions:["jsonl"]},
-            {name:"JSON",extensions:["json"]},
-            {name:"Text",extensions:["txt"]},
-            {name:"All Files",extensions:["*"]}
-        ]
-    })
-    if(result.canceled||!result.filePath)return null
-    if(result.filePath.includes("\x00")||result.filePath.includes(".."))return null
-    return result.filePath
-})
-ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
-    try{
-        if(!filePath||typeof filePath!=="string"){
-            return{success:false,error:"Invalid file path"}
-        }
-        let resolvedPath=filePath;
-        if(filePath.includes("prompts/")){
-            let possiblePaths=[
-                filePath,
-                path.join(process.resourcesPath,filePath),
-                path.join(path.dirname(fileURLToPath(import.meta.url)),"..",filePath),
-                path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",filePath),
-                path.join(app.getAppPath(),filePath),
-            ];
-            if(filePath.startsWith("src/prompts/")){
-                let withoutSrc=filePath.replace("src/prompts/","prompts/");
-                possiblePaths.push(
-                    withoutSrc,
-                    path.join(process.resourcesPath,withoutSrc),
-                    path.join(path.dirname(fileURLToPath(import.meta.url)),"..",withoutSrc),
-                    path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",withoutSrc),
-                    path.join(app.getAppPath(),withoutSrc)
-                );
-            }
-            for(let p of possiblePaths){
-                try{
-                    if(fs.existsSync(p)){
-                        resolvedPath=p;
-                        break;
-                    }
-                }
-                catch{}
-            }
-        }
-        
-        if(!isPathSafeForRead(resolvedPath)){
-            return{success:false,error:"File path is outside allowed directories"}
-        }
-        let content=await fsp.readFile(resolvedPath,"utf-8")
-        return{success:true,content}
-    }
-    catch(error){
-        return{success:false,error:"Failed to read file"}
-    }
-})
-ipcMain.handle("file:save",async(_:Electron.IpcMainInvokeEvent,filePath:string,content:string):Promise<{success:boolean;error?:string}>=>{
-    try{
-        if(!filePath||typeof filePath!=="string"||!content||typeof content!=="string"){
-            return{success:false,error:"Invalid file path or content"}
-        }
-        if(content.length>100*1024*1024){
-            return{success:false,error:"Content exceeds maximum size of 100MB"}
-        }
-        if(!isPathSafeForWrite(filePath)){
-            return{success:false,error:"File path is outside allowed write directories"}
-        }
-        await fsp.writeFile(filePath,content,"utf-8")
-        return{success:true}
-    }
-    catch(error){
-        return{success:false,error:"Failed to save file"}
-    }
-})
-ipcMain.handle("file:parse",async(_:Electron.IpcMainInvokeEvent,filePath:string,fileType:string):Promise<{success:boolean;content?:string;error?:string}>=>{
-    try{
-        if(!filePath||typeof filePath!=="string"||!fileType||typeof fileType!=="string"){
-            return{success:false,error:"Invalid file path or type"}
-        }
-        if(!isPathSafeForParse(filePath)){
-            return{success:false,error:"Invalid or unsafe file path"}
-        }
-        if(!fileParser){
-            fileParser=new FileParserLazy()
-        }
-        let text=await fileParser.parseFile(filePath,fileType)
-        return{success:true,content:text}
-    }
-    catch(error){
-        return{success:false,error:"Failed to parse file"}
-    }
-})
-ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileObj[]):Promise<{success:boolean;results?:unknown[];error?:string}>=>{
-    try{
-        if(!files||!Array.isArray(files)||files.length===0){
-            return{success:false,error:"Invalid files array"}
-        }
-        if(files.length>50){
-            return{success:false,error:"Cannot process more than 50 files at once"}
-        }
-        for(let f of files){
-            if(!f||!f.path||typeof f.path!=="string"){
-                return{success:false,error:"Invalid file entry in batch"}
-            }
-            if(!isPathSafeForParse(f.path)){
-                return{success:false,error:"Invalid or unsafe file path in batch"}
-            }
-        }
-        if(!fileParser){
-            fileParser=new FileParserLazy()
-        }
-        let results=await fileParser.processFiles(files.map(f=>f.path))
-        return{success:true,results}
-    }
-    catch(error){
-        return{success:false,error:"Failed to parse files"}
-    }
-})
-ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;models:never[];error:string}>=>{
-    try{
-        let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
-        let models=(tagsResponse.data.models||[]).map((m:any)=>({
-            ...m,
-            name:typeof m.name==="string"?m.name.replace(/[\x00-\x1F]/g,""):String(m.name||"").replace(/[\x00-\x1F]/g,"")
-        }))
-        let version="unknown"
-        try{
-            let versionResponse=await axios.get("http://localhost:11434/api/version",{timeout:3000})
-            version=versionResponse.data.version||"unknown"
-        }
-        catch{
-            if(tagsResponse.data?.version){
-                version=tagsResponse.data.version
-            }
-        }
-        return{
-            running:true,
-            models,
-            version
-        }
-    }
-    catch(error){
-        console.error("Ollama check failed:",(error as Error).message)
-        return{running:false,models:[],error:"Failed to connect to Ollama"}
-    }
-})
-ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
-    let{model,prompt,options={}}=payload
-    if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
-        return{success:false,error:"Invalid model name or prompt"}
-    }
-    if(prompt.length>500000){
-        return{success:false,error:"Prompt is too large"}
-    }
-    try{
-        await axios.get("http://localhost:11434/api/show",{
-            params:{name:model},
-            timeout:10000
-        }).catch(()=>{})
-    }
-    catch{}
-    let promptLength=prompt.length
-    let timeout=300000
-    if(promptLength>10000)timeout=600000
-    else if(promptLength>5000)timeout=450000
-    let maxRetries=2
-    let lastError:Error|null=null
-    for(let attempt=0;attempt<=maxRetries;attempt++){
-        try{
-            let response=await axios.post(
-                "http://localhost:11434/api/generate",
-                {
-                    model:model.replace(/[\x00-\x1F]/g,""),
-                    prompt,
-                    stream:false,
-                    options:{
-                        temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                        top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                        ...options
-                    }
-                },
-                {
-                    timeout,
-                    maxContentLength:50*1024*1024,
-                    maxBodyLength:50*1024*1024,
-                    headers:{
-                        "Content-Type":"application/json",
-                        "Accept":"application/json"
-                    }
-                }
-            )
-            if(!response.data||typeof response.data.response!=="string"){
-                return{success:false,error:"Invalid response from Ollama"}
-            }
-            return{success:true,response:response.data.response}
-        }
-        catch(error){
-            lastError=error as Error
-            if((error as any).code=="ECONNABORTED"||(error as Error).message.includes("timeout")){
-                if(attempt<maxRetries){
-                    await new Promise(r=>setTimeout(r,5000))
-                }
-            }
-            else{
-                break
-            }
-        }
-    }
-    return{success:false,error:"Failed to generate response from Ollama"}
-})
 export async function handleOllamaGenerateStream(payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options={}}=payload
     if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
@@ -595,165 +330,6 @@ export async function handleOllamaGenerateStream(payload:{model:string;prompt:st
         return{success:false,error:"Failed to generate response from Ollama"}
     }
 }
-
-ipcMain.handle("ollama:generateStream",async(_event,payload)=>handleOllamaGenerateStream(payload))
-
-ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payload:{
-    apiKey:string
-    baseUrl:string
-    model:string
-    prompt:string
-    options?:{temperature?:number;top_p?:number;max_tokens?:number}
-}):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
-    let{apiKey,baseUrl,model,prompt,options={}}=payload
-    if(!apiKey||!model||!prompt){
-        return{success:false,error:"Missing required parameters"}
-    }
-    try{
-        let cleanBaseUrl=baseUrl.replace(/\/+$/,"")
-        let response=await axios.post(
-            `${cleanBaseUrl}/v1/chat/completions`,
-            {
-                model,
-                messages:[
-                    {role:"system",content:"You are a helpful assistant for generating training data."},
-                    {role:"user",content:prompt}
-                ],
-                temperature:options.temperature??0.7,
-                top_p:options.top_p??0.9,
-                max_tokens:options.max_tokens??4096
-            },
-            {
-                headers:{
-                    "Content-Type":"application/json",
-                    "Authorization":`Bearer ${apiKey}`
-                },
-                timeout:300000,
-                httpAgent,
-                httpsAgent
-            }
-        )
-        let rc=response.data.choices?.[0]?.message?.content||""
-        return{
-            success:true,
-            response:rc,
-            usage:response.data.usage
-        }
-    }
-    catch(error:any){
-        if(error.response){
-            return{success:false,error:`API error ${error.response.status}: ${JSON.stringify(error.response.data)}`}
-        }
-        return{success:false,error:error.message||"Failed to call OpenAI API"}
-    }
-})
-ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
-ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
-ipcMain.handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
-    try{
-        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-        if(fs.existsSync(cachePath)){
-            let data=JSON.parse(fs.readFileSync(cachePath,"utf-8"))
-            return{success:true,data}
-        }
-        return{success:true,data:{}}
-    }
-    catch{
-        return{success:true,data:{}}
-    }
-})
-ipcMain.handle("cache:save",async(_event:Electron.IpcMainInvokeEvent,data:Record<string,any>):Promise<{success:boolean}>=>{
-    try{
-        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-        fs.writeFileSync(cachePath,JSON.stringify(data))
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-ipcMain.handle("cache:clear",async():Promise<{success:boolean}>=>{
-    try{
-        let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-        if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-ipcMain.handle("progress:save",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
-    try{
-        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-        fs.writeFileSync(progressPath,JSON.stringify(data))
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-
-ipcMain.handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
-    try{
-        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-        if(fs.existsSync(progressPath)){
-            let data=JSON.parse(fs.readFileSync(progressPath,"utf-8"))
-            return{success:true,data}
-        }
-        return{success:true,data:null}
-    }
-    catch{
-        return{success:true,data:null}
-    }
-})
-
-ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
-    try{
-        let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-        if(fs.existsSync(progressPath))fs.unlinkSync(progressPath)
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-
-ipcMain.handle("save-checkpoint",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
-    try{
-        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-        fs.writeFileSync(checkpointPath,JSON.stringify(data))
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-
-ipcMain.handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
-    try{
-        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-        if(fs.existsSync(checkpointPath)){
-            let data=JSON.parse(fs.readFileSync(checkpointPath,"utf-8"))
-            return{success:true,data}
-        }
-        return{success:true,data:null}
-    }
-    catch{
-        return{success:true,data:null}
-    }
-})
-
-ipcMain.handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
-    try{
-        let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-        if(fs.existsSync(checkpointPath))fs.unlinkSync(checkpointPath)
-        return{success:true}
-    }
-    catch{
-        return{success:false}
-    }
-})
-
 const LOGS_DIR=path.join(userDataPath,"logs")
 const MAX_LOG_FILES=5
 const MAX_LOG_SIZE=1024*1024
@@ -802,37 +378,462 @@ function getCurrentLogFilePath():string{
         return getLogFilePath(0)
     }
 }
-ipcMain.handle("write-log",async(_:Electron.IpcMainInvokeEvent,entry:unknown):Promise<void>=>{
-    try{
-        if(!entry||typeof entry!=="object"){
-            return
-        }
-        let logLine=JSON.stringify(entry)+"\n"
-        let filePath=getCurrentLogFilePath()
-        fs.appendFileSync(filePath,logLine,"utf-8")
-    }
-    catch{}
-})
-ipcMain.handle("export-logs",async(_:Electron.IpcMainInvokeEvent,data:string):Promise<{success:boolean;error?:string}>=>{
-    try{
-        if(!data||typeof data!=="string"){
-            return{success:false,error:"Invalid log data"}
-        }
-        let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
-            defaultPath:"logs.jsonl",
+function registerCriticalIpcHandlers():void{
+    ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
+        let result=await dialog.showOpenDialog(mainWindow as Electron.BaseWindow,{
+            properties:["openFile","multiSelections"],
             filters:[
-                {name:"JSONL Files",extensions:["jsonl"]},
+                {name:"Documents",extensions:["pdf","docx","doc","rtf","txt","md","html"]},
                 {name:"All Files",extensions:["*"]}
             ]
         })
-        if(result.canceled||!result.filePath){
-            return{success:false,error:"Export cancelled"}
+        if(result.canceled)return[]
+        let maxSize=100*1024*1024
+        let files=await Promise.all(result.filePaths.map(async filePath=>{
+            try{
+                if(filePath.includes("\x00")||filePath.includes(".."))return null
+                let resolvedPath=path.resolve(filePath)
+                let userHome=path.resolve(app.getPath("home"))
+                if(!isPathWithin(userHome,resolvedPath))return null
+                let stats=await fsp.stat(filePath)
+                if(!stats.isFile()||stats.size>maxSize)return null
+                return{
+                    path:filePath,
+                    name:path.basename(filePath),
+                    size:stats.size,
+                    type:path.extname(filePath).slice(1),
+                    lastModified:stats.mtime
+                }as FileObj
+            }
+            catch{
+                return null
+            }
+        }))
+        return files.filter(Boolean)as FileObj[]
+    })
+    ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
+        let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
+            defaultPath:defaultFilename||"training_data.jsonl",
+            filters:[
+                {name:"JSON Lines",extensions:["jsonl"]},
+                {name:"JSON",extensions:["json"]},
+                {name:"Text",extensions:["txt"]},
+                {name:"All Files",extensions:["*"]}
+            ]
+        })
+        if(result.canceled||!result.filePath)return null
+        if(result.filePath.includes("\x00")||result.filePath.includes(".."))return null
+        return result.filePath
+    })
+    ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
+        try{
+            if(!filePath||typeof filePath!=="string"){
+                return{success:false,error:"Invalid file path"}
+            }
+            let resolvedPath=filePath;
+            if(filePath.includes("prompts/")){
+                let possiblePaths=[
+                    filePath,
+                    path.join(process.resourcesPath,filePath),
+                    path.join(path.dirname(fileURLToPath(import.meta.url)),"..",filePath),
+                    path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",filePath),
+                    path.join(app.getAppPath(),filePath),
+                ];
+                if(filePath.startsWith("src/prompts/")){
+                    let withoutSrc=filePath.replace("src/prompts/","prompts/");
+                    possiblePaths.push(
+                        withoutSrc,
+                        path.join(process.resourcesPath,withoutSrc),
+                        path.join(path.dirname(fileURLToPath(import.meta.url)),"..",withoutSrc),
+                        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",withoutSrc),
+                        path.join(app.getAppPath(),withoutSrc)
+                    );
+                }
+                for(let p of possiblePaths){
+                    try{
+                        if(fs.existsSync(p)){
+                            resolvedPath=p;
+                            break;
+                        }
+                    }
+                    catch{}
+                }
+            }
+
+            if(!isPathSafeForRead(resolvedPath)){
+                return{success:false,error:"File path is outside allowed directories"}
+            }
+            let content=await fsp.readFile(resolvedPath,"utf-8")
+            return{success:true,content}
         }
-        await fsp.writeFile(result.filePath,data,"utf-8")
-        return{success:true}
+        catch(error){
+            return{success:false,error:"Failed to read file"}
+        }
+    })
+    ipcMain.handle("file:save",async(_:Electron.IpcMainInvokeEvent,filePath:string,content:string):Promise<{success:boolean;error?:string}>=>{
+        try{
+            if(!filePath||typeof filePath!=="string"||!content||typeof content!=="string"){
+                return{success:false,error:"Invalid file path or content"}
+            }
+            if(content.length>100*1024*1024){
+                return{success:false,error:"Content exceeds maximum size of 100MB"}
+            }
+            if(!isPathSafeForWrite(filePath)){
+                return{success:false,error:"File path is outside allowed write directories"}
+            }
+            await fsp.writeFile(filePath,content,"utf-8")
+            return{success:true}
+        }
+        catch(error){
+            return{success:false,error:"Failed to save file"}
+        }
+    })
+    ipcMain.handle("file:parse",async(_:Electron.IpcMainInvokeEvent,filePath:string,fileType:string):Promise<{success:boolean;content?:string;error?:string}>=>{
+        try{
+            if(!filePath||typeof filePath!=="string"||!fileType||typeof fileType!=="string"){
+                return{success:false,error:"Invalid file path or type"}
+            }
+            if(!isPathSafeForParse(filePath)){
+                return{success:false,error:"Invalid or unsafe file path"}
+            }
+            if(!fileParser){
+                fileParser=new FileParserLazy()
+            }
+            let text=await fileParser.parseFile(filePath,fileType)
+            return{success:true,content:text}
+        }
+        catch(error){
+            return{success:false,error:"Failed to parse file"}
+        }
+    })
+    ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileObj[]):Promise<{success:boolean;results?:unknown[];error?:string}>=>{
+        try{
+            if(!files||!Array.isArray(files)||files.length===0){
+                return{success:false,error:"Invalid files array"}
+            }
+            if(files.length>50){
+                return{success:false,error:"Cannot process more than 50 files at once"}
+            }
+            for(let f of files){
+                if(!f||!f.path||typeof f.path!=="string"){
+                    return{success:false,error:"Invalid file entry in batch"}
+                }
+                if(!isPathSafeForParse(f.path)){
+                    return{success:false,error:"Invalid or unsafe file path in batch"}
+                }
+            }
+            if(!fileParser){
+                fileParser=new FileParserLazy()
+            }
+            let results=await fileParser.processFiles(files.map(f=>f.path))
+            return{success:true,results}
+        }
+        catch(error){
+            return{success:false,error:"Failed to parse files"}
+        }
+    })
+    ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;models:never[];error:string}>=>{
+        try{
+            let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
+            let models=(tagsResponse.data.models||[]).map((m:any)=>({
+                ...m,
+                name:typeof m.name==="string"?m.name.replace(/[\x00-\x1F]/g,""):String(m.name||"").replace(/[\x00-\x1F]/g,"")
+            }))
+            let version="unknown"
+            try{
+                let versionResponse=await axios.get("http://localhost:11434/api/version",{timeout:3000})
+                version=versionResponse.data.version||"unknown"
+            }
+            catch{
+                if(tagsResponse.data?.version){
+                    version=tagsResponse.data.version
+                }
+            }
+            return{
+                running:true,
+                models,
+                version
+            }
+        }
+        catch(error){
+            console.error("Ollama check failed:",(error as Error).message)
+            return{running:false,models:[],error:"Failed to connect to Ollama"}
+        }
+    })
+    ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
+        let{model,prompt,options={}}=payload
+        if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
+            return{success:false,error:"Invalid model name or prompt"}
+        }
+        if(prompt.length>500000){
+            return{success:false,error:"Prompt is too large"}
+        }
+        try{
+            await axios.get("http://localhost:11434/api/show",{
+                params:{name:model},
+                timeout:10000
+            }).catch(()=>{})
+        }
+        catch{}
+        let promptLength=prompt.length
+        let timeout=300000
+        if(promptLength>10000)timeout=600000
+        else if(promptLength>5000)timeout=450000
+        let maxRetries=2
+        let lastError:Error|null=null
+        for(let attempt=0;attempt<=maxRetries;attempt++){
+            try{
+                let response=await axios.post(
+                    "http://localhost:11434/api/generate",
+                    {
+                        model:model.replace(/[\x00-\x1F]/g,""),
+                        prompt,
+                        stream:false,
+                        options:{
+                            temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                            ...options
+                        }
+                    },
+                    {
+                        timeout,
+                        maxContentLength:50*1024*1024,
+                        maxBodyLength:50*1024*1024,
+                        headers:{
+                            "Content-Type":"application/json",
+                            "Accept":"application/json"
+                        }
+                    }
+                )
+                if(!response.data||typeof response.data.response!=="string"){
+                    return{success:false,error:"Invalid response from Ollama"}
+                }
+                return{success:true,response:response.data.response}
+            }
+            catch(error){
+                lastError=error as Error
+                if((error as any).code=="ECONNABORTED"||(error as Error).message.includes("timeout")){
+                    if(attempt<maxRetries){
+                        await new Promise(r=>setTimeout(r,5000))
+                    }
+                }
+                else{
+                    break
+                }
+            }
+        }
+        return{success:false,error:"Failed to generate response from Ollama"}
+    })
+    ipcMain.handle("ollama:generateStream",async(_event,payload)=>handleOllamaGenerateStream(payload))
+    ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payload:{
+        apiKey:string
+        baseUrl:string
+        model:string
+        prompt:string
+        options?:{temperature?:number;top_p?:number;max_tokens?:number}
+    }):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+        let{apiKey,baseUrl,model,prompt,options={}}=payload
+        if(!apiKey||!model||!prompt){
+            return{success:false,error:"Missing required parameters"}
+        }
+        try{
+            let cleanBaseUrl=baseUrl.replace(/\/+$/,"")
+            let response=await axios.post(
+                `${cleanBaseUrl}/v1/chat/completions`,
+                {
+                    model,
+                    messages:[
+                        {role:"system",content:"You are a helpful assistant for generating training data."},
+                        {role:"user",content:prompt}
+                    ],
+                    temperature:options.temperature??0.7,
+                    top_p:options.top_p??0.9,
+                    max_tokens:options.max_tokens??4096
+                },
+                {
+                    headers:{
+                        "Content-Type":"application/json",
+                        "Authorization":`Bearer ${apiKey}`
+                    },
+                    timeout:300000,
+                    httpAgent,
+                    httpsAgent
+                }
+            )
+            let rc=response.data.choices?.[0]?.message?.content||""
+            return{
+                success:true,
+                response:rc,
+                usage:response.data.usage
+            }
+        }
+        catch(error:any){
+            if(error.response){
+                return{success:false,error:`API error ${error.response.status}: ${JSON.stringify(error.response.data)}`}
+            }
+            return{success:false,error:error.message||"Failed to call OpenAI API"}
+        }
+    })
+    ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
+    ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
+}
+function registerDeferredIpcHandlers():void{
+    if(deferredIpcRegistered)return
+    deferredIpcRegistered=true
+    ipcMain.handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
+        try{
+            let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+            if(fs.existsSync(cachePath)){
+                let data=JSON.parse(fs.readFileSync(cachePath,"utf-8"))
+                return{success:true,data}
+            }
+            return{success:true,data:{}}
+        }
+        catch{
+            return{success:true,data:{}}
+        }
+    })
+    ipcMain.handle("cache:save",async(_event:Electron.IpcMainInvokeEvent,data:Record<string,any>):Promise<{success:boolean}>=>{
+        try{
+            let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+            fs.writeFileSync(cachePath,JSON.stringify(data))
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("cache:clear",async():Promise<{success:boolean}>=>{
+        try{
+            let cachePath=path.join(app.getPath("userData"),"training-cache.json")
+            if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("progress:save",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+        try{
+            let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+            fs.writeFileSync(progressPath,JSON.stringify(data))
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
+        try{
+            let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+            if(fs.existsSync(progressPath)){
+                let data=JSON.parse(fs.readFileSync(progressPath,"utf-8"))
+                return{success:true,data}
+            }
+            return{success:true,data:null}
+        }
+        catch{
+            return{success:true,data:null}
+        }
+    })
+    ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
+        try{
+            let progressPath=path.join(app.getPath("userData"),"training-progress.json")
+            if(fs.existsSync(progressPath))fs.unlinkSync(progressPath)
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("save-checkpoint",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+        try{
+            let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+            fs.writeFileSync(checkpointPath,JSON.stringify(data))
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
+        try{
+            let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+            if(fs.existsSync(checkpointPath)){
+                let data=JSON.parse(fs.readFileSync(checkpointPath,"utf-8"))
+                return{success:true,data}
+            }
+            return{success:true,data:null}
+        }
+        catch{
+            return{success:true,data:null}
+        }
+    })
+    ipcMain.handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
+        try{
+            let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
+            if(fs.existsSync(checkpointPath))fs.unlinkSync(checkpointPath)
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    ipcMain.handle("write-log",async(_:Electron.IpcMainInvokeEvent,entry:unknown):Promise<void>=>{
+        try{
+            if(!entry||typeof entry!=="object"){
+                return
+            }
+            let logLine=JSON.stringify(entry)+"\n"
+            let filePath=getCurrentLogFilePath()
+            fs.appendFileSync(filePath,logLine,"utf-8")
+        }
+        catch{}
+    })
+    ipcMain.handle("export-logs",async(_:Electron.IpcMainInvokeEvent,data:string):Promise<{success:boolean;error?:string}>=>{
+        try{
+            if(!data||typeof data!=="string"){
+                return{success:false,error:"Invalid log data"}
+            }
+            let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
+                defaultPath:"logs.jsonl",
+                filters:[
+                    {name:"JSONL Files",extensions:["jsonl"]},
+                    {name:"All Files",extensions:["*"]}
+                ]
+            })
+            if(result.canceled||!result.filePath){
+                return{success:false,error:"Export cancelled"}
+            }
+            await fsp.writeFile(result.filePath,data,"utf-8")
+            return{success:true}
+        }
+        catch(error){
+            return{success:false,error:"Failed to export logs"}
+        }
+    })
+}
+app.whenReady().then(()=>{
+    registerCriticalIpcHandlers()
+    startSplash()
+    createMainWindow()
+})
+app.on("window-all-closed",()=>{
+    if(!isMac)app.quit()
+})
+app.on("before-quit",async()=>{
+    if(splashProcess){
+        try{splashProcess.kill()}catch{}
+        splashProcess=null
     }
-    catch(error){
-        return{success:false,error:"Failed to export logs"}
+    if(fileParser){
+        try{await fileParser.dispose()}catch{}
+        fileParser=null
+    }
+})
+app.on("activate",()=>{
+    if(!mainWindow){
+        createMainWindow()
     }
 })
 process.on("uncaughtException",(error:Error)=>{
