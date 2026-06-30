@@ -164,7 +164,13 @@ function startSplash(){
             sandbox:true
         }
     })
-    splashWindow.loadFile(path.join(path.dirname(fileURLToPath(import.meta.url)),"splash.html")).then(()=>{
+    let splashHtmlCandidates=[
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"splash.html"),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","src","splash.html"),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","splash.html"),
+    ]
+    let splashHtmlPath=splashHtmlCandidates.find(p=>fs.existsSync(p))||splashHtmlCandidates[0]
+    splashWindow.loadFile(splashHtmlPath).then(()=>{
         splashWindow!.center()
         splashWindow!.show()
     }).catch(console.error)
@@ -182,6 +188,14 @@ function stopSplash(){
     }
 }
 function createMainWindow(){
+    let isCompiled=import.meta.url.endsWith(".js")||import.meta.url.endsWith(".mjs")
+    let preloadName=isCompiled?"preload.js":"preload.ts"
+    let preloadCandidates=[
+        path.join(path.dirname(fileURLToPath(import.meta.url)),preloadName),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","src","preload.ts"),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","preload.ts"),
+    ]
+    let preloadPath=preloadCandidates.find(p=>fs.existsSync(p))||preloadCandidates[0]
     mainWindow=new BrowserWindow({
         width:1400,
         height:900,
@@ -194,7 +208,7 @@ function createMainWindow(){
         titleBarStyle:"default",
         useContentSize:true,
         webPreferences:{
-            preload:path.join(path.dirname(fileURLToPath(import.meta.url)),"preload.ts"),
+            preload:preloadPath,
             nodeIntegration:false,
             contextIsolation:true,
             spellcheck:false,

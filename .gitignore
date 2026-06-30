@@ -143,5 +143,7 @@ release
 
 #TypeScript build output
 dist-ts
+#Compiled main process output (esbuild)
+dist-main
 .trae
 AGENTS.md
