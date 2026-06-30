@@ -334,13 +334,13 @@
 
   * [x] SubTask E1.3: Run `npm run build` and fix all build errors
 
-* [ ] Task E2: Packaging verification
+* [x] Task E2: Packaging verification
 
-  * [ ] SubTask E2.1: Run `npm run package:win` and confirm the portable `.exe` launches
+  * [x] SubTask E2.1: Run `npm run package:win` and confirm the portable `.exe` launches
 
-  * [ ] SubTask E2.2: Confirm splash screen appears and exits correctly in the packaged build
+  * [x] SubTask E2.2: Confirm splash screen appears and exits correctly in the packaged build
 
-  * [ ] SubTask E2.3: Confirm the new UI renders correctly in the packaged build
+  * [x] SubTask E2.3: Confirm the new UI renders correctly in the packaged build
 
 # Task Dependencies
 
