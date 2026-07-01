@@ -9,6 +9,9 @@ function getConfirmModal(): HTMLDivElement {
     confirmModal = document.createElement("div")
     confirmModal.id = "confirm-modal"
     confirmModal.className = "modal"
+    confirmModal.setAttribute("role", "dialog")
+    confirmModal.setAttribute("aria-modal", "true")
+    confirmModal.setAttribute("aria-labelledby", "confirm-title")
     confirmModal.innerHTML = `
       <div class="modal-content confirm-dialog">
         <div class="modal-header">
@@ -52,6 +55,7 @@ export function showConfirm(
       cancelBtn.removeEventListener("click", onCancelClick)
       okBtn.removeEventListener("click", onConfirmClick)
       modal.removeEventListener("click", onBackdropClick)
+      document.removeEventListener("keydown", onKeydown)
       resolveRef = null
     }
 
@@ -73,9 +77,17 @@ export function showConfirm(
       }
     }
 
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        onCancelClick()
+      }
+    }
+
     cancelBtn.addEventListener("click", onCancelClick)
     okBtn.addEventListener("click", onConfirmClick)
     modal.addEventListener("click", onBackdropClick)
+    document.addEventListener("keydown", onKeydown)
 
     modal.style.display = "flex"
     modal.classList.add("active")
