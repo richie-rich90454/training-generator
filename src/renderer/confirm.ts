@@ -57,6 +57,9 @@ export function showConfirm(
       modal.removeEventListener("click", onBackdropClick)
       document.removeEventListener("keydown", onKeydown)
       resolveRef = null
+      if (previouslyFocused && document.contains(previouslyFocused)) {
+        previouslyFocused.focus()
+      }
     }
 
     const onConfirmClick = () => {
@@ -82,6 +85,16 @@ export function showConfirm(
         e.preventDefault()
         onCancelClick()
       }
+      else if (e.key === "Tab") {
+        if (e.shiftKey && document.activeElement === cancelBtn) {
+          e.preventDefault()
+          okBtn.focus()
+        }
+        else if (!e.shiftKey && document.activeElement === okBtn) {
+          e.preventDefault()
+          cancelBtn.focus()
+        }
+      }
     }
 
     cancelBtn.addEventListener("click", onCancelClick)
@@ -89,8 +102,9 @@ export function showConfirm(
     modal.addEventListener("click", onBackdropClick)
     document.addEventListener("keydown", onKeydown)
 
+    const previouslyFocused = document.activeElement as HTMLElement | null
     modal.style.display = "flex"
     modal.classList.add("active")
-    okBtn.focus()
+    cancelBtn.focus()
   })
 }
