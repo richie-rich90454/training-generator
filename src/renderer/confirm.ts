@@ -1,4 +1,5 @@
 let confirmModal: HTMLDivElement | null = null
+let resolveRef: ((value: boolean) => void) | null = null
 
 function getConfirmModal(): HTMLDivElement {
   if (!confirmModal) {
@@ -33,6 +34,11 @@ export function showConfirm(
   onCancel?: () => void
 ): Promise<boolean> {
   return new Promise((resolve) => {
+    if (resolveRef) {
+      resolveRef(false)
+      resolveRef = null
+    }
+    resolveRef = resolve
     const modal = getConfirmModal()
     const messageEl = modal.querySelector("#confirm-message") as HTMLElement
     const cancelBtn = modal.querySelector("#confirm-cancel-btn") as HTMLButtonElement
@@ -46,6 +52,7 @@ export function showConfirm(
       cancelBtn.removeEventListener("click", onCancelClick)
       okBtn.removeEventListener("click", onConfirmClick)
       modal.removeEventListener("click", onBackdropClick)
+      resolveRef = null
     }
 
     const onConfirmClick = () => {
