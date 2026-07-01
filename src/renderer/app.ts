@@ -767,7 +767,10 @@ class TrainGeneratorApp{
                         showToast("No valid items found in the file","error")
                         return
                     }
-                    let warmed=await warmCache(items)
+                    let model=this.uiManager.modelSelect.value
+                    let language=this.uiManager.languageSelect.value||"en"
+                    let prompt=await this.promptManager.getPromptWithFallback(language,this.uiManager.processingType.value)||""
+                    let warmed=await warmCache(items,model,prompt)
                     showToast(`Cache warmed with ${warmed} items from ${items.length} total entries`,"success")
                     this.addLog(`Cache warmed: ${warmed} items imported from previous output`,"success")
                 }

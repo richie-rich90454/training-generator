@@ -152,26 +152,26 @@ describe("cache warm", () => {
   })
   it("should warm cache from instruction items", async () => {
     let items = [{ instruction: "What is X?", output: "X is a variable." }]
-    let warmed = await warmCache(items)
+    let warmed = await warmCache(items, "model1", "prompt1")
     expect(warmed).toBe(1)
   })
   it("should warm cache from text items", async () => {
     let items = [{ text: "This is a sample text with enough length." }]
-    let warmed = await warmCache(items)
+    let warmed = await warmCache(items, "model1", "prompt1")
     expect(warmed).toBe(1)
   })
   it("should warm cache from message items", async () => {
     let items = [{ messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help?" }] }]
-    let warmed = await warmCache(items)
+    let warmed = await warmCache(items, "model1", "prompt1")
     expect(warmed).toBe(1)
   })
   it("should skip items without usable content", async () => {
     let items = [{}, { instruction: "Q", output: "" }, { text: "" }]
-    let warmed = await warmCache(items)
+    let warmed = await warmCache(items, "model1", "prompt1")
     expect(warmed).toBe(0)
   })
   it("should handle empty array", async () => {
-    let warmed = await warmCache([])
+    let warmed = await warmCache([], "model1", "prompt1")
     expect(warmed).toBe(0)
   })
 })

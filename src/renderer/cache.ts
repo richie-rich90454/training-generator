@@ -93,7 +93,7 @@ export async function clearCache():Promise<void>{
     }
 }
 
-export async function warmCache(outputItems:Array<{instruction?:string;input?:string;output?:string;text?:string;messages?:Array<{role:string;content:string}>}>):Promise<number>{
+export async function warmCache(outputItems:Array<{instruction?:string;input?:string;output?:string;text?:string;messages?:Array<{role:string;content:string}>}>,model:string,prompt:string):Promise<number>{
     await loadCache()
     let warmed=0
     for(let item of outputItems){
@@ -114,7 +114,7 @@ export async function warmCache(outputItems:Array<{instruction?:string;input?:st
             response=lastMsg.content
         }
         if(!chunk||!response)continue
-        let key=hashKey(chunk,"__warmed__","__warmed__")
+        let key=hashKey(chunk,model,prompt)
         let tokens=Math.ceil(response.length/4)
         cacheMap.set(key,{response,tokens,timestamp:Date.now()})
         warmed++
