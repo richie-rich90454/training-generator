@@ -6,7 +6,7 @@
   "types": "src/types/interfaces.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
-    "dev": "vite & cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .",
+    "dev": "concurrently \"vite\" \"cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .\"",
     "build": "npm run build:main && vite build",
     "build:main": "node scripts/build-main.mjs",
     "preview": "vite preview",
@@ -154,6 +154,7 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^9.2.3",
     "cross-env": "^10.1.0",
     "electron": "^42.3.3",
     "electron-builder": "^26.15.2",
