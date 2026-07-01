@@ -168,6 +168,44 @@ export class CliAnthropicProvider implements Provider {
     }
 }
 
+export class CliGeminiProvider implements Provider {
+    name = "gemini"
+    apiKey: string
+    baseUrl: string
+    rateLimiter: RateLimiter
+
+    constructor(apiKey: string, baseUrl: string = "https://generativelanguage.googleapis.com") {
+        this.apiKey = apiKey
+        this.baseUrl = baseUrl
+        this.rateLimiter = new RateLimiter(60, 10)
+        this.rateLimiter.enable()
+    }
+
+    async generate(prompt: string, model: string, options?: ProviderOptions): Promise<ProviderResult> {
+        try {
+            await this.rateLimiter.acquire()
+            let result = await retryWithBackoff(async () => {
+                let response = await axios.post(`${this.baseUrl}/v1beta/models/${model}:generateContent?key=${this.apiKey}`, {
+                    contents: [{ parts: [{ text: prompt }] }]
+                }, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    timeout: 120000
+                })
+                return response.data
+            }, 3, 1000, undefined, this.rateLimiter)
+            let text = result.candidates?.[0]?.content?.parts?.[0]?.text || ""
+            let tokens = result.usageMetadata?.candidatesTokenCount ?? Math.ceil(text.length / 4)
+            return { text, tokens, provider: "gemini" }
+        }
+        catch (error) {
+            let msg = (error as any)?.response?.data?.error?.message || (error as Error).message
+            throw new Error(`Gemini generation failed: ${msg}`)
+        }
+    }
+}
+
 export function createCliProvider(type: string, config?: { apiKey?: string; baseUrl?: string }): Provider {
     if (type === "openai" || type === "anthropic" || type === "gemini") {
         let baseUrl = config?.baseUrl ||
