@@ -126,6 +126,48 @@ export class CliOpenAIProvider implements Provider {
     }
 }
 
+export class CliAnthropicProvider implements Provider {
+    name = "anthropic"
+    apiKey: string
+    baseUrl: string
+    rateLimiter: RateLimiter
+
+    constructor(apiKey: string, baseUrl: string = "https://api.anthropic.com") {
+        this.apiKey = apiKey
+        this.baseUrl = baseUrl
+        this.rateLimiter = new RateLimiter(60, 10)
+        this.rateLimiter.enable()
+    }
+
+    async generate(prompt: string, model: string, options?: ProviderOptions): Promise<ProviderResult> {
+        try {
+            await this.rateLimiter.acquire()
+            let result = await retryWithBackoff(async () => {
+                let response = await axios.post(`${this.baseUrl}/v1/messages`, {
+                    model,
+                    max_tokens: options?.max_tokens ?? 4096,
+                    messages: [{ role: "user", content: prompt }]
+                }, {
+                    headers: {
+                        "x-api-key": this.apiKey,
+                        "anthropic-version": "2023-06-01",
+                        "Content-Type": "application/json"
+                    },
+                    timeout: 120000
+                })
+                return response.data
+            }, 3, 1000, undefined, this.rateLimiter)
+            let text = result.content?.[0]?.text || ""
+            let tokens = result.usage?.output_tokens ?? Math.ceil(text.length / 4)
+            return { text, tokens, provider: "anthropic" }
+        }
+        catch (error) {
+            let msg = (error as any)?.response?.data?.error?.message || (error as Error).message
+            throw new Error(`Anthropic generation failed: ${msg}`)
+        }
+    }
+}
+
 export function createCliProvider(type: string, config?: { apiKey?: string; baseUrl?: string }): Provider {
     if (type === "openai" || type === "anthropic" || type === "gemini") {
         let baseUrl = config?.baseUrl ||
