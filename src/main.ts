@@ -22,6 +22,7 @@ let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
 let deferredIpcRegistered=false
 let isAppQuitting=false
+let writeLogQueue:Promise<void>=Promise.resolve()
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
 let keyStoragePath=path.join(userDataPath,".keys")
@@ -564,13 +565,9 @@ const MAX_LOG_SIZE=1024*1024
 function getLogFilePath(index:number):string{
     return path.join(LOGS_DIR,`app-${index}.log`)
 }
-function getCurrentLogFilePath():string{
-    let dirsExist=false
+async function getCurrentLogFilePathAsync():Promise<string>{
     try{
-        if(!fs.existsSync(LOGS_DIR)){
-            fs.mkdirSync(LOGS_DIR,{recursive:true})
-        }
-        dirsExist=true
+        await fsp.mkdir(LOGS_DIR,{recursive:true})
     }
     catch{
         return getLogFilePath(0)
@@ -578,10 +575,7 @@ function getCurrentLogFilePath():string{
     for(let i=0;i<MAX_LOG_FILES;i++){
         let filePath=getLogFilePath(i)
         try{
-            if(!fs.existsSync(filePath)){
-                return filePath
-            }
-            let stats=fs.statSync(filePath)
+            let stats=await fsp.stat(filePath)
             if(stats.size<MAX_LOG_SIZE){
                 return filePath
             }
@@ -594,12 +588,17 @@ function getCurrentLogFilePath():string{
         for(let i=MAX_LOG_FILES-1;i>0;i--){
             let src=getLogFilePath(i-1)
             let dst=getLogFilePath(i)
-            if(fs.existsSync(src)){
-                if(fs.existsSync(dst))fs.unlinkSync(dst)
-                fs.renameSync(src,dst)
+            try{
+                await fsp.access(src)
+                try{
+                    await fsp.unlink(dst)
+                }
+                catch{}
+                await fsp.rename(src,dst)
             }
+            catch{}
         }
-        fs.writeFileSync(getLogFilePath(0),"")
+        await fsp.writeFile(getLogFilePath(0),"","utf-8")
         return getLogFilePath(0)
     }
     catch{
@@ -1072,15 +1071,15 @@ function registerDeferredIpcHandlers():void{
         }
     })
     ipcMain.handle("write-log",async(_:Electron.IpcMainInvokeEvent,entry:unknown):Promise<void>=>{
-        try{
-            if(!entry||typeof entry!=="object"){
-                return
-            }
-            let logLine=JSON.stringify(entry)+"\n"
-            let filePath=getCurrentLogFilePath()
-            fs.appendFileSync(filePath,logLine,"utf-8")
+        if(!entry||typeof entry!=="object"){
+            return
         }
-        catch{}
+        let logLine=JSON.stringify(entry)+"\n"
+        writeLogQueue=writeLogQueue.then(async()=>{
+            let filePath=await getCurrentLogFilePathAsync()
+            await fsp.appendFile(filePath,logLine,"utf-8")
+        }).catch(()=>{})
+        await writeLogQueue
     })
     ipcMain.handle("export-logs",async(_:Electron.IpcMainInvokeEvent,data:string):Promise<{success:boolean;error?:string}>=>{
         try{
