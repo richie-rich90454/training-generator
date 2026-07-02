@@ -1,5 +1,4 @@
-﻿import{contextBridge,ipcRenderer}from "electron"
-import type{OllamaStatus}from "./types/index.ts"
+import{contextBridge,ipcRenderer}from "electron"
 
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>ipcRenderer.invoke("dialog:openFile"),
@@ -25,18 +24,5 @@ contextBridge.exposeInMainWorld("electronAPI",{
     exportLogs:(data:string)=>ipcRenderer.invoke("export-logs",data),
     saveCheckpoint:(data:unknown)=>ipcRenderer.invoke("save-checkpoint",data),
     loadCheckpoint:()=>ipcRenderer.invoke("load-checkpoint"),
-    clearCheckpoint:()=>ipcRenderer.invoke("clear-checkpoint"),
-    onOllamaStatusUpdate:(callback:(status:OllamaStatus)=>void)=>()=>{
-        ipcRenderer.on("ollama:status-update",(_event:any,status:OllamaStatus)=>callback(status))
-        return()=>{
-            ipcRenderer.removeListener("ollama:status-update",(_event:any,status:OllamaStatus)=>callback(status))
-        }
-    }
-})
-
-contextBridge.exposeInMainWorld("appConsole",{
-    log:(...args:unknown[])=>console.log("[App]",...args),
-    error:(...args:unknown[])=>console.error("[App Error]",...args),
-    warn:(...args:unknown[])=>console.warn("[App Warning]",...args),
-    info:(...args:unknown[])=>console.info("[App Info]",...args)
+    clearCheckpoint:()=>ipcRenderer.invoke("clear-checkpoint")
 })

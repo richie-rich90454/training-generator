@@ -39,8 +39,7 @@ describe("Preload API structure",()=>{
             checkOllama:expect.any(Function),
             generateWithOllama:expect.any(Function),
             getAppVersion:expect.any(Function),
-            getPlatform:expect.any(Function),
-            onOllamaStatusUpdate:expect.any(Function)
+            getPlatform:expect.any(Function)
         }
         expect(apiShape.openFileDialog).toBeDefined()
         expect(apiShape.readFile).toBeDefined()
@@ -52,7 +51,6 @@ describe("Preload API structure",()=>{
         expect(apiShape.generateWithOllama).toBeDefined()
         expect(apiShape.getAppVersion).toBeDefined()
         expect(apiShape.getPlatform).toBeDefined()
-        expect(apiShape.onOllamaStatusUpdate).toBeDefined()
     })
 
     test("IPC invoke is called for openFileDialog",()=>{
@@ -107,63 +105,6 @@ describe("Preload API structure",()=>{
         expect(mockElectron.ipcRenderer.invoke).toHaveBeenCalledWith("app:getPlatform")
     })
 
-    test("onOllamaStatusUpdate registers IPC listener on ollama:status-update",()=>{
-        let callback=vi.fn()
-        mockElectron.ipcRenderer.on("ollama:status-update",callback)
-        expect(mockElectron.ipcRenderer.on).toHaveBeenCalledWith("ollama:status-update",callback)
-    })
-
-    test("onOllamaStatusUpdate returns unsubscribe function",()=>{
-        let callback=vi.fn()
-        mockElectron.ipcRenderer.on("ollama:status-update",callback)
-        let unsubscribe=()=>{
-            mockElectron.ipcRenderer.removeListener("ollama:status-update",callback)
-        }
-        expect(typeof unsubscribe).toBe("function")
-        unsubscribe()
-        expect(mockElectron.ipcRenderer.removeListener).toHaveBeenCalledWith("ollama:status-update",callback)
-    })
-
-    test("onOllamaStatusUpdate listener receives OllamaStatus object",()=>{
-        let callback=vi.fn()
-        mockElectron.ipcRenderer.on("ollama:status-update",callback)
-        let status={running:true,models:[{name:"llama2"}],version:"0.1.0"}
-        let listeners=mockElectron.ipcRenderer._listeners["ollama:status-update"]
-        expect(listeners).toBeDefined()
-        expect(listeners.length).toBe(1)
-        listeners[0]({},status)
-        expect(callback).toHaveBeenCalledWith({},status)
-    })
-
-    test("onOllamaStatusUpdate unsubscribe stops receiving events",()=>{
-        let callback=vi.fn()
-        mockElectron.ipcRenderer.on("ollama:status-update",callback)
-        mockElectron.ipcRenderer.removeListener("ollama:status-update",callback)
-        let listeners=mockElectron.ipcRenderer._listeners["ollama:status-update"]
-        expect(listeners.length).toBe(0)
-    })
-
-    test("multiple onOllamaStatusUpdate listeners are supported",()=>{
-        let callback1=vi.fn()
-        let callback2=vi.fn()
-        mockElectron.ipcRenderer.on("ollama:status-update",callback1)
-        mockElectron.ipcRenderer.on("ollama:status-update",callback2)
-        let listeners=mockElectron.ipcRenderer._listeners["ollama:status-update"]
-        expect(listeners.length).toBe(2)
-    })
-
-    test("appConsole methods are exposed",()=>{
-        let appConsole={
-            log:(...args:unknown[])=>console.log("[App]",...args),
-            error:(...args:unknown[])=>console.error("[App Error]",...args),
-            warn:(...args:unknown[])=>console.warn("[App Warning]",...args),
-            info:(...args:unknown[])=>console.info("[App Info]",...args)
-        }
-        expect(typeof appConsole.log).toBe("function")
-        expect(typeof appConsole.error).toBe("function")
-        expect(typeof appConsole.warn).toBe("function")
-        expect(typeof appConsole.info).toBe("function")
-    })
 })
 
 describe("Preload security",()=>{
@@ -183,13 +124,11 @@ describe("Preload security",()=>{
             "ollama:check",
             "ollama:generate",
             "app:getVersion",
-            "app:getPlatform",
-            "ollama:status-update"
+            "app:getPlatform"
         ]
         expect(allowedChannels).toContain("dialog:openFile")
         expect(allowedChannels).toContain("file:parse")
         expect(allowedChannels).toContain("ollama:check")
-        expect(allowedChannels).toContain("ollama:status-update")
         expect(allowedChannels).not.toContain("shell:execute")
         expect(allowedChannels).not.toContain("fs:read")
         expect(allowedChannels).not.toContain("child_process:spawn")
