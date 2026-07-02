@@ -5,45 +5,63 @@ import { Logger } from "../src/renderer/logger.js"
 import { t, applyLanguage } from "../src/renderer/i18n.js"
 import { validateItems } from "../src/renderer/qualityValidator.js"
 import type { TrainingItem } from "../src/types/index.js"
-describe("security", () => {
-    beforeEach(() => {
+describe("security",()=>{
+    let encryptKey:(plaintext:string)=>Promise<string>
+    let decryptKey:(encrypted:string)=>Promise<string|null>
+    beforeEach(async()=>{
+        vi.resetModules()
         localStorage.clear()
+        ;(window as any).electronAPI=undefined
+        let security=await import("../src/renderer/security.js")
+        encryptKey=security.encryptKey
+        decryptKey=security.decryptKey
     })
-    afterEach(() => {
+    afterEach(()=>{
         localStorage.clear()
         vi.restoreAllMocks()
     })
-    it("encrypts and decrypts a key", async () => {
-        let original = "sk-test-key-12345"
-        let encrypted = await encryptKey(original)
+    it("encrypts and decrypts a key",async()=>{
+        let original="sk-test-key-12345"
+        let encrypted=await encryptKey(original)
         expect(encrypted).not.toBe(original)
-        let decrypted = await decryptKey(encrypted)
+        let decrypted=await decryptKey(encrypted)
         expect(decrypted).toBe(original)
     })
-    it("returns empty string for empty input", async () => {
+    it("returns empty string for empty plaintext and null for empty ciphertext",async()=>{
         expect(await encryptKey("")).toBe("")
-        expect(await decryptKey("")).toBe("")
+        expect(await decryptKey("")).toBe(null)
     })
-    it("produces different ciphertexts for same plaintext", async () => {
-        let key = "same-key"
-        let e1 = await encryptKey(key)
-        let e2 = await encryptKey(key)
+    it("produces different ciphertexts for same plaintext",async()=>{
+        let key="same-key"
+        let e1=await encryptKey(key)
+        let e2=await encryptKey(key)
         expect(e1).not.toBe(e2)
     })
-    it("returns plaintext when decrypting unencrypted value", async () => {
-        let plaintext = "not-encrypted"
-        let decrypted = await decryptKey(plaintext)
-        expect(decrypted).toBe(plaintext)
+    it("returns null when decrypting invalid or unencrypted value",async()=>{
+        let plaintext="not-encrypted"
+        let decrypted=await decryptKey(plaintext)
+        expect(decrypted).toBe(null)
     })
-    it("stores key in localStorage", async () => {
+    it("does not store key in localStorage",async()=>{
         await encryptKey("secret")
-        expect(localStorage.getItem("train-generator-encryption-key")).toBeTruthy()
+        expect(localStorage.getItem("train-generator-encryption-key")).toBeNull()
     })
-    it("reuses stored key for subsequent encryptions", async () => {
-        await encryptKey("first")
-        let stored = localStorage.getItem("train-generator-encryption-key")
-        await encryptKey("second")
-        expect(localStorage.getItem("train-generator-encryption-key")).toBe(stored)
+    it("migrates legacy localStorage key then removes it",async()=>{
+        let legacyKey="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        localStorage.setItem("train-generator-encryption-key",legacyKey)
+        await encryptKey("secret")
+        expect(localStorage.getItem("train-generator-encryption-key")).toBeNull()
+        let encrypted=await encryptKey("secret")
+        let decrypted=await decryptKey(encrypted)
+        expect(decrypted).toBe("secret")
+    })
+    it("reuses memory key for subsequent encryptions",async()=>{
+        let e1=await encryptKey("first")
+        let d1=await decryptKey(e1)
+        let e2=await encryptKey("second")
+        let d2=await decryptKey(e2)
+        expect(d1).toBe("first")
+        expect(d2).toBe("second")
     })
 })
 describe("logger", () => {

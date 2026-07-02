@@ -361,13 +361,19 @@ class UIManager{
             if(settings.provider)this.providerSelect.value=settings.provider
             if(settings.apiKey){
                 let decrypted=await decryptKey(settings.apiKey)
-                this.apiKeyInput.value=decrypted
-                // Migration: if the key was unencrypted (decrypt returned same value), re-save it encrypted
-                if(decrypted===settings.apiKey && decrypted.length>0){
-                    // Key was not encrypted, migrate it
-                    let encrypted=await encryptKey(decrypted)
-                    settings.apiKey=encrypted
-                    localStorage.setItem("train-generator-settings",JSON.stringify(settings))
+                if(decrypted!=null){
+                    this.apiKeyInput.value=decrypted
+                    if(decrypted===settings.apiKey && decrypted.length>0){
+                        let encrypted=await encryptKey(decrypted)
+                        settings.apiKey=encrypted
+                        try{
+                            localStorage.setItem("train-generator-settings",JSON.stringify(settings))
+                        }
+                        catch{}
+                    }
+                }
+                else{
+                    this.apiKeyInput.value=""
                 }
             }
             if(settings.baseUrl)this.baseUrlInput.value=settings.baseUrl
