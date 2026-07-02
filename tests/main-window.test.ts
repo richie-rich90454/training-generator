@@ -22,7 +22,7 @@ describe("BrowserWindow configuration",()=>{
             preload:"path/to/preload.ts",
             contextIsolation:true,
             nodeIntegration:false,
-            sandbox:false,
+            sandbox:true,
             spellcheck:false,
             disableHtmlFullscreenWindowResize:true,
             backgroundThrottling:false,
@@ -31,7 +31,7 @@ describe("BrowserWindow configuration",()=>{
         expect(webPreferences.contextIsolation).toBe(true)
         expect(webPreferences.nodeIntegration).toBe(false)
         expect(webPreferences.preload).toBeDefined()
-        expect(webPreferences.sandbox).toBe(false)
+        expect(webPreferences.sandbox).toBe(true)
         expect(webPreferences.spellcheck).toBe(false)
     })
 

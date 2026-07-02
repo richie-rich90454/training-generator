@@ -378,7 +378,7 @@ function createMainWindow(){
             contextIsolation:true,
             spellcheck:false,
             disableHtmlFullscreenWindowResize:true,
-            sandbox:false,
+            sandbox:true,
             webgl:true,
             backgroundThrottling:false,
             enablePreferredSizeMode:true,
