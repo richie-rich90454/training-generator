@@ -30,9 +30,13 @@ export function exportCSV(items:TrainingItem[]):string{
     })
     return [header,...rows].join("\n")
 }
-function csvEscape(value:string):string{
-    if(value.includes(",")||value.includes('"')||value.includes("\n")){
-        return `"${value.replace(/"/g,'""')}"`
+export function csvEscape(value:string):string{
+    let escaped=value.replace(/"/g,'""')
+    if(/^[\=\+\-\@\t\r]/.test(escaped)){
+        escaped="'"+escaped
     }
-    return value
+    if(escaped.includes(",")||escaped.includes('"')||escaped.includes("\n")||escaped.includes("\r")){
+        return `"${escaped}"`
+    }
+    return escaped
 }
