@@ -87,6 +87,8 @@ export class Devtools{
         })
     }
     private switchTab(tabName:string):void{
+        let validTabs=["logs","cache","workers","memory"]
+        if(!validTabs.includes(tabName))return
         let tabs=this.container.querySelectorAll(".devtools-tab")
         tabs.forEach(t=>t.classList.remove("active"))
         let activeTab=this.container.querySelector(`.devtools-tab[data-tab="${tabName}"]`)
@@ -240,8 +242,17 @@ export class Devtools{
     }
     dispose():void{
         this.logEntries=[]
-        if(this.container.parentNode){
+        this.visible=false
+        if(this.pendingRender){
+            cancelAnimationFrame(this.pendingRender)
+            this.pendingRender=false
+        }
+        if(this.container&&this.container.parentNode){
             this.container.parentNode.removeChild(this.container)
         }
+        this.logOutput=null
+        this.cacheContent=null
+        this.workerContent=null
+        this.memoryContent=null
     }
 }
