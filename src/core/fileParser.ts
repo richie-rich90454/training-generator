@@ -65,18 +65,24 @@ class FileParser{
             let readStream=fs.createReadStream(filePath,{encoding:"utf8",highWaterMark:64*1024})
             let content=""
             let maxSize=50*1024*1024
+            let settled=false
+            function settle(fn:()=>void):void{
+                if(settled)return
+                settled=true
+                fn()
+            }
             readStream.on("data",(chunk)=>{
                 content+=chunk as string
                 if(content.length>maxSize){
                     readStream.destroy()
-                    reject(new Error("Text file too large to process"))
+                    settle(()=>reject(new Error("Text file too large to process")))
                 }
             })
             readStream.on("end",()=>{
-                resolve(content)
+                settle(()=>resolve(content))
             })
             readStream.on("error",(error)=>{
-                reject(error)
+                settle(()=>reject(error))
             })
         })
     }
