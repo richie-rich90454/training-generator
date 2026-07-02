@@ -16,7 +16,7 @@ class FileParser{
             let stats=await fs.promises.stat(filePath)
             let fileSize=stats.size
             if(fileSize>10*1024*1024){
-                console.log(`Large file detected(${(fileSize/(1024*1024)).toFixed(2)}MB),using streaming...`)
+                console.log(`Large file detected(${(fileSize/(1024*1024)).toFixed(2)}MB),parsing in memory...`)
                 return await this.parseLargeFile(filePath,fileType)
             }
             let buffer=await fs.promises.readFile(filePath)
