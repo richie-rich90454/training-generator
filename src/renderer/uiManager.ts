@@ -541,7 +541,7 @@ class UIManager{
                 if(fontSizeSelect)fontSizeSelect.value=settings.fontSize
                 this.applyFontSize(settings.fontSize)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smartSizing"]
+            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smart-sizing"]
             checkboxes.forEach(id=>{
                 let checkbox=document.getElementById(id as string) as HTMLInputElement|null
                 if(checkbox&&settings[id]!=undefined){
@@ -586,7 +586,7 @@ class UIManager{
                 settings.fontSize=fontSizeSelect.value
                 this.applyFontSize(fontSizeSelect.value)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smartSizing"]
+            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smart-sizing"]
             checkboxes.forEach(id=>{
                 let checkbox=document.getElementById(id as string) as HTMLInputElement|null
                 if(checkbox){

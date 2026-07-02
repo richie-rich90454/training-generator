@@ -132,7 +132,7 @@ export interface FullAppSettings{
     "max-file-size"?:number
     maxOutputItems?:number
     maxChunks?:number
-    smartSizing?:boolean
+    "smart-sizing"?:boolean
     maxParallelFiles?:string
 }
 
