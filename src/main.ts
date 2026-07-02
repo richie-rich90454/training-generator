@@ -24,10 +24,58 @@ let deferredIpcRegistered=false
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
 let keyStoragePath=path.join(userDataPath,".keys")
+const MAX_READ_SIZE=10*1024*1024
+let allowedParsePaths=new Set<string>()
+let allowedSavePaths=new Set<string>()
+function normalizeAllowlistPath(filePath:string):string{
+    try{
+        let resolved=path.resolve(filePath)
+        if(isWin||isMac){
+            return resolved.toLowerCase()
+        }
+        return resolved
+    }
+    catch{
+        return filePath
+    }
+}
+function allowParsePath(filePath:string):void{
+    try{
+        allowedParsePaths.add(normalizeAllowlistPath(filePath))
+    }
+    catch{}
+}
+function allowSavePath(filePath:string):void{
+    try{
+        allowedSavePaths.add(normalizeAllowlistPath(filePath))
+    }
+    catch{}
+}
+function isAllowedParsePath(filePath:string):boolean{
+    try{
+        return allowedParsePaths.has(normalizeAllowlistPath(filePath))
+    }
+    catch{
+        return false
+    }
+}
+function isAllowedSavePath(filePath:string):boolean{
+    try{
+        return allowedSavePaths.has(normalizeAllowlistPath(filePath))
+    }
+    catch{
+        return false
+    }
+}
 function isPathWithin(baseDir:string,targetPath:string):boolean{
     try{
         let resolvedTarget=path.resolve(targetPath)
         let resolvedBase=path.resolve(baseDir)
+        if(isWin||isMac){
+            let rt=resolvedTarget.toLowerCase()
+            let rb=resolvedBase.toLowerCase()
+            return rt===rb||rt.startsWith(rb+path.sep.toLowerCase())
+        }
         return resolvedTarget===resolvedBase||resolvedTarget.startsWith(resolvedBase+path.sep)
     }
     catch{
@@ -41,7 +89,7 @@ function getSafeReadDirs():string[]{
         dirs.push(path.resolve(app.getAppPath(),"src","prompts"))
         dirs.push(path.resolve(app.getAppPath(),"dist","prompts"))
         dirs.push(path.resolve(app.getAppPath(),"prompts"))
-        if(process.resourcesPath){
+        if(typeof process!=="undefined"&&process.resourcesPath){
             dirs.push(path.resolve(process.resourcesPath))
         }
         let metaDir=path.dirname(fileURLToPath(import.meta.url))
@@ -84,15 +132,42 @@ function isPathSafeForWrite(filePath:string):boolean{
         return false
     }
 }
+function normalizePromptsPath(filePath:string):string{
+    return filePath.replace(/\\/g,"/")
+}
+function isPromptsPath(filePath:string):boolean{
+    return normalizePromptsPath(filePath).includes("prompts/")
+}
 function isPathSafeForParse(filePath:string):boolean{
-    if(!filePath||typeof filePath!=="string"||filePath.includes("\x00")||filePath.includes(".."))return false
+    if(!filePath||typeof filePath!=="string"||filePath.includes("\x00"))return false
     try{
         let resolved=path.resolve(filePath)
-        let userHome=path.resolve(app.getPath("home"))
-        if(!isPathWithin(userHome,resolved))return false
-        if(!fs.existsSync(resolved))return false
-        let stats=fs.statSync(resolved)
-        return stats.isFile()
+        if(isAllowedParsePath(resolved)||isPathWithin(userDataPath,resolved))return fs.statSync(resolved).isFile()
+        return false
+    }
+    catch{
+        return false
+    }
+}
+function isPrivateOrLoopbackHost(hostname:string):boolean{
+    let h=hostname.toLowerCase()
+    if(h==="localhost"||h==="127.0.0.1"||h==="::1"||h==="0.0.0.0")return true
+    if(h.startsWith("127.")||h.startsWith("10.")||h.startsWith("192.168."))return true
+    if(h.startsWith("172.")){
+        let parts=h.split(".")
+        let second=parseInt(parts[1],10)
+        if(second>=16&&second<=31)return true
+    }
+    if(h.startsWith("fc")||h.startsWith("fd")||h.startsWith("fe80:")||h.startsWith("169.254."))return true
+    return false
+}
+function isValidOpenAIBaseUrl(baseUrl:string):boolean{
+    if(!baseUrl||typeof baseUrl!=="string")return false
+    try{
+        let url=new URL(baseUrl)
+        if(url.protocol!=="http:"&&url.protocol!=="https:")return false
+        if(!url.hostname||isPrivateOrLoopbackHost(url.hostname))return false
+        return true
     }
     catch{
         return false
@@ -191,7 +266,9 @@ function startSplash(){
         let metaDir=path.dirname(fileURLToPath(import.meta.url))
         let exePaths:string[]=[]
         if(app.isPackaged){
-            exePaths.push(path.join(process.resourcesPath,"native-splash","splash.exe"))
+            if(typeof process!=="undefined"&&process.resourcesPath){
+                exePaths.push(path.join(process.resourcesPath,"native-splash","splash.exe"))
+            }
             exePaths.push(path.join(path.dirname(app.getPath("exe")),"resources","native-splash","splash.exe"))
             exePaths.push(path.join(path.dirname(app.getAppPath()),"native-splash","splash.exe"))
         }
@@ -352,8 +429,9 @@ function createMainWindow(){
         mainWindow=null
     })
 }
-export async function handleOllamaGenerateStream(payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>{
-    let{model,prompt,options={}}=payload
+export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>{
+    let{model,prompt,options}=payload
+    options=options??{}
     if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
         return{success:false,error:"Invalid model name or prompt"}
     }
@@ -508,9 +586,10 @@ function registerCriticalIpcHandlers():void{
         })
         if(result.canceled)return[]
         let maxSize=100*1024*1024
+        let rejected:string[]=[]
         let files=await Promise.all(result.filePaths.map(async filePath=>{
             try{
-                if(filePath.includes("\x00")||filePath.includes(".."))return null
+                if(filePath.includes("\x00"))return null
                 let resolvedPath=path.resolve(filePath)
                 let userHome=path.resolve(app.getPath("home"))
                 if(!isPathWithin(userHome,resolvedPath))return null
@@ -528,6 +607,17 @@ function registerCriticalIpcHandlers():void{
                 return null
             }
         }))
+        result.filePaths.forEach((filePath,index)=>{
+            if(files[index]){
+                allowParsePath(filePath)
+            }
+            else{
+                rejected.push(filePath)
+            }
+        })
+        if(rejected.length>0){
+            dialog.showErrorBox("File selection rejected","The following files cannot be opened by the application:\n"+rejected.join("\n"))
+        }
         return files.filter(Boolean)as FileObj[]
     })
     ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
@@ -541,7 +631,9 @@ function registerCriticalIpcHandlers():void{
             ]
         })
         if(result.canceled||!result.filePath)return null
-        if(result.filePath.includes("\x00")||result.filePath.includes(".."))return null
+        if(result.filePath.includes("\x00"))return null
+        if(!isPathSafeForWrite(result.filePath))return null
+        allowSavePath(result.filePath)
         return result.filePath
     })
     ipcMain.handle("secureKey:getKey",async():Promise<string|null>=>{
@@ -556,38 +648,46 @@ function registerCriticalIpcHandlers():void{
             if(!filePath||typeof filePath!=="string"){
                 return{success:false,error:"Invalid file path"}
             }
-            let resolvedPath=filePath;
-            if(filePath.includes("prompts/")){
-                let possiblePaths=[
+            let resolvedPath=filePath
+            let normalizedPath=normalizePromptsPath(filePath)
+            if(isPromptsPath(filePath)){
+                let possiblePaths:string[]=[
                     filePath,
-                    path.join(process.resourcesPath,filePath),
                     path.join(path.dirname(fileURLToPath(import.meta.url)),"..",filePath),
                     path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",filePath),
-                    path.join(app.getAppPath(),filePath),
-                ];
-                if(filePath.startsWith("src/prompts/")){
-                    let withoutSrc=filePath.replace("src/prompts/","prompts/");
+                    path.join(app.getAppPath(),filePath)
+                ]
+                if(typeof process!=="undefined"&&process.resourcesPath){
+                    possiblePaths.push(path.join(process.resourcesPath,filePath))
+                }
+                if(normalizedPath.startsWith("src/prompts/")){
+                    let withoutSrc=normalizedPath.replace("src/prompts/","prompts/")
                     possiblePaths.push(
                         withoutSrc,
-                        path.join(process.resourcesPath,withoutSrc),
                         path.join(path.dirname(fileURLToPath(import.meta.url)),"..",withoutSrc),
                         path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist",withoutSrc),
                         path.join(app.getAppPath(),withoutSrc)
-                    );
+                    )
+                    if(typeof process!=="undefined"&&process.resourcesPath){
+                        possiblePaths.push(path.join(process.resourcesPath,withoutSrc))
+                    }
                 }
                 for(let p of possiblePaths){
                     try{
                         if(fs.existsSync(p)){
-                            resolvedPath=p;
-                            break;
+                            resolvedPath=p
+                            break
                         }
                     }
                     catch{}
                 }
             }
-
             if(!isPathSafeForRead(resolvedPath)){
                 return{success:false,error:"File path is outside allowed directories"}
+            }
+            let stats=await fsp.stat(resolvedPath)
+            if(stats.size>MAX_READ_SIZE){
+                return{success:false,error:"File exceeds maximum read size of 10MB"}
             }
             let content=await fsp.readFile(resolvedPath,"utf-8")
             return{success:true,content}
@@ -598,13 +698,13 @@ function registerCriticalIpcHandlers():void{
     })
     ipcMain.handle("file:save",async(_:Electron.IpcMainInvokeEvent,filePath:string,content:string):Promise<{success:boolean;error?:string}>=>{
         try{
-            if(!filePath||typeof filePath!=="string"||!content||typeof content!=="string"){
+            if(!filePath||typeof filePath!=="string"||content==null||typeof content!=="string"){
                 return{success:false,error:"Invalid file path or content"}
             }
             if(content.length>100*1024*1024){
                 return{success:false,error:"Content exceeds maximum size of 100MB"}
             }
-            if(!isPathSafeForWrite(filePath)){
+            if(!isPathSafeForWrite(filePath)&&!isAllowedSavePath(filePath)){
                 return{success:false,error:"File path is outside allowed write directories"}
             }
             await fsp.writeFile(filePath,content,"utf-8")
@@ -686,8 +786,9 @@ function registerCriticalIpcHandlers():void{
             return{running:false,models:[],error:"Failed to connect to Ollama"}
         }
     })
-    ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model:string;prompt:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
-        let{model,prompt,options={}}=payload
+    ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>=>{
+        let{model,prompt,options}=payload
+        options=options??{}
         if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
             return{success:false,error:"Invalid model name or prompt"}
         }
@@ -750,17 +851,21 @@ function registerCriticalIpcHandlers():void{
         }
         return{success:false,error:"Failed to generate response from Ollama"}
     })
-    ipcMain.handle("ollama:generateStream",async(_event,payload)=>handleOllamaGenerateStream(payload))
+    ipcMain.handle("ollama:generateStream",async(_event,payload={})=>handleOllamaGenerateStream(payload))
     ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payload:{
-        apiKey:string
-        baseUrl:string
-        model:string
-        prompt:string
+        apiKey?:string
+        baseUrl?:string
+        model?:string
+        prompt?:string
         options?:{temperature?:number;top_p?:number;max_tokens?:number}
-    }):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
-        let{apiKey,baseUrl,model,prompt,options={}}=payload
-        if(!apiKey||!model||!prompt){
+    }={}):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+        let{apiKey,baseUrl,model,prompt,options}=payload
+        options=options??{}
+        if(!apiKey||!baseUrl||!model||!prompt){
             return{success:false,error:"Missing required parameters"}
+        }
+        if(!isValidOpenAIBaseUrl(baseUrl)){
+            return{success:false,error:"Invalid or unsafe OpenAI base URL"}
         }
         try{
             let cleanBaseUrl=baseUrl.replace(/\/+$/,"")
@@ -806,10 +911,12 @@ function registerCriticalIpcHandlers():void{
         try{
             let candidates=[
                 path.join(app.getAppPath(),"docs","user-guide.md"),
-                path.join(process.resourcesPath,"docs","user-guide.md"),
                 path.join(path.dirname(app.getPath("exe")),"docs","user-guide.md"),
                 path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","docs","user-guide.md")
             ]
+            if(typeof process!=="undefined"&&process.resourcesPath){
+                candidates.splice(1,0,path.join(process.resourcesPath,"docs","user-guide.md"))
+            }
             let guidePath:string|null=null
             for(let p of candidates){
                 if(fs.existsSync(p)){
