@@ -38,20 +38,21 @@ async function loadCache():Promise<void>{
     cacheLoaded=true
 }
 
-function hashKey(chunk:string,model:string,prompt:string):string{
+async function hashKey(chunk:string,model:string,prompt:string):Promise<string>{
     let str=`${chunk}|${model}|${prompt}`
-    let hash=0
-    for(let i=0;i<str.length;i++){
-        let char=str.charCodeAt(i)
-        hash=((hash<<5)-hash)+char
-        hash=hash&hash
+    let data=new TextEncoder().encode(str)
+    let digest=await crypto.subtle.digest("SHA-256",data)
+    let bytes=new Uint8Array(digest)
+    let hex=""
+    for(let i=0;i<bytes.length;i++){
+        hex+=bytes[i].toString(16).padStart(2,"0")
     }
-    return Math.abs(hash).toString(16)
+    return hex
 }
 
 export async function getCachedResult(chunk:string,model:string,prompt:string):Promise<CacheEntry|null>{
     await loadCache()
-    let key=hashKey(chunk,model,prompt)
+    let key=await hashKey(chunk,model,prompt)
     cacheStats.totalRequests++
     let entry=cacheMap.get(key)
     if(entry){
@@ -67,7 +68,7 @@ export async function getCachedResult(chunk:string,model:string,prompt:string):P
 
 export async function setCachedResult(chunk:string,model:string,prompt:string,response:string,tokens:number):Promise<void>{
     await loadCache()
-    let key=hashKey(chunk,model,prompt)
+    let key=await hashKey(chunk,model,prompt)
     cacheMap.set(key,{response,tokens,timestamp:Date.now()})
     try{
         if(window.electronAPI?.saveCache){
@@ -114,7 +115,7 @@ export async function warmCache(outputItems:Array<{instruction?:string;input?:st
             response=lastMsg.content
         }
         if(!chunk||!response)continue
-        let key=hashKey(chunk,model,prompt)
+        let key=await hashKey(chunk,model,prompt)
         let tokens=Math.ceil(response.length/4)
         cacheMap.set(key,{response,tokens,timestamp:Date.now()})
         warmed++
