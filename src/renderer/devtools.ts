@@ -1,6 +1,8 @@
 import type{LogEntry}from"./logger.js"
 import{getCacheStats}from"./cache.js"
 const MAX_LOG_ENTRIES=1000
+const LOG_LEVELS=["debug","info","warn","error"] as const
+type LogLevel=typeof LOG_LEVELS[number]
 export class Devtools{
     private container:HTMLElement
     private visible:boolean=false
@@ -141,7 +143,8 @@ export class Devtools{
         }
         let fragment=document.createDocumentFragment()
         for(let entry of filtered){
-            let levelClass=`log-level-${entry.level}`
+            let level=(LOG_LEVELS.includes(entry.level as LogLevel)?entry.level:"info") as LogLevel
+            let levelClass=`log-level-${level}`
             let time=new Date(entry.timestamp).toLocaleTimeString()
             let row=document.createElement("div")
             row.className=`devtools-log-entry ${levelClass}`
@@ -150,7 +153,7 @@ export class Devtools{
             timeSpan.textContent=time
             let levelSpan=document.createElement("span")
             levelSpan.className="log-level"
-            levelSpan.textContent=`[${entry.level.toUpperCase()}]`
+            levelSpan.textContent=`[${level.toUpperCase()}]`
             let moduleSpan=document.createElement("span")
             moduleSpan.className="log-module"
             moduleSpan.textContent=entry.module
