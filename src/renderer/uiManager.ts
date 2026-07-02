@@ -601,6 +601,14 @@ class UIManager{
             if(maxParallelFiles){
                 settings.maxParallelFiles=maxParallelFiles.value
             }
+            let maxOutputItems=document.getElementById("max-output-items") as HTMLSelectElement|null
+            if(maxOutputItems){
+                settings.maxOutputItems=parseInt(maxOutputItems.value)||100000
+            }
+            let maxChunks=document.getElementById("max-chunks") as HTMLSelectElement|null
+            if(maxChunks){
+                settings.maxChunks=parseInt(maxChunks.value)||500
+            }
             localStorage.setItem("training-generator-app-settings",JSON.stringify(settings))
             this.addLog("Application settings saved","success")
         }
