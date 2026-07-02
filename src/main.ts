@@ -1094,15 +1094,24 @@ app.whenReady().then(()=>{
 app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
 })
-app.on("before-quit",async()=>{
+app.on("before-quit",async(event)=>{
+    event.preventDefault()
+    try{stopSplash()}catch{}
     if(splashProcess){
         try{splashProcess.kill()}catch{}
         splashProcess=null
+    }
+    if(splashWindow&&!splashWindow.isDestroyed()){
+        splashWindow.close()
+        splashWindow=null
     }
     if(fileParser){
         try{await fileParser.dispose()}catch{}
         fileParser=null
     }
+    httpAgent.destroy()
+    httpsAgent.destroy()
+    app.exit()
 })
 app.on("activate",()=>{
     if(!mainWindow){
