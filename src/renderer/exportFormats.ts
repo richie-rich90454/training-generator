@@ -28,7 +28,7 @@ export function exportCSV(items:TrainingItem[]):string{
         }
         return `${instruction},${input},${output}`
     })
-    return [header,...rows].join("\n")
+    return "\uFEFF"+[header,...rows].join("\n")+"\n"
 }
 export function csvEscape(value:string):string{
     let escaped=value.replace(/"/g,'""')
