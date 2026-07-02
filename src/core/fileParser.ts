@@ -167,11 +167,11 @@ class FileParser{
     }
     extractTextFromPDF(buffer:Buffer):string{
         let text=buffer.toString("utf-8",0,Math.min(buffer.length,10000))
-        return text.replace(/[^\x20-\x7E\n\r\t]/g," ").replace(/\s+/g," ").trim()
+        return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g," ").replace(/\s+/g," ").trim()
     }
     extractTextFromBuffer(buffer:Buffer):string{
         let text=buffer.toString("utf-8",0,Math.min(buffer.length,10000))
-        return text.replace(/[^\x20-\x7E\n\r\t]/g," ").replace(/\s+/g," ").trim()
+        return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g," ").replace(/\s+/g," ").trim()
     }
     extractPlainTextFromRTF(rtfText:string):string{
         let text=rtfText
