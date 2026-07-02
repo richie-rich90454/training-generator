@@ -192,6 +192,8 @@ class FileParser{
     }
     extractPlainTextFromRTF(rtfText:string):string{
         let text=rtfText
+        text=text.replace(/\\'([0-9a-fA-F]{2})/g,(_,hex)=>String.fromCharCode(parseInt(hex,16)))
+        text=text.replace(/\\u(-?\d+)\s*./g,(_,code)=>String.fromCharCode(parseInt(code,10)))
         text=text.replace(/\\[^{}]+|{[^{}]*}/g," ")
         text=text.replace(/\s+/g," ").trim()
         return text
