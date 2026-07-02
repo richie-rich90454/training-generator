@@ -155,7 +155,7 @@ class UIManager{
         return icons[type]||"info-circle"
     }
     private outputPreviewTimer:ReturnType<typeof setTimeout>|null=null
-
+    private virtualListInstance:{destroy:()=>void}|null=null
     updateOutputPreviewDebounced():void{
         if(this.outputPreviewTimer){
             clearTimeout(this.outputPreviewTimer)
@@ -180,7 +180,10 @@ class UIManager{
         if(data.length>100){
             const ITEM_HEIGHT=28
             this.outputPreview.classList.add("virtual-list-container")
-            createVirtualList({
+            if(this.virtualListInstance){
+                this.virtualListInstance.destroy()
+            }
+            this.virtualListInstance=createVirtualList({
                 container:this.outputPreview,
                 items:data,
                 itemHeight:ITEM_HEIGHT,
