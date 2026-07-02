@@ -1,5 +1,6 @@
 import fs from "fs"
 import path from "path"
+import crypto from "crypto"
 import{Worker}from "worker_threads"
 import{fileURLToPath}from "url"
 import type{ParseBatchItem}from "../types/index.ts"
@@ -155,18 +156,23 @@ class FileParserLazy{
     }
     async parsePDFWithWorker(buffer:Buffer):Promise<string>{
         return new Promise((resolve, reject)=>{
-            let workerPath=path.join(path.dirname(fileURLToPath(import.meta.url)),"../workers/pdfWorker.ts")
-            let worker=new Worker(workerPath);
-            let id=Date.now()+Math.random();
-            let timeout=setTimeout(()=>{
+            let workerPath=path.join(path.dirname(fileURLToPath(import.meta.url)),"../workers/pdfWorker.js")
+            let worker=new Worker(workerPath,{ type: "module" } as any);
+            let id=crypto.randomUUID();
+            let settled=false
+            function cleanup():void{
+                if (settled)return
+                settled=true
+                clearTimeout(timeout);
                 worker.terminate();
+            }
+            let timeout=setTimeout(()=>{
+                cleanup();
                 reject(new Error("PDF parsing timeout (30 seconds)"));
             }, 30000);
             worker.on("message", (result)=>{
-                if (result.id==id){
-                    clearTimeout(timeout);
-                    worker.terminate();
-
+                if (result.id===id){
+                    cleanup();
                     if (result.success){
                         resolve(result.text);
                     }
@@ -176,15 +182,12 @@ class FileParserLazy{
                 }
             });
             worker.on("error", (error)=>{
-                clearTimeout(timeout);
-                worker.terminate();
+                cleanup();
                 reject(error);
             });
             worker.on("exit", (code)=>{
-                if (code!==0){
-                    clearTimeout(timeout);
-                    reject(new Error(`Worker stopped with exit code ${code}`));
-                }
+                cleanup();
+                reject(new Error(`Worker stopped with exit code ${code}`));
             });
             worker.postMessage({ id, buffer });
         });
