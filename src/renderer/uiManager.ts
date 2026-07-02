@@ -829,6 +829,21 @@ class UIManager{
         },30000)
         this.intervals.push(intervalId)
     }
+    destroy():void{
+        this.intervals.forEach(id=>window.clearInterval(id))
+        this.timeouts.forEach(id=>window.clearTimeout(id))
+        this.intervals=[]
+        this.timeouts=[]
+        if(this.outputPreviewTimer){
+            window.clearTimeout(this.outputPreviewTimer)
+            this.outputPreviewTimer=null
+        }
+        this.removeFocusTrap()
+        if(this.virtualListInstance){
+            this.virtualListInstance.destroy()
+            this.virtualListInstance=null
+        }
+    }
 }
 
 export default UIManager
