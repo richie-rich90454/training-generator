@@ -34,7 +34,9 @@ async function loadCache():Promise<void>{
                 let result=await window.electronAPI.loadCache()
                 if(result.success&&result.data){
                     for(let[key,value]of Object.entries(result.data)){
-                        cacheMap.set(key,value as CacheEntry)
+                        if(value&&typeof (value as CacheEntry).response==="string"&&typeof (value as CacheEntry).tokens==="number"){
+                            cacheMap.set(key,value as CacheEntry)
+                        }
                     }
                 }
             }
@@ -119,6 +121,7 @@ export async function setCachedResult(chunk:string,model:string,prompt:string,re
 
 export async function clearCache():Promise<void>{
     cacheMap.clear()
+    cacheLoaded=false
     try{
         if(window.electronAPI?.clearCache){
             await window.electronAPI.clearCache()
