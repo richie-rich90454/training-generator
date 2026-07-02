@@ -299,6 +299,12 @@ function startSplash(){
                 detached:true,
                 stdio:"ignore"
             })
+            splashProcess.on("error",(error:Error)=>{
+                console.error("[splash] process error:",error)
+            })
+            splashProcess.on("exit",()=>{
+                splashProcess=null
+            })
             splashProcess.unref()
             console.log("[splash] spawned with pid:",splashProcess.pid)
         }
