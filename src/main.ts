@@ -606,7 +606,7 @@ function getCurrentLogFilePath():string{
 }
 function registerCriticalIpcHandlers():void{
     ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
-        let result=await dialog.showOpenDialog(mainWindow as Electron.BaseWindow,{
+        let result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
             properties:["openFile","multiSelections"],
             filters:[
                 {name:"Documents",extensions:["pdf","docx","doc","rtf","txt","md","html"]},
@@ -650,7 +650,7 @@ function registerCriticalIpcHandlers():void{
         return files.filter(Boolean)as FileObj[]
     })
     ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
-        let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
+        let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
             defaultPath:defaultFilename||"training_data.jsonl",
             filters:[
                 {name:"JSON Lines",extensions:["jsonl"]},
@@ -1085,7 +1085,7 @@ function registerDeferredIpcHandlers():void{
             if(!data||typeof data!=="string"){
                 return{success:false,error:"Invalid log data"}
             }
-            let result=await dialog.showSaveDialog(mainWindow as Electron.BaseWindow,{
+            let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
                 defaultPath:"logs.jsonl",
                 filters:[
                     {name:"JSONL Files",extensions:["jsonl"]},
