@@ -1088,6 +1088,8 @@ app.whenReady().then(()=>{
     startSplash()
     registerCriticalIpcHandlers()
     createMainWindow()
+    registerDeferredIpcHandlers()
+    setTimeout(()=>registerDeferredIpcHandlers(),5000)
 })
 app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
