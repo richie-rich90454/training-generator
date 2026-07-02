@@ -336,8 +336,10 @@ function startSplash(){
     ]
     let splashHtmlPath=splashHtmlCandidates.find(p=>fs.existsSync(p))||splashHtmlCandidates[0]
     splashWindow.loadFile(splashHtmlPath).then(()=>{
-        splashWindow!.center()
-        splashWindow!.show()
+        if(splashWindow&&!splashWindow.isDestroyed()){
+            splashWindow.center()
+            splashWindow.show()
+        }
     }).catch(console.error)
 }
 function stopSplash(){
@@ -402,8 +404,10 @@ function createMainWindow(){
     mainWindow.webContents.once("dom-ready",()=>{
         registerDeferredIpcHandlers()
         stopSplash()
-        mainWindow!.show()
-        mainWindow!.focus()
+        if(mainWindow&&!mainWindow.isDestroyed()){
+            mainWindow.show()
+            mainWindow.focus()
+        }
     })
     mainWindow.webContents.once("did-finish-load",()=>{
         stopSplash()
