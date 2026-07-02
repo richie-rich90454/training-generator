@@ -72,6 +72,7 @@ function preFilterCheck(itemA:TrainingItem,itemB:TrainingItem):boolean{
 }
 
 export function deduplicate(items:TrainingItem[],threshold:number=0.9):{items:TrainingItem[];removed:number}{
+    threshold=Math.min(1,Math.max(0,threshold))
     if(items.length<=1)return{items,removed:0}
     let hashes=items.map(item=>hashString(getItemText(item)))
     let keep:boolean[]=new Array(items.length).fill(true)
