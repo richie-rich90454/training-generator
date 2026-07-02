@@ -132,12 +132,12 @@ class FileParser{
     }
     async parseRTF(buffer:Buffer):Promise<string>{
         try{
-            let rtfText=buffer.toString("utf-8")
+            let rtfText=this.stripBom(buffer.toString("utf-8"))
             return await this.parseRTFText(rtfText)
         }
         catch(error){
             console.error("RTF parsing error:",error)
-            return this.extractPlainTextFromRTF(buffer.toString("utf-8"))
+            return this.extractPlainTextFromRTF(this.stripBom(buffer.toString("utf-8")))
         }
     }
     async parseRTFText(rtfText:string):Promise<string>{
@@ -157,11 +157,17 @@ class FileParser{
             parser.end()
         })
     }
+    private stripBom(text:string):string{
+        if(text.charCodeAt(0)===0xFEFF){
+            return text.slice(1)
+        }
+        return text
+    }
     async parseText(buffer:Buffer):Promise<string>{
-        return buffer.toString("utf-8")
+        return this.stripBom(buffer.toString("utf-8"))
     }
     async parseHTML(buffer:Buffer):Promise<string>{
-        let html=buffer.toString("utf-8")
+        let html=this.stripBom(buffer.toString("utf-8"))
         return htmlToText(html,{
             wordwrap:false,
             selectors:[
