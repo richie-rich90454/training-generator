@@ -49,6 +49,14 @@ export interface IpcChannels {
     request: void
     response: string
   }
+  'secureKey:getKey': {
+    request: void
+    response: string | null
+  }
+  'secureKey:setKey': {
+    request: { key: string }
+    response: boolean
+  }
   'cache:load': {
     request: void
     response: { success: boolean; data?: Record<string, any> }

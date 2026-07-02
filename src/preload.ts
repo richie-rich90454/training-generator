@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI",{
     generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>ipcRenderer.invoke("openai:generate",{apiKey,baseUrl,model,prompt,options}),
     getAppVersion:()=>ipcRenderer.invoke("app:getVersion"),
     getPlatform:()=>ipcRenderer.invoke("app:getPlatform"),
+    getSecureKey:()=>ipcRenderer.invoke("secureKey:getKey"),
+    setSecureKey:(key:string)=>ipcRenderer.invoke("secureKey:setKey",key),
     openUserGuide:()=>ipcRenderer.invoke("docs:openUserGuide"),
     loadCache:()=>ipcRenderer.invoke("cache:load"),
     saveCache:(data:Record<string,any>)=>ipcRenderer.invoke("cache:save",data),

@@ -1,4 +1,4 @@
-import{app,BrowserWindow,ipcMain,dialog,shell}from "electron"
+import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
@@ -6,6 +6,7 @@ import{spawn}from "child_process"
 import{fileURLToPath}from "url"
 import http from "http"
 import https from "https"
+import crypto from "crypto"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
 import type{FileObj,OllamaGenerateOptions}from "./types/index.ts"
@@ -22,6 +23,7 @@ let fileParser:InstanceType<typeof FileParserLazy>|null=null
 let deferredIpcRegistered=false
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
+let keyStoragePath=path.join(userDataPath,".keys")
 function isPathWithin(baseDir:string,targetPath:string):boolean{
     try{
         let resolvedTarget=path.resolve(targetPath)
@@ -93,6 +95,58 @@ function isPathSafeForParse(filePath:string):boolean{
         return stats.isFile()
     }
     catch{
+        return false
+    }
+}
+async function getSecureKey():Promise<string|null>{
+    try{
+        await fsp.mkdir(keyStoragePath,{recursive:true})
+        let encryptedPath=path.join(keyStoragePath,"aes-key-encrypted")
+        let plainPath=path.join(keyStoragePath,"aes-key")
+        if(safeStorage.isEncryptionAvailable()&&fs.existsSync(encryptedPath)){
+            try{
+                let encrypted=await fsp.readFile(encryptedPath)
+                return safeStorage.decryptString(encrypted)
+            }
+            catch{
+                await fsp.unlink(encryptedPath).catch(()=>{})
+            }
+        }
+        if(fs.existsSync(plainPath)){
+            try{
+                return await fsp.readFile(plainPath,"utf-8")
+            }
+            catch{
+                await fsp.unlink(plainPath).catch(()=>{})
+            }
+        }
+        let key=crypto.randomBytes(32).toString("base64")
+        if(safeStorage.isEncryptionAvailable()){
+            await fsp.writeFile(encryptedPath,safeStorage.encryptString(key))
+        }
+        else{
+            await fsp.writeFile(plainPath,key,"utf-8")
+        }
+        return key
+    }
+    catch(error){
+        console.error("getSecureKey failed:",error)
+        return null
+    }
+}
+async function setSecureKey(key:string):Promise<boolean>{
+    try{
+        await fsp.mkdir(keyStoragePath,{recursive:true})
+        if(safeStorage.isEncryptionAvailable()){
+            await fsp.writeFile(path.join(keyStoragePath,"aes-key-encrypted"),safeStorage.encryptString(key))
+        }
+        else{
+            await fsp.writeFile(path.join(keyStoragePath,"aes-key"),key,"utf-8")
+        }
+        return true
+    }
+    catch(error){
+        console.error("setSecureKey failed:",error)
         return false
     }
 }
@@ -489,6 +543,13 @@ function registerCriticalIpcHandlers():void{
         if(result.canceled||!result.filePath)return null
         if(result.filePath.includes("\x00")||result.filePath.includes(".."))return null
         return result.filePath
+    })
+    ipcMain.handle("secureKey:getKey",async():Promise<string|null>=>{
+        return getSecureKey()
+    })
+    ipcMain.handle("secureKey:setKey",async(_:Electron.IpcMainInvokeEvent,key:string):Promise<boolean>=>{
+        if(typeof key!=="string"||key.length===0)return false
+        return setSecureKey(key)
     })
     ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{

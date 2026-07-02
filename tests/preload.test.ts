@@ -39,7 +39,9 @@ describe("Preload API structure",()=>{
             checkOllama:expect.any(Function),
             generateWithOllama:expect.any(Function),
             getAppVersion:expect.any(Function),
-            getPlatform:expect.any(Function)
+            getPlatform:expect.any(Function),
+            getSecureKey:expect.any(Function),
+            setSecureKey:expect.any(Function)
         }
         expect(apiShape.openFileDialog).toBeDefined()
         expect(apiShape.readFile).toBeDefined()
@@ -51,6 +53,8 @@ describe("Preload API structure",()=>{
         expect(apiShape.generateWithOllama).toBeDefined()
         expect(apiShape.getAppVersion).toBeDefined()
         expect(apiShape.getPlatform).toBeDefined()
+        expect(apiShape.getSecureKey).toBeDefined()
+        expect(apiShape.setSecureKey).toBeDefined()
     })
 
     test("IPC invoke is called for openFileDialog",()=>{
@@ -105,6 +109,16 @@ describe("Preload API structure",()=>{
         expect(mockElectron.ipcRenderer.invoke).toHaveBeenCalledWith("app:getPlatform")
     })
 
+    test("IPC invoke is called for getSecureKey",()=>{
+        mockElectron.ipcRenderer.invoke("secureKey:getKey")
+        expect(mockElectron.ipcRenderer.invoke).toHaveBeenCalledWith("secureKey:getKey")
+    })
+
+    test("IPC invoke is called for setSecureKey with key",()=>{
+        mockElectron.ipcRenderer.invoke("secureKey:setKey","secret-key")
+        expect(mockElectron.ipcRenderer.invoke).toHaveBeenCalledWith("secureKey:setKey","secret-key")
+    })
+
 })
 
 describe("Preload security",()=>{
@@ -124,7 +138,9 @@ describe("Preload security",()=>{
             "ollama:check",
             "ollama:generate",
             "app:getVersion",
-            "app:getPlatform"
+            "app:getPlatform",
+            "secureKey:getKey",
+            "secureKey:setKey"
         ]
         expect(allowedChannels).toContain("dialog:openFile")
         expect(allowedChannels).toContain("file:parse")
