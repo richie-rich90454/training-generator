@@ -21,6 +21,7 @@ let splashWindow:BrowserWindow|null=null
 let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
 let deferredIpcRegistered=false
+let isAppQuitting=false
 let userDataPath=path.join(app.getPath("documents"),"TrainingGenerator")
 let cachePath=path.join(userDataPath,"Cache")
 let keyStoragePath=path.join(userDataPath,".keys")
@@ -1117,6 +1118,7 @@ app.on("window-all-closed",()=>{
 })
 app.on("before-quit",async(event)=>{
     event.preventDefault()
+    isAppQuitting=true
     try{stopSplash()}catch{}
     if(splashProcess){
         try{splashProcess.kill()}catch{}
@@ -1141,7 +1143,13 @@ app.on("activate",()=>{
 })
 process.on("uncaughtException",(error:Error)=>{
     console.error("Uncaught Exception:",error)
+    if(typeof app?.quit==="function"&&!isAppQuitting){
+        app.quit()
+    }
 })
 process.on("unhandledRejection",(reason:unknown,promise:Promise<unknown>)=>{
     console.error("Unhandled Rejection at:",promise,"reason:",reason)
+    if(typeof app?.quit==="function"&&!isAppQuitting){
+        app.quit()
+    }
 })
