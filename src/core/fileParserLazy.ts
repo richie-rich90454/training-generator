@@ -152,7 +152,7 @@ class FileParserLazy{
         }
     }
     async parsePDF(buffer:Buffer):Promise<string>{
-        if (buffer.length>5*1024*1024){
+        if (buffer.length>1*1024*1024){
             try{
                 return await this.parsePDFWithWorker(buffer);
             }
