@@ -1,11 +1,24 @@
 import{defineConfig}from "vitest/config"
-
+import path from "path"
+import{fileURLToPath}from "url"
+let __dirname=path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
     test:{
         globals:true,
-        environment:"node",
-        include:["tests/**/*.test.ts"],
+        environment:"happy-dom",
+        include:["tests/**/*.test.ts","tests/**/*.test.tsx","src/**/*.test.ts"],
         testTimeout:30000,
-        hookTimeout:30000
+        hookTimeout:30000,
+        setupFiles:["./tests/setup.ts"],
+        coverage:{
+            provider:"v8",
+            include:["src/**/*.ts"],
+            exclude:["src/**/*.test.ts","src/types/**"]
+        }
+    },
+    resolve:{
+        alias:{
+            "@":path.resolve(__dirname,"./src")
+        }
     }
 })
