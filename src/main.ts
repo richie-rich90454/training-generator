@@ -968,6 +968,17 @@ function registerCriticalIpcHandlers():void{
         }
     })
 }
+function isValidPersistedData(data:unknown):data is Record<string,unknown>{
+    return data!==null&&typeof data==="object"
+}
+function isDataSizeValid(data:unknown):boolean{
+    try{
+        return Buffer.byteLength(JSON.stringify(data),"utf-8")<=100*1024*1024
+    }
+    catch{
+        return false
+    }
+}
 function registerDeferredIpcHandlers():void{
     if(deferredIpcRegistered)return
     deferredIpcRegistered=true
@@ -985,6 +996,9 @@ function registerDeferredIpcHandlers():void{
         }
     })
     ipcMain.handle("cache:save",async(_event:Electron.IpcMainInvokeEvent,data:Record<string,any>):Promise<{success:boolean}>=>{
+        if(!isValidPersistedData(data)||!isDataSizeValid(data)){
+            return{success:false}
+        }
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
             fs.writeFileSync(cachePath,JSON.stringify(data))
@@ -1005,6 +1019,9 @@ function registerDeferredIpcHandlers():void{
         }
     })
     ipcMain.handle("progress:save",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+        if(!isValidPersistedData(data)||!isDataSizeValid(data)){
+            return{success:false}
+        }
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
             fs.writeFileSync(progressPath,JSON.stringify(data))
@@ -1038,6 +1055,9 @@ function registerDeferredIpcHandlers():void{
         }
     })
     ipcMain.handle("save-checkpoint",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+        if(!isValidPersistedData(data)||!isDataSizeValid(data)){
+            return{success:false}
+        }
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
             fs.writeFileSync(checkpointPath,JSON.stringify(data))
