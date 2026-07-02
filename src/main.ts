@@ -256,6 +256,24 @@ if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
 }
+const gotSingleInstanceLock=typeof app.requestSingleInstanceLock==="function"?app.requestSingleInstanceLock():true
+if(!gotSingleInstanceLock){
+    if(typeof app.quit==="function"){
+        app.quit()
+    }
+    process.exit(0)
+}
+if(typeof app.on==="function"){
+    app.on("second-instance",()=>{
+        if(mainWindow){
+            if(mainWindow.isMinimized()){
+                mainWindow.restore()
+            }
+            mainWindow.show()
+            mainWindow.focus()
+        }
+    })
+}
 function startSplash(){
     console.log("[splash] startSplash called, platform=win32:",isWin,"packaged:",app.isPackaged)
     // Diagnosis: in dev mode process.resourcesPath points at Electron's own
