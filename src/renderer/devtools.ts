@@ -10,6 +10,7 @@ export class Devtools{
     private cacheContent:HTMLElement|null=null
     private workerContent:HTMLElement|null=null
     private memoryContent:HTMLElement|null=null
+    private pendingRender:false|number=false
     constructor(){
         this.container=this.createContainer()
         document.body.appendChild(this.container)
@@ -113,8 +114,11 @@ export class Devtools{
         if(this.logEntries.length>MAX_LOG_ENTRIES){
             this.logEntries.shift()
         }
-        if(this.visible&&this.isLogsTabActive()){
-            this.renderLogs()
+        if(this.visible&&this.isLogsTabActive()&&!this.pendingRender){
+            this.pendingRender=requestAnimationFrame(()=>{
+                this.pendingRender=false
+                this.renderLogs()
+            })
         }
     }
     private isLogsTabActive():boolean{
@@ -127,18 +131,39 @@ export class Devtools{
         if(this.logFilter!=="all"){
             filtered=this.logEntries.filter(e=>e.level===this.logFilter)
         }
-        let html=""
+        this.logOutput.innerHTML=""
+        if(filtered.length===0){
+            let empty=document.createElement("div")
+            empty.className="devtools-empty"
+            empty.textContent="No log entries"
+            this.logOutput.appendChild(empty)
+            return
+        }
+        let fragment=document.createDocumentFragment()
         for(let entry of filtered){
             let levelClass=`log-level-${entry.level}`
             let time=new Date(entry.timestamp).toLocaleTimeString()
-            html+=`<div class="devtools-log-entry ${levelClass}">
-        <span class="log-time">${time}</span>
-        <span class="log-level">[${entry.level.toUpperCase()}]</span>
-        <span class="log-module">${this.escapeHtml(entry.module)}</span>
-        <span class="log-message">${this.escapeHtml(entry.message)}</span>
-      </div>`
+            let row=document.createElement("div")
+            row.className=`devtools-log-entry ${levelClass}`
+            let timeSpan=document.createElement("span")
+            timeSpan.className="log-time"
+            timeSpan.textContent=time
+            let levelSpan=document.createElement("span")
+            levelSpan.className="log-level"
+            levelSpan.textContent=`[${entry.level.toUpperCase()}]`
+            let moduleSpan=document.createElement("span")
+            moduleSpan.className="log-module"
+            moduleSpan.textContent=entry.module
+            let messageSpan=document.createElement("span")
+            messageSpan.className="log-message"
+            messageSpan.textContent=entry.message
+            row.appendChild(timeSpan)
+            row.appendChild(levelSpan)
+            row.appendChild(moduleSpan)
+            row.appendChild(messageSpan)
+            fragment.appendChild(row)
         }
-        this.logOutput.innerHTML=html||'<div class="devtools-empty">No log entries</div>'
+        this.logOutput.appendChild(fragment)
         this.logOutput.scrollTop=this.logOutput.scrollHeight
     }
     refresh():void{
