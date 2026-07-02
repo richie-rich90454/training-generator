@@ -4,6 +4,9 @@ interface CacheEntry{
     timestamp:number
 }
 
+const CACHE_TTL_MS=7*24*60*60*1000
+const MAX_CACHE_SIZE=10000
+
 export interface CacheStats{
     hits:number
     misses:number
@@ -63,6 +66,11 @@ export async function getCachedResult(chunk:string,model:string,prompt:string):P
     cacheStats.totalRequests++
     let entry=cacheMap.get(key)
     if(entry){
+        if(Date.now()-entry.timestamp>CACHE_TTL_MS){
+            cacheMap.delete(key)
+            cacheStats.misses++
+            return null
+        }
         cacheStats.hits++
         cacheStats.estimatedTokensSaved+=entry.tokens
         cacheStats.estimatedCostSaved+=Math.round((entry.tokens/1000)*0.002*10000)/10000
@@ -81,10 +89,22 @@ async function persistCache():Promise<void>{
     }
 }
 
+function evictOldestIfNeeded():void{
+    if(cacheMap.size<=MAX_CACHE_SIZE)return
+    let entries=[...cacheMap.entries()]
+    entries.sort((a,b)=>a[1].timestamp-b[1].timestamp)
+    while(cacheMap.size>MAX_CACHE_SIZE){
+        let oldest=entries.shift()
+        if(oldest)cacheMap.delete(oldest[0])
+        else break
+    }
+}
+
 export async function setCachedResult(chunk:string,model:string,prompt:string,response:string,tokens:number):Promise<void>{
     await loadCache()
     let key=await hashKey(chunk,model,prompt)
     cacheMap.set(key,{response,tokens,timestamp:Date.now()})
+    evictOldestIfNeeded()
     if(saveTimeout){
         clearTimeout(saveTimeout)
         saveTimeout=null
