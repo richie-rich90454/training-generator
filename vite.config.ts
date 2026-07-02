@@ -1,7 +1,7 @@
 import{defineConfig}from "vite"
 import path from "path"
 import fs from "fs"
-import{glob}from "glob"
+import{globSync}from "glob"
 import{fileURLToPath}from "url"
 import type{Plugin}from "vite"
 
@@ -20,7 +20,7 @@ function copyPromptsPlugin():Plugin{
             if(!fs.existsSync(destDir)){
                 fs.mkdirSync(destDir,{recursive:true})
             }
-            let files=glob.sync("**/*",{cwd:srcDir,nodir:true})
+            let files=globSync("**/*",{cwd:srcDir,nodir:true})
             let copiedCount=0
             for(let file of files){
                 let srcFile=path.join(srcDir,file)
@@ -56,6 +56,7 @@ export default defineConfig({
         cssMinify:true,
         sourcemap:false,
         rollupOptions:{
+            external:["electron"],
             input:{
                 main:"./index.html",
             },
