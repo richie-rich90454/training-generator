@@ -186,7 +186,7 @@ export class Devtools{
         <tr><td>Cache Misses:</td><td>${cs.misses}</td></tr>
         <tr><td>Total Requests:</td><td>${cs.totalRequests}</td></tr>
         <tr><td>Hit Rate:</td><td>${hitRate}%</td></tr>
-        <tr><td>Tokens Saved:</td><td>${cs.estimatedTokensSaved.toLocaleString()}</td></tr>
+        <tr><td>Tokens Saved:</td><td>${cs.estimatedTokensSaved.toLocaleString("en-US")}</td></tr>
         <tr><td>Est. Cost Saved:</td><td>$${cs.estimatedCostSaved.toFixed(4)}</td></tr>
       </table>
     `
