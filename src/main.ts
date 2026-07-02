@@ -318,9 +318,9 @@ export async function handleOllamaGenerateStream(payload:{model:string;prompt:st
                 prompt,
                 stream:true,
                 options:{
+                    ...options,
                     temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                    ...options
+                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9))
                 }
             },
             {
@@ -334,10 +334,22 @@ export async function handleOllamaGenerateStream(payload:{model:string;prompt:st
         )
         let fullResponse=""
         let stream=response.data
-        return await new Promise((resolve,reject)=>{
+        let noDataTimer:ReturnType<typeof setTimeout>|null=null
+        return await new Promise<{success:boolean;response?:string;error?:string}>((resolve,reject)=>{
+            let buffer=""
+            noDataTimer=setTimeout(()=>{
+                reject(new Error("Stream timed out (no data)"))
+            },timeout)
             stream.on("data",(chunk:Buffer)=>{
-                let lines=chunk.toString().split("\n").filter((l:string)=>l.trim())
+                if(noDataTimer)clearTimeout(noDataTimer)
+                noDataTimer=setTimeout(()=>{
+                    reject(new Error("Stream timed out (no data)"))
+                },timeout)
+                buffer+=chunk.toString()
+                let lines=buffer.split("\n")
+                buffer=lines.pop() ?? ""
                 for(let line of lines){
+                    if(!line.trim())continue
                     try{
                         let parsed=JSON.parse(line)
                         if(parsed.response){
@@ -354,6 +366,18 @@ export async function handleOllamaGenerateStream(payload:{model:string;prompt:st
                 reject(error)
             })
             stream.on("end",()=>{
+                if(buffer.trim()){
+                    try{
+                        let parsed=JSON.parse(buffer)
+                        if(parsed.response){
+                            fullResponse+=parsed.response
+                        }
+                        if(parsed.done){
+                            resolve({success:true,response:fullResponse})
+                        }
+                    }
+                    catch{}
+                }
                 if(!fullResponse){
                     reject(new Error("Stream ended without response"))
                 }
@@ -361,6 +385,10 @@ export async function handleOllamaGenerateStream(payload:{model:string;prompt:st
                     resolve({success:true,response:fullResponse})
                 }
             })
+        }).finally(()=>{
+            if(noDataTimer)clearTimeout(noDataTimer)
+            try{stream.destroy()}catch{}
+            stream.removeAllListeners()
         })
     }
     catch(error){
@@ -627,9 +655,9 @@ function registerCriticalIpcHandlers():void{
                         prompt,
                         stream:false,
                         options:{
+                            ...options,
                             temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                            ...options
+                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9))
                         }
                     },
                     {
