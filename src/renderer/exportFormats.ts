@@ -1,6 +1,6 @@
 import type{TrainingItem}from"../types/index.js"
 export function exportJSONL(items:TrainingItem[]):string{
-    return items.map(item=>JSON.stringify(item)).join("\n")
+    return items.map(item=>JSON.stringify(item)).join("\n")+"\n"
 }
 export function exportJSONArray(items:TrainingItem[]):string{
     return JSON.stringify(items,null,2)
