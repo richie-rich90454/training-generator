@@ -1108,6 +1108,9 @@ app.whenReady().then(()=>{
     createMainWindow()
     registerDeferredIpcHandlers()
     setTimeout(()=>registerDeferredIpcHandlers(),5000)
+}).catch((error)=>{
+    console.error("Failed to ready app:",error)
+    app.quit()
 })
 app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
