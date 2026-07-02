@@ -1,5 +1,6 @@
 let confirmModal: HTMLDivElement | null = null
 let resolveRef: ((value: boolean) => void) | null = null
+let dismissRef: (() => void) | null = null
 
 function getConfirmModal(): HTMLDivElement {
   if (!confirmModal) {
@@ -33,6 +34,7 @@ function getConfirmModal(): HTMLDivElement {
 
 export function showConfirm(
   message: string,
+  title?: string,
   onConfirm?: () => void,
   onCancel?: () => void
 ): Promise<boolean> {
@@ -40,14 +42,17 @@ export function showConfirm(
     if (resolveRef) {
       resolveRef(false)
       resolveRef = null
+      dismissRef = null
     }
     resolveRef = resolve
     const modal = getConfirmModal()
     const messageEl = modal.querySelector("#confirm-message") as HTMLElement
+    const titleEl = modal.querySelector("#confirm-title") as HTMLElement
     const cancelBtn = modal.querySelector("#confirm-cancel-btn") as HTMLButtonElement
     const okBtn = modal.querySelector("#confirm-ok-btn") as HTMLButtonElement
 
     messageEl.textContent = message
+    titleEl.textContent = title ?? "Confirm"
 
     const cleanup = () => {
       modal.classList.remove("active")
@@ -57,6 +62,7 @@ export function showConfirm(
       modal.removeEventListener("click", onBackdropClick)
       document.removeEventListener("keydown", onKeydown)
       resolveRef = null
+      dismissRef = null
       if (previouslyFocused && document.contains(previouslyFocused)) {
         previouslyFocused.focus()
       }
@@ -73,6 +79,7 @@ export function showConfirm(
       onCancel?.()
       resolve(false)
     }
+    dismissRef = onCancelClick
 
     const onBackdropClick = (e: Event) => {
       if (e.target === modal) {
@@ -107,4 +114,10 @@ export function showConfirm(
     modal.classList.add("active")
     cancelBtn.focus()
   })
+}
+
+export function closeConfirm(): void {
+  if (dismissRef) {
+    dismissRef()
+  }
 }
