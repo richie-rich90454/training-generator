@@ -9,7 +9,7 @@ import type{ParseBatchItem}from "../types/index.ts"
 class FileParser{
     supportedFormats:string[]
     constructor(){
-        this.supportedFormats=["pdf","docx","doc","rtf","txt","md","html"]
+        this.supportedFormats=["pdf","docx","doc","rtf","txt","md","html","htm"]
     }
     async parseFile(filePath:string,fileType:string):Promise<string>{
         try{
@@ -200,6 +200,9 @@ class FileParser{
     }
     async extractTextFromFile(filePath:string):Promise<string>{
         let ext=path.extname(filePath).toLowerCase().replace(".","")
+        if(ext==="htm"){
+            ext="html"
+        }
         if(!this.supportedFormats.includes(ext)){
             throw new Error(`Unsupported file format:${ext}`)
         }

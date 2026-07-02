@@ -17,7 +17,7 @@ class FileParserLazy{
     private loading:Record<string,Promise<unknown>|undefined>
     private isDisposed:boolean
     constructor(){
-        this.supportedFormats=["pdf", "docx", "doc", "rtf", "txt", "md", "html"];
+        this.supportedFormats=["pdf", "docx", "doc", "rtf", "txt", "md", "html", "htm"];
         this.dependencies={
             mammoth: null,
             pdfParse: null,
@@ -287,6 +287,9 @@ class FileParserLazy{
     }
     async extractTextFromFile(filePath:string):Promise<string>{
         let ext=path.extname(filePath).toLowerCase().replace(".", "");
+        if (ext==="htm"){
+            ext="html";
+        }
         if (!this.supportedFormats.includes(ext)){
             throw new Error(`Unsupported file format: ${ext}`);
         }

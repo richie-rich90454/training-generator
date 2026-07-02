@@ -46,7 +46,7 @@ describe("FileParserLazy",()=>{
         })
 
         test("supportedFormats has correct length",()=>{
-            expect(parser.supportedFormats.length).toBe(7)
+            expect(parser.supportedFormats.length).toBe(8)
         })
     })
 
