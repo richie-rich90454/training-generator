@@ -14,6 +14,7 @@ export interface CacheStats{
 
 let cacheMap:Map<string,CacheEntry>=new Map()
 let cacheLoaded=false
+let loadPromise:Promise<void>|null=null
 
 let cacheStats:CacheStats={hits:0,misses:0,totalRequests:0,estimatedTokensSaved:0,estimatedCostSaved:0}
 
@@ -22,20 +23,25 @@ export function resetCacheStats():void{cacheStats={hits:0,misses:0,totalRequests
 
 async function loadCache():Promise<void>{
     if(cacheLoaded)return
-    try{
-        if(window.electronAPI?.loadCache){
-            let result=await window.electronAPI.loadCache()
-            if(result.success&&result.data){
-                for(let[key,value]of Object.entries(result.data)){
-                    cacheMap.set(key,value as CacheEntry)
+    if(loadPromise)return loadPromise
+    loadPromise=(async ()=>{
+        try{
+            if(window.electronAPI?.loadCache){
+                let result=await window.electronAPI.loadCache()
+                if(result.success&&result.data){
+                    for(let[key,value]of Object.entries(result.data)){
+                        cacheMap.set(key,value as CacheEntry)
+                    }
                 }
             }
         }
-    }
-    catch(error){
-        console.error("Cache: failed to load cache",(error as Error).message)
-    }
-    cacheLoaded=true
+        catch(error){
+            console.error("Cache: failed to load cache",(error as Error).message)
+        }
+        cacheLoaded=true
+    })()
+    loadPromise.finally(()=>{loadPromise=null})
+    return loadPromise
 }
 
 async function hashKey(chunk:string,model:string,prompt:string):Promise<string>{
