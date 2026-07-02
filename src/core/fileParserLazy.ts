@@ -309,11 +309,12 @@ class FileParserLazy{
                 });
             }
             catch (error){
+                let err=error as Error
                 results.push({
                     filePath,
                     success: false,
                     text: "",
-                    error: "Failed to extract text from file"
+                    error: err.stack||err.message||String(error)
                 });
             }
         }

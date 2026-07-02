@@ -221,11 +221,12 @@ class FileParser{
                 })
             }
             catch(error){
+                let err=error as Error
                 results.push({
                     filePath,
                     success:false,
                     text:"",
-                    error:(error as Error).message
+                    error:err.stack||err.message||String(error)
                 })
             }
         }
