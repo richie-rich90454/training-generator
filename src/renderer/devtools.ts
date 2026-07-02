@@ -1,5 +1,6 @@
 import type{LogEntry}from"./logger.js"
 import{getCacheStats}from"./cache.js"
+const MAX_LOG_ENTRIES=1000
 export class Devtools{
     private container:HTMLElement
     private visible:boolean=false
@@ -109,6 +110,9 @@ export class Devtools{
     }
     addLog(entry:LogEntry):void{
         this.logEntries.push(entry)
+        if(this.logEntries.length>MAX_LOG_ENTRIES){
+            this.logEntries.shift()
+        }
         if(this.visible&&this.isLogsTabActive()){
             this.renderLogs()
         }
