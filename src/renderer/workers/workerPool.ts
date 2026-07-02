@@ -2,19 +2,117 @@ import type { TrainingItem } from "../../types/index.js"
 
 let chunkWorker: Worker | null = null
 let dedupWorker: Worker | null = null
+let requestCounter: number = 0
+
+interface ChunkPending {
+  resolve: (chunks: string[]) => void
+  reject: (error: Error) => void
+  timer: ReturnType<typeof setTimeout>
+}
+
+interface DedupPending {
+  resolve: (result: { items: TrainingItem[]; removed: number }) => void
+  reject: (error: Error) => void
+  timer: ReturnType<typeof setTimeout>
+}
+
+const chunkPending: Map<number, ChunkPending> = new Map()
+const dedupPending: Map<number, DedupPending> = new Map()
+
+const TIMEOUT_MS: number = 60000
 
 function supportsWorkers(): boolean {
   return typeof Worker !== "undefined"
 }
 
+function rejectAllChunkPending(error: Error): void {
+  for (const pending of chunkPending.values()) {
+    clearTimeout(pending.timer)
+    pending.reject(error)
+  }
+  chunkPending.clear()
+}
+
+function rejectAllDedupPending(error: Error): void {
+  for (const pending of dedupPending.values()) {
+    clearTimeout(pending.timer)
+    pending.reject(error)
+  }
+  dedupPending.clear()
+}
+
+function createChunkWorker(): Worker | null {
+  try {
+    const worker = new Worker(new URL("./chunk.worker.js", import.meta.url), { type: "module" })
+    worker.addEventListener("message", (e: MessageEvent) => {
+      const pending = chunkPending.get(e.data.id)
+      if (!pending) return
+      chunkPending.delete(e.data.id)
+      clearTimeout(pending.timer)
+      if (e.data.error) {
+        pending.reject(new Error(e.data.error))
+      } else {
+        pending.resolve(e.data.chunks)
+      }
+    })
+    worker.addEventListener("error", (e: ErrorEvent) => {
+      rejectAllChunkPending(new Error(e.message || "Worker error"))
+      if (chunkWorker === worker) {
+        worker.terminate()
+        chunkWorker = createChunkWorker()
+      }
+    })
+    worker.addEventListener("messageerror", () => {
+      rejectAllChunkPending(new Error("Failed to deserialize message"))
+      if (chunkWorker === worker) {
+        worker.terminate()
+        chunkWorker = createChunkWorker()
+      }
+    })
+    return worker
+  } catch {
+    return null
+  }
+}
+
+function createDedupWorker(): Worker | null {
+  try {
+    const worker = new Worker(new URL("./dedup.worker.js", import.meta.url), { type: "module" })
+    worker.addEventListener("message", (e: MessageEvent) => {
+      const pending = dedupPending.get(e.data.id)
+      if (!pending) return
+      dedupPending.delete(e.data.id)
+      clearTimeout(pending.timer)
+      if (e.data.error) {
+        pending.reject(new Error(e.data.error))
+      } else {
+        pending.resolve(e.data)
+      }
+    })
+    worker.addEventListener("error", (e: ErrorEvent) => {
+      rejectAllDedupPending(new Error(e.message || "Worker error"))
+      if (dedupWorker === worker) {
+        worker.terminate()
+        dedupWorker = createDedupWorker()
+      }
+    })
+    worker.addEventListener("messageerror", () => {
+      rejectAllDedupPending(new Error("Failed to deserialize message"))
+      if (dedupWorker === worker) {
+        worker.terminate()
+        dedupWorker = createDedupWorker()
+      }
+    })
+    return worker
+  } catch {
+    return null
+  }
+}
+
 function getChunkWorker(): Worker | null {
   if (!supportsWorkers()) return null
   if (!chunkWorker) {
-    try {
-      chunkWorker = new Worker(new URL("./chunk.worker.js", import.meta.url), { type: "module" })
-    } catch {
-      return null
-    }
+    chunkWorker = createChunkWorker()
   }
   return chunkWorker
 }
@@ -22,11 +120,7 @@ function getChunkWorker(): Worker | null {
 function getDedupWorker(): Worker | null {
   if (!supportsWorkers()) return null
   if (!dedupWorker) {
-    try {
-      dedupWorker = new Worker(new URL("./dedup.worker.js", import.meta.url), { type: "module" })
-    } catch {
-      return null
-    }
+    dedupWorker = createDedupWorker()
   }
   return dedupWorker
 }
@@ -47,19 +141,20 @@ export function chunkInWorker(
       return
     }
 
-    const handler = (e: MessageEvent) => {
-      worker.removeEventListener("message", handler)
-      if (e.data.error) {
-        reject(new Error(e.data.error))
-      } else {
-        resolve(e.data.chunks)
+    const id = ++requestCounter
+    const timer = setTimeout(() => {
+      chunkPending.delete(id)
+      reject(new Error("Worker timeout"))
+      if (chunkWorker === worker) {
+        worker.terminate()
+        chunkWorker = createChunkWorker()
       }
-    }
+    }, TIMEOUT_MS)
 
-    worker.addEventListener("message", handler)
+    chunkPending.set(id, { resolve, reject, timer })
     // Transferable objects not applicable here: all data is text (strings/objects),
     // not ArrayBuffer, so structured clone is the correct transfer mechanism.
-    worker.postMessage({ text, chunkSize, overlap, smartSizing })
+    worker.postMessage({ id, text, chunkSize, overlap, smartSizing })
   })
 }
 
@@ -77,23 +172,26 @@ export function dedupInWorker(
       return
     }
 
-    const handler = (e: MessageEvent) => {
-      worker.removeEventListener("message", handler)
-      if (e.data.error) {
-        reject(new Error(e.data.error))
-      } else {
-        resolve(e.data)
+    const id = ++requestCounter
+    const timer = setTimeout(() => {
+      dedupPending.delete(id)
+      reject(new Error("Worker timeout"))
+      if (dedupWorker === worker) {
+        worker.terminate()
+        dedupWorker = createDedupWorker()
       }
-    }
+    }, TIMEOUT_MS)
 
-    worker.addEventListener("message", handler)
+    dedupPending.set(id, { resolve, reject, timer })
     // Transferable objects not applicable here: data is JSON-serializable objects (items array),
     // not ArrayBuffer, so structured clone is the correct transfer mechanism.
-    worker.postMessage({ items, threshold })
+    worker.postMessage({ id, items, threshold })
   })
 }
 
 export function terminateWorkers(): void {
+  rejectAllChunkPending(new Error("Workers terminated"))
+  rejectAllDedupPending(new Error("Workers terminated"))
   if (chunkWorker) {
     chunkWorker.terminate()
     chunkWorker = null
