@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import UIManager from "../src/renderer/uiManager.js"
+import { csvEscape } from "../src/renderer/exportFormats.js"
 function setupDom(): void {
     document.body.innerHTML=`
         <div id="progress-text"></div>
@@ -69,16 +70,14 @@ describe("UIManager helpers", () => {
         expect(ui.sanitizeText("hello world")).toContain("hello")
         expect(ui.sanitizeText("hello world")).toContain("world")
     })
-    it("escapeCsvField escapes quotes", () => {
-        let ui=new UIManager({})
-        expect(ui.escapeCsvField('say "hello"')).toBe('say ""hello""')
+    it("csvEscape escapes quotes", () => {
+        expect(csvEscape('say "hello"')).toBe('"say ""hello"""')
     })
-    it("escapeCsvField prefixes formula characters", () => {
-        let ui=new UIManager({})
-        expect(ui.escapeCsvField("=SUM(A1)")).toBe("'=SUM(A1)")
-        expect(ui.escapeCsvField("+123")).toBe("'+123")
-        expect(ui.escapeCsvField("-123")).toBe("'-123")
-        expect(ui.escapeCsvField("@user")).toBe("'@user")
+    it("csvEscape prefixes formula characters", () => {
+        expect(csvEscape("=SUM(A1)")).toBe("'=SUM(A1)")
+        expect(csvEscape("+123")).toBe("'+123")
+        expect(csvEscape("-123")).toBe("'-123")
+        expect(csvEscape("@user")).toBe("'@user")
     })
     it("getLogIcon returns correct icons", () => {
         let ui=new UIManager({})

@@ -74,9 +74,6 @@ class TrainGeneratorApp{
     sanitizeText(text:string):string{
         return this.uiManager.sanitizeText(text)
     }
-    escapeCsvField(value:string):string{
-        return this.uiManager.escapeCsvField(value)
-    }
     updateProcessButton():void{
         this.fileManager.updateProcessButton()
     }

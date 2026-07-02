@@ -212,11 +212,6 @@ class UIManager{
         let sanitized=String(text).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
         return this.escapeHtml(sanitized)
     }
-    escapeCsvField(value:string):string{
-        let escaped=value.replace(/"/g,'""')
-        if(/^[=+\-@]/.test(escaped))escaped="'"+escaped
-        return escaped
-    }
     showModal(show:boolean):void{
         this.settingsModal.classList.toggle("active",show)
         if(show){
