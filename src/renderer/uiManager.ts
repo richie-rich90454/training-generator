@@ -744,6 +744,7 @@ class UIManager{
         this.addLog(`Profile "${name}" deleted`,"success")
     }
     updateModelSelect(models:OllamaModel[]):void{
+        let previousValue=this.modelSelect.value
         this.modelSelect.innerHTML=""
         if(models.length==0){
             let option=document.createElement("option")
@@ -765,6 +766,9 @@ class UIManager{
                 option.selected=true
             }
         })
+        if(previousValue&&models.some(m=>m.name===previousValue)){
+            this.modelSelect.value=previousValue
+        }
         this.app.fileManager.updateProcessButton()
     }
     async checkOllamaStatus():Promise<OllamaStatus>{
