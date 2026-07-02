@@ -442,7 +442,7 @@ class UIManager{
                             if(previewLines.length>100){
                                 previewLines=previewLines.substring(0,100)+"..."
                             }
-                            if(loadedPrompt.includes("{{text}}")){
+                            if(loadedPrompt.includes("{text}")){
                                 let escapedPreviewLines=this.sanitizeText(previewLines)
                                 promptPreview=`(prompt:"${escapedPreviewLines}")`
                             }
