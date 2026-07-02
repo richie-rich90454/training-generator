@@ -15,6 +15,7 @@ export interface CacheStats{
 let cacheMap:Map<string,CacheEntry>=new Map()
 let cacheLoaded=false
 let loadPromise:Promise<void>|null=null
+let saveTimeout:ReturnType<typeof setTimeout>|null=null
 
 let cacheStats:CacheStats={hits:0,misses:0,totalRequests:0,estimatedTokensSaved:0,estimatedCostSaved:0}
 
@@ -72,20 +73,28 @@ export async function getCachedResult(chunk:string,model:string,prompt:string):P
     return entry||null
 }
 
+async function persistCache():Promise<void>{
+    if(window.electronAPI?.saveCache){
+        let data:Record<string,CacheEntry>={}
+        cacheMap.forEach((v,k)=>{data[k]=v})
+        await window.electronAPI.saveCache(data as any)
+    }
+}
+
 export async function setCachedResult(chunk:string,model:string,prompt:string,response:string,tokens:number):Promise<void>{
     await loadCache()
     let key=await hashKey(chunk,model,prompt)
     cacheMap.set(key,{response,tokens,timestamp:Date.now()})
-    try{
-        if(window.electronAPI?.saveCache){
-            let data:Record<string,CacheEntry>={}
-            cacheMap.forEach((v,k)=>{data[k]=v})
-            await window.electronAPI.saveCache(data as any)
-        }
+    if(saveTimeout){
+        clearTimeout(saveTimeout)
+        saveTimeout=null
     }
-    catch(error){
-        console.error("Cache: failed to save cache entry",(error as Error).message)
-    }
+    saveTimeout=setTimeout(()=>{
+        saveTimeout=null
+        persistCache().catch((error:unknown)=>{
+            console.error("Cache: failed to save cache entry",(error as Error).message)
+        })
+    },500)
 }
 
 export async function clearCache():Promise<void>{
