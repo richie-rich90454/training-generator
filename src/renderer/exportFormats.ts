@@ -22,9 +22,9 @@ export function exportCSV(items:TrainingItem[]):string{
             output=csvEscape(item.text)
         }
         else{
-            instruction=csvEscape(item.instruction||"")
-            input=csvEscape(item.input||"")
-            output=csvEscape(item.output||"")
+            instruction=csvEscape(item.instruction!=null?String(item.instruction):"")
+            input=csvEscape(item.input!=null?String(item.input):"")
+            output=csvEscape(item.output!=null?String(item.output):"")
         }
         return `${instruction},${input},${output}`
     })
