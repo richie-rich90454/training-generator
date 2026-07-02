@@ -154,7 +154,7 @@ class FileParserLazy{
                 if (result.id==id){
                     clearTimeout(timeout);
                     worker.terminate();
-                    
+
                     if (result.success){
                         resolve(result.text);
                     }
@@ -240,11 +240,11 @@ class FileParserLazy{
     }
     extractTextFromPDF(buffer:Buffer):string{
         let text=buffer.toString("utf-8", 0, Math.min(buffer.length, 10000));
-        return text.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
+        return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, " ").replace(/\s+/g, " ").trim();
     }
     extractTextFromBuffer(buffer:Buffer):string{
         let text=buffer.toString("utf-8", 0, Math.min(buffer.length, 10000));
-        return text.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
+        return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, " ").replace(/\s+/g, " ").trim();
     }
     extractPlainTextFromRTF(rtfText:string):string{
         let text=rtfText;
@@ -257,7 +257,7 @@ class FileParserLazy{
         if (!this.supportedFormats.includes(ext)){
             throw new Error(`Unsupported file format: ${ext}`);
         }
-        
+
         return await this.parseFile(filePath, ext);
     }
     async processFiles(filePaths:string[]):Promise<ParseBatchItem[]>{
@@ -281,7 +281,7 @@ class FileParserLazy{
                 });
             }
         }
-        
+
         return results;
     }
     dispose():void{
