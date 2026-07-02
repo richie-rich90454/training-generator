@@ -207,12 +207,15 @@ export class CliGeminiProvider implements Provider {
 }
 
 export function createCliProvider(type: string, config?: { apiKey?: string; baseUrl?: string }): Provider {
-    if (type === "openai" || type === "anthropic" || type === "gemini") {
-        let baseUrl = config?.baseUrl ||
-            (type === "anthropic" ? "https://api.anthropic.com" :
-                type === "gemini" ? "https://generativelanguage.googleapis.com" :
-                    "https://api.openai.com")
-        return new CliOpenAIProvider(config?.apiKey || "", baseUrl)
+    let apiKey = config?.apiKey || ""
+    switch (type) {
+        case "openai":
+            return new CliOpenAIProvider(apiKey, config?.baseUrl || "https://api.openai.com")
+        case "anthropic":
+            return new CliAnthropicProvider(apiKey, config?.baseUrl || "https://api.anthropic.com")
+        case "gemini":
+            return new CliGeminiProvider(apiKey, config?.baseUrl || "https://generativelanguage.googleapis.com")
+        default:
+            return new CliOllamaProvider(config?.baseUrl || "http://localhost:11434")
     }
-    return new CliOllamaProvider()
 }
