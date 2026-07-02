@@ -14,6 +14,8 @@ class FileParserLazy{
         RtfParser:unknown|null
         htmlToText:unknown|null
     }
+    private loading:Record<string,Promise<unknown>|undefined>
+    private isDisposed:boolean
     constructor(){
         this.supportedFormats=["pdf", "docx", "doc", "rtf", "txt", "md", "html"];
         this.dependencies={
@@ -23,29 +25,43 @@ class FileParserLazy{
             RtfParser: null,
             htmlToText: null
         };
+        this.loading={};
+        this.isDisposed=false;
     }
     async loadDependency(name:string):Promise<unknown>{
         if (this.dependencies[name]!==null){
             return this.dependencies[name];
         }
+        if (this.loading[name]){
+            return this.loading[name];
+        }
+        this.loading[name]=this.importDependency(name)
+        try{
+            let result=await this.loading[name]
+            if (!this.isDisposed){
+                this.dependencies[name]=result
+            }
+            return result
+        }
+        finally{
+            delete this.loading[name]
+        }
+    }
+    private async importDependency(name:string):Promise<unknown>{
         switch (name){
             case "mammoth":
-                this.dependencies.mammoth=(await import("mammoth")).default
-                break
+                return (await import("mammoth")).default
             case "pdfParse":
-                this.dependencies.pdfParse=(await import("pdf-parse")).default
-                break
+                return (await import("pdf-parse")).default
             case "officeParser":
-                this.dependencies.officeParser=(await import("officeparser")).default
-                break
+                return (await import("officeparser")).default
             case "RtfParser":
-                this.dependencies.RtfParser=(await import("rtf-parser-fixes")).RtfParser
-                break
+                return (await import("rtf-parser-fixes")).RtfParser
             case "htmlToText":
-                this.dependencies.htmlToText=(await import("html-to-text")).htmlToText
-                break
+                return (await import("html-to-text")).htmlToText
+            default:
+                throw new Error(`Unknown dependency: ${name}`)
         }
-        return this.dependencies[name];
     }
     async parseFile(filePath:string,fileType:string):Promise<string>{
         try{
@@ -300,6 +316,7 @@ class FileParserLazy{
         return results;
     }
     dispose():void{
+        this.isDisposed=true;
         this.dependencies={
             mammoth: null,
             pdfParse: null,
@@ -307,6 +324,7 @@ class FileParserLazy{
             RtfParser: null,
             htmlToText: null
         };
+        this.loading={};
     }
 }
 export default FileParserLazy;
