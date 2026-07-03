@@ -394,8 +394,8 @@ class TrainGeneratorApp{
                 config:{
                     model:this.uiManager.modelSelect.value,
                     processingType:this.uiManager.processingType.value,
-                    chunkSize:this.uiManager.chunkSize.value,
-                    concurrency:this.uiManager.concurrencySelect.value,
+                    chunkSize:parseInt(this.uiManager.chunkSize.value)||2000,
+                    concurrency:parseInt(this.uiManager.concurrencySelect.value)||3,
                     provider:this.uiManager.providerSelect.value
                 },
                 timestamp:Date.now()
@@ -440,7 +440,7 @@ class TrainGeneratorApp{
                 if(file.file&&file.file instanceof File){
                     if(file.type=="pdf"){
                         if(file.path){
-                            let result=await window.electronAPI.parseFile(file.path,"pdf")
+                            let result=await window.electronAPI!.parseFile(file.path,"pdf")
                             if(!result.success){
                                 this.logger.warn("app",`Main process PDF parse failed for ${file.name}, falling back to browser extraction`)
                                 let arrayBuffer=await this.readFileAsArrayBuffer(file.file)
@@ -456,7 +456,7 @@ class TrainGeneratorApp{
                         textContent=await this.readFileContent(file.file)
                     }
                 }else if(file.path){
-                    let result=await window.electronAPI.parseFile(file.path,file.type)
+                    let result=await window.electronAPI!.parseFile(file.path,file.type)
                     if(!result.success){
                         throw new Error(result.error)
                     }
@@ -791,7 +791,7 @@ class TrainGeneratorApp{
                 if(fileObj.file&&fileObj.file instanceof File){
                     if(fileObj.type=="pdf"){
                         if(fileObj.path){
-                            let result=await window.electronAPI.parseFile(fileObj.path,"pdf")
+                            let result=await window.electronAPI!.parseFile(fileObj.path,"pdf")
                             if(!result.success){
                                 this.logger.warn("app",`Main process PDF parse failed for ${fileObj.name}, falling back to browser extraction`)
                                 let arrayBuffer=await this.readFileAsArrayBuffer(fileObj.file)
@@ -811,7 +811,7 @@ class TrainGeneratorApp{
                     }
                 }
                 else if(fileObj.path){
-                    let result=await window.electronAPI.parseFile(fileObj.path,fileObj.type)
+                    let result=await window.electronAPI!.parseFile(fileObj.path,fileObj.type)
                     if(!result.success){
                         throw new Error(result.error)
                     }

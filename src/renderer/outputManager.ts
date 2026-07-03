@@ -1,10 +1,8 @@
-import type{TrainingItem,QAPair,ConversationTurn}from"../types/index.js"
+import type{TrainingItem,QAPair,ConversationTurn,ChatMessage}from"../types/index.js"
 import{exportJSONL,exportJSONArray,exportCSV}from"./exportFormats.js"
-
 class OutputManager{
     app:any
     outputData:TrainingItem[]
-
     constructor(app:any){
         this.app=app
         this.outputData=[]
@@ -24,6 +22,7 @@ class OutputManager{
                 qaPairs.forEach(pair=>{
                     if(format=="chatml"){
                         items.push({
+                            format:"chatml",
                             messages:[
                                 {role:"user",content:pair.question},
                                 {role:"assistant",content:pair.answer}
@@ -31,13 +30,14 @@ class OutputManager{
                         })
                     }
                     else if(format=="text"){
-                        items.push({text:pair.answer})
+                        items.push({format:"text",text:pair.answer})
                     }
                     else if(format=="csv"){
-                        items.push({input:pair.question,output:pair.answer})
+                        items.push({format:"instruction",input:pair.question,output:pair.answer})
                     }
                     else{
                         items.push({
+                            format:"instruction",
                             instruction:"Answer the question based on the text",
                             input:pair.question,
                             output:pair.answer
@@ -51,23 +51,24 @@ class OutputManager{
             let conversationTurns=this.parseConversationTurns(output)
             if(conversationTurns.length>0){
                 if(format=="chatml"){
-                    let messages:Array<{role:string;content:string}>=[]
+                    let messages:ChatMessage[]=[]
                     conversationTurns.forEach(turn=>{
                         messages.push({role:"user",content:turn.user})
                         messages.push({role:"assistant",content:turn.assistant})
                     })
-                    items.push({messages})
+                    items.push({format:"chatml",messages})
                 }
                 else{
                     conversationTurns.forEach(turn=>{
                         if(format=="text"){
-                            items.push({text:turn.assistant})
+                            items.push({format:"text",text:turn.assistant})
                         }
                         else if(format=="csv"){
-                            items.push({input:turn.user,output:turn.assistant})
+                            items.push({format:"instruction",input:turn.user,output:turn.assistant})
                         }
                         else{
                             items.push({
+                                format:"instruction",
                                 instruction:"Respond to the user's message",
                                 input:turn.user,
                                 output:turn.assistant
@@ -80,6 +81,7 @@ class OutputManager{
         }
         if(format=="chatml"){
             items.push({
+                format:"chatml",
                 messages:[
                     {role:"user",content:input},
                     {role:"assistant",content:output}
@@ -87,13 +89,14 @@ class OutputManager{
             })
         }
         else if(format=="text"){
-            items.push({text:output})
+            items.push({format:"text",text:output})
         }
         else if(format=="csv"){
-            items.push({input,output})
+            items.push({format:"instruction",input,output})
         }
         else{
             items.push({
+                format:"instruction",
                 instruction:processingType=="instruction"?"Answer the question based on the text":"Process the following text",
                 input:input,
                 output:output
@@ -241,12 +244,12 @@ class OutputManager{
                     else if(format=="json")partFilename+=".json"
                     else if(format=="csv")partFilename+=".csv"
                     else partFilename+=".txt"
-                    let savePath=await window.electronAPI.saveFileDialog(partFilename)
+                    let savePath=await window.electronAPI!.saveFileDialog(partFilename)
                     if(!savePath){
                         this.app.addLog("Export cancelled","info")
                         return
                     }
-                    let result=await window.electronAPI.saveFile(savePath,content)
+                    let result=await window.electronAPI!.saveFile(savePath,content)
                     if(result.success){
                         this.app.addLog(`Exported part ${i+1}/${partCount} to ${savePath}`,"success")
                     }
@@ -263,12 +266,12 @@ class OutputManager{
             else if(format=="json")defaultFilename+=".json"
             else if(format=="csv")defaultFilename+=".csv"
             else defaultFilename+=".txt"
-            let savePath=await window.electronAPI.saveFileDialog(defaultFilename)
+            let savePath=await window.electronAPI!.saveFileDialog(defaultFilename)
             if(!savePath){
                 this.app.addLog("Export cancelled","info")
                 return
             }
-            let result=await window.electronAPI.saveFile(savePath,content)
+            let result=await window.electronAPI!.saveFile(savePath,content)
             if(result.success){
                 this.app.addLog(`Exported to ${savePath}`,"success")
             }
@@ -323,5 +326,4 @@ class OutputManager{
         }
     }
 }
-
 export default OutputManager

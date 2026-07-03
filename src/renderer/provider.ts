@@ -90,10 +90,11 @@ export class OllamaProvider implements Provider{
     }
 
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
-        if(!window.electronAPI?.generateWithOllamaStream)throw new Error("Electron API not available")
+        let api=window.electronAPI
+        if(!api)throw new Error("Electron API not available")
         try{
             let result=await retryWithBackoff(async()=>{
-                let r=await window.electronAPI.generateWithOllamaStream(model,prompt,{
+                let r=await api.generateWithOllamaStream(model,prompt,{
                     temperature:options?.temperature??0.7,
                     top_p:options?.top_p??0.9
                 })
@@ -139,11 +140,12 @@ export class OpenAIProvider implements Provider{
     }
 
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
-        if(!window.electronAPI?.generateWithOpenAI)throw new Error("Electron API not available")
+        let api=window.electronAPI
+        if(!api)throw new Error("Electron API not available")
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
-                let r=await window.electronAPI.generateWithOpenAI(
+                let r=await api.generateWithOpenAI(
                     this.apiKey,this.baseUrl,model,prompt,{
                         temperature:options?.temperature??0.7,
                         top_p:options?.top_p??0.9,

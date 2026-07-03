@@ -352,9 +352,9 @@ class UIManager{
             if(settings.processingType&&validProcessingTypes.includes(settings.processingType))this.processingType.value=settings.processingType
             if(settings.outputFormat&&validOutputFormats.includes(settings.outputFormat))this.outputFormat.value=settings.outputFormat
             if(settings.language&&validLanguages.includes(settings.language))this.languageSelect.value=settings.language
-            if(settings.chunkSize){
-                let n=parseInt(settings.chunkSize)
-                if(!isNaN(n)&&n>=500&&n<=10000)this.chunkSize.value=String(n)
+            if(settings.chunkSize!=null){
+                let n=Number(settings.chunkSize)
+                if(Number.isFinite(n)&&n>=500&&n<=10000)this.chunkSize.value=String(n)
             }
             if(settings.provider)this.providerSelect.value=settings.provider
             if(settings.apiKey){
@@ -375,9 +375,9 @@ class UIManager{
                 }
             }
             if(settings.baseUrl)this.baseUrlInput.value=settings.baseUrl
-            if(settings.temperature){
-                let t=parseFloat(settings.temperature)
-                if(!isNaN(t)&&t>=0&&t<=1){
+            if(settings.temperature!=null){
+                let t=Number(settings.temperature)
+                if(Number.isFinite(t)&&t>=0&&t<=1){
                     this.temperatureInput.value=String(t)
                     this.updateTemperatureDisplay()
                 }
@@ -401,12 +401,12 @@ class UIManager{
             processingType:this.processingType.value,
             outputFormat:this.outputFormat.value,
             language:this.languageSelect.value,
-            chunkSize:this.chunkSize.value,
-            concurrency:this.concurrencySelect.value,
+            chunkSize:parseInt(this.chunkSize.value)||2000,
+            concurrency:parseInt(this.concurrencySelect.value)||3,
             provider:this.providerSelect.value,
             apiKey:encryptedApiKey,
             baseUrl:this.baseUrlInput.value,
-            temperature:this.temperatureInput.value
+            temperature:parseFloat(this.temperatureInput.value)||0.7
         }
         try{
             localStorage.setItem("train-generator-settings",JSON.stringify(settings))
@@ -539,18 +539,24 @@ class UIManager{
                 if(fontSizeSelect)fontSizeSelect.value=settings.fontSize
                 this.applyFontSize(settings.fontSize)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smart-sizing"]
-            checkboxes.forEach(id=>{
-                let checkbox=document.getElementById(id as string) as HTMLInputElement|null
-                if(checkbox&&settings[id]!=undefined){
-                    checkbox.checked=settings[id] as boolean
+            let checkboxMap:Record<string,keyof FullAppSettings>={
+                "auto-save":"autoSave",
+                "auto-check-ollama":"autoCheckOllama",
+                "start-maximized":"startMaximized",
+                "remember-window-size":"rememberWindowSize",
+                "smart-sizing":"smartSizing"
+            }
+            Object.entries(checkboxMap).forEach(([id,key])=>{
+                let checkbox=document.getElementById(id) as HTMLInputElement|null
+                if(checkbox&&settings[key]!=undefined){
+                    checkbox.checked=settings[key] as boolean
                 }
             })
-            if(settings["max-file-size"]!=undefined){
+            if(settings.maxFileSize!=undefined){
                 let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
                 if(maxFileSize){
-                    let n=parseInt(String(settings["max-file-size"]))
-                    if(!isNaN(n)&&n>=10&&n<=1000)maxFileSize.value=String(n)
+                    let n=Number(settings.maxFileSize)
+                    if(Number.isFinite(n)&&n>=10&&n<=1000)maxFileSize.value=String(n)
                 }
             }
             if(settings.maxOutputItems!=undefined){
@@ -563,7 +569,7 @@ class UIManager{
             }
             if(settings.maxParallelFiles!=undefined){
                 let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
-                if(maxParallelFiles)maxParallelFiles.value=settings.maxParallelFiles
+                if(maxParallelFiles)maxParallelFiles.value=String(settings.maxParallelFiles)
             }
             this.addLog("Application settings loaded","info")
         }
@@ -584,20 +590,26 @@ class UIManager{
                 settings.fontSize=fontSizeSelect.value
                 this.applyFontSize(fontSizeSelect.value)
             }
-            let checkboxes:Array<keyof FullAppSettings>=["auto-save","auto-check-ollama","start-maximized","remember-window-size","smart-sizing"]
-            checkboxes.forEach(id=>{
-                let checkbox=document.getElementById(id as string) as HTMLInputElement|null
+            let checkboxMap:Record<string,Extract<keyof FullAppSettings,"autoSave"|"autoCheckOllama"|"startMaximized"|"rememberWindowSize"|"smartSizing">>={
+                "auto-save":"autoSave",
+                "auto-check-ollama":"autoCheckOllama",
+                "start-maximized":"startMaximized",
+                "remember-window-size":"rememberWindowSize",
+                "smart-sizing":"smartSizing"
+            }
+            Object.entries(checkboxMap).forEach(([id,key])=>{
+                let checkbox=document.getElementById(id) as HTMLInputElement|null
                 if(checkbox){
-                    (settings as Record<string,unknown>)[id as string]=checkbox.checked
+                    settings[key]=checkbox.checked
                 }
             })
             let maxFileSize=document.getElementById("max-file-size") as HTMLInputElement|null
             if(maxFileSize){
-                settings["max-file-size"]=parseInt(maxFileSize.value)||100
+                settings.maxFileSize=parseInt(maxFileSize.value)||100
             }
             let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
             if(maxParallelFiles){
-                settings.maxParallelFiles=maxParallelFiles.value
+                settings.maxParallelFiles=parseInt(maxParallelFiles.value)||1
             }
             let maxOutputItems=document.getElementById("max-output-items") as HTMLSelectElement|null
             if(maxOutputItems){

@@ -7,8 +7,8 @@ export interface CheckpointData {
   config: {
     model: string
     processingType: string
-    chunkSize: string
-    concurrency: string
+    chunkSize: number
+    concurrency: number
     provider: string
   }
   timestamp: number

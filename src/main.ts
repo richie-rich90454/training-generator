@@ -9,7 +9,8 @@ import https from "https"
 import crypto from "crypto"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
-import type{FileObj,OllamaGenerateOptions}from "./types/index.ts"
+import{handle}from "./ipcMain.js"
+import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
@@ -606,7 +607,7 @@ async function getCurrentLogFilePathAsync():Promise<string>{
     }
 }
 function registerCriticalIpcHandlers():void{
-    ipcMain.handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
+    handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
         let result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
             properties:["openFile","multiSelections"],
             filters:[
@@ -650,7 +651,7 @@ function registerCriticalIpcHandlers():void{
         }
         return files.filter(Boolean)as FileObj[]
     })
-    ipcMain.handle("dialog:saveFile",async(_:Electron.IpcMainInvokeEvent,defaultFilename?:string):Promise<string|null>=>{
+    handle("dialog:saveFile",async(_event,{defaultFilename}:{defaultFilename?:string}):Promise<string|null>=>{
         let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
             defaultPath:defaultFilename||"training_data.jsonl",
             filters:[
@@ -666,14 +667,14 @@ function registerCriticalIpcHandlers():void{
         allowSavePath(result.filePath)
         return result.filePath
     })
-    ipcMain.handle("secureKey:getKey",async():Promise<string|null>=>{
+    handle("secureKey:getKey",async():Promise<string|null>=>{
         return getSecureKey()
     })
-    ipcMain.handle("secureKey:setKey",async(_:Electron.IpcMainInvokeEvent,key:string):Promise<boolean>=>{
+    handle("secureKey:setKey",async(_event,{key}:{key:string}):Promise<boolean>=>{
         if(typeof key!=="string"||key.length===0)return false
         return setSecureKey(key)
     })
-    ipcMain.handle("file:read",async(_:Electron.IpcMainInvokeEvent,filePath:string):Promise<{success:boolean;content?:string;error?:string}>=>{
+    handle("file:read",async(_event,{filePath}:{filePath:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"){
                 return{success:false,error:"Invalid file path"}
@@ -726,7 +727,7 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:"Failed to read file"}
         }
     })
-    ipcMain.handle("file:save",async(_:Electron.IpcMainInvokeEvent,filePath:string,content:string):Promise<{success:boolean;error?:string}>=>{
+    handle("file:save",async(_event,{filePath,content}:{filePath:string;content:string}):Promise<{success:boolean;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"||content==null||typeof content!=="string"){
                 return{success:false,error:"Invalid file path or content"}
@@ -744,7 +745,7 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:"Failed to save file"}
         }
     })
-    ipcMain.handle("file:parse",async(_:Electron.IpcMainInvokeEvent,filePath:string,fileType:string):Promise<{success:boolean;content?:string;error?:string}>=>{
+    handle("file:parse",async(_event,{filePath,fileType}:{filePath:string;fileType:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"||!fileType||typeof fileType!=="string"){
                 return{success:false,error:"Invalid file path or type"}
@@ -762,7 +763,7 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:"Failed to parse file"}
         }
     })
-    ipcMain.handle("file:parseBatch",async(_:Electron.IpcMainInvokeEvent,files:FileObj[]):Promise<{success:boolean;results?:unknown[];error?:string}>=>{
+    handle("file:parseBatch",async(_event,{files}:{files:FileObj[]}):Promise<{success:boolean;results?:ParseBatchItem[];error?:string}>=>{
         try{
             if(!files||!Array.isArray(files)||files.length===0){
                 return{success:false,error:"Invalid files array"}
@@ -788,10 +789,10 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:"Failed to parse files"}
         }
     })
-    ipcMain.handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<{running:boolean;models:unknown[];version:string}|{running:false;models:never[];error:string}>=>{
+    handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<OllamaStatus>=>{
         try{
             let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
-            let models=(tagsResponse.data.models||[]).map((m:any)=>({
+            let models:OllamaModel[]=(tagsResponse.data.models||[]).map((m:any)=>({
                 ...m,
                 name:typeof m.name==="string"?m.name.replace(/[\x00-\x1F]/g,""):String(m.name||"").replace(/[\x00-\x1F]/g,"")
             }))
@@ -816,7 +817,7 @@ function registerCriticalIpcHandlers():void{
             return{running:false,models:[],error:"Failed to connect to Ollama"}
         }
     })
-    ipcMain.handle("ollama:generate",async(_:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>=>{
+    handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
         let{model,prompt,options}=payload
         options=options??{}
         if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
@@ -881,14 +882,14 @@ function registerCriticalIpcHandlers():void{
         }
         return{success:false,error:"Failed to generate response from Ollama"}
     })
-    ipcMain.handle("ollama:generateStream",async(_event,payload={})=>handleOllamaGenerateStream(payload))
-    ipcMain.handle("openai:generate",async(_event:Electron.IpcMainInvokeEvent,payload:{
+    handle("ollama:generateStream",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions})=>handleOllamaGenerateStream(payload))
+    handle("openai:generate",async(_event,payload:{
         apiKey?:string
         baseUrl?:string
         model?:string
         prompt?:string
         options?:{temperature?:number;top_p?:number;max_tokens?:number}
-    }={}):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+    }):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
         let{apiKey,baseUrl,model,prompt,options}=payload
         options=options??{}
         if(!apiKey||!baseUrl||!model||!prompt){
@@ -935,9 +936,9 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:error.message||"Failed to call OpenAI API"}
         }
     })
-    ipcMain.handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
-    ipcMain.handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
-    ipcMain.handle("docs:openUserGuide",async(_:Electron.IpcMainInvokeEvent):Promise<{success:boolean;error?:string}>=>{
+    handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
+    handle("app:getPlatform",(_:Electron.IpcMainInvokeEvent):string=>process.platform)
+    handle("docs:openUserGuide",async(_:Electron.IpcMainInvokeEvent):Promise<{success:boolean;error?:string}>=>{
         try{
             let candidates=[
                 path.join(app.getAppPath(),"docs","user-guide.md"),
@@ -982,7 +983,7 @@ function isDataSizeValid(data:unknown):boolean{
 function registerDeferredIpcHandlers():void{
     if(deferredIpcRegistered)return
     deferredIpcRegistered=true
-    ipcMain.handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
+    handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
             if(fs.existsSync(cachePath)){
@@ -995,7 +996,7 @@ function registerDeferredIpcHandlers():void{
             return{success:true,data:{}}
         }
     })
-    ipcMain.handle("cache:save",async(_event:Electron.IpcMainInvokeEvent,data:Record<string,any>):Promise<{success:boolean}>=>{
+    handle("cache:save",async(_event,{data}:{data:Record<string,any>}):Promise<{success:boolean}>=>{
         if(!isValidPersistedData(data)||!isDataSizeValid(data)){
             return{success:false}
         }
@@ -1008,7 +1009,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("cache:clear",async():Promise<{success:boolean}>=>{
+    handle("cache:clear",async():Promise<{success:boolean}>=>{
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
             if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
@@ -1018,7 +1019,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("progress:save",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+    handle("progress:save",async(_event,{data}:{data:any}):Promise<{success:boolean}>=>{
         if(!isValidPersistedData(data)||!isDataSizeValid(data)){
             return{success:false}
         }
@@ -1031,7 +1032,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
+    handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
             if(fs.existsSync(progressPath)){
@@ -1044,7 +1045,7 @@ function registerDeferredIpcHandlers():void{
             return{success:true,data:null}
         }
     })
-    ipcMain.handle("progress:clear",async():Promise<{success:boolean}>=>{
+    handle("progress:clear",async():Promise<{success:boolean}>=>{
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
             if(fs.existsSync(progressPath))fs.unlinkSync(progressPath)
@@ -1054,7 +1055,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("save-checkpoint",async(_event:Electron.IpcMainInvokeEvent,data:any):Promise<{success:boolean}>=>{
+    handle("save-checkpoint",async(_event,{data}:{data:any}):Promise<{success:boolean}>=>{
         if(!isValidPersistedData(data)||!isDataSizeValid(data)){
             return{success:false}
         }
@@ -1067,7 +1068,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
+    handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
             if(fs.existsSync(checkpointPath)){
@@ -1080,7 +1081,7 @@ function registerDeferredIpcHandlers():void{
             return{success:true,data:null}
         }
     })
-    ipcMain.handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
+    handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
             if(fs.existsSync(checkpointPath))fs.unlinkSync(checkpointPath)
@@ -1090,7 +1091,7 @@ function registerDeferredIpcHandlers():void{
             return{success:false}
         }
     })
-    ipcMain.handle("write-log",async(_:Electron.IpcMainInvokeEvent,entry:unknown):Promise<void>=>{
+    handle("write-log",async(_event,{entry}:{entry:unknown}):Promise<void>=>{
         if(!entry||typeof entry!=="object"){
             return
         }
@@ -1101,7 +1102,7 @@ function registerDeferredIpcHandlers():void{
         }).catch(()=>{})
         await writeLogQueue
     })
-    ipcMain.handle("export-logs",async(_:Electron.IpcMainInvokeEvent,data:string):Promise<{success:boolean;error?:string}>=>{
+    handle("export-logs",async(_event,{data}:{data:string}):Promise<{success:boolean;error?:string}>=>{
         try{
             if(!data||typeof data!=="string"){
                 return{success:false,error:"Invalid log data"}

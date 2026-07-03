@@ -19,7 +19,7 @@ describe("OllamaProvider", () => {
         expect(await provider.healthCheck()).toBe(true)
     })
     it("returns unhealthy when ollama is offline", async() => {
-        window.electronAPI.checkOllama=vi.fn(async()=>({ running: false, models: [] }))
+        window.electronAPI!.checkOllama=vi.fn(async()=>({ running: false, models: [] }))
         let provider=new OllamaProvider()
         expect(await provider.healthCheck()).toBe(false)
     })
@@ -36,7 +36,7 @@ describe("OllamaProvider", () => {
         expect(result.tokens).toBeGreaterThan(0)
     })
     it("throws when generation fails", async() => {
-        window.electronAPI.generateWithOllamaStream=vi.fn(async()=>({ success: false, error: "model not found" }))
+        window.electronAPI!.generateWithOllamaStream=vi.fn(async()=>({ success: false, error: "model not found" }))
         let provider=new OllamaProvider()
         await expect(provider.generate("prompt", "model")).rejects.toThrow("model not found")
     })
@@ -48,7 +48,7 @@ describe("OllamaProvider", () => {
     it("passes temperature and top_p", async() => {
         let provider=new OllamaProvider()
         await provider.generate("prompt", "model", { temperature: 0.5, top_p: 0.8 })
-        expect(window.electronAPI.generateWithOllamaStream).toHaveBeenCalledWith("model", "prompt", expect.objectContaining({ temperature: 0.5, top_p: 0.8 }))
+        expect(window.electronAPI!.generateWithOllamaStream).toHaveBeenCalledWith("model", "prompt", expect.objectContaining({ temperature: 0.5, top_p: 0.8 }))
     })
 })
 describe("OpenAIProvider", () => {
@@ -82,13 +82,13 @@ describe("OpenAIProvider", () => {
         expect(result.tokens).toBe(10)
     })
     it("estimates tokens when usage missing", async() => {
-        window.electronAPI.generateWithOpenAI=vi.fn(async()=>({ success: true, response: "short" }))
+        window.electronAPI!.generateWithOpenAI=vi.fn(async()=>({ success: true, response: "short" }))
         let provider=new OpenAIProvider("key")
         let result=await provider.generate("prompt", "gpt-4")
         expect(result.tokens).toBeGreaterThan(0)
     })
     it("throws on generation failure", async() => {
-        window.electronAPI.generateWithOpenAI=vi.fn(async()=>({ success: false, error: "auth failed" }))
+        window.electronAPI!.generateWithOpenAI=vi.fn(async()=>({ success: false, error: "auth failed" }))
         let provider=new OpenAIProvider("key")
         await expect(provider.generate("prompt", "gpt-4")).rejects.toThrow("auth failed")
     })
@@ -105,7 +105,7 @@ describe("OpenAIProvider", () => {
     it("passes max_tokens option", async() => {
         let provider=new OpenAIProvider("key")
         await provider.generate("prompt", "gpt-4", { max_tokens: 512 })
-        expect(window.electronAPI.generateWithOpenAI).toHaveBeenCalledWith("key", "https://api.openai.com", "gpt-4", "prompt", expect.objectContaining({ max_tokens: 512 }))
+        expect(window.electronAPI!.generateWithOpenAI).toHaveBeenCalledWith("key", "https://api.openai.com", "gpt-4", "prompt", expect.objectContaining({ max_tokens: 512 }))
     })
 })
 describe("retryWithBackoff", () => {

@@ -169,59 +169,59 @@ describe("i18n", () => {
 })
 describe("quality validator", () => {
     it("passes valid instruction items", () => {
-        let items: TrainingItem[] = [{ instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." }]
+        let items: TrainingItem[] = [{ format: "instruction", instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." }]
         let report = validateItems(items)
         expect(report.passRate).toBe(100)
         expect(report.flaggedItems).toBe(0)
     })
     it("flags short answers", () => {
-        let items: TrainingItem[] = [{ instruction: "What?", input: "", output: "Yes" }]
+        let items: TrainingItem[] = [{ format: "instruction", instruction: "What?", input: "", output: "Yes" }]
         let report = validateItems(items)
         expect(report.flaggedItems).toBe(1)
         expect(report.breakdown["answer_too_short"]).toBe(1)
     })
     it("flags missing answer", () => {
-        let items: TrainingItem[] = [{ instruction: "What?", input: "", output: "" }]
+        let items: TrainingItem[] = [{ format: "instruction", instruction: "What?", input: "", output: "" }]
         let report = validateItems(items)
         expect(report.flaggedItems).toBe(1)
     })
     it("flags missing question", () => {
-        let items: TrainingItem[] = [{ instruction: "", input: "", output: "Paris is the capital of France and it is beautiful." }]
+        let items: TrainingItem[] = [{ format: "instruction", instruction: "", input: "", output: "Paris is the capital of France and it is beautiful." }]
         let report = validateItems(items)
         expect(report.breakdown["missing_question"]).toBe(1)
     })
     it("flags language mismatch", () => {
-        let items: TrainingItem[] = [{ instruction: "这是什么？", input: "", output: "This is an English answer that is long enough." }]
+        let items: TrainingItem[] = [{ format: "instruction", instruction: "这是什么？", input: "", output: "This is an English answer that is long enough." }]
         let report = validateItems(items)
         expect(report.breakdown["language_mismatch"]).toBe(1)
     })
     it("validates chatml messages", () => {
-        let items: TrainingItem[] = [{ messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] }]
+        let items: TrainingItem[] = [{ format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] }]
         let report = validateItems(items)
         expect(report.passRate).toBe(100)
     })
     it("flags empty messages", () => {
-        let items: TrainingItem[] = [{ messages: [] }]
+        let items: TrainingItem[] = [{ format: "chatml", messages: [] }]
         let report = validateItems(items)
         expect(report.breakdown["missing_answer"]).toBe(1)
     })
     it("flags messages with missing content", () => {
-        let items: TrainingItem[] = [{ messages: [{ role: "user", content: "" }, { role: "assistant", content: "" }] }]
+        let items: TrainingItem[] = [{ format: "chatml", messages: [{ role: "user", content: "" }, { role: "assistant", content: "" }] }]
         let report = validateItems(items)
         expect(report.flaggedItems).toBeGreaterThan(0)
     })
     it("flags short message answers", () => {
-        let items: TrainingItem[] = [{ messages: [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hi" }] }]
+        let items: TrainingItem[] = [{ format: "chatml", messages: [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hi" }] }]
         let report = validateItems(items)
         expect(report.breakdown["answer_too_short"]).toBe(1)
     })
     it("validates text format items", () => {
-        let items: TrainingItem[] = [{ text: "This is a long enough text answer for validation purposes." }]
+        let items: TrainingItem[] = [{ format: "text", text: "This is a long enough text answer for validation purposes." }]
         let report = validateItems(items)
         expect(report.passRate).toBe(100)
     })
     it("flags short text items", () => {
-        let items: TrainingItem[] = [{ text: "Short" }]
+        let items: TrainingItem[] = [{ format: "text", text: "Short" }]
         let report = validateItems(items)
         expect(report.breakdown["answer_too_short"]).toBe(1)
     })
@@ -231,8 +231,8 @@ describe("quality validator", () => {
     })
     it("computes breakdown totals", () => {
         let items: TrainingItem[] = [
-            { instruction: "Q1?", input: "", output: "A" },
-            { instruction: "Q2?", input: "", output: "B" },
+            { format: "instruction", instruction: "Q1?", input: "", output: "A" },
+            { format: "instruction", instruction: "Q2?", input: "", output: "B" },
         ]
         let report = validateItems(items)
         expect(report.totalItems).toBe(2)

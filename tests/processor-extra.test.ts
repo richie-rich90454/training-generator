@@ -13,7 +13,7 @@ function makeProvider(responseText: string="output"): Provider {
 function makeOutputManager(): any {
     return {
         createTrainingItem: vi.fn((input: string, output: string, processingType: string): TrainingItem[] => {
-            return [{ instruction: "test", input, output }]
+            return [{ format: "instruction", instruction: "test", input, output }]
         })
     }
 }

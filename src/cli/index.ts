@@ -189,6 +189,7 @@ function createTrainingItem(input: string, output: string, processingType: strin
         if (qaPairs.length > 0) {
             for (let pair of qaPairs) {
                 items.push({
+                    format: "instruction",
                     instruction: "Answer the question based on the text",
                     input: pair.question,
                     output: pair.answer
@@ -202,6 +203,7 @@ function createTrainingItem(input: string, output: string, processingType: strin
         if (turns.length > 0) {
             for (let turn of turns) {
                 items.push({
+                    format: "instruction",
                     instruction: "Respond to the user's message",
                     input: turn.user,
                     output: turn.assistant
@@ -212,6 +214,7 @@ function createTrainingItem(input: string, output: string, processingType: strin
     }
 
     items.push({
+        format: "instruction",
         instruction: processingType === "instruction" ? "Answer the question based on the text" : "Process the following text",
         input: input,
         output: output

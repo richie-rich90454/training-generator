@@ -4,7 +4,7 @@ export interface ElectronAPI{
     openFileDialog:()=>Promise<FileObj[]>
     readFile:(filePath:string)=>Promise<ReadFileResult>
     parseFile:(filePath:string,fileType:string)=>Promise<ParseFileResult>
-    parseFilesBatch:(files:Array<{path:string}>)=>Promise<ParseBatchResult>
+    parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
     saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>
     saveFileDialog:(defaultFilename?:string)=>Promise<string|null>
     checkOllama:()=>Promise<OllamaStatus>
@@ -31,7 +31,7 @@ export interface ElectronAPI{
 
 declare global{
     interface Window{
-        electronAPI:ElectronAPI
-        app:unknown
+        electronAPI?:ElectronAPI
+        app?:unknown
     }
 }

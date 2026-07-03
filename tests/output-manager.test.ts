@@ -147,30 +147,30 @@ describe("OutputManager exportOutput", () => {
     it("exports jsonl", async() => {
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.exportOutput("jsonl")
-        expect(window.electronAPI.saveFile).toHaveBeenCalled()
+        expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports json", async() => {
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.exportOutput("json")
-        expect(window.electronAPI.saveFile).toHaveBeenCalled()
+        expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports csv", async() => {
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.exportOutput("csv")
-        expect(window.electronAPI.saveFile).toHaveBeenCalled()
+        expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports text", async() => {
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ text: "hello" }]
+        manager.outputData=[{ format: "text", text: "hello" }]
         await manager.exportOutput("text")
-        expect(window.electronAPI.saveFile).toHaveBeenCalled()
+        expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("cancels when no save path", async() => {
         vi.stubGlobal("window", {
@@ -181,7 +181,7 @@ describe("OutputManager exportOutput", () => {
         })
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ text: "hello" }]
+        manager.outputData=[{ format: "text", text: "hello" }]
         await manager.exportOutput("text")
         expect(app.addLog).toHaveBeenCalledWith("Export cancelled", "info")
     })
@@ -194,7 +194,7 @@ describe("OutputManager exportOutput", () => {
         })
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ text: "hello" }]
+        manager.outputData=[{ format: "text", text: "hello" }]
         await manager.exportOutput("text")
         expect(app.addLog).toHaveBeenCalledWith(expect.stringContaining("disk full"), "error")
     })
@@ -207,15 +207,15 @@ describe("OutputManager exportOutput", () => {
         })
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=Array.from({ length: 100001 }, (_, i)=>({ text: `item ${i}` }))
+        manager.outputData=Array.from({ length: 100001 }, (_, i)=>({ format: "text", text: `item ${i}` }))
         await manager.exportOutput("jsonl")
-        expect(window.electronAPI.saveFile).toHaveBeenCalledTimes(2)
+        expect(window.electronAPI!.saveFile).toHaveBeenCalledTimes(2)
     })
 })
 describe("OutputManager copyOutput", () => {
     let clipboard: any
     beforeEach(()=>{
-        clipboard={ text: "" }
+        clipboard={ format: "text", text: "" }
         vi.stubGlobal("navigator", {
             clipboard: {
                 writeText: vi.fn(async(t: string)=>{ clipboard.text=t }),
@@ -231,28 +231,28 @@ describe("OutputManager copyOutput", () => {
     it("copies jsonl", async() => {
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.copyOutput()
         expect(clipboard.text).toContain("instruction")
     })
     it("copies json", async() => {
         let app=makeApp("jsonl", "json")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.copyOutput()
         expect(JSON.parse(clipboard.text)[0].input).toBe("in")
     })
     it("copies csv", async() => {
         let app=makeApp("jsonl", "csv")
         let manager=new OutputManager(app)
-        manager.outputData=[{ instruction: "test", input: "in", output: "out" }]
+        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
         await manager.copyOutput()
         expect(clipboard.text).toContain("instruction,input,output")
     })
     it("copies text", async() => {
         let app=makeApp("jsonl", "text")
         let manager=new OutputManager(app)
-        manager.outputData=[{ text: "hello" }]
+        manager.outputData=[{ format: "text", text: "hello" }]
         await manager.copyOutput()
         expect(clipboard.text).toBe("hello")
     })
@@ -264,7 +264,7 @@ describe("OutputManager copyOutput", () => {
         })
         let app=makeApp("jsonl")
         let manager=new OutputManager(app)
-        manager.outputData=[{ text: "hello" }]
+        manager.outputData=[{ format: "text", text: "hello" }]
         await manager.copyOutput()
         expect(app.addLog).toHaveBeenCalledWith(expect.stringContaining("clipboard denied"), "error")
     })

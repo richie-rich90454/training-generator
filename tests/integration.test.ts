@@ -221,6 +221,7 @@ describe("integration: chunking + deduplication", () => {
         let chunks = semanticChunk(text, 100, 0)
         expect(chunks.length).toBeGreaterThan(0)
         let items: TrainingItem[] = chunks.map((chunk, i) => ({
+            format: "instruction" as const,
             instruction: `Q${i}`,
             input: "",
             output: chunk
@@ -232,9 +233,9 @@ describe("integration: chunking + deduplication", () => {
 
     it("deduplicates exact duplicate training items", () => {
         let items: TrainingItem[] = [
-            { instruction: "Q1", input: "", output: "Same answer repeated here for deduplication." },
-            { instruction: "Q2", input: "", output: "Same answer repeated here for deduplication." },
-            { instruction: "Q3", input: "", output: "A different answer appears in this item." }
+            { format: "instruction", instruction: "Q1", input: "", output: "Same answer repeated here for deduplication." },
+            { format: "instruction", instruction: "Q2", input: "", output: "Same answer repeated here for deduplication." },
+            { format: "instruction", instruction: "Q3", input: "", output: "A different answer appears in this item." }
         ]
         let result = deduplicate(items, 0.95)
         expect(result.removed).toBe(1)
@@ -255,8 +256,8 @@ describe("integration: chunking + deduplication", () => {
 describe("integration: quality validation", () => {
     it("validates processor output and reports pass rate", () => {
         let items: TrainingItem[] = [
-            { instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." },
-            { instruction: "What is 2+2?", input: "", output: "The answer is four." }
+            { format: "instruction", instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." },
+            { format: "instruction", instruction: "What is 2+2?", input: "", output: "The answer is four." }
         ]
         let report = validateItems(items)
         expect(report.totalItems).toBe(2)
@@ -265,8 +266,8 @@ describe("integration: quality validation", () => {
 
     it("flags low quality output from pipeline", () => {
         let items: TrainingItem[] = [
-            { instruction: "What?", input: "", output: "Yes" },
-            { instruction: "Why?", input: "", output: "No" }
+            { format: "instruction", instruction: "What?", input: "", output: "Yes" },
+            { format: "instruction", instruction: "Why?", input: "", output: "No" }
         ]
         let report = validateItems(items)
         expect(report.flaggedItems).toBeGreaterThan(0)
@@ -274,6 +275,7 @@ describe("integration: quality validation", () => {
 
     it("validates chatml formatted output", () => {
         let items: TrainingItem[] = [{
+            format: "chatml" as const,
             messages: [
                 { role: "user", content: "Hello, how are you?" },
                 { role: "assistant", content: "I am doing well, thank you for asking. How can I help?" }
@@ -307,8 +309,8 @@ describe("integration: checkpoint save/load", () => {
         let data = {
             files: [{ name: "test.txt" } as SelectedFile],
             completedChunks: { "test.txt": 1 },
-            outputData: [{ instruction: "Q", input: "", output: "A" }],
-            config: { model: "m", processingType: "instruction", chunkSize: "1000", concurrency: "1", provider: "ollama" },
+            outputData: [{ format: "instruction" as const, instruction: "Q", input: "", output: "A" }],
+            config: { model: "m", processingType: "instruction", chunkSize: 1000, concurrency: 1, provider: "ollama" },
             timestamp: Date.now()
         }
         await saveCheckpoint(data)
@@ -322,8 +324,8 @@ describe("integration: checkpoint save/load", () => {
         let data = {
             files: [],
             completedChunks: {},
-            outputData: [{ instruction: "Q", input: "", output: "A" }],
-            config: { model: "m", processingType: "instruction", chunkSize: "1000", concurrency: "1", provider: "ollama" },
+            outputData: [{ format: "instruction" as const, instruction: "Q", input: "", output: "A" }],
+            config: { model: "m", processingType: "instruction", chunkSize: 1000, concurrency: 1, provider: "ollama" },
             timestamp: Date.now()
         }
         await saveCheckpoint(data)
@@ -388,8 +390,8 @@ describe("integration: export and copy", () => {
             let app = makeMockApp(format)
             let outputManager = new OutputManager(app)
             outputManager.outputData = [
-                { instruction: "Q1", input: "", output: "A1" },
-                { instruction: "Q2", input: "", output: "A2" }
+                { format: "instruction", instruction: "Q1", input: "", output: "A1" },
+                { format: "instruction", instruction: "Q2", input: "", output: "A2" }
             ]
             await outputManager.exportOutput(format)
             expect(savedFiles.length).toBe(1)
@@ -407,7 +409,7 @@ describe("integration: export and copy", () => {
         })
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
-        outputManager.outputData = [{ instruction: "Q", input: "", output: "A" }]
+        outputManager.outputData = [{ format: "instruction", instruction: "Q", input: "", output: "A" }]
         await outputManager.exportOutput("jsonl")
         expect(savedFiles.length).toBe(0)
     })
@@ -424,7 +426,7 @@ describe("integration: export and copy", () => {
         it(`copies output in ${format} format`, async () => {
             let app = makeMockApp(format)
             let outputManager = new OutputManager(app)
-            outputManager.outputData = [{ instruction: "Q", input: "", output: "A" }]
+            outputManager.outputData = [{ format: "instruction", instruction: "Q", input: "", output: "A" }]
             await outputManager.copyOutput()
             expect(clipboardText.length).toBeGreaterThan(0)
         })
@@ -737,19 +739,19 @@ describe("integration: cache behavior", () => {
 
 describe("integration: quality validator rules", () => {
     let validItems: TrainingItem[] = [
-        { instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." }
+        { format: "instruction", instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." }
     ]
     let shortAnswerItems: TrainingItem[] = [
-        { instruction: "What?", input: "", output: "Yes" }
+        { format: "instruction", instruction: "What?", input: "", output: "Yes" }
     ]
     let missingAnswerItems: TrainingItem[] = [
-        { instruction: "What is the answer?", input: "", output: "" }
+        { format: "instruction", instruction: "What is the answer?", input: "", output: "" }
     ]
     let missingQuestionItems: TrainingItem[] = [
-        { instruction: "", input: "", output: "This is a long enough answer for validation purposes." }
+        { format: "instruction", instruction: "", input: "", output: "This is a long enough answer for validation purposes." }
     ]
     let languageMismatchItems: TrainingItem[] = [
-        { instruction: "这是什么？", input: "", output: "This is an English answer that is long enough." }
+        { format: "instruction", instruction: "这是什么？", input: "", output: "This is an English answer that is long enough." }
     ]
 
     let cases: Array<{ name: string; items: TrainingItem[]; expectFlagged: boolean }> = [
@@ -775,9 +777,9 @@ describe("integration: quality validator rules", () => {
 
     it("validates multiple item formats in one report", () => {
         let items: TrainingItem[] = [
-            { instruction: "Q1", input: "", output: "A long enough answer for the first question." },
-            { messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] },
-            { text: "This is a long enough text answer for validation purposes." }
+            { format: "instruction", instruction: "Q1", input: "", output: "A long enough answer for the first question." },
+            { format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] },
+            { format: "text", text: "This is a long enough text answer for validation purposes." }
         ]
         let report = validateItems(items)
         expect(report.totalItems).toBe(3)
@@ -787,9 +789,9 @@ describe("integration: quality validator rules", () => {
 
 describe("integration: deduplication thresholds", () => {
     let items: TrainingItem[] = [
-        { instruction: "Q1", input: "", output: "This is exactly the same answer for deduplication testing." },
-        { instruction: "Q2", input: "", output: "This is exactly the same answer for deduplication testing." },
-        { instruction: "Q3", input: "", output: "This is a slightly different answer for deduplication testing." }
+        { format: "instruction", instruction: "Q1", input: "", output: "This is exactly the same answer for deduplication testing." },
+        { format: "instruction", instruction: "Q2", input: "", output: "This is exactly the same answer for deduplication testing." },
+        { format: "instruction", instruction: "Q3", input: "", output: "This is a slightly different answer for deduplication testing." }
     ]
 
     let thresholds = [0.8, 0.9, 0.95, 0.99]
@@ -824,7 +826,7 @@ describe("integration: export edge cases", () => {
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
         outputManager.outputData = [
-            { messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] }
+            { format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] }
         ]
         await outputManager.exportOutput("jsonl")
         expect(savedFiles[0].content).toContain("messages")
@@ -834,8 +836,8 @@ describe("integration: export edge cases", () => {
         let app = makeMockApp("text")
         let outputManager = new OutputManager(app)
         outputManager.outputData = [
-            { text: "First text item." },
-            { text: "Second text item." }
+            { format: "text", text: "First text item." },
+            { format: "text", text: "Second text item." }
         ]
         await outputManager.exportOutput("text")
         expect(savedFiles[0].content).toContain("First text item")
@@ -845,7 +847,7 @@ describe("integration: export edge cases", () => {
         let app = makeMockApp("csv")
         let outputManager = new OutputManager(app)
         outputManager.outputData = [
-            { instruction: "Q, quoted", input: "", output: "A, quoted" }
+            { format: "instruction", instruction: "Q, quoted", input: "", output: "A, quoted" }
         ]
         await outputManager.exportOutput("csv")
         expect(savedFiles[0].content).toContain('"')
@@ -861,7 +863,7 @@ describe("integration: export edge cases", () => {
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
         outputManager.outputData = [
-            { messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] }
+            { format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] }
         ]
         await outputManager.copyOutput()
         expect(clipboardText).toContain("messages")
@@ -876,7 +878,7 @@ describe("integration: export edge cases", () => {
         })
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
-        outputManager.outputData = [{ instruction: "Q", input: "", output: "A" }]
+        outputManager.outputData = [{ format: "instruction", instruction: "Q", input: "", output: "A" }]
         await outputManager.exportOutput("jsonl")
         expect(app.addLog).toHaveBeenCalled()
     })
@@ -907,8 +909,8 @@ describe("integration: checkpoint variations", () => {
             let data = {
                 files: [],
                 completedChunks: {},
-                outputData: Array.from({ length: size }, (_, i) => ({ instruction: `Q${i}`, input: "", output: `A${i}` })),
-                config: { model: "m", processingType: "instruction", chunkSize: "1000", concurrency: "1", provider: "ollama" },
+                outputData: Array.from({ length: size }, (_, i) => ({ format: "instruction" as const, instruction: `Q${i}`, input: "", output: `A${i}` })),
+                config: { model: "m", processingType: "instruction", chunkSize: 1000, concurrency: 1, provider: "ollama" },
                 timestamp: Date.now()
             }
             await saveCheckpoint(data)
@@ -923,7 +925,7 @@ describe("integration: checkpoint variations", () => {
             files: [{ name: "f.txt" } as SelectedFile],
             completedChunks: { "f.txt": 3 },
             outputData: [],
-            config: { model: "llama3", processingType: "conversation", chunkSize: "2000", concurrency: "3", provider: "openai" },
+            config: { model: "llama3", processingType: "conversation", chunkSize: 2000, concurrency: 3, provider: "openai" },
             timestamp: 12345
         }
         await saveCheckpoint(data)
@@ -1025,37 +1027,37 @@ describe("integration: quality validator parameterized", () => {
     let cases: Array<{ name: string; item: TrainingItem; expectPass: boolean }> = [
         {
             name: "valid instruction",
-            item: { instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." },
+            item: { format: "instruction", instruction: "What is the capital of France?", input: "", output: "Paris is the capital of France and it is beautiful." },
             expectPass: true
         },
         {
             name: "short output",
-            item: { instruction: "What?", input: "", output: "Yes" },
+            item: { format: "instruction", instruction: "What?", input: "", output: "Yes" },
             expectPass: false
         },
         {
             name: "empty output",
-            item: { instruction: "What?", input: "", output: "" },
+            item: { format: "instruction", instruction: "What?", input: "", output: "" },
             expectPass: false
         },
         {
             name: "valid chatml",
-            item: { messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] },
+            item: { format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi there, how can I help you today?" }] },
             expectPass: true
         },
         {
             name: "short chatml",
-            item: { messages: [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hi" }] },
+            item: { format: "chatml", messages: [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hi" }] },
             expectPass: false
         },
         {
             name: "valid text",
-            item: { text: "This is a long enough text answer for validation purposes." },
+            item: { format: "text", text: "This is a long enough text answer for validation purposes." },
             expectPass: true
         },
         {
             name: "short text",
-            item: { text: "Short" },
+            item: { format: "text", text: "Short" },
             expectPass: false
         }
     ]
@@ -1092,9 +1094,9 @@ describe("integration: export format variations", () => {
             let app = makeMockApp(format)
             let outputManager = new OutputManager(app)
             outputManager.outputData = [
-                { instruction: "Q1", input: "", output: "A1" },
-                { messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] },
-                { text: "Plain text item." }
+                { format: "instruction", instruction: "Q1", input: "", output: "A1" },
+                { format: "chatml", messages: [{ role: "user", content: "Hello" }, { role: "assistant", content: "Hi" }] },
+                { format: "text", text: "Plain text item." }
             ]
             await outputManager.exportOutput(format)
             expect(savedFiles.length).toBe(1)
@@ -1114,7 +1116,7 @@ describe("integration: export format variations", () => {
         })
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
-        outputManager.outputData = Array.from({ length: 100001 }, (_, i) => ({ instruction: `Q${i}`, input: "", output: `A${i}` }))
+        outputManager.outputData = Array.from({ length: 100001 }, (_, i) => ({ format: "instruction", instruction: `Q${i}`, input: "", output: `A${i}` }))
         await outputManager.exportOutput("jsonl")
         expect(savedFiles.length).toBeGreaterThan(1)
     })
@@ -1236,7 +1238,7 @@ describe("integration: logger with output manager", () => {
     it("logs export attempts through app facade", () => {
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
-        outputManager.outputData = [{ instruction: "Q", input: "", output: "A" }]
+        outputManager.outputData = [{ format: "instruction", instruction: "Q", input: "", output: "A" }]
         outputManager.exportOutput("jsonl")
         expect(app.addLog).not.toHaveBeenCalledWith("No data to export", "warning")
     })
@@ -1249,7 +1251,7 @@ describe("integration: logger with output manager", () => {
         })
         let app = makeMockApp("jsonl")
         let outputManager = new OutputManager(app)
-        outputManager.outputData = [{ instruction: "Q", input: "", output: "A" }]
+        outputManager.outputData = [{ format: "instruction", instruction: "Q", input: "", output: "A" }]
         outputManager.copyOutput()
         expect(app.addLog).not.toHaveBeenCalledWith("No data to copy", "warning")
     })

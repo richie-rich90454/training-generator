@@ -3,13 +3,13 @@ import { describe, it, expect } from "vitest"
 import { deduplicate } from "../src/renderer/deduplicator.js"
 import type { TrainingItem } from "../src/types/index.js"
 function makeItem(output: string): TrainingItem {
-    return { instruction: "test", input: "", output }
+    return { format: "instruction", instruction: "test", input: "", output }
 }
 describe("deduplicate exact duplicates", () => {
     let formats: [string, TrainingItem, TrainingItem][]=[
         ["instruction", makeItem("same"), makeItem("same")],
-        ["messages", { messages: [{ role: "user", content: "hi" }, { role: "assistant", content: "hello" }] }, { messages: [{ role: "user", content: "hi" }, { role: "assistant", content: "hello" }] }],
-        ["text", { text: "same text" }, { text: "same text" }],
+        ["messages", { format: "chatml", messages: [{ role: "user", content: "hi" }, { role: "assistant", content: "hello" }] }, { format: "chatml", messages: [{ role: "user", content: "hi" }, { role: "assistant", content: "hello" }] }],
+        ["text", { format: "text", text: "same text" }, { format: "text", text: "same text" }],
         ["output only", { output: "same output" } as TrainingItem, { output: "same output" } as TrainingItem],
     ]
     formats.forEach(([label, a, b])=>{
@@ -91,15 +91,15 @@ describe("deduplicate edge cases", () => {
         expect(result.items.length).toBe(10)
     })
     it("handles items with empty text", () => {
-        let items=[{ text: "" } as TrainingItem, { text: "" } as TrainingItem]
+        let items=[{ format: "text", text: "" } as TrainingItem, { format: "text", text: "" } as TrainingItem]
         let result=deduplicate(items)
         expect(result.removed).toBe(1)
     })
     it("handles mixed format items", () => {
         let items: TrainingItem[]=[
-            { text: "hello" },
-            { messages: [{ role: "user", content: "hello" }] },
-            { output: "hello" } as TrainingItem,
+            { format: "text", text: "hello" },
+            { format: "chatml", messages: [{ role: "user", content: "hello" }] },
+            { format: "instruction", output: "hello" } as TrainingItem,
         ]
         let result=deduplicate(items)
         expect(result.items.length).toBeGreaterThan(0)
@@ -115,7 +115,7 @@ describe("deduplicate edge cases", () => {
 })
 describe("deduplicate script and length prefilter", () => {
     it("does not deduplicate cjk vs latin by default prefilter", () => {
-        let items=[{ text: "你好世界" } as TrainingItem, { text: "hello world" } as TrainingItem]
+        let items=[{ format: "text", text: "你好世界" } as TrainingItem, { format: "text", text: "hello world" } as TrainingItem]
         let result=deduplicate(items, 0.9)
         expect(result.removed).toBe(0)
         expect(result.items.length).toBe(2)
@@ -126,12 +126,12 @@ describe("deduplicate script and length prefilter", () => {
         expect(result.removed).toBe(0)
     })
     it("handles arabic script", () => {
-        let items=[{ text: "مرحبا" } as TrainingItem, { text: "مرحبا" } as TrainingItem]
+        let items=[{ format: "text", text: "مرحبا" } as TrainingItem, { format: "text", text: "مرحبا" } as TrainingItem]
         let result=deduplicate(items, 0.9)
         expect(result.removed).toBe(1)
     })
     it("handles mixed script", () => {
-        let items=[{ text: "hello 你好" } as TrainingItem, { text: "hello 你好" } as TrainingItem]
+        let items=[{ format: "text", text: "hello 你好" } as TrainingItem, { format: "text", text: "hello 你好" } as TrainingItem]
         let result=deduplicate(items, 0.9)
         expect(result.removed).toBe(1)
     })

@@ -4,7 +4,7 @@ import { deduplicate } from "../src/renderer/deduplicator.js"
 import type { TrainingItem } from "../src/types/index.js"
 
 function makeItem(output: string): TrainingItem {
-  return { instruction: "test", input: "", output }
+  return { format: "instruction", instruction: "test", input: "", output }
 }
 
 describe("deduplicate", () => {
@@ -56,12 +56,14 @@ describe("deduplicate", () => {
 
   it("should handle items with messages field", () => {
     let item1: TrainingItem = {
+      format: "chatml",
       messages: [
         { role: "user", content: "Hello" },
         { role: "assistant", content: "Hi there" },
       ],
     }
     let item2: TrainingItem = {
+      format: "chatml",
       messages: [
         { role: "user", content: "Hello" },
         { role: "assistant", content: "Hi there" },
@@ -72,8 +74,8 @@ describe("deduplicate", () => {
   })
 
   it("should handle items with text field", () => {
-    let item1: TrainingItem = { text: "Some text content" }
-    let item2: TrainingItem = { text: "Some text content" }
+    let item1: TrainingItem = { format: "text", text: "Some text content" }
+    let item2: TrainingItem = { format: "text", text: "Some text content" }
     let result = deduplicate([item1, item2])
     expect(result.removed).toBe(1)
   })
