@@ -486,7 +486,7 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
 ## Phase 4 — Low (cosmetic, edge-cases, accessibility)
 
-* [ ] Task 32: Low-severity cleanup
+* [x] Task 32: Low-severity cleanup
 
   * [x] SubTask 32.1: Replace `==` with `===` in `src/main.ts` (lines 16, 17, 258, 652)
 
@@ -494,61 +494,61 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [x] SubTask 32.3: Remove unnecessary `as any` for `"cache"` path
 
-  * [ ] SubTask 32.4: Remove `D5` unused keyframe; fix `D6` progress 100% twice
+  * [x] SubTask 32.4: Remove `D5` unused keyframe; fix `D6` progress 100% twice
 
   * [x] SubTask 32.5: Fix `helpContent.ts` unescaped `&` in "Drag & drop"
 
   * [x] SubTask 32.6: `tsconfig.json` — remove `skipLibCheck` (or validate separately)
 
-  * [ ] SubTask 32.7: Use `const` (or workspace `let`) consistently for non-reassigned bindings in config files
+  * [x] SubTask 32.7: Use `const` (or workspace `let`) consistently for non-reassigned bindings in config files
 
-  * [ ] SubTask 32.8: Fix `glob.sync` `__dirname` polyfill inconsistency
+  * [x] SubTask 32.8: Fix `glob.sync` `__dirname` polyfill inconsistency
 
-  * [ ] SubTask 32.9: Verify pinned package versions exist on npm (`electron@^42.3.3`, `typescript@^6.0.3`, `vite@^8.0.16`, `vitest@^4.1.8`)
+  * [x] SubTask 32.9: Verify pinned package versions exist on npm (`electron@^42.3.3`, `typescript@^6.0.3`, `vite@^8.0.16`, `vitest@^4.1.8`)
 
-  * [ ] SubTask 32.10: Add `postinstall` guard or document CI requirements
+  * [x] SubTask 32.10: Add `postinstall` guard or document CI requirements
 
-  * [ ] SubTask 32.11: Verify `pdf-parse` v2 asarUnpack necessity
+  * [x] SubTask 32.11: Verify `pdf-parse` v2 asarUnpack necessity
 
-  * [ ] SubTask 32.12: Fix `pdfWorker.ts` `parentPort` null check; post `success:false` on invalid buffer immediately; validate `message.id`
+  * [x] SubTask 32.12: Fix `pdfWorker.ts` `parentPort` null check; post `success:false` on invalid buffer immediately; validate `message.id`
 
-  * [ ] SubTask 32.13: `pdfWorker.ts` — post `success:false` to parent on `uncaughtException` then `process.exit(1)`
+  * [x] SubTask 32.13: `pdfWorker.ts` — post `success:false` to parent on `uncaughtException` then `process.exit(1)`
 
-  * [ ] SubTask 32.14: Fix `parseQAPairs` regex (require colon); handle orphan questions
+  * [x] SubTask 32.14: Fix `parseQAPairs` regex (require colon); handle orphan questions
 
-  * [ ] SubTask 32.15: `CliOllamaProvider` — construct a `RateLimiter`; use `result.eval_count` if present
+  * [x] SubTask 32.15: `CliOllamaProvider` — construct a `RateLimiter`; use `result.eval_count` if present
 
-  * [ ] SubTask 32.16: Remove dead `appConsole` from preload (already in Task 12.4)
+  * [x] SubTask 32.16: Remove dead `appConsole` from preload (already in Task 12.4)
 
-  * [ ] SubTask 32.17: Fix `toast.ts` shifted-toast close button still clickable
+  * [x] SubTask 32.17: Fix `toast.ts` shifted-toast close button still clickable
 
-  * [ ] SubTask 32.18: Add ARIA to toast container (already in Task 24.1)
+  * [x] SubTask 32.18: Add ARIA to toast container (already in Task 24.1)
 
-  * [ ] SubTask 32.19: Fix `deduplicator.ts` `preFilterCheck` cross-script skip (make configurable)
+  * [x] SubTask 32.19: Fix `deduplicator.ts` `preFilterCheck` cross-script skip (make configurable)
 
-  * [ ] SubTask 32.20: Fix `cache.ts` cost-saved rounding precision
+  * [x] SubTask 32.20: Fix `cache.ts` cost-saved rounding precision
 
-  * [ ] SubTask 32.21: Fix `chunker.ts` `splitSentences` abbreviation guardlist (already in 20.9)
+  * [x] SubTask 32.21: Fix `chunker.ts` `splitSentences` abbreviation guardlist (already in 20.9)
 
-  * [ ] SubTask 32.22: Fix `fileManager.ts` `formatFileSize` "1 Byte"
+  * [x] SubTask 32.22: Fix `fileManager.ts` `formatFileSize` "1 Byte"
 
-  * [ ] SubTask 32.23: Fix `statsTracker.ts` `tokensPerSecond` clamping (already in 28.3)
+  * [x] SubTask 32.23: Fix `statsTracker.ts` `tokensPerSecond` clamping (already in 28.3)
 
-  * [ ] SubTask 32.24: Fix `security.ts` AES-GCM IV usage counter / rekey
+  * [x] SubTask 32.24: Fix `security.ts` AES-GCM IV usage counter / rekey
 
-  * [ ] SubTask 32.25: Fix `provenance.ts` `_mergedFrom` dedup (already in 28.6)
+  * [x] SubTask 32.25: Fix `provenance.ts` `_mergedFrom` dedup (already in 28.6)
 
 ## Phase 5 — Verification
 
-* [ ] Task 33: Run full test suite + typecheck + build
+* [x] Task 33: Run full test suite + typecheck + build
 
-  * [ ] SubTask 33.1: `npx tsc --noEmit` passes
+  * [x] SubTask 33.1: `npx tsc --noEmit` passes
 
-  * [ ] SubTask 33.2: `npm test` passes (update existing tests where behavior intentionally changed; add new tests for fixed bugs)
+  * [x] SubTask 33.2: `npm test` passes (update existing tests where behavior intentionally changed; add new tests for fixed bugs)
 
-  * [ ] SubTask 33.3: `npm run build` succeeds (no `glob.sync` error; `pdfWorker.js` resolves; `dev` script works on Windows)
+  * [x] SubTask 33.3: `npm run build` succeeds (no `glob.sync` error; `pdfWorker.js` resolves; `dev` script works on Windows)
 
-  * [ ] SubTask 33.4: `cargo test --all`, `cargo clippy --all -- -D warnings` (N/A — no Rust in this project)
+  * [x] SubTask 33.4: `cargo test --all`, `cargo clippy --all -- -D warnings` (N/A — no Rust in this project)
 
   * [ ] SubTask 33.5: Manual smoke test: open non-English PDF; switch language; toggle smartSizing/maxOutputItems; export CSV with formula-leading values; rapid confirm dialogs; concurrent worker calls
 
