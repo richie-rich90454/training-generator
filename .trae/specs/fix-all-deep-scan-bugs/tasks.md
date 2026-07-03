@@ -402,19 +402,19 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [ ] SubTask 25.8: Document/escape consistently between two preview paths
 
-* [ ] Task 26: Fix config profiles (`src/renderer/configProfiles.ts`)
+* [x] Task 26: Fix config profiles (`src/renderer/configProfiles.ts`)
 
-  * [ ] SubTask 26.1: Validate `Array.isArray(parsed)` in `listProfiles`
+  * [x] SubTask 26.1: Validate `Array.isArray(parsed)` in `listProfiles`
 
-  * [ ] SubTask 26.2: Wrap `localStorage.setItem` in try/catch in `saveProfile`/`deleteProfile`
+  * [x] SubTask 26.2: Wrap `localStorage.setItem` in try/catch in `saveProfile`/`deleteProfile`
 
-  * [ ] SubTask 26.3: Deep-clone on insert
+  * [x] SubTask 26.3: Deep-clone on insert
 
-  * [ ] SubTask 26.4: Preserve `createdAt` on update
+  * [x] SubTask 26.4: Preserve `createdAt` on update
 
-  * [ ] SubTask 26.5: Drop `async` (or document why)
+  * [x] SubTask 26.5: Drop `async` (or document why)
 
-  * [ ] SubTask 26.6: Add `version` field + migration in `listProfiles`
+  * [x] SubTask 26.6: Add `version` field + migration in `listProfiles`
 
 * [ ] Task 27: Fix i18n (`src/renderer/i18n.ts`)
 
