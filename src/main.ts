@@ -358,6 +358,7 @@ function startSplash(){
     let splashHtmlPath=splashHtmlCandidates.find(p=>fs.existsSync(p))||splashHtmlCandidates[0]
     splashWindow.loadFile(splashHtmlPath).then(()=>{
         if(splashWindow&&!splashWindow.isDestroyed()){
+            splashWindow.webContents.executeJavaScript(`window.__appVersion=${JSON.stringify(app.getVersion())}`).catch(()=>{})
             splashWindow.center()
             splashWindow.show()
         }
@@ -725,6 +726,36 @@ function registerCriticalIpcHandlers():void{
         }
         catch(error){
             return{success:false,error:"Failed to read file"}
+        }
+    })
+    handle("prompt:get",async(_event,{language,processingType}:{language:string;processingType:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
+        try{
+            if(!language||!processingType)return{success:false,error:"Missing language or processingType"}
+            let fileName=`${language}_${processingType}.txt`
+            let possiblePaths:string[]=[]
+            let dirs=getSafeReadDirs()
+            for(let dir of dirs){
+                possiblePaths.push(path.join(dir,fileName))
+                possiblePaths.push(path.join(dir,"prompts",fileName))
+                possiblePaths.push(path.join(dir,"src","prompts",fileName))
+            }
+            for(let p of possiblePaths){
+                try{
+                    if(fs.existsSync(p)){
+                        let stats=await fsp.stat(p)
+                        if(stats.size>MAX_READ_SIZE){
+                            return{success:false,error:"Prompt file exceeds maximum read size"}
+                        }
+                        let content=await fsp.readFile(p,"utf-8")
+                        return{success:true,content}
+                    }
+                }
+                catch{}
+            }
+            return{success:false,error:"Prompt file not found"}
+        }
+        catch(error){
+            return{success:false,error:"Failed to load prompt"}
         }
     })
     handle("file:save",async(_event,{filePath,content}:{filePath:string;content:string}):Promise<{success:boolean;error?:string}>=>{
