@@ -1,39 +1,43 @@
-import type{TrainingItem}from"../types/index.js"
-export interface ProvenanceData{
-    sourceFile:string
-    chunkIndex:number
-    model:string
-    promptType:string
-    timestamp:string// ISO 8601
-    _mergedFrom?:string[]
+import type { TrainingItem } from "../types/index.js"
+export interface ProvenanceData {
+    sourceFile: string
+    chunkIndex: number
+    model: string
+    promptType: string
+    timestamp: string
+    _mergedFrom?: string[]
 }
-export function tagItem(item:TrainingItem,provenance:ProvenanceData):TrainingItem{
-    return{
+export function tagItem(item: TrainingItem, provenance: ProvenanceData): TrainingItem {
+    if (item._provenance) return item
+    return {
         ...item,
-        _provenance:provenance
+        _provenance: provenance
     }
 }
-function cloneItem(item:TrainingItem):TrainingItem{
-    return{...item}
+function cloneItem(item: TrainingItem): TrainingItem {
+    return { ...item }
 }
-export function mergeProvenance(surviving:TrainingItem,removed:TrainingItem):TrainingItem{
-    let existing=surviving._provenance as ProvenanceData|undefined
-    let removedProv=removed._provenance as ProvenanceData|undefined
-    if(!removedProv)return cloneItem(surviving)
-    if(!existing){
-        return{
+export function mergeProvenance(surviving: TrainingItem, removed: TrainingItem, survivingSource?: string): TrainingItem {
+    let existing = surviving._provenance as ProvenanceData | undefined
+    let removedProv = removed._provenance as ProvenanceData | undefined
+    if (!removedProv) return cloneItem(surviving)
+    if (!existing) {
+        return {
             ...cloneItem(surviving),
-            _provenance:{
+            _provenance: {
                 ...removedProv,
-                _mergedFrom:[removedProv.sourceFile]
+                sourceFile: survivingSource || removedProv.sourceFile,
+                _mergedFrom: [removedProv.sourceFile]
             }
         }
     }
-    return{
+    let merged = [...(existing._mergedFrom || []), removedProv.sourceFile]
+    let deduped = Array.from(new Set(merged))
+    return {
         ...cloneItem(surviving),
-        _provenance:{
+        _provenance: {
             ...existing,
-            _mergedFrom:[...(existing._mergedFrom||[]),removedProv.sourceFile]
+            _mergedFrom: deduped
         }
     }
 }

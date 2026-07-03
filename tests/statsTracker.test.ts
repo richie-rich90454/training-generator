@@ -88,8 +88,8 @@ describe("StatsTracker", () => {
     expect(tracker.elapsed).toBeGreaterThanOrEqual(0)
   })
 
-  it("should compute success rate as 100% when no chunks", () => {
-    expect(tracker.successRate).toBe(100)
+  it("should compute success rate as 0% when no chunks", () => {
+    expect(tracker.successRate).toBe(0)
   })
 
   it("should compute success rate correctly", () => {

@@ -14,69 +14,78 @@ export interface QualityReport {
   breakdown: Record<string, number>
 }
 
-export function validateItems(items: TrainingItem[], sourceText?: string): QualityReport {
+const CJK_RE = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
+
+function hasCJK(text: string): boolean {
+  return CJK_RE.test(text)
+}
+
+export function validateItems(items: TrainingItem[]): QualityReport {
   let flags: QualityFlag[] = []
-  
+
   for (let i = 0; i < items.length; i++) {
     let item = items[i]
     let reasons: string[] = []
-    
+
     if (item.messages) {
-      // Messages format: check that messages is non-empty and each has role/content
       if (!item.messages.length) {
         reasons.push("missing_answer")
       } else {
+        let answer = ""
+        let hasMissing = false
         for (let msg of item.messages) {
           if (!msg.role || !msg.content) {
-            reasons.push("missing_answer")
+            hasMissing = true
             break
           }
+          if (msg.role === "assistant") {
+            answer += msg.content + " "
+          }
         }
-        let answer = item.messages.map(m => m.content).join(" ")
-        if (answer.length < 20) {
+        if (hasMissing) {
+          reasons.push("missing_answer")
+        }
+        else if (answer.trim().length < 20) {
           reasons.push("answer_too_short")
+        }
+        let userText = item.messages.filter(m => m.role === "user").map(m => m.content).join(" ")
+        let assistantText = item.messages.filter(m => m.role === "assistant").map(m => m.content).join(" ")
+        if (userText && assistantText && hasCJK(userText) !== hasCJK(assistantText)) {
+          reasons.push("language_mismatch")
         }
       }
     } else if (item.text) {
-      // Text format: check that text is non-empty and has minimum length
-      if (!item.text) {
-        reasons.push("missing_answer")
-      } else if (item.text.length < 20) {
+      if (item.text.length < 20) {
         reasons.push("answer_too_short")
       }
     } else {
-      // Instruction format: existing checks
       let answer = item.output || ""
-      if (answer.length < 20) {
+      if (item.instruction && !answer) {
+        reasons.push("missing_answer")
+      } else if (!item.instruction && answer) {
+        reasons.push("missing_question")
+      } else if (answer.length < 20) {
         reasons.push("answer_too_short")
       }
-      if (item.instruction && !item.output) {
-        reasons.push("missing_answer")
-      }
-      if (!item.instruction && item.output) {
-        reasons.push("missing_question")
-      }
-      if (item.instruction && item.output) {
-        let qHasCJK = /[\u4e00-\u9fff]/.test(item.instruction)
-        let aHasCJK = /[\u4e00-\u9fff]/.test(item.output)
-        if (qHasCJK !== aHasCJK) {
+      if (item.instruction && answer) {
+        if (hasCJK(item.instruction) !== hasCJK(answer)) {
           reasons.push("language_mismatch")
         }
       }
     }
-    
+
     if (reasons.length > 0) {
       flags.push({ itemIndex: i, item, reasons })
     }
   }
-  
+
   let breakdown: Record<string, number> = {}
   for (let flag of flags) {
     for (let reason of flag.reasons) {
       breakdown[reason] = (breakdown[reason] || 0) + 1
     }
   }
-  
+
   return {
     totalItems: items.length,
     flaggedItems: flags.length,
