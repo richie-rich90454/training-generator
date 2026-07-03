@@ -14,7 +14,7 @@ export interface QualityReport {
   breakdown: Record<string, number>
 }
 
-const CJK_RE = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
+const CJK_RE = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u3400-\u4dbf\u20000-\u2a6df\u2a700-\u2b73f\u2b740-\u2b81f\uf900-\ufaff]/
 
 function hasCJK(text: string): boolean {
   return CJK_RE.test(text)
@@ -58,19 +58,22 @@ export function validateItems(items: TrainingItem[]): QualityReport {
       if (item.text.length < 20) {
         reasons.push("answer_too_short")
       }
+      let pairedText = item.instruction || item.input || ""
+      if (pairedText && item.text && hasCJK(pairedText) !== hasCJK(item.text)) {
+        reasons.push("language_mismatch")
+      }
     } else {
       let answer = item.output || ""
-      if (item.instruction && !answer) {
+      let question = item.instruction || item.input || ""
+      if (question && !answer) {
         reasons.push("missing_answer")
-      } else if (!item.instruction && answer) {
+      } else if (!question && answer) {
         reasons.push("missing_question")
       } else if (answer.length < 20) {
         reasons.push("answer_too_short")
       }
-      if (item.instruction && answer) {
-        if (hasCJK(item.instruction) !== hasCJK(answer)) {
-          reasons.push("language_mismatch")
-        }
+      if (question && answer && hasCJK(question) !== hasCJK(answer)) {
+        reasons.push("language_mismatch")
       }
     }
 
