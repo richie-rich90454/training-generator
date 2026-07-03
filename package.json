@@ -6,9 +6,9 @@
   "types": "src/types/interfaces.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
-    "dev": "concurrently \"vite\" \"cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .\"",
+    "dev": "node scripts/dev.mjs",
     "electron": "electron .",
-    "electron:dev": "concurrently \"vite\" \"cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .\"",
+    "electron:dev": "node scripts/dev.mjs",
     "electron:start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
     "electron:build": "npm run build:main && vite build",
     "electron:package": "npm run build && electron-builder",
