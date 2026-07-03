@@ -2,10 +2,9 @@ import{defineConfig}from "vite"
 import path from "path"
 import fs from "fs"
 import{globSync}from "glob"
-import{fileURLToPath}from "url"
 import type{Plugin}from "vite"
 
-const __dirname=path.dirname(fileURLToPath(import.meta.url))
+const __dirname=import.meta.dirname
 
 function copyPromptsPlugin():Plugin{
     return{
