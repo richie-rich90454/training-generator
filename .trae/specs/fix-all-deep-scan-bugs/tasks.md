@@ -458,19 +458,19 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [x] SubTask 29.3: `promptManager.ts` — remove `fallbackCache` or wire it; resolve prompts via main IPC in packaged app; cache negative results; de-dupe concurrent `getPrompt` calls
 
-* [ ] Task 30: Fix splash.html (`src/splash.html`)
+* [x] Task 30: Fix splash.html (`src/splash.html`)
 
-  * [ ] SubTask 30.1: Use `navigator.userAgentData?.platform` with fallback
+  * [x] SubTask 30.1: Use `navigator.userAgentData?.platform` with fallback
 
-  * [ ] SubTask 30.2: Inline critical CSS + embed font via `data:` URL (or absolute asset paths)
+  * [x] SubTask 30.2: Inline critical CSS + embed font via `data:` URL (or absolute asset paths)
 
-  * [ ] SubTask 30.3: Move inline script to external `.js`; drop `'unsafe-inline'` from CSP
+  * [x] SubTask 30.3: Move inline script to external `.js`; drop `'unsafe-inline'` from CSP
 
-  * [ ] SubTask 30.4: Inject version dynamically from `app.getVersion()`
+  * [x] SubTask 30.4: Inject version dynamically from `app.getVersion()`
 
-  * [ ] SubTask 30.5: Store `setTimeout` handles; clear on `pagehide`; remove unused keyframe
+  * [x] SubTask 30.5: Store `setTimeout` handles; clear on `pagehide`; remove unused keyframe
 
-  * [ ] SubTask 30.6: Use `currentStep/totalSteps*100` so bar reaches 100% only in "ready" branch
+  * [x] SubTask 30.6: Use `currentStep/totalSteps*100` so bar reaches 100% only in "ready" branch
 
 * [ ] Task 31: Fix index.html (`index.html`)
 
