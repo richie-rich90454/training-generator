@@ -64,6 +64,32 @@ describe("security",()=>{
         expect(d2).toBe("second")
     })
 })
+describe("security IV usage counter",()=>{
+    let encryptKey:(plaintext:string)=>Promise<string>
+    let decryptKey:(encrypted:string)=>Promise<string|null>
+    beforeEach(async()=>{
+        vi.stubEnv("TRAINING_GENERATOR_REKEY_THRESHOLD","3")
+        vi.resetModules()
+        localStorage.clear()
+        ;(window as any).electronAPI=undefined
+        let security=await import("../src/renderer/security.js")
+        encryptKey=security.encryptKey
+        decryptKey=security.decryptKey
+    })
+    afterEach(()=>{
+        vi.unstubAllEnvs()
+        localStorage.clear()
+        vi.restoreAllMocks()
+    })
+    it("rotates key after threshold encryptions",async()=>{
+        let e1=await encryptKey("a")
+        let e2=await encryptKey("b")
+        let e3=await encryptKey("c")
+        let e4=await encryptKey("d")
+        expect(await decryptKey(e4)).toBe("d")
+        expect(await decryptKey(e1)).toBe(null)
+    })
+})
 describe("logger", () => {
     let logger: Logger
     beforeEach(() => {

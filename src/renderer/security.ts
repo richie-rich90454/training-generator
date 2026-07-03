@@ -1,6 +1,8 @@
 const STORAGE_KEY="train-generator-encryption-key"
 const CHUNK_SIZE=65536
+const REKEY_THRESHOLD=Number(process.env.TRAINING_GENERATOR_REKEY_THRESHOLD??"100000")
 let memoryKey:CryptoKey|null=null
+let encryptionCount=0
 async function importKeyNonExtractable(raw:Uint8Array):Promise<CryptoKey>{
     return crypto.subtle.importKey("raw", raw as BufferSource, {name:"AES-GCM"}, false, ["encrypt","decrypt"])
 }
@@ -76,6 +78,11 @@ export async function encryptKey(plaintext:string):Promise<string>{
     let combined=new Uint8Array(iv.length+ciphertext.byteLength)
     combined.set(iv)
     combined.set(new Uint8Array(ciphertext), iv.length)
+    encryptionCount++
+    if(REKEY_THRESHOLD>0&&encryptionCount>=REKEY_THRESHOLD){
+        encryptionCount=0
+        await generateAndCacheKey()
+    }
     return arrayBufferToBase64Chunked(combined)
 }
 export async function decryptKey(encrypted:string):Promise<string|null>{
