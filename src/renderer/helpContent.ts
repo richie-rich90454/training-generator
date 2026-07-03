@@ -3,7 +3,7 @@ export function getHelpContent():string{
             <h3><i class="fas fa-question-circle"></i>Training Generator Help</h3>
             <div class="help-section">
                 <h4>Getting Started</h4>
-                <p>1.<strong>Upload Files</strong>:Drag & drop or click to browse for documents(PDF,DOCX,DOC,RTF,TXT,MD,HTML)</p>
+                <p>1.<strong>Upload Files</strong>:Drag &amp; drop or click to browse for documents(PDF,DOCX,DOC,RTF,TXT,MD,HTML)</p>
                 <p>2.<strong>Configure Settings</strong>:Select model,processing type,output format,and chunk size</p>
                 <p>3.<strong>Process Files</strong>:Click "Process Files" to convert documents to training data</p>
                 <p>4.<strong>Export Results</strong>:Save or copy the generated training data</p>
