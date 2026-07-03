@@ -239,10 +239,10 @@ try{
 catch(error){
     console.error("Failed to create directories:",error)
     userDataPath=app.getPath("userData")
-    cachePath=(app as any).getPath("cache")
+    cachePath=app.getPath("cache")
 }
 app.setPath("userData",userDataPath)
-;(app as any).setPath("cache",cachePath)
+app.setPath("cache",cachePath)
 app.commandLine.appendSwitch("no-first-run")
 app.commandLine.appendSwitch("disable-background-networking")
 app.commandLine.appendSwitch("disable-component-update")

@@ -1,4 +1,10 @@
 /// <reference types="vite/client" />
+declare namespace Electron{
+    interface App{
+        getPath(name:"cache"):string
+        setPath(name:"cache",path:string):void
+    }
+}
 declare module "node:stream/web"{
     export interface UnderlyingDefaultSource<R=unknown>{
         start?(controller:ReadableStreamDefaultController<R>):void|Promise<void>
