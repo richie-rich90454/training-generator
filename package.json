@@ -7,6 +7,11 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
     "dev": "concurrently \"vite\" \"cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .\"",
+    "electron": "electron .",
+    "electron:dev": "concurrently \"vite\" \"cross-env NODE_ENV=development node --import tsx/esm node_modules/electron/cli.js .\"",
+    "electron:start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
+    "electron:build": "npm run build:main && vite build",
+    "electron:package": "npm run build && electron-builder",
     "build": "npm run build:main && vite build",
     "build:main": "node scripts/build-main.mjs",
     "preview": "vite preview",
