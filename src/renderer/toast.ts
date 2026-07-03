@@ -91,10 +91,11 @@ class Toast {
   private updatePointerEvents(): void {
     for (let i = 0; i < this.toasts.length; i++) {
       const toast = this.toasts[i]
-      if (i === this.toasts.length - 1) {
-        toast.element.style.pointerEvents = ""
-      } else {
-        toast.element.style.pointerEvents = "none"
+      const isTop = i === this.toasts.length - 1
+      toast.element.style.pointerEvents = isTop ? "" : "none"
+      const closeBtn = toast.element.querySelector(".toast-close") as HTMLButtonElement | null
+      if (closeBtn) {
+        closeBtn.style.pointerEvents = isTop ? "auto" : "none"
       }
     }
   }
