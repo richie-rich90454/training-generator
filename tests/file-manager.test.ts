@@ -43,7 +43,7 @@ describe("FileManager selection", () => {
         let manager=new FileManager(app)
         await manager.addFiles([createFile("doc.pdf"), createFile("notes.txt")])
         expect(manager.selectedFiles.length).toBe(2)
-        expect(app.addLog).toHaveBeenCalledWith("Added 2file(s)", "success")
+        expect(app.addLog).toHaveBeenCalledWith("Added 2 file(s)", "success")
     })
     it("rejects unsupported file types", async() => {
         let app=makeApp()
@@ -247,6 +247,6 @@ describe("FileManager helpers", () => {
         let manager=new FileManager(app)
         await manager.addFiles([createFile("<bad>.txt")])
         let item=document.querySelector(".file-item")
-        expect(item!.getAttribute("data-name")).not.toContain("<")
+        expect(item!.getAttribute("data-id")).not.toContain("<")
     })
 })

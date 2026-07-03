@@ -19,15 +19,22 @@ class FileManager{
         this.fileStatuses=new Map()
         this.cacheElements()
     }
+    private getEl<T extends HTMLElement>(id:string):T{
+        let el=document.getElementById(id)
+        if(!el){
+            console.warn(`FileManager: missing DOM element #${id}`)
+        }
+        return el as unknown as T
+    }
     cacheElements():void{
-        this.dropZone=document.getElementById("drop-zone") as HTMLElement
-        this.fileInput=document.getElementById("file-input") as HTMLInputElement
-        this.browseBtn=document.getElementById("browse-btn") as HTMLElement
-        this.fileList=document.getElementById("file-list") as HTMLElement
-        this.processBtn=document.getElementById("process-btn") as HTMLButtonElement
-        this.clearBtn=document.getElementById("clear-btn") as HTMLButtonElement
-        this.filesCountEl=document.getElementById("files-count") as HTMLElement
-        this.lastProcessedEl=document.getElementById("last-processed") as HTMLElement
+        this.dropZone=this.getEl<HTMLElement>("drop-zone")
+        this.fileInput=this.getEl<HTMLInputElement>("file-input")
+        this.browseBtn=this.getEl<HTMLElement>("browse-btn")
+        this.fileList=this.getEl<HTMLElement>("file-list")
+        this.processBtn=this.getEl<HTMLButtonElement>("process-btn")
+        this.clearBtn=this.getEl<HTMLButtonElement>("clear-btn")
+        this.filesCountEl=this.getEl<HTMLElement>("files-count")
+        this.lastProcessedEl=this.getEl<HTMLElement>("last-processed")
     }
     handleDragOver(e:DragEvent):void{
         e.preventDefault()
@@ -42,23 +49,24 @@ class FileManager{
     async handleDrop(e:DragEvent):Promise<void>{
         e.preventDefault()
         this.dropZone.classList.remove("drag-over")
-        let files=Array.from(e.dataTransfer!.files)
+        let files=Array.from(e.dataTransfer?.files ?? [])
         await this.addFiles(files)
     }
     async handleFileSelect(e:Event):Promise<void>{
-        let files=Array.from((e.target as HTMLInputElement).files!)
+        let target=e.target as HTMLInputElement|null
+        let files=Array.from(target?.files ?? [])
         await this.addFiles(files)
-        ;(e.target as HTMLInputElement).value=""
+        if(target)target.value=""
     }
     async addFiles(files:File[]):Promise<void>{
         let maxFiles=100
-        if(this.selectedFiles.length>=maxFiles){
-            this.app.addLog(`Maximum of ${maxFiles}files already selected`,"warning")
+        let remainingSlots=maxFiles-this.selectedFiles.length
+        if(remainingSlots<=0){
+            this.app.addLog(`Maximum of ${maxFiles} files already selected`,"warning")
             return
         }
-        let remainingSlots=maxFiles-this.selectedFiles.length
         if(files.length>remainingSlots){
-            this.app.addLog(`Only ${remainingSlots}more file(s)can be added(max ${maxFiles})`,"warning")
+            this.app.addLog(`Only ${remainingSlots} more file(s) can be added (max ${maxFiles})`,"warning")
             files=files.slice(0,remainingSlots)
         }
         let validFiles=files.filter(file=>{
@@ -67,7 +75,7 @@ class FileManager{
             return ["pdf","docx","doc","rtf","txt","md","html"].includes(ext)
         })
         if(validFiles.length==0){
-            this.app.addLog("No valid files selected. Supported formats:PDF,DOCX,DOC,RTF,TXT,MD,HTML","warning")
+            this.app.addLog("No valid files selected. Supported formats: PDF, DOCX, DOC, RTF, TXT, MD, HTML","warning")
             return
         }
         let addedCount=0
@@ -75,12 +83,12 @@ class FileManager{
         for(let file of validFiles){
             let maxSize=100*1024*1024
             if(file.size>maxSize){
-                this.app.addLog(`File too large: ${file.name}(${this.formatFileSize(file.size)}). Maximum size is 100MB.`,"warning")
+                this.app.addLog(`File too large: ${file.name} (${this.formatFileSize(file.size)}). Maximum size is 100MB.`,"warning")
                 skippedCount++
                 continue
             }
-            if(file.name.toLowerCase().endsWith(".pdf")&& file.size>20*1024*1024){
-                this.app.addLog(`Large PDF detected: ${file.name}(${this.formatFileSize(file.size)}). Processing may take longer.`,"info")
+            if(file.name.toLowerCase().endsWith(".pdf") && file.size>20*1024*1024){
+                this.app.addLog(`Large PDF detected: ${file.name} (${this.formatFileSize(file.size)}). Processing may take longer.`,"info")
             }
             let fileObj:SelectedFile={
                 file:file,
@@ -96,17 +104,18 @@ class FileManager{
         }
         this.updateProcessButton()
         if(addedCount>0){
-            this.app.addLog(`Added ${addedCount}file(s)`,"success")
+            this.app.addLog(`Added ${addedCount} file(s)`,"success")
         }
         if(skippedCount>0){
-            this.app.addLog(`Skipped ${skippedCount}file(s)due to size limits`,"warning")
+            this.app.addLog(`Skipped ${skippedCount} file(s) due to size limits`,"warning")
         }
     }
     addFileToList(fileObj:SelectedFile):void{
         let fileItem=document.createElement("div")
         fileItem.className="file-item"
         let escapedName=this.app.sanitizeText(fileObj.name)
-        fileItem.setAttribute("data-name",escapedName)
+        let fileId=encodeURIComponent(fileObj.name)
+        fileItem.setAttribute("data-id",fileId)
         fileItem.innerHTML=`
             <div class="file-info">
                 <i class="fas fa-file-${this.getFileIcon(fileObj.type)} file-icon"></i>
@@ -116,7 +125,7 @@ class FileManager{
                 </div>
             </div>
             <span class="file-status" aria-label="Status: waiting"></span>
-            <button class="file-remove" data-name="${escapedName}" aria-label="Remove ${escapedName}">
+            <button class="file-remove" data-id="${fileId}" aria-label="Remove ${escapedName}">
                 <i class="fas fa-times"></i>
             </button>
         `
@@ -155,8 +164,8 @@ class FileManager{
         this.updateFileStatusIcon(fileName,status)
     }
     updateFileStatusIcon(fileName:string,status:string):void{
-        let escapedName=this.app.sanitizeText(fileName)
-        let fileItem=this.fileList.querySelector(`.file-item[data-name="${escapedName}"]`)
+        let fileId=encodeURIComponent(fileName)
+        let fileItem=this.fileList.querySelector(`.file-item[data-id="${fileId}"]`)
         if(!fileItem)return
         let statusEl=fileItem.querySelector(".file-status") as HTMLElement|null
         if(!statusEl){
@@ -183,11 +192,13 @@ class FileManager{
             failed:"#D13438"
         }
         let label=labelMap[status]||"Waiting"
-        statusEl.setAttribute("aria-label",`Status: ${label}`)
-        statusEl.innerHTML=`<i class="fas ${iconMap[status]||"fa-clock"}" style="color:${colorMap[status]||"#A19F9D"}" aria-hidden="true"></i><span class="file-status-label">${label}</span>`
+        let iconClass=iconMap[status]||"fa-clock"
+        let iconColor=colorMap[status]||"#A19F9D"
+        statusEl.setAttribute("aria-label","Status: "+label)
+        statusEl.innerHTML='<i class="fas '+iconClass+'" style="color:'+iconColor+'" aria-hidden="true"></i><span class="file-status-label">'+label+"</span>"
     }
     updateProcessButton():void{
-        let ollamaReady=this.app.uiManager.ollamaStatus.running
+        let ollamaReady=this.app.uiManager?.ollamaStatus?.running??false
         let demoActive=this.app.processor?.demoMode??false
         this.processBtn.disabled=this.selectedFiles.length==0||(!ollamaReady&&!demoActive)
         if(!ollamaReady&&!demoActive){
@@ -214,6 +225,7 @@ class FileManager{
     }
     formatFileSize(bytes:number):string{
         if(bytes==0)return "0 Bytes"
+        if(bytes==1)return "1 Byte"
         let k=1024
         let sizes=["Bytes","KB","MB","GB"]
         let i=Math.floor(Math.log(bytes)/Math.log(k))
