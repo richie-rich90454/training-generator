@@ -434,9 +434,9 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [ ] SubTask 27.8: Quote all locale keys consistently
 
-* [ ] Task 28: Fix checkpoint, rate limiter, stats, audit, logger, provenance, qualityValidator
+* [x] Task 28: Fix checkpoint, rate limiter, stats, audit, logger, provenance, qualityValidator
 
-  * [ ] SubTask 28.1: `checkpoint.ts` — validate loaded shape; re-throw/save-failure signal; document `completedChunks` semantics; auto-clear on completion
+  * [x] SubTask 28.1: `checkpoint.ts` — validate loaded shape; re-throw/save-failure signal; document `completedChunks` semantics; auto-clear on completion
 
   * [ ] SubTask 28.2: `rateLimiter.ts` — guard `tokensPerMinute>0`; treat `<=0` retry-after as default; re-cap tokens on `setRate`; add max-wait/AbortSignal; set `lastRefill=Date.now()` not `pausedUntil`
 

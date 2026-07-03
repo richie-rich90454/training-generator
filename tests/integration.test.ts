@@ -307,7 +307,7 @@ describe("integration: checkpoint save/load", () => {
 
     it("saves and loads checkpoint data", async () => {
         let data = {
-            files: [{ name: "test.txt" } as SelectedFile],
+            files: [{ file: null, name: "test.txt", size: 0, type: "txt", path: null } as SelectedFile],
             completedChunks: { "test.txt": 1 },
             outputData: [{ format: "instruction" as const, instruction: "Q", input: "", output: "A" }],
             config: { model: "m", processingType: "instruction", chunkSize: 1000, concurrency: 1, provider: "ollama" },
@@ -922,7 +922,7 @@ describe("integration: checkpoint variations", () => {
 
     it("preserves checkpoint config fields", async () => {
         let data = {
-            files: [{ name: "f.txt" } as SelectedFile],
+            files: [{ file: null, name: "f.txt", size: 0, type: "txt", path: null } as SelectedFile],
             completedChunks: { "f.txt": 3 },
             outputData: [],
             config: { model: "llama3", processingType: "conversation", chunkSize: 2000, concurrency: 3, provider: "openai" },
