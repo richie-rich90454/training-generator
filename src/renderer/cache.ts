@@ -22,7 +22,12 @@ let saveTimeout:ReturnType<typeof setTimeout>|null=null
 
 let cacheStats:CacheStats={hits:0,misses:0,totalRequests:0,estimatedTokensSaved:0,estimatedCostSaved:0}
 
-export function getCacheStats():CacheStats{return{...cacheStats}}
+export function getCacheStats():CacheStats{
+    return{
+        ...cacheStats,
+        estimatedCostSaved:Math.round(cacheStats.estimatedCostSaved*10000)/10000
+    }
+}
 export function resetCacheStats():void{cacheStats={hits:0,misses:0,totalRequests:0,estimatedTokensSaved:0,estimatedCostSaved:0}}
 
 async function loadCache():Promise<void>{
@@ -75,7 +80,7 @@ export async function getCachedResult(chunk:string,model:string,prompt:string):P
         }
         cacheStats.hits++
         cacheStats.estimatedTokensSaved+=entry.tokens
-        cacheStats.estimatedCostSaved+=Math.round((entry.tokens/1000)*0.002*10000)/10000
+        cacheStats.estimatedCostSaved+=(entry.tokens/1000)*0.002
     }
     else{
         cacheStats.misses++

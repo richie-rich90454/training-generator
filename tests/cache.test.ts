@@ -138,6 +138,16 @@ describe("cache stats", () => {
     expect(stats.misses).toBe(1)
     expect(stats.estimatedTokensSaved).toBe(30)
   })
+  it("should round accumulated cost saved to 4 decimals", async () => {
+    await setCachedResult("chunk1", "model1", "prompt1", "response1", 1234)
+    await setCachedResult("chunk2", "model1", "prompt2", "response2", 5678)
+    resetCacheStats()
+    await getCachedResult("chunk1", "model1", "prompt1")
+    await getCachedResult("chunk2", "model1", "prompt2")
+    let stats = getCacheStats()
+    let expected = Math.round(((1234 + 5678) / 1000) * 0.002 * 10000) / 10000
+    expect(stats.estimatedCostSaved).toBe(expected)
+  })
 })
 describe("cache warm", () => {
   beforeEach(async () => {
