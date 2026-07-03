@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest"
-import { findPreviousWhitespace, findPreviousSentenceBoundary, detectSemanticUnits, isInSemanticUnit, estimateTextDensity, semanticChunk, simpleChunk } from "../src/renderer/chunker.js"
+import { findPreviousWhitespace, findPreviousSentenceBoundary, detectSemanticUnits, isInSemanticUnit, estimateTextDensity, semanticChunk, simpleChunk, splitSentences } from "../src/renderer/chunker.js"
 describe("findPreviousWhitespace", () => {
     it("returns -1 when no whitespace before position", () => {
         let text="abcdef"
@@ -332,5 +332,40 @@ describe("simpleChunk", () => {
         let chunks=simpleChunk(text, 100)
         let joined=chunks.join(" ")
         expect(joined.length).toBeGreaterThan(text.length*0.8)
+    })
+})
+describe("chunker bug fixes", () => {
+    it("preserves tail text when trimming to word boundary", () => {
+        let text="One two three four five six seven eight nine ten."
+        let chunks=semanticChunk(text, 25, 0)
+        let joined=chunks.join(" ")
+        expect(joined.replace(/\s+/g, " ").trim()).toContain("ten")
+    })
+    it("uses overlap text instead of context prefix when overlap is set", () => {
+        let text="First sentence here. Second sentence here. Third sentence here. Fourth sentence here."
+        let chunks=semanticChunk(text, 35, 10)
+        expect(chunks.length).toBeGreaterThan(1)
+        for (let i=1; i<chunks.length; i++) {
+            expect(chunks[i].startsWith("[CONTEXT FROM PREVIOUS CHUNK:]")).toBe(false)
+        }
+    })
+    it("splits at CJK punctuation without whitespace", () => {
+        let text="你好。世界。再见。再见面。"
+        let chunks=semanticChunk(text, 10, 0)
+        expect(chunks.length).toBeGreaterThanOrEqual(2)
+    })
+    it("detects table rows without leading or trailing pipes", () => {
+        let text="a|b|c\nd|e|f"
+        let units=detectSemanticUnits(text)
+        expect(units.length).toBe(1)
+        expect(units[0].type).toBe("table")
+    })
+    it("does not split after common abbreviations in fallback splitter", () => {
+        let text="Dr. Smith visited e.g. the hospital. Then he left."
+        let sentences=splitSentences(text)
+        expect(sentences.length).toBeGreaterThanOrEqual(2)
+        let joined=sentences.join(" ")
+        expect(joined).toContain("Dr. Smith")
+        expect(joined).toContain("e.g. the hospital")
     })
 })

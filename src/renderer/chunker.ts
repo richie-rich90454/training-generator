@@ -11,7 +11,12 @@ export function findPreviousWhitespace(text: string, position: number): number {
 
 export function findPreviousSentenceBoundary(text: string, position: number): number {
     for (let i = position - 1; i >= 0; i--) {
-        if (/[.!?。！？]/.test(text[i])) {
+        let c = text[i]
+        // CJK sentence punctuation is a hard boundary regardless of following whitespace
+        if (/[。！？]/.test(c)) {
+            return i + 1
+        }
+        if (/[.!?]/.test(c)) {
             let next = i + 1 < text.length ? text[i + 1] : ""
             if (/\s/.test(next) || i + 1 >= text.length) {
                 return i + 1
@@ -19,6 +24,14 @@ export function findPreviousSentenceBoundary(text: string, position: number): nu
         }
     }
     return -1
+}
+
+function isTableRow(line: string): boolean {
+    return line.split("|").length >= 3
+}
+
+function isListItem(line: string): boolean {
+    return /^(\s*)([-*+]|\d+[.)])\s/.test(line)
 }
 
 export function detectSemanticUnits(text: string): { start: number, end: number, type: string }[] {
@@ -51,14 +64,14 @@ export function detectSemanticUnits(text: string): { start: number, end: number,
         }
 
         // Table row (| delimited lines)
-        if (trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.indexOf('|', 1) < trimmed.length - 1) {
+        if (isTableRow(trimmed)) {
             let start = pos
             i++
             pos += lineLen
             while (i < lines.length) {
                 let l = lines[i]
                 let t = l.trimStart()
-                if (t.startsWith('|') && t.indexOf('|', 1) < t.length - 1) {
+                if (isTableRow(t)) {
                     let lIsLast = i === lines.length - 1
                     pos += l.length + (lIsLast ? 0 : 1)
                     i++
@@ -90,7 +103,7 @@ export function detectSemanticUnits(text: string): { start: number, end: number,
         }
 
         // List items (bullet: - * + or numbered: 1. 2) )
-        if (/^(\s*)([-*+]|\d+[.)])\s/.test(line)) {
+        if (isListItem(line)) {
             let start = pos
             i++
             pos += lineLen
@@ -100,17 +113,17 @@ export function detectSemanticUnits(text: string): { start: number, end: number,
                     let lIsLast = i === lines.length - 1
                     pos += l.length + (lIsLast ? 0 : 1)
                     i++
-                    if (i < lines.length && /^(\s*)([-*+]|\d+[.)])\s/.test(lines[i])) {
+                    if (i < lines.length && isListItem(lines[i])) {
                         continue
                     } else {
                         break
                     }
                 }
-                if (/^(\s*)([-*+]|\d+[.)])\s/.test(l)) {
+                if (isListItem(l)) {
                     let lIsLast = i === lines.length - 1
                     pos += l.length + (lIsLast ? 0 : 1)
                     i++
-                } else if (/^ {2,}\S/.test(l) && !/^(\s*)([-*+]|\d+[.)])\s/.test(l)) {
+                } else if (/^ {2,}\S/.test(l) && !isListItem(l)) {
                     let lIsLast = i === lines.length - 1
                     pos += l.length + (lIsLast ? 0 : 1)
                     i++
@@ -173,17 +186,22 @@ function splitUnitAtRowBoundary(unitText: string, unitType: string): string[] {
     let lines = unitText.split('\n')
     let rows: string[] = []
 
-    if (unitType === 'table' || unitType === 'code_block') {
+    if (unitType === 'table') {
+        // Split at line boundaries; each line is a table row per isTableRow predicate
+        for (let i = 0; i < lines.length; i++) {
+            rows.push(lines[i])
+        }
+    } else if (unitType === 'code_block') {
         // Split at line boundaries
         for (let i = 0; i < lines.length; i++) {
             rows.push(lines[i])
         }
     } else if (unitType === 'list') {
-        // Split at item boundaries
+        // Split at item boundaries using the same predicate as detection
         let currentItem = ""
         for (let i = 0; i < lines.length; i++) {
             let l = lines[i]
-            if (/^(\s*)([-*+]|\d+[.)])\s/.test(l) && currentItem.length > 0) {
+            if (isListItem(l) && currentItem.length > 0) {
                 rows.push(currentItem)
                 currentItem = l
             } else {
@@ -209,6 +227,25 @@ export function estimateTextDensity(text: string): number {
     let avgSentenceLen = chars / sentences
     let density = Math.min(1, (words / chars) * avgSentenceLen / 50)
     return density
+}
+
+function buildContextPrefix(previousChunkText: string): string {
+    if (!previousChunkText) return ""
+    let lastSentences = getLastSentences(previousChunkText, 2)
+    if (lastSentences.length === 0) return ""
+    return "[CONTEXT FROM PREVIOUS CHUNK:] " + lastSentences.join(" ") + " "
+}
+
+function buildOverlapPrefix(previousChunkText: string, overlap: number): string {
+    if (!previousChunkText || overlap <= 0) return ""
+    return previousChunkText.slice(-overlap) + " "
+}
+
+function buildPrefix(previousChunkText: string, overlap: number): string {
+    if (overlap > 0) {
+        return buildOverlapPrefix(previousChunkText, overlap)
+    }
+    return buildContextPrefix(previousChunkText)
 }
 
 export function semanticChunk(text: string, chunkSize: number = 2000, overlap: number = 100, smartSizing: boolean = false): string[] {
@@ -252,14 +289,7 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
                     // Push current chunk, start new one with the unit
                     chunks.push(currentChunk.trim())
                     previousChunkText = currentChunk.trim()
-
-                    let contextPrefix = buildContextPrefix(previousChunkText)
-                    currentChunk = contextPrefix + unitText
-
-                    if (overlap > 0 && previousChunkText.length > 0) {
-                        let overlapText = previousChunkText.slice(-overlap)
-                        currentChunk = contextPrefix + overlapText + " " + unitText
-                    }
+                    currentChunk = buildPrefix(previousChunkText, overlap) + unitText
                 } else {
                     // Include unit in current chunk
                     currentChunk += (currentChunk ? " " : "") + unitText
@@ -279,14 +309,14 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
                 if (currentChunk.length > 0) {
                     chunks.push(currentChunk.trim())
                     previousChunkText = currentChunk.trim()
-                    currentChunk = buildContextPrefix(previousChunkText)
+                    currentChunk = buildPrefix(previousChunkText, overlap)
                 }
 
                 for (let row of rows) {
                     if (currentChunk.length + row.length > chunkSize && currentChunk.length > 0) {
                         chunks.push(currentChunk.trim())
                         previousChunkText = currentChunk.trim()
-                        currentChunk = buildContextPrefix(previousChunkText) + row
+                        currentChunk = buildPrefix(previousChunkText, overlap) + row
                     } else {
                         currentChunk += (currentChunk ? " " : "") + row
                     }
@@ -307,21 +337,16 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
             // Enforce word boundary at chunk boundary
             let boundary = currentChunk.length
             let wsIdx = findPreviousWhitespace(currentChunk, boundary)
+            let tail = ""
             if (wsIdx > boundary - 20) {
-                // Word boundary is close — trim to it
-                currentChunk = currentChunk.slice(0, wsIdx)
+                tail = currentChunk.slice(wsIdx + 1).trim()
+                currentChunk = currentChunk.slice(0, wsIdx).trimEnd()
             }
 
             chunks.push(currentChunk.trim())
             previousChunkText = currentChunk.trim()
 
-            let contextPrefix = buildContextPrefix(previousChunkText)
-            if (overlap > 0) {
-                let overlapText = previousChunkText.slice(-overlap)
-                currentChunk = contextPrefix + overlapText + " " + sentence
-            } else {
-                currentChunk = contextPrefix + sentence
-            }
+            currentChunk = buildPrefix(previousChunkText, overlap) + (tail ? tail + " " : "") + sentence
         } else {
             currentChunk += (currentChunk ? " " : "") + sentence
         }
@@ -333,13 +358,6 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
     }
 
     return chunks
-}
-
-function buildContextPrefix(previousChunkText: string): string {
-    if (!previousChunkText) return ""
-    let lastSentences = getLastSentences(previousChunkText, 2)
-    if (lastSentences.length === 0) return ""
-    return "[CONTEXT FROM PREVIOUS CHUNK:] " + lastSentences.join(" ") + " "
 }
 
 export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
@@ -382,22 +400,53 @@ export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
     return chunks
 }
 
-function splitSentences(text: string): string[] {
-    try {
-        let doc = nlp(text)
-        let sentences = doc.sentences().out("array") as string[]
-        if (sentences && sentences.length > 0) return sentences
+const ABBREVIATIONS = new Set([
+    "mr", "mrs", "ms", "dr", "prof", "sr", "jr", "vs", "etc", "eg", "ie",
+    "inc", "ltd", "corp", "llc", "st", "ave", "blvd", "rd", "pl", "no",
+    "vol", "vols", "pp", "pg", "cf", "et", "al", "approx", "dept", "univ",
+    "fig", "figs", "eq", "eqs", "ch", "chs", "sec", "secs"
+])
+
+function wordBeforePosition(text: string, position: number): string {
+    let start = position - 1
+    while (start >= 0 && !/\s/.test(text[start])) {
+        start--
     }
-    catch { }
+    return text.slice(start + 1, position).replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+}
+
+function isAbbreviationBoundary(text: string, position: number): boolean {
+    let word = wordBeforePosition(text, position)
+    return ABBREVIATIONS.has(word)
+}
+
+export function splitSentences(text: string): string[] {
+    let hasCjkPunctuation = /[\u3002\uFF01\uFF1F]/.test(text)
+    if (!hasCjkPunctuation) {
+        try {
+            let doc = nlp(text)
+            let sentences = doc.sentences().out("array") as string[]
+            if (sentences && sentences.length > 0) return sentences
+        }
+        catch { }
+    }
     let result: string[] = []
     let current = ""
     for (let i = 0; i < text.length; i++) {
         current += text[i]
         let c = text[i]
         let next = text[i + 1] || ""
-        if ((c === "." || c === "!" || c === "?") && (next === " " || next === "\n" || next === "\r" || i === text.length - 1)) {
+        if (/[。！？]/.test(c)) {
             result.push(current.trim())
             current = ""
+        }
+        else if (c === "." || c === "!" || c === "?") {
+            if (next === " " || next === "\n" || next === "\r" || i === text.length - 1) {
+                if (!isAbbreviationBoundary(text, i)) {
+                    result.push(current.trim())
+                    current = ""
+                }
+            }
         }
         else if (c === "\n" && current.trim().length > 0) {
             result.push(current.trim())
