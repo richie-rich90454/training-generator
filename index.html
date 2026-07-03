@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' http://localhost:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com; img-src 'self' data:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' http://localhost:* ws://localhost:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com; img-src 'self' data:">
         <title>Training Generator-AI Training Data Creator</title>
         <link rel="stylesheet" href="./src/styles/main.css">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
@@ -53,7 +53,7 @@
                                 <h3 data-i18n="upload.dropzone">Drop files here or click to browse</h3>
                                 <p data-i18n="upload.formats">Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
                             </div>
-                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.html" style="display:none">
+                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html" style="display:none">
                             <button id="browse-btn" class="btn btn-primary" title="Ctrl+O" aria-label="Browse for files (Ctrl+O)">
                                 <i class="fas fa-folder-open"></i> <span data-i18n="upload.browse">Browse Files</span>
                             </button>
@@ -122,13 +122,8 @@
                             </div>
                         </div>
                         <div id="output-preview" class="output-preview" role="region" aria-label="Output preview">
-                            <pre><code data-i18n="output.placeholder">// Output will appear here after processing
-    // Example format (JSONL):
-    {
-    "instruction": "What is machine learning?",
-    "input": "",
-    "output": "Machine learning is a subset of artificial intelligence..."
-    }</code></pre>
+                            <pre><code data-i18n="output.placeholder">{"instruction":"What is machine learning?","input":"","output":"Machine learning is a subset of artificial intelligence..."}
+{"instruction":"Explain neural networks","input":"","output":"Neural networks are computational models inspired by biological neurons..."}</code></pre>
                         </div>
                     </div>
                 </div>
