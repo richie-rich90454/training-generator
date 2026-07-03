@@ -1,9 +1,13 @@
+import { showToast } from "./toast.js"
+
 export class TemplateEditor{
     private overlay:HTMLDivElement
     private modal:HTMLDivElement
     private textarea:HTMLTextAreaElement
     private highlightedPreview:HTMLPreElement
     private livePreview:HTMLPreElement
+    private focusTrapHandler:((e:KeyboardEvent)=>void)|null=null
+    private lastFocusedElement:HTMLElement|null=null
 
     constructor(){
         this.overlay=document.createElement("div")
@@ -37,9 +41,11 @@ export class TemplateEditor{
     }
 
     private createDOM():void{
-        // Inject styles
-        let style=document.createElement("style")
-        style.textContent=`
+        let styleId="template-editor-styles"
+        if(!document.getElementById(styleId)){
+            let style=document.createElement("style")
+            style.id=styleId
+            style.textContent=`
             .tpl-var{display:inline;padding:1px 4px;border-radius:3px;font-weight:bold;font-family:'Noto Sans',sans-serif}
             .tpl-var-text{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
             .tpl-var-language{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
@@ -56,18 +62,16 @@ export class TemplateEditor{
             .template-editor-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary,#666);padding:0 4px;line-height:1}
             .template-editor-close:hover{color:var(--text-primary,#333)}
         `
-        document.head.appendChild(style)
+            document.head.appendChild(style)
+        }
 
-        // Overlay
         this.overlay.className="template-editor-overlay"
         this.overlay.setAttribute("role","dialog")
         this.overlay.setAttribute("aria-modal","true")
         this.overlay.setAttribute("aria-label","Edit Prompt Template")
 
-        // Modal
         this.modal.className="template-editor-modal"
 
-        // Header
         let header=document.createElement("div")
         header.className="template-editor-header"
         header.innerHTML='<h2><i class="fas fa-edit"></i> Edit Prompt Template</h2>'
@@ -78,7 +82,6 @@ export class TemplateEditor{
         closeBtn.addEventListener("click",()=>this.hide())
         header.appendChild(closeBtn)
 
-        // Body
         let body=document.createElement("div")
         body.className="template-editor-body"
 
@@ -104,7 +107,6 @@ export class TemplateEditor{
         body.appendChild(liveLabel)
         body.appendChild(this.livePreview)
 
-        // Footer
         let footer=document.createElement("div")
         footer.className="template-editor-footer"
 
@@ -148,15 +150,22 @@ export class TemplateEditor{
     }
 
     private handleKeydown=(e:KeyboardEvent):void=>{
-        if(e.key==="Escape"&&this.overlay.style.display==="flex"){
-            // Check if no other modal is open (e.g., settings)
-            let settingsModal=document.getElementById("settings-modal")
-            if(settingsModal&&(settingsModal.style.display==="flex"||settingsModal.classList.contains("active"))){
-                return
-            }
-            e.preventDefault()
-            this.hide()
+        if(e.key!=="Escape"||this.overlay.style.display!=="flex")return
+        if(this.hasHigherZIndexModal())return
+        e.preventDefault()
+        this.hide()
+    }
+
+    private hasHigherZIndexModal():boolean{
+        let activeModals=document.querySelectorAll(".modal.active,[role='dialog'].active")
+        let overlayZ=parseInt(getComputedStyle(this.overlay).zIndex||"10000",10)
+        for(let i=0;i<activeModals.length;i++){
+            let modal=activeModals[i]
+            if(modal===this.overlay)continue
+            let z=parseInt(getComputedStyle(modal).zIndex||"0",10)
+            if(z>overlayZ)return true
         }
+        return false
     }
 
     private updatePreviews():void{
@@ -167,13 +176,26 @@ export class TemplateEditor{
     }
 
     show():void{
+        this.lastFocusedElement=document.activeElement as HTMLElement
         this.overlay.style.display="flex"
         this.updatePreviews()
-        this.textarea.focus()
+        this.trapFocus()
+        let focusable=this.overlay.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])')
+        if(focusable.length>0){
+            (focusable[0] as HTMLElement).focus()
+        }
+        else{
+            this.textarea.focus()
+        }
     }
 
     hide():void{
         this.overlay.style.display="none"
+        this.removeFocusTrap()
+        if(this.lastFocusedElement&&document.contains(this.lastFocusedElement)){
+            this.lastFocusedElement.focus()
+            this.lastFocusedElement=null
+        }
     }
 
     loadTemplate(content:string):void{
@@ -185,19 +207,55 @@ export class TemplateEditor{
         return this.textarea.value
     }
 
+    private trapFocus():void{
+        if(this.focusTrapHandler)return
+        let selector='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        this.focusTrapHandler=(e:KeyboardEvent)=>{
+            if(e.key!=="Tab")return
+            let focusable=Array.from(this.overlay.querySelectorAll<HTMLElement>(selector))
+            if(focusable.length===0)return
+            let first=focusable[0]
+            let last=focusable[focusable.length-1]
+            if(e.shiftKey&&document.activeElement===first){
+                e.preventDefault()
+                last.focus()
+            }
+            else if(!e.shiftKey&&document.activeElement===last){
+                e.preventDefault()
+                first.focus()
+            }
+        }
+        document.addEventListener("keydown",this.focusTrapHandler)
+    }
+
+    private removeFocusTrap():void{
+        if(this.focusTrapHandler){
+            document.removeEventListener("keydown",this.focusTrapHandler)
+            this.focusTrapHandler=null
+        }
+    }
+
     private handleLoad():void{
         let input=document.createElement("input")
         input.type="file"
         input.accept=".txt"
+        input.style.display="none"
+        document.body.appendChild(input)
         input.addEventListener("change",()=>{
             let file=input.files?.[0]
-            if(!file)return
+            if(!file){
+                input.remove()
+                return
+            }
             let reader=new FileReader()
             reader.onload=()=>{
                 this.loadTemplate(reader.result as string)
+                input.remove()
             }
             reader.onerror=()=>{
                 console.error("Failed to read template file")
+                showToast("Failed to read template file","error")
+                input.remove()
             }
             reader.readAsText(file)
         })
@@ -207,6 +265,7 @@ export class TemplateEditor{
     private handleSave():void{
         let content=this.textarea.value
         if(!content.trim()){
+            showToast("Cannot save an empty template","warning")
             return
         }
         let blob=new Blob([content],{type:"text/plain"})
@@ -217,6 +276,14 @@ export class TemplateEditor{
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
-        URL.revokeObjectURL(url)
+        setTimeout(()=>URL.revokeObjectURL(url),1000)
+    }
+
+    dispose():void{
+        document.removeEventListener("keydown",this.handleKeydown)
+        this.removeFocusTrap()
+        if(this.overlay&&this.overlay.parentNode){
+            this.overlay.parentNode.removeChild(this.overlay)
+        }
     }
 }
