@@ -154,7 +154,7 @@ class FileParserLazy{
     async parsePDF(buffer:Buffer):Promise<string>{
         if (buffer.length>1*1024*1024){
             try{
-                return await this.parsePDFWithWorker(buffer);
+                return await this.parsePDFWithWorker(buffer, true);
             }
             catch (workerError){
                 console.warn("PDF Worker failed, falling back to main thread:", workerError);
@@ -170,7 +170,7 @@ class FileParserLazy{
             return this.extractTextFromPDF(buffer);
         }
     }
-    async parsePDFWithWorker(buffer:Buffer):Promise<string>{
+    async parsePDFWithWorker(buffer:Buffer,transfer?:boolean):Promise<string>{
         return new Promise((resolve, reject)=>{
             let workerPath=path.join(path.dirname(fileURLToPath(import.meta.url)),"../workers/pdfWorker.js")
             let worker=new Worker(workerPath,{ type: "module" } as any);
@@ -205,7 +205,9 @@ class FileParserLazy{
                 cleanup();
                 reject(new Error(`Worker stopped with exit code ${code}`));
             });
-            worker.postMessage({ id, buffer });
+            let messageBuffer=transfer?Buffer.from(buffer):buffer
+            let transferList=transfer&&messageBuffer.buffer?[messageBuffer.buffer]:[]
+            worker.postMessage({ id, buffer: messageBuffer }, transferList as import("worker_threads").TransferListItem[]);
         });
     }
     async parseDOCX(buffer:Buffer):Promise<string>{
