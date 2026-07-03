@@ -19,7 +19,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "cli": "tsx src/cli/index.ts",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "node scripts/postinstall.mjs"
   },
   "keywords": [
     "electron",
