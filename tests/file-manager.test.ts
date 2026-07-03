@@ -237,9 +237,11 @@ describe("FileManager helpers", () => {
     it("formats file sizes", () => {
         let manager=new FileManager(makeApp())
         expect(manager.formatFileSize(0)).toBe("0 Bytes")
+        expect(manager.formatFileSize(1)).toBe("1 Byte")
         expect(manager.formatFileSize(1024)).toBe("1 KB")
         expect(manager.formatFileSize(1024*1024)).toBe("1 MB")
         expect(manager.formatFileSize(1024*1024*1024)).toContain("GB")
+        expect(manager.formatFileSize(1536)).toBe("1.5 KB")
     })
     it("sanitizes file names in list", async() => {
         let app=makeApp()

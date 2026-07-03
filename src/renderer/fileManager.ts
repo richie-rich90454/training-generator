@@ -224,12 +224,14 @@ class FileManager{
         return icons[fileType]||"file"
     }
     formatFileSize(bytes:number):string{
-        if(bytes==0)return "0 Bytes"
-        if(bytes==1)return "1 Byte"
+        if(bytes===0)return "0 Bytes"
         let k=1024
-        let sizes=["Bytes","KB","MB","GB"]
+        let singular=["Byte","KB","MB","GB"]
+        let plural=["Bytes","KB","MB","GB"]
         let i=Math.floor(Math.log(bytes)/Math.log(k))
-        return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+" "+sizes[i]
+        let value=parseFloat((bytes/Math.pow(k,i)).toFixed(2))
+        let label=value===1?singular[i]:plural[i]
+        return value+" "+label
     }
 }
 
