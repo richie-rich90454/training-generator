@@ -14,7 +14,7 @@ export interface QualityReport {
   breakdown: Record<string, number>
 }
 
-const CJK_RE = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u3400-\u4dbf\u20000-\u2a6df\u2a700-\u2b73f\u2b740-\u2b81f\uf900-\ufaff]/
+const CJK_RE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u
 
 function hasCJK(text: string): boolean {
   return CJK_RE.test(text)
