@@ -15,8 +15,8 @@ import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaMode
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 
-let isWin:boolean=process.platform=="win32"
-let isMac:boolean=process.platform=="darwin"
+let isWin:boolean=process.platform==="win32"
+let isMac:boolean=process.platform==="darwin"
 let mainWindow:BrowserWindow|null=null
 let splashWindow:BrowserWindow|null=null
 let splashProcess:import("child_process").ChildProcess|null=null
@@ -416,7 +416,7 @@ function createMainWindow(){
         }
     })
     mainWindow.setMenu(null)
-    if(process.env.NODE_ENV=="development"){
+    if(process.env.NODE_ENV==="development"){
         mainWindow.loadURL("http://localhost:5173")
         mainWindow.webContents.openDevTools({mode:"detach"})
     }
@@ -901,7 +901,7 @@ function registerCriticalIpcHandlers():void{
             }
             catch(error){
                 lastError=error as Error
-                if((error as any).code=="ECONNABORTED"||(error as Error).message.includes("timeout")){
+                if((error as any).code==="ECONNABORTED"||(error as Error).message.includes("timeout")){
                     if(attempt<maxRetries){
                         await new Promise(r=>setTimeout(r,5000))
                     }
