@@ -3,6 +3,7 @@ import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResu
 export interface ElectronAPI{
     openFileDialog:()=>Promise<FileObj[]>
     readFile:(filePath:string)=>Promise<ReadFileResult>
+    getPrompt:(language:string,processingType:string)=>Promise<{success:boolean;content?:string;error?:string}>
     parseFile:(filePath:string,fileType:string)=>Promise<ParseFileResult>
     parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
     saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>

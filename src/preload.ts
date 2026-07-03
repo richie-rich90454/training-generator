@@ -4,6 +4,7 @@ import type{FileObj}from "./types/index.js"
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>invoke("dialog:openFile"),
     readFile:(filePath:string)=>invoke("file:read",{filePath}),
+    getPrompt:(language:string,processingType:string)=>invoke("prompt:get",{language,processingType}),
     parseFile:(filePath:string,fileType:string)=>invoke("file:parse",{filePath,fileType}),
     parseFilesBatch:(files:FileObj[])=>invoke("file:parseBatch",{files}),
     saveFile:(filePath:string,content:string)=>invoke("file:save",{filePath,content}),

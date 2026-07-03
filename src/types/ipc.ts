@@ -16,6 +16,10 @@ export interface IpcChannels{
         request:{filePath:string}
         response:{success:boolean;content?:string;error?:string}
     }
+    'prompt:get':{
+        request:{language:string;processingType:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
     'dialog:openFile':{
         request:void
         response:FileObj[]
