@@ -11,7 +11,7 @@ export function getHelpContent():string{
             <div class="help-section">
                 <h4>Requirements</h4>
                 <p>•<strong>Ollama</strong>:Must be installed and running for AI processing</p>
-                <p>•<strong>Models</strong>:Pull models using<code>ollama pull <model-name></code></p>
+                <p>•<strong>Models</strong>:Pull models using<code>ollama pull &lt;model-name&gt;</code></p>
                 <p>•<strong>File Size</strong>:Maximum 100MB per file</p>
             </div>
             <div class="help-section">

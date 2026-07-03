@@ -81,6 +81,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "Remember Window Size",
     "settings.reset": "Reset to Defaults",
     "settings.save": "Save Settings",
+    "settings.profileSelect.default": "-- Select a profile --",
   },
   "zh-Hans": {
     "app.title": "训练生成器",
@@ -162,6 +163,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "记住窗口大小",
     "settings.reset": "恢复默认设置",
     "settings.save": "保存设置",
+    "settings.profileSelect.default": "-- 选择配置文件 --",
   },
   "zh-Hant": {
     "app.title": "訓練生成器",
@@ -243,6 +245,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "記住視窗大小",
     "settings.reset": "恢復預設設定",
     "settings.save": "儲存設定",
+    "settings.profileSelect.default": "-- 選擇設定檔 --",
   },
   ja: {
     "app.title": "トレーニングジェネレーター",
@@ -324,6 +327,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "ウィンドウサイズを記憶",
     "settings.reset": "デフォルトに戻す",
     "settings.save": "設定を保存",
+    "settings.profileSelect.default": "-- プロファイルを選択 --",
   },
   ko: {
     "app.title": "트레이닝 생성기",
@@ -405,6 +409,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "창 크기 기억",
     "settings.reset": "기본값으로 초기화",
     "settings.save": "설정 저장",
+    "settings.profileSelect.default": "-- 프로필 선택 --",
   },
   es: {
     "app.title": "Generador de Entrenamiento",
@@ -486,6 +491,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "Recordar Tamaño de Ventana",
     "settings.reset": "Restablecer Predeterminados",
     "settings.save": "Guardar Configuración",
+    "settings.profileSelect.default": "-- Seleccionar un perfil --",
   },
   fr: {
     "app.title": "Générateur d'Entraînement",
@@ -558,11 +564,16 @@ const translations: Record<string, TranslationDict> = {
     "settings.autoSave": "Sauvegarde Auto des Préréglages",
     "settings.autoCheckOllama": "Vérification Auto d'Ollama",
     "settings.maxFileSize": "Taille Max de Fichier (Mo)",
+    "settings.maxOutputItems": "Max d'Éléments de Sortie par Fichier",
+    "settings.maxOutputItems.unlimited": "Illimité",
+    "settings.maxChunks": "Max de Fragments par Fichier",
+    "settings.maxChunks.unlimited": "Illimité",
     "settings.window": "Fenêtre",
     "settings.startMaximized": "Démarrer en Plein Écran",
     "settings.rememberWindowSize": "Mémoriser la Taille",
     "settings.reset": "Réinitialiser par Défaut",
     "settings.save": "Enregistrer",
+    "settings.profileSelect.default": "-- Sélectionner un profil --",
   },
   de: {
     "app.title": "Trainingsgenerator",
@@ -644,38 +655,80 @@ const translations: Record<string, TranslationDict> = {
     "settings.rememberWindowSize": "Fenstergröße Merken",
     "settings.reset": "Auf Standard Zurücksetzen",
     "settings.save": "Einstellungen Speichern",
+    "settings.profileSelect.default": "-- Profil auswählen --",
   },
 }
 
-export function t(key: string, lang: string): string {
-  return translations[lang]?.[key] || translations["en"]?.[key] || key
+let currentLang="en"
+
+export function t(key: string, lang: string, params?: Record<string, string>): string {
+  let value=translations[lang]?.[key] ?? translations["en"]?.[key] ?? key
+  if(params){
+    value=value.replace(/\{\{(\w+)\}\}/g,(_,name)=>params[name] ?? "")
+  }
+  return value
 }
 
-export function applyLanguage(lang: string): void {
-  const elements = document.querySelectorAll("[data-i18n]")
-  elements.forEach((el) => {
-    const key = el.getAttribute("data-i18n")
-    if (key) {
-      const translated = t(key, lang)
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-        if (el.type === "text" || el.type === "password" || el.type === "email" || el.tagName === "TEXTAREA") {
-          el.placeholder = translated
-        }
-      } else if (el instanceof HTMLOptionElement) {
-        el.textContent = translated
-      } else {
-        el.textContent = translated
+export function detectLocale(): string{
+  let lang=typeof navigator!=="undefined" ? navigator.language || "en" : "en"
+  let map:Record<string,string>={
+    "zh-CN":"zh-Hans",
+    "zh-SG":"zh-Hans",
+    "zh-TW":"zh-Hant",
+    "zh-HK":"zh-Hant",
+    "zh-MO":"zh-Hant"
+  }
+  if(map[lang])return map[lang]
+  let base=lang.split("-")[0]
+  let supported=["en","zh-Hans","zh-Hant","es","fr","de","ja","ko"]
+  if(supported.includes(base))return base
+  return "en"
+}
+
+function setElementText(el: Element, text: string): void{
+  if(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement){
+    if(el.type==="text" || el.type==="password" || el.type==="email" || el.tagName==="TEXTAREA"){
+      el.placeholder=text
+    }
+  }
+  else if(el instanceof HTMLOptionElement){
+    el.textContent=text
+  }
+  else{
+    let found=false
+    for(let node of Array.from(el.childNodes)){
+      if(node.nodeType===Node.TEXT_NODE && node.textContent && node.textContent.trim().length>0){
+        node.textContent=text
+        found=true
+        break
       }
     }
-  })
-  // Also handle placeholders
-  const placeholderEls = document.querySelectorAll("[data-i18n-placeholder]")
-  placeholderEls.forEach((el) => {
-    const key = el.getAttribute("data-i18n-placeholder")
-    if (key && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) {
-      el.placeholder = t(key, lang)
+    if(!found){
+      el.textContent=text
+    }
+  }
+}
+
+export function applyLanguage(lang?: string): void{
+  currentLang=lang || localStorage.getItem("train-generator-ui-lang") || detectLocale()
+  localStorage.setItem("train-generator-ui-lang",currentLang)
+  let elements=document.querySelectorAll("[data-i18n]")
+  elements.forEach((el)=>{
+    let key=el.getAttribute("data-i18n")
+    if(key){
+      setElementText(el,t(key,currentLang))
     }
   })
-  // Update document lang attribute
-  document.documentElement.lang = lang
+  let placeholderEls=document.querySelectorAll("[data-i18n-placeholder]")
+  placeholderEls.forEach((el)=>{
+    let key=el.getAttribute("data-i18n-placeholder")
+    if(key && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)){
+      el.placeholder=t(key,currentLang)
+    }
+  })
+  document.documentElement.lang=currentLang
+}
+
+export function getCurrentLang(): string{
+  return currentLang
 }

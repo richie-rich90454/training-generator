@@ -1,8 +1,10 @@
 import type{OllamaModel,OllamaStatus,AppSettings,FullAppSettings}from"../types/index.js"
 import{createVirtualList}from"./virtualList.js"
-import{applyLanguage}from"./i18n.js"
+import{applyLanguage,getCurrentLang}from"./i18n.js"
 import{encryptKey,decryptKey}from"./security.js"
 import{listProfiles,saveProfile,loadProfile,deleteProfile}from"./configProfiles.js"
+import{getHelpContent}from"./helpContent.js"
+import{showConfirm}from"./confirm.js"
 
 class UIManager{
     app:any
@@ -48,6 +50,10 @@ class UIManager{
     uiLanguage:string
     logCount:number=0
     lastFocusedElement:HTMLElement|null=null
+    profileSequence:number=0
+    mediaListener:((e:MediaQueryListEvent)=>void)|null=null
+    helpKeydownHandler:((e:Event)=>void)|null=null
+    statusSpan:HTMLElement|null=null
 
     constructor(app:any){
         this.app=app
@@ -70,9 +76,14 @@ class UIManager{
         this.copyBtn=document.getElementById("copy-btn") as HTMLButtonElement
         this.exportFormat=document.getElementById("export-format") as HTMLSelectElement
         this.ollamaStatusEl=document.getElementById("ollama-status") as HTMLElement
+        if(this.ollamaStatusEl){
+            this.statusSpan=this.ollamaStatusEl.querySelector("span")
+        }
         this.settingsBtn=document.getElementById("settings-btn") as HTMLElement
         this.settingsModal=document.getElementById("settings-modal") as HTMLElement
-        this.modalClose=document.querySelector(".modal-close") as HTMLElement
+        if(this.settingsModal){
+            this.modalClose=this.settingsModal.querySelector(".modal-close") as HTMLElement
+        }
         this.helpBtn=document.getElementById("help-btn") as HTMLElement
         this.modelSelect=document.getElementById("model-select") as HTMLSelectElement
         this.processingType=document.getElementById("processing-type") as HTMLSelectElement
@@ -112,7 +123,12 @@ class UIManager{
         let min=parseFloat(this.temperatureInput.min)||0
         let max=parseFloat(this.temperatureInput.max)||1
         if(isNaN(value))value=0.7
-        let percentage=((value-min)/(max-min))*100
+        if(value<min)value=min
+        if(value>max)value=max
+        let percentage=0
+        if(max>min){
+            percentage=((value-min)/(max-min))*100
+        }
         this.temperatureInput.style.setProperty("--range-fill",`${percentage}%`)
         this.temperatureValue.textContent=value.toFixed(1)
     }
@@ -130,6 +146,8 @@ class UIManager{
         }
     }
     addLog(message:string,type:string="info"):void{
+        if(!this.processingLog)return
+        this.logCount=this.processingLog.children.length
         let logEntry=document.createElement("div")
         logEntry.className=`log-entry ${type}`
         logEntry.innerHTML=`
@@ -227,12 +245,26 @@ class UIManager{
         else{
             this.removeFocusTrap()
             this.restoreFocus()
-            window.setTimeout(()=>{
+            let duration=this.parseTransitionDuration(this.settingsModal)
+            let handled=false
+            let onTransitionEnd=()=>{
+                handled=true
+                this.settingsModal.removeEventListener("transitionend",onTransitionEnd)
                 if(!this.settingsModal.classList.contains("active")){
                     this.settingsModal.style.display="none"
                 }
-            },parseFloat(getComputedStyle(this.settingsModal).transitionDuration||"0.15s")*1000)
+            }
+            this.settingsModal.addEventListener("transitionend",onTransitionEnd)
+            window.setTimeout(()=>{
+                if(!handled)onTransitionEnd()
+            },duration+50)
         }
+    }
+    private parseTransitionDuration(element:HTMLElement):number{
+        let duration=getComputedStyle(element).transitionDuration||"0.15s"
+        let value=parseFloat(duration)
+        if(duration.includes("ms"))return value
+        return value*1000
     }
     showCustomModal(content:string):void{
         let body=this.settingsModal.querySelector(".modal-body")
@@ -244,7 +276,7 @@ class UIManager{
     focusTrapHandler:((e:Event)=>void)|null=null
     trapFocus(modalElement:HTMLElement):void{
         if(this.focusTrapHandler)return
-        let focusableSelector='button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        let focusableSelector='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
         this.focusTrapHandler=(e:Event)=>{
             let ke=e as KeyboardEvent
             if(ke.key!=="Tab")return
@@ -284,32 +316,7 @@ class UIManager{
     }
     showHelp():void{
         this.addLog("Opening help documentation...","info")
-        let helpContent=`
-            <h3><i class="fas fa-question-circle"></i>Training Generator Help</h3>
-            <div class="help-section">
-                <h4>Getting Started</h4>
-                <p>1.<strong>Upload Files</strong>:Drag & drop or click to browse for documents(PDF,DOCX,DOC,RTF,TXT,MD,HTML)</p>
-                <p>2.<strong>Configure Settings</strong>:Select model,processing type,output format,and chunk size</p>
-                <p>3.<strong>Process Files</strong>:Click "Process Files" to convert documents to training data</p>
-                <p>4.<strong>Export Results</strong>:Save or copy the generated training data</p>
-            </div>
-            <div class="help-section">
-                <h4>Requirements</h4>
-                <p>•<strong>Ollama</strong>:Must be installed and running for AI processing</p>
-                <p>•<strong>Models</strong>:Pull models using<code>ollama pull <model-name></code></p>
-                <p>•<strong>File Size</strong>:Maximum 100MB per file</p>
-            </div>
-            <div class="help-section">
-                <h4>Troubleshooting</h4>
-                <p>•<strong>Ollama Not Detected</strong>:Run<code>ollama serve</code>in terminal</p>
-                <p>•<strong>PDF Extraction Issues</strong>:Try converting problematic PDFs to text first</p>
-                <p>•<strong>Large Files</strong>:Processing may take longer for files>20MB</p>
-            </div>
-            <div class="help-section">
-                <h4>Need More Help?</h4>
-                <p>Visit the GitHub repository for documentation and issue reporting.</p>
-            </div>
-        `
+        let helpContent=getHelpContent()
         let helpModal=document.getElementById("help-modal") as HTMLElement|null
         if(!helpModal){
             helpModal=document.createElement("div")
@@ -331,16 +338,45 @@ class UIManager{
             `
             document.body.appendChild(helpModal)
             helpModal.querySelector(".help-close")!.addEventListener("click",()=>{
-                helpModal!.classList.remove("active")
+                this.hideHelp()
             })
             helpModal.addEventListener("click",(e:Event)=>{
                 if(e.target==helpModal){
-                    helpModal!.classList.remove("active")
+                    this.hideHelp()
                 }
             })
         }
         helpModal.classList.add("active")
+        helpModal.style.display="flex"
+        this.lastFocusedElement=document.activeElement as HTMLElement
+        this.trapFocus(helpModal)
+        if(!this.helpKeydownHandler){
+            this.helpKeydownHandler=(e:Event)=>{
+                let ke=e as KeyboardEvent
+                if(ke.key==="Escape"){
+                    this.hideHelp()
+                }
+            }
+            document.addEventListener("keydown",this.helpKeydownHandler)
+        }
+        let focusable=helpModal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])')
+        if(focusable.length>0){
+            (focusable[0] as HTMLElement).focus()
+        }
         this.addLog("Help documentation opened","success")
+    }
+    private hideHelp():void{
+        let helpModal=document.getElementById("help-modal")
+        if(helpModal){
+            helpModal.classList.remove("active")
+            helpModal.style.display="none"
+        }
+        this.removeFocusTrap()
+        this.restoreFocus()
+        if(this.helpKeydownHandler){
+            document.removeEventListener("keydown",this.helpKeydownHandler)
+            this.helpKeydownHandler=null
+        }
     }
     async loadSettings():Promise<void>{
         try{
@@ -356,7 +392,9 @@ class UIManager{
                 let n=Number(settings.chunkSize)
                 if(Number.isFinite(n)&&n>=500&&n<=10000)this.chunkSize.value=String(n)
             }
-            if(settings.provider)this.providerSelect.value=settings.provider
+            let validProviders=Array.from(this.providerSelect.options).map(o=>o.value)
+            if(settings.provider&&validProviders.includes(settings.provider))this.providerSelect.value=settings.provider
+            if(settings.baseUrl&&typeof settings.baseUrl==="string"&&/^https?:\/\//.test(settings.baseUrl))this.baseUrlInput.value=settings.baseUrl
             if(settings.apiKey){
                 let decrypted=await decryptKey(settings.apiKey)
                 if(decrypted!=null){
@@ -374,7 +412,6 @@ class UIManager{
                     this.apiKeyInput.value=""
                 }
             }
-            if(settings.baseUrl)this.baseUrlInput.value=settings.baseUrl
             if(settings.temperature!=null){
                 let t=Number(settings.temperature)
                 if(Number.isFinite(t)&&t>=0&&t<=1){
@@ -438,8 +475,7 @@ class UIManager{
                                 previewLines=previewLines.substring(0,100)+"..."
                             }
                             if(loadedPrompt.includes("{text}")){
-                                let escapedPreviewLines=this.sanitizeText(previewLines)
-                                promptPreview=`(prompt:"${escapedPreviewLines}")`
+                                promptPreview=`(prompt:"${previewLines}")`
                             }
                             else{
                                 promptPreview=""
@@ -458,8 +494,7 @@ class UIManager{
                         if(previewLines.length>100){
                             previewLines=previewLines.substring(0,100)+"..."
                         }
-                        let escapedPreviewLines=this.sanitizeText(previewLines)
-                        promptPreview=`(prompt:"${escapedPreviewLines}")`
+                        promptPreview=`(prompt:"${previewLines}")`
                         break
                     }
                 }
@@ -470,7 +505,7 @@ class UIManager{
             this.addLog(`Settings saved. Output language set to: ${settings.language}${promptPreview}`,"success")
             let nonLatinLanguages=["zh-Hans","zh-Hant","ja","ko"]
             if(nonLatinLanguages.includes(settings.language!)){
-                this.addLog(`Note: ${settings.language}uses non-Latin script. Ensure your Ollama model supports this language.`,"warning")
+                this.addLog(`Note: ${settings.language} uses non-Latin script. Ensure your Ollama model supports this language.`,"warning")
             }
         }
         catch(error){
@@ -660,20 +695,26 @@ class UIManager{
         }
     }
     applyTheme(theme:string):void{
+        if(this.mediaListener){
+            let mql=window.matchMedia("(prefers-color-scheme:dark)")
+            mql.removeEventListener("change",this.mediaListener)
+            this.mediaListener=null
+        }
         document.body.classList.remove("theme-light","theme-dark")
+        let apply=(isDark:boolean)=>{
+            document.body.classList.add(isDark?"theme-dark":"theme-light")
+        }
         if(theme=="light"){
-            document.body.classList.add("theme-light")
+            apply(false)
         }
         else if(theme=="dark"){
-            document.body.classList.add("theme-dark")
+            apply(true)
         }
         else{
-            if(window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches){
-                document.body.classList.add("theme-dark")
-            }
-            else{
-                document.body.classList.add("theme-light")
-            }
+            let mql=window.matchMedia("(prefers-color-scheme:dark)")
+            apply(mql.matches)
+            this.mediaListener=(e:MediaQueryListEvent)=>apply(e.matches)
+            mql.addEventListener("change",this.mediaListener)
         }
     }
     applyFontSize(size:string):void{
@@ -709,8 +750,11 @@ class UIManager{
     }
     async applyProfile(name:string):Promise<void>{
         if(!name)return
+        this.profileSequence++
+        let seq=this.profileSequence
         let profile=await loadProfile(name)
         if(!profile)return
+        if(seq!==this.profileSequence)return
         this.modelSelect.value=profile.model||""
         this.processingType.value=profile.processingType||"instruction"
         this.outputFormat.value=profile.outputFormat||"jsonl"
@@ -747,7 +791,7 @@ class UIManager{
     async deleteCurrentProfile():Promise<void>{
         let name=this.profileSelect.value
         if(!name)return
-        let confirmed=window.confirm(`Delete profile "${name}"?`)
+        let confirmed=await showConfirm(`Delete profile "${name}"?`,`Delete Profile`)
         if(!confirmed)return
         await deleteProfile(name)
         await this.refreshProfiles()
@@ -785,7 +829,7 @@ class UIManager{
         try{
             if(!window.electronAPI ||!window.electronAPI.checkOllama){
                 console.warn("electronAPI not available,running in browser mode")
-                this.ollamaStatusEl.querySelector("span")!.textContent="Ollama:Browser Mode"
+                if(this.statusSpan)this.statusSpan.textContent="Ollama:Browser Mode"
                 this.ollamaStatusEl.className="status-indicator status-offline"
                 this.addLog("Running in browser mode(Ollama unavailable)","warning")
                 return{running:false,models:[],error:"Browser mode"}
@@ -794,13 +838,13 @@ class UIManager{
             this.ollamaStatus=status
             if(status.running){
                 let versionText=status.version&&status.version!=="unknown"?`v${String(status.version).replace(/[\x00-\x1F<>"'&]/g,"")}`:""
-                this.ollamaStatusEl.querySelector("span")!.textContent=`Ollama:Online ${versionText}(${status.models.length}models)`
+                if(this.statusSpan)this.statusSpan.textContent=`Ollama:Online ${versionText}(${status.models.length}models)`
                 this.ollamaStatusEl.className="status-indicator status-online"
                 this.addLog(`Ollama is running(${status.version})with ${status.models.length}models`,"success")
                 this.updateModelSelect(status.models)
             }
             else{
-                this.ollamaStatusEl.querySelector("span")!.textContent="Ollama:Offline"
+                if(this.statusSpan)this.statusSpan.textContent="Ollama:Offline"
                 this.ollamaStatusEl.className="status-indicator status-offline"
                 this.addLog("Ollama is not running. Please start Ollama to process files.","error")
             }
@@ -809,7 +853,7 @@ class UIManager{
         }
         catch(error){
             console.error("Error checking Ollama status:",error)
-            this.ollamaStatusEl.querySelector("span")!.textContent="Ollama:Error"
+            if(this.statusSpan)this.statusSpan.textContent="Ollama:Error"
             this.ollamaStatusEl.className="status-indicator status-offline"
             this.addLog("Failed to check Ollama status","error")
             return{running:false,models:[],error:(error as Error).message}
