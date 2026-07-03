@@ -154,10 +154,10 @@ class OutputManager{
         }
         flushPair()
         if(pairs.length==0&&text.length<100000){
-            let qaMatches=text.match(/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis)
+            let qaMatches=text.match(/^Q:\s*(.*?)\s*^A:\s*(.*?)(?=^Q:|$)/gims)
             if(qaMatches){
                 for(let match of qaMatches){
-                    let qMatch=match.match(/Q:\s*(.*?)\s*A:\s*(.*)/is)
+                    let qMatch=match.match(/^Q:\s*(.*?)\s*^A:\s*(.*)/ims)
                     if(qMatch&&(qMatch[1]||qMatch[2])){
                         pairs.push({
                             question:qMatch[1].trim(),
@@ -215,10 +215,10 @@ class OutputManager{
             })
         }
         if(turns.length==0&&text.length<100000){
-            let convMatches=text.match(/Human:\s*(.*?)\s*Assistant:\s*(.*?)(?=Human:|$)/gis)
+            let convMatches=text.match(/^Human:\s*(.*?)\s*^Assistant:\s*(.*?)(?=^Human:|$)/gims)
             if(convMatches){
                 for(let match of convMatches){
-                    let hMatch=match.match(/Human:\s*(.*?)\s*Assistant:\s*(.*)/is)
+                    let hMatch=match.match(/^Human:\s*(.*?)\s*^Assistant:\s*(.*)/ims)
                     if(hMatch&&hMatch[1]&&hMatch[2]){
                         turns.push({
                             user:hMatch[1].trim(),
