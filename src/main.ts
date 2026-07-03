@@ -9,7 +9,7 @@ import https from "https"
 import crypto from "crypto"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
-import{handle}from "./ipcMain.js"
+import{handle}from "./ipcMain.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})

@@ -1,5 +1,5 @@
 import{contextBridge}from "electron"
-import{invoke}from "./ipcRenderer.js"
+import{invoke}from "./ipcRenderer.ts"
 import type{FileObj}from "./types/index.js"
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>invoke("dialog:openFile"),
