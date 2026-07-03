@@ -188,125 +188,125 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
 ## Phase 2 — High (functional defects, leaks)
 
-* [ ] Task 14: Fix splash/main window lifecycle (`src/main.ts`)
+* [x] Task 14: Fix splash/main window lifecycle (`src/main.ts`)
 
-  * [ ] SubTask 14.1: Attach `splashProcess.on("error",...)` and `splashProcess.on("exit",()=>{splashProcess=null})`
+  * [x] SubTask 14.1: Attach `splashProcess.on("error",...)` and `splashProcess.on("exit",()=>{splashProcess=null})`
 
-  * [ ] SubTask 14.2: Guard `splashWindow!`/`mainWindow!` with `isDestroyed()` checks in async callbacks
+  * [x] SubTask 14.2: Guard `splashWindow!`/`mainWindow!` with `isDestroyed()` checks in async callbacks
 
-  * [ ] SubTask 14.3: Register deferred IPC handlers in `whenReady` (or fallback) not only `dom-ready`
+  * [x] SubTask 14.3: Register deferred IPC handlers in `whenReady` (or fallback) not only `dom-ready`
 
-  * [ ] SubTask 14.4: `before-quit` uses `event.preventDefault()` for async work then `app.exit()`; close `splashWindow`; destroy `httpAgent`/`httpsAgent`
+  * [x] SubTask 14.4: `before-quit` uses `event.preventDefault()` for async work then `app.exit()`; close `splashWindow`; destroy `httpAgent`/`httpsAgent`
 
-  * [ ] SubTask 14.5: Call `app.requestSingleInstanceLock()`; handle `second-instance` to focus existing window
+  * [x] SubTask 14.5: Call `app.requestSingleInstanceLock()`; handle `second-instance` to focus existing window
 
-  * [ ] SubTask 14.6: Add `.catch` to `whenReady().then(...)`
+  * [x] SubTask 14.6: Add `.catch` to `whenReady().then(...)`
 
-  * [ ] SubTask 14.7: `uncaughtException`/`unhandledRejection` log + `app.quit()` (or show dialog)
+  * [x] SubTask 14.7: `uncaughtException`/`unhandledRejection` log + `app.quit()` (or show dialog)
 
-  * [ ] SubTask 14.8: Pass `mainWindow ?? undefined` to `dialog.show*Dialog`
+  * [x] SubTask 14.8: Pass `mainWindow ?? undefined` to `dialog.show*Dialog`
 
-  * [ ] SubTask 14.9: Guard `did-fail-load` to main-frame only; check `validatedURL` defined
+  * [x] SubTask 14.9: Guard `did-fail-load` to main-frame only; check `validatedURL` defined
 
-  * [ ] SubTask 14.10: Serialize concurrent `write-log` with a promise queue; use `fsp` async equivalents
+  * [x] SubTask 14.10: Serialize concurrent `write-log` with a promise queue; use `fsp` async equivalents
 
-  * [ ] SubTask 14.11: Validate `cache:save`/`progress:save`/`save-checkpoint` data size/type; reject `null` in `write-log`
+  * [x] SubTask 14.11: Validate `cache:save`/`progress:save`/`save-checkpoint` data size/type; reject `null` in `write-log`
 
-* [ ] Task 15: Fix settings persistence (`src/renderer/uiManager.ts`)
+* [x] Task 15: Fix settings persistence (`src/renderer/uiManager.ts`)
 
-  * [ ] SubTask 15.1: Align `smartSizing` ↔ `smart-sizing` DOM id in load/save arrays
+  * [x] SubTask 15.1: Align `smartSizing` ↔ `smart-sizing` DOM id in load/save arrays
 
-  * [ ] SubTask 15.2: Save `maxOutputItems` and `maxChunks` in `saveAppSettings`
+  * [x] SubTask 15.2: Save `maxOutputItems` and `maxChunks` in `saveAppSettings`
 
-  * [ ] SubTask 15.3: Capture `modelSelect.value` before rebuilding; restore if model still exists
+  * [x] SubTask 15.3: Capture `modelSelect.value` before rebuilding; restore if model still exists
 
-  * [ ] SubTask 15.4: Track scroll handler in `virtualList.ts`; remove at start of `createVirtualList` (or return `destroy()`)
+  * [x] SubTask 15.4: Track scroll handler in `virtualList.ts`; remove at start of `createVirtualList` (or return `destroy()`)
 
-  * [ ] SubTask 15.5: Use `{text}` consistently (not `{{text}}`); align `templateEditor` and `savePreset`
+  * [x] SubTask 15.5: Use `{text}` consistently (not `{{text}}`); align `templateEditor` and `savePreset`
 
-  * [ ] SubTask 15.6: Add `destroy()` to `UIManager` that clears `intervals`/`timeouts`
+  * [x] SubTask 15.6: Add `destroy()` to `UIManager` that clears `intervals`/`timeouts`
 
-* [ ] Task 16: Fix devtools log memory leak (`src/renderer/devtools.ts`)
+* [x] Task 16: Fix devtools log memory leak (`src/renderer/devtools.ts`)
 
-  * [ ] SubTask 16.1: Cap `logEntries` (e.g. 1000) as ring buffer
+  * [x] SubTask 16.1: Cap `logEntries` (e.g. 1000) as ring buffer
 
-  * [ ] SubTask 16.2: Append single DOM node per log (throttle/batch via `requestAnimationFrame`)
+  * [x] SubTask 16.2: Append single DOM node per log (throttle/batch via `requestAnimationFrame`)
 
-  * [ ] SubTask 16.3: Escape `time` and `level`; validate `level` against allow-list before use as CSS class
+  * [x] SubTask 16.3: Escape `time` and `level`; validate `level` against allow-list before use as CSS class
 
-  * [ ] SubTask 16.4: Null references in `dispose()`; validate `tabName` against allow-list
+  * [x] SubTask 16.4: Null references in `dispose()`; validate `tabName` against allow-list
 
-  * [ ] SubTask 16.5: Use explicit locale (`en-US`) for number formatting
+  * [x] SubTask 16.5: Use explicit locale (`en-US`) for number formatting
 
-* [ ] Task 17: Fix CSV export injection (`src/renderer/exportFormats.ts`, `src/renderer/uiManager.ts`)
+* [x] Task 17: Fix CSV export injection (`src/renderer/exportFormats.ts`, `src/renderer/uiManager.ts`)
 
-  * [ ] SubTask 17.1: `csvEscape` quotes fields containing `,`, `"`, `\n`, `\r`, or formula-leading char; prefix `=`,`+`,`-`,`@`,tab,CR with `'`
+  * [x] SubTask 17.1: `csvEscape` quotes fields containing `,`, `"`, `\n`, `\r`, or formula-leading char; prefix `=`,`+`,`-`,`@`,tab,CR with `'`
 
-  * [ ] SubTask 17.2: Reconcile `escapeCsvField` (uiManager) with `csvEscape` (exportFormats) — single helper
+  * [x] SubTask 17.2: Reconcile `escapeCsvField` (uiManager) with `csvEscape` (exportFormats) — single helper
 
-  * [ ] SubTask 17.3: Add UTF-8 BOM to CSV export
+  * [x] SubTask 17.3: Add UTF-8 BOM to CSV export
 
-  * [ ] SubTask 17.4: Append trailing newline to JSONL
+  * [x] SubTask 17.4: Append trailing newline to JSONL
 
-  * [ ] SubTask 17.5: Use `item.instruction != null ? String(item.instruction) : ""` (not `|| ""`)
+  * [x] SubTask 17.5: Use `item.instruction != null ? String(item.instruction) : ""` (not `|| ""`)
 
-  * [ ] SubTask 17.6: Filter null/undefined items; choose header appropriate to dominant item shape
+  * [x] SubTask 17.6: Filter null/undefined items; choose header appropriate to dominant item shape
 
-* [ ] Task 18: Fix file parser memory + encoding (`src/core/fileParser.ts`, `src/core/fileParserLazy.ts`)
+* [x] Task 18: Fix file parser memory + encoding (`src/core/fileParser.ts`, `src/core/fileParserLazy.ts`)
 
-  * [ ] SubTask 18.1: Add `maxSize` to `streamTextFile` (lazy already has 50MB); `destroy()` on overflow
+  * [x] SubTask 18.1: Add `maxSize` to `streamTextFile` (lazy already has 50MB); `destroy()` on overflow
 
-  * [ ] SubTask 18.2: Strip UTF-8 BOM after `toString("utf-8")` in `parseText`/`parseHTML`/`parseRTF` (both files)
+  * [x] SubTask 18.2: Strip UTF-8 BOM after `toString("utf-8")` in `parseText`/`parseHTML`/`parseRTF` (both files)
 
-  * [ ] SubTask 18.3: Set `settle` guard on `streamTextFile` to prevent double-resolve/reject
+  * [x] SubTask 18.3: Set `settle` guard on `streamTextFile` to prevent double-resolve/reject
 
-  * [ ] SubTask 18.4: `fileParserLazy.parsePDFWithWorker` — use `pdfWorker.js` path + `{type:"module"}`
+  * [x] SubTask 18.4: `fileParserLazy.parsePDFWithWorker` — use `pdfWorker.js` path + `{type:"module"}`
 
-  * [ ] SubTask 18.5: `fileParserLazy.parsePDFWithWorker` — use `crypto.randomUUID()` for `id`; `===` for comparison; always reject on exit regardless of code
+  * [x] SubTask 18.5: `fileParserLazy.parsePDFWithWorker` — use `crypto.randomUUID()` for `id`; `===` for comparison; always reject on exit regardless of code
 
-  * [ ] SubTask 18.6: Cache in-flight promise in `loadDependency`; check `isDisposed` before assigning
+  * [x] SubTask 18.6: Cache in-flight promise in `loadDependency`; check `isDisposed` before assigning
 
-  * [ ] SubTask 18.7: Use real streaming PDF extractor or rename "Large file detected" log to "parsing in memory"
+  * [x] SubTask 18.7: Use real streaming PDF extractor or rename "Large file detected" log to "parsing in memory"
 
-  * [ ] SubTask 18.8: Use `RtfParser` consistently; only fall back to careful regex that decodes `\uN`/`\'hh`
+  * [x] SubTask 18.8: Use `RtfParser` consistently; only fall back to careful regex that decodes `\uN`/`\'hh`
 
-  * [ ] SubTask 18.9: Add `"htm"` to `supportedFormats`; normalize `htm`→`html`
+  * [x] SubTask 18.9: Add `"htm"` to `supportedFormats`; normalize `htm`→`html`
 
-  * [ ] SubTask 18.10: Keep full Error on result object (include stack); `dispose()` cancels pending `loadDependency`
+  * [x] SubTask 18.10: Keep full Error on result object (include stack); `dispose()` cancels pending `loadDependency`
 
-  * [ ] SubTask 18.11: Lower PDF worker threshold to 1 MB or always use worker
+  * [x] SubTask 18.11: Lower PDF worker threshold to 1 MB or always use worker
 
-  * [ ] SubTask 18.12: Transfer buffer to worker when no fallback needed (or re-read on fallback)
+  * [x] SubTask 18.12: Transfer buffer to worker when no fallback needed (or re-read on fallback)
 
-* [ ] Task 19: Fix virtual list (`src/renderer/virtualList.ts`)
+* [x] Task 19: Fix virtual list (`src/renderer/virtualList.ts`)
 
-  * [ ] SubTask 19.1: Return `destroy()` that removes scroll listener; caller destroys previous instance
+  * [x] SubTask 19.1: Return `destroy()` that removes scroll listener; caller destroys previous instance
 
-  * [ ] SubTask 19.2: Add `ResizeObserver` to re-render when container becomes visible
+  * [x] SubTask 19.2: Add `ResizeObserver` to re-render when container becomes visible
 
-  * [ ] SubTask 19.3: Re-snapshot `items.length` inside `render` defensively
+  * [x] SubTask 19.3: Re-snapshot `items.length` inside `render` defensively
 
-  * [ ] SubTask 19.4: Cap spacer height (cluster/buffer for >1.2M items)
+  * [x] SubTask 19.4: Cap spacer height (cluster/buffer for >1.2M items)
 
-* [ ] Task 20: Fix chunker data loss (`src/renderer/chunker.ts`)
+* [x] Task 20: Fix chunker data loss (`src/renderer/chunker.ts`)
 
-  * [ ] SubTask 20.1: Capture tail `currentChunk.slice(wsIdx)` and prepend to next chunk (don't drop text)
+  * [x] SubTask 20.1: Capture tail `currentChunk.slice(wsIdx)` and prepend to next chunk (don't drop text)
 
-  * [ ] SubTask 20.2: Use either `contextPrefix` or `overlap`, not both
+  * [x] SubTask 20.2: Use either `contextPrefix` or `overlap`, not both
 
-  * [ ] SubTask 20.3: Treat CJK punctuation as hard boundary (no whitespace requirement)
+  * [x] SubTask 20.3: Treat CJK punctuation as hard boundary (no whitespace requirement)
 
-  * [ ] SubTask 20.4: Fix table-row detection (`split('|').length >= 3`)
+  * [x] SubTask 20.4: Fix table-row detection (`split('|').length >= 3`)
 
-  * [ ] SubTask 20.5: Mirror row predicate between `detectSemanticUnits` and `splitUnitAtRowBoundary`
+  * [x] SubTask 20.5: Mirror row predicate between `detectSemanticUnits` and `splitUnitAtRowBoundary`
 
-  * [ ] SubTask 20.6: Advance `i` past any sentence whose `start` is within the unit
+  * [x] SubTask 20.6: Advance `i` past any sentence whose `start` is within the unit
 
-  * [ ] SubTask 20.7: Apply `overlap` in oversized-unit path
+  * [x] SubTask 20.7: Apply `overlap` in oversized-unit path
 
-  * [ ] SubTask 20.8: Early return on `text.trim().length===0`; `simpleChunk` splits oversized units
+  * [x] SubTask 20.8: Early return on `text.trim().length===0`; `simpleChunk` splits oversized units
 
-  * [ ] SubTask 20.9: Add abbreviation guardlist to `splitSentences` fallback
+  * [x] SubTask 20.9: Add abbreviation guardlist to `splitSentences` fallback
 
 * [ ] Task 21: Fix types/config consistency
 
