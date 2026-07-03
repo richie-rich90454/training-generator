@@ -28,7 +28,6 @@
     }
     let steps=["Initializing application...", "Loading core modules...", "Setting up file parser...", "Connecting to Ollama...", "Preparing user interface...", "Almost ready..."]
     let currentStep=0
-    let totalSteps=steps.length
     let timers=[]
     function schedule(fn,delay){
         let id=setTimeout(fn,delay)
@@ -41,8 +40,8 @@
     }
     function updateProgress(){
         if(!progressBar||!loadingText)return
-        if(currentStep<totalSteps){
-            let progress=(currentStep/totalSteps)*100
+        if(currentStep<steps.length){
+            let progress=(currentStep/steps.length)*100
             progressBar.style.width=`${progress}%`
             loadingText.textContent=steps[currentStep]
             currentStep++
