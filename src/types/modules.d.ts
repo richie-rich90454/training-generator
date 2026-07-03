@@ -1,4 +1,12 @@
 /// <reference types="vite/client" />
+declare module "node:stream/web"{
+    export interface UnderlyingDefaultSource<R=unknown>{
+        start?(controller:ReadableStreamDefaultController<R>):void|Promise<void>
+        pull?(controller:ReadableStreamDefaultController<R>):void|Promise<void>
+        cancel?(reason?:unknown):void|Promise<void>
+        type?:undefined
+    }
+}
 declare module "pdf-parse"{
     let pdfParse:(buffer:Buffer)=>Promise<{text:string;numpages:number;info:Record<string,unknown>;metadata:Record<string,unknown>;version:string}>;
     export default pdfParse;
