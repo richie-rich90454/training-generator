@@ -2,10 +2,10 @@ import esbuild from "esbuild"
 import path from "path"
 import { fileURLToPath } from "url"
 
-let __dirname = path.dirname(fileURLToPath(import.meta.url))
-let root = path.resolve(__dirname, "..")
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(__dirname, "..")
 
-let external = [
+const external = [
     "electron",
     "axios",
     "pdf-parse",
@@ -17,7 +17,7 @@ let external = [
     "better-sqlite3"
 ]
 
-let commonOptions = {
+const commonOptions = {
     bundle: true,
     platform: "node",
     target: "node20",

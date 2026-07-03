@@ -5,14 +5,14 @@ import{globSync}from "glob"
 import{fileURLToPath}from "url"
 import type{Plugin}from "vite"
 
-let __dirname=path.dirname(fileURLToPath(import.meta.url))
+const __dirname=path.dirname(fileURLToPath(import.meta.url))
 
 function copyPromptsPlugin():Plugin{
     return{
         name:"copy-prompts",
         writeBundle(){
-            let srcDir=path.resolve(__dirname,"src/prompts")
-            let destDir=path.resolve(__dirname,"dist/prompts")
+            const srcDir=path.resolve(__dirname,"src/prompts")
+            const destDir=path.resolve(__dirname,"dist/prompts")
             if(!fs.existsSync(srcDir)){
                 console.warn(`Source directory ${srcDir} does not exist`)
                 return
@@ -20,12 +20,12 @@ function copyPromptsPlugin():Plugin{
             if(!fs.existsSync(destDir)){
                 fs.mkdirSync(destDir,{recursive:true})
             }
-            let files=globSync("**/*",{cwd:srcDir,nodir:true})
+            const files=globSync("**/*",{cwd:srcDir,nodir:true})
             let copiedCount=0
-            for(let file of files){
-                let srcFile=path.join(srcDir,file)
-                let destFile=path.join(destDir,file)
-                let destDirName=path.dirname(destFile)
+            for(const file of files){
+                const srcFile=path.join(srcDir,file)
+                const destFile=path.join(destDir,file)
+                const destDirName=path.dirname(destFile)
                 if(!fs.existsSync(destDirName)){
                     fs.mkdirSync(destDirName,{recursive:true})
                 }
