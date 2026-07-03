@@ -747,6 +747,7 @@ class UIManager{
         if(currentValue&&profiles.some(p=>p.name===currentValue)){
             this.profileSelect.value=currentValue
         }
+        applyLanguage(getCurrentLang())
     }
     async applyProfile(name:string):Promise<void>{
         if(!name)return
@@ -823,6 +824,7 @@ class UIManager{
         if(previousValue&&models.some(m=>m.name===previousValue)){
             this.modelSelect.value=previousValue
         }
+        applyLanguage(getCurrentLang())
         this.app.fileManager.updateProcessButton()
     }
     async checkOllamaStatus():Promise<OllamaStatus>{

@@ -1,7 +1,7 @@
 type TranslationDict = Record<string, string>
 
 const translations: Record<string, TranslationDict> = {
-  en: {
+  "en": {
     "app.title": "Training Generator",
     "app.subtitle": "Convert documents to AI training data using Ollama",
     "header.settings": "Settings",
@@ -247,7 +247,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.save": "儲存設定",
     "settings.profileSelect.default": "-- 選擇設定檔 --",
   },
-  ja: {
+  "ja": {
     "app.title": "トレーニングジェネレーター",
     "app.subtitle": "Ollamaを使用してドキュメントをAIトレーニングデータに変換",
     "header.settings": "設定",
@@ -411,7 +411,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.save": "설정 저장",
     "settings.profileSelect.default": "-- 프로필 선택 --",
   },
-  es: {
+  "es": {
     "app.title": "Generador de Entrenamiento",
     "app.subtitle": "Convertir documentos en datos de entrenamiento de IA usando Ollama",
     "header.settings": "Configuración",
@@ -575,7 +575,7 @@ const translations: Record<string, TranslationDict> = {
     "settings.save": "Enregistrer",
     "settings.profileSelect.default": "-- Sélectionner un profil --",
   },
-  de: {
+  "de": {
     "app.title": "Trainingsgenerator",
     "app.subtitle": "Dokumente mit Ollama in KI-Trainingsdaten umwandeln",
     "header.settings": "Einstellungen",
@@ -695,16 +695,11 @@ function setElementText(el: Element, text: string): void{
     el.textContent=text
   }
   else{
-    let found=false
     for(let node of Array.from(el.childNodes)){
       if(node.nodeType===Node.TEXT_NODE && node.textContent && node.textContent.trim().length>0){
         node.textContent=text
-        found=true
-        break
+        return
       }
-    }
-    if(!found){
-      el.textContent=text
     }
   }
 }
