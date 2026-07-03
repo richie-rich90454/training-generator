@@ -869,7 +869,6 @@ function registerCriticalIpcHandlers():void{
         if(promptLength>10000)timeout=600000
         else if(promptLength>5000)timeout=450000
         let maxRetries=2
-        let lastError:Error|null=null
         for(let attempt=0;attempt<=maxRetries;attempt++){
             try{
                 let response=await axios.post(
@@ -900,7 +899,6 @@ function registerCriticalIpcHandlers():void{
                 return{success:true,response:response.data.response}
             }
             catch(error){
-                lastError=error as Error
                 if((error as any).code==="ECONNABORTED"||(error as Error).message.includes("timeout")){
                     if(attempt<maxRetries){
                         await new Promise(r=>setTimeout(r,5000))
