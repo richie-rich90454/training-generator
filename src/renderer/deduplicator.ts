@@ -109,7 +109,11 @@ function detectScript(text:string):string{
     return'mixed'
 }
 
-function preFilterCheck(itemA:TrainingItem,itemB:TrainingItem):boolean{
+export interface DeduplicateOptions{
+    skipCrossScript?:boolean
+}
+
+function preFilterCheck(itemA:TrainingItem,itemB:TrainingItem,skipCrossScript:boolean):boolean{
     let textA=getItemText(itemA)
     let textB=getItemText(itemB)
     let lenA=textA.length
@@ -117,13 +121,15 @@ function preFilterCheck(itemA:TrainingItem,itemB:TrainingItem):boolean{
     if(lenA===0||lenB===0)return false
     let lengthRatio=Math.abs(lenA-lenB)/Math.max(lenA,lenB)
     if(lengthRatio>0.5)return true
+    if(!skipCrossScript)return false
     let scriptA=detectScript(textA)
     let scriptB=detectScript(textB)
     if((scriptA==='cjk'&&scriptB==='latin')||(scriptA==='latin'&&scriptB==='cjk'))return true
     return false
 }
 
-export function deduplicate(items:TrainingItem[],threshold:number=0.9):{items:TrainingItem[];removed:number}{
+export function deduplicate(items:TrainingItem[],threshold:number=0.9,options?:DeduplicateOptions):{items:TrainingItem[];removed:number}{
+    let skipCrossScript=options?.skipCrossScript!==false
     threshold=Math.min(1,Math.max(0,threshold))
     if(items.length<=1)return{items,removed:0}
     if(threshold===0){
@@ -178,7 +184,7 @@ export function deduplicate(items:TrainingItem[],threshold:number=0.9):{items:Tr
         }
         for(let j of candidates){
             if(!keep[j])continue
-            if(preFilterCheck(items[i],items[j]))continue
+            if(preFilterCheck(items[i],items[j],skipCrossScript))continue
             let dist=hammingDistance(hashes[i],hashes[j])
             if(dist<=maxDistance){
                 let sim=jaccardSimilarity(texts[i],texts[j])

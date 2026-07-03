@@ -136,6 +136,18 @@ describe("deduplicate script and length prefilter", () => {
         expect(result.removed).toBe(1)
     })
 })
+describe("deduplicate cross-script option", () => {
+    it("accepts skipCrossScript option without error", () => {
+        let items=[{ format: "text", text: "hello world" } as TrainingItem, { format: "text", text: "你好世界" } as TrainingItem]
+        let result=deduplicate(items, 0.9, { skipCrossScript: false })
+        expect(result.items.length).toBe(2)
+    })
+    it("keeps default cross-script skip when option omitted", () => {
+        let items=[{ format: "text", text: "hello world" } as TrainingItem, { format: "text", text: "你好世界" } as TrainingItem]
+        let result=deduplicate(items, 0.9)
+        expect(result.items.length).toBe(2)
+    })
+})
 describe("deduplicate threshold sweep", () => {
     let thresholds=[0.0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 1.0]
     thresholds.forEach(threshold=>{
