@@ -15,7 +15,6 @@ export function createVirtualList<T>(options:VirtualListOptions<T>):{destroy:()=
     container.style.overflowY="auto"
     container.style.position="relative"
     let spacer=document.createElement("div")
-    spacer.style.height=`${items.length*itemHeight}px`
     spacer.style.position="relative"
     container.appendChild(spacer)
     let viewport=document.createElement("div")
@@ -25,12 +24,35 @@ export function createVirtualList<T>(options:VirtualListOptions<T>):{destroy:()=
     viewport.style.right="0"
     container.appendChild(viewport)
     let renderedRange:{start:number;end:number}={start:-1,end:-1}
+    let resizeObserver:ResizeObserver|null=null
+    const MAX_SPACER_PIXELS=1000000
+    function getItemCount():number{
+        return items.length
+    }
+    function updateSpacerHeight():void{
+        let itemCount=getItemCount()
+        let trueHeight=itemCount*itemHeight
+        spacer.style.height=`${Math.min(trueHeight,MAX_SPACER_PIXELS)}px`
+    }
+    function scrollTopToStartIndex(scrollTop:number,containerHeight:number):number{
+        let itemCount=getItemCount()
+        let visibleCount=Math.ceil(containerHeight/itemHeight)+1
+        let trueHeight=itemCount*itemHeight
+        let spacerHeight=Math.min(trueHeight,MAX_SPACER_PIXELS)
+        if(spacerHeight<=containerHeight||trueHeight<=spacerHeight){
+            return Math.max(0,Math.floor(scrollTop/itemHeight))
+        }
+        let maxScroll=spacerHeight-containerHeight
+        let ratio=maxScroll>0?scrollTop/maxScroll:0
+        return Math.max(0,Math.min(itemCount-visibleCount,Math.floor(ratio*(itemCount-visibleCount))))
+    }
     function render():void{
+        let itemCount=getItemCount()
         let scrollTop=container.scrollTop
         let containerHeight=container.clientHeight
-        let startIndex=Math.max(0,Math.floor(scrollTop/itemHeight))
+        let startIndex=scrollTopToStartIndex(scrollTop,containerHeight)
         let visibleCount=Math.ceil(containerHeight/itemHeight)+1
-        let endIndex=Math.min(items.length,startIndex+visibleCount)
+        let endIndex=Math.min(itemCount,startIndex+visibleCount)
         if(startIndex===renderedRange.start&&endIndex===renderedRange.end)return
         renderedRange={start:startIndex,end:endIndex}
         viewport.innerHTML=""
@@ -54,11 +76,32 @@ export function createVirtualList<T>(options:VirtualListOptions<T>):{destroy:()=
     }
     container.addEventListener("scroll",render,{passive:true})
     listenerMap.set(container,render)
+    updateSpacerHeight()
     render()
+    if(typeof ResizeObserver!=="undefined"){
+        resizeObserver=new ResizeObserver((entries)=>{
+            for(let entry of entries){
+                if(entry.contentRect.height>0){
+                    render()
+                }
+            }
+        })
+        resizeObserver.observe(container)
+    }
     return {
         destroy:()=>{
             container.removeEventListener("scroll",render)
             listenerMap.delete(container)
+            if(resizeObserver){
+                resizeObserver.disconnect()
+                resizeObserver=null
+            }
+            if(viewport.parentNode){
+                viewport.parentNode.removeChild(viewport)
+            }
+            if(spacer.parentNode){
+                spacer.parentNode.removeChild(spacer)
+            }
         }
     }
 }
