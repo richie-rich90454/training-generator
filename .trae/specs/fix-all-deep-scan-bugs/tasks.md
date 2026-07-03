@@ -450,13 +450,13 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [x] SubTask 28.7: `qualityValidator.ts` — remove dead `if(!item.text)` branch; drop or implement `sourceText`; make `answer_too_short`/`missing_answer` mutually exclusive; expand CJK range to include Kana/Hangul; apply `language_mismatch` to messages/text formats
 
-* [ ] Task 29: Fix fileManager, outputManager, promptManager
+* [x] Task 29: Fix fileManager, outputManager, promptManager
 
   * [x] SubTask 29.1: `fileManager.ts` — null-check DOM lookups; use `data-id` not `data-name`; fix missing spaces in log messages; format "1 Byte"; guard `e.dataTransfer`/`e.target.files`; optional-chain `uiManager?.ollamaStatus`; partial-add on cap
 
-  * [ ] SubTask 29.2: `outputManager.ts` — pre-choose directory for multi-part export; default `format` to "jsonl"; push partial QA pairs with warning; require regex labels at line start; size-guard `copyOutput`; fall back to `input`/`instruction` in `getItemText`
+  * [x] SubTask 29.2: `outputManager.ts` — pre-choose directory for multi-part export; default `format` to "jsonl"; push partial QA pairs with warning; require regex labels at line start; size-guard `copyOutput`; fall back to `input`/`instruction` in `getItemText`
 
-  * [ ] SubTask 29.3: `promptManager.ts` — remove `fallbackCache` or wire it; resolve prompts via main IPC in packaged app; cache negative results; de-dupe concurrent `getPrompt` calls
+  * [x] SubTask 29.3: `promptManager.ts` — remove `fallbackCache` or wire it; resolve prompts via main IPC in packaged app; cache negative results; de-dupe concurrent `getPrompt` calls
 
 * [ ] Task 30: Fix splash.html (`src/splash.html`)
 
