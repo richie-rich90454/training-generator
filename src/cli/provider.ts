@@ -49,15 +49,18 @@ function parseRetryAfter(msg: string): number | undefined {
 
 export class CliOllamaProvider implements Provider {
     name = "ollama"
-    rateLimiter?: RateLimiter = undefined
+    rateLimiter: RateLimiter
     private baseUrl: string
 
     constructor(baseUrl: string = "http://localhost:11434") {
         this.baseUrl = baseUrl
+        this.rateLimiter = new RateLimiter(60, 10)
+        this.rateLimiter.enable()
     }
 
     async generate(prompt: string, model: string, options?: ProviderOptions): Promise<ProviderResult> {
         try {
+            await this.rateLimiter.acquire()
             let result = await retryWithBackoff(async () => {
                 let response = await axios.post(`${this.baseUrl}/api/generate`, {
                     model,
@@ -72,9 +75,10 @@ export class CliOllamaProvider implements Provider {
                     timeout: 300000
                 })
                 return response.data
-            }, 3, 1000)
+            }, 3, 1000, undefined, this.rateLimiter)
             let text = result.response || ""
-            return { text, tokens: Math.ceil(text.length / 4), provider: "ollama" }
+            let tokens = typeof result.eval_count === "number" ? result.eval_count : Math.ceil(text.length / 4)
+            return { text, tokens, provider: "ollama" }
         }
         catch (error) {
             let msg = (error as any)?.response?.data?.error || (error as Error).message
