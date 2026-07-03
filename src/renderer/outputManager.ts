@@ -9,6 +9,8 @@ class OutputManager{
     }
     private getItemText(item:TrainingItem):string{
         if(item.output)return item.output
+        if(item.instruction)return item.instruction
+        if(item.input)return item.input
         if(item.messages)return item.messages.map(m=>m.content).join(" ")
         if(item.text)return item.text
         return""
@@ -114,22 +116,32 @@ class OutputManager{
         let currentQuestion=""
         let currentAnswer=""
         let inAnswer=false
+        let flushPair=()=>{
+            if(currentQuestion||currentAnswer){
+                pairs.push({
+                    question:currentQuestion.trim(),
+                    answer:currentAnswer.trim()
+                })
+                if(currentQuestion&&!currentAnswer){
+                    this.app.addLog("QA pair missing answer; exporting partial pair","warning")
+                }
+                else if(!currentQuestion&&currentAnswer){
+                    this.app.addLog("QA pair missing question; exporting partial pair","warning")
+                }
+            }
+            currentQuestion=""
+            currentAnswer=""
+            inAnswer=false
+        }
         for(let line of lines){
             let trimmedLine=line.trim()
-            if(trimmedLine.match(/^question:?\s*/i)){
-                if(currentQuestion&&currentAnswer){
-                    pairs.push({
-                        question:currentQuestion.trim(),
-                        answer:currentAnswer.trim()
-                    })
-                }
-                currentQuestion=trimmedLine.replace(/^question:?\s*/i,"")
-                currentAnswer=""
-                inAnswer=false
+            if(trimmedLine.match(/^question:\s*/i)){
+                flushPair()
+                currentQuestion=trimmedLine.replace(/^question:\s*/i,"")
             }
-            else if(trimmedLine.match(/^answer:?\s*/i)){
+            else if(trimmedLine.match(/^answer:\s*/i)){
                 inAnswer=true
-                currentAnswer=trimmedLine.replace(/^answer:?\s*/i,"")
+                currentAnswer=trimmedLine.replace(/^answer:\s*/i,"")
             }
             else if(trimmedLine){
                 if(inAnswer&&currentAnswer){
@@ -140,18 +152,13 @@ class OutputManager{
                 }
             }
         }
-        if(currentQuestion&&currentAnswer){
-            pairs.push({
-                question:currentQuestion.trim(),
-                answer:currentAnswer.trim()
-            })
-        }
+        flushPair()
         if(pairs.length==0&&text.length<100000){
             let qaMatches=text.match(/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis)
             if(qaMatches){
                 for(let match of qaMatches){
                     let qMatch=match.match(/Q:\s*(.*?)\s*A:\s*(.*)/is)
-                    if(qMatch&&qMatch[1]&&qMatch[2]){
+                    if(qMatch&&(qMatch[1]||qMatch[2])){
                         pairs.push({
                             question:qMatch[1].trim(),
                             answer:qMatch[2].trim()
@@ -223,32 +230,49 @@ class OutputManager{
         }
         return turns
     }
+    private getFormat(exportFormat?:string):string{
+        let format=exportFormat||this.app.uiManager.exportFormat?.value||this.app.uiManager.outputFormat.value
+        if(!format||typeof format!=="string")return"jsonl"
+        return format
+    }
+    private extensionForFormat(format:string):string{
+        if(format=="jsonl")return".jsonl"
+        if(format=="json")return".json"
+        if(format=="csv")return".csv"
+        if(format=="text")return".txt"
+        return".jsonl"
+    }
+    private dirname(filePath:string):string{
+        let idx=filePath.lastIndexOf("/")
+        let idx2=filePath.lastIndexOf("\\")
+        let sepIdx=Math.max(idx,idx2)
+        if(sepIdx<=0)return""
+        return filePath.slice(0,sepIdx)
+    }
     async exportOutput(exportFormat?:string):Promise<void>{
         if(this.outputData.length==0){
             this.app.addLog("No data to export","warning")
             return
         }
         try{
-            let format=exportFormat||this.app.uiManager.exportFormat?.value||this.app.uiManager.outputFormat.value
+            let format=this.getFormat(exportFormat)
             let SPLIT_THRESHOLD=100000
             if(this.outputData.length>SPLIT_THRESHOLD){
                 let partCount=Math.ceil(this.outputData.length/SPLIT_THRESHOLD)
                 this.app.addLog(`Output exceeds ${SPLIT_THRESHOLD} items, splitting into ${partCount} files`,"info")
+                let firstPath=await window.electronAPI!.saveFileDialog(`training_data-1${this.extensionForFormat(format)}`)
+                if(!firstPath){
+                    this.app.addLog("Export cancelled","info")
+                    return
+                }
+                let baseDir=this.dirname(firstPath)
                 for(let i=0;i<partCount;i++){
                     let start=i*SPLIT_THRESHOLD
                     let end=Math.min((i+1)*SPLIT_THRESHOLD,this.outputData.length)
                     let partData=this.outputData.slice(start,end)
                     let content=this.formatData(partData,format)
-                    let partFilename=`training_data-${i+1}`
-                    if(format=="jsonl")partFilename+=".jsonl"
-                    else if(format=="json")partFilename+=".json"
-                    else if(format=="csv")partFilename+=".csv"
-                    else partFilename+=".txt"
-                    let savePath=await window.electronAPI!.saveFileDialog(partFilename)
-                    if(!savePath){
-                        this.app.addLog("Export cancelled","info")
-                        return
-                    }
+                    let partFilename=`training_data-${i+1}${this.extensionForFormat(format)}`
+                    let savePath=baseDir?`${baseDir}/${partFilename}`:partFilename
                     let result=await window.electronAPI!.saveFile(savePath,content)
                     if(result.success){
                         this.app.addLog(`Exported part ${i+1}/${partCount} to ${savePath}`,"success")
@@ -261,11 +285,7 @@ class OutputManager{
                 return
             }
             let content=this.formatData(this.outputData,format)
-            let defaultFilename="training_data"
-            if(format=="jsonl")defaultFilename+=".jsonl"
-            else if(format=="json")defaultFilename+=".json"
-            else if(format=="csv")defaultFilename+=".csv"
-            else defaultFilename+=".txt"
+            let defaultFilename=`training_data${this.extensionForFormat(format)}`
             let savePath=await window.electronAPI!.saveFileDialog(defaultFilename)
             if(!savePath){
                 this.app.addLog("Export cancelled","info")
@@ -304,7 +324,7 @@ class OutputManager{
             return
         }
         try{
-            let format=this.app.uiManager.exportFormat?.value||this.app.uiManager.outputFormat.value
+            let format=this.getFormat()
             let content=""
             if(format=="jsonl"){
                 content=exportJSONL(this.outputData)
@@ -317,6 +337,11 @@ class OutputManager{
             }
             else if(format=="text"){
                 content=this.outputData.map(item=>this.getItemText(item)).join("\n\n")
+            }
+            const MAX_CLIPBOARD_SIZE=5*1024*1024
+            if(content.length>MAX_CLIPBOARD_SIZE){
+                this.app.addLog(`Output too large to copy (${content.length} chars); use export instead`,"warning")
+                return
             }
             await navigator.clipboard.writeText(content)
             this.app.addLog("Copied to clipboard","success")
