@@ -488,17 +488,17 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
 * [ ] Task 32: Low-severity cleanup
 
-  * [ ] SubTask 32.1: Replace `==` with `===` in `src/main.ts` (lines 16, 17, 258, 652)
+  * [x] SubTask 32.1: Replace `==` with `===` in `src/main.ts` (lines 16, 17, 258, 652)
 
-  * [ ] SubTask 32.2: Remove dead `lastError` in `ollama:generate`; remove dead pre-check or branch on result
+  * [x] SubTask 32.2: Remove dead `lastError` in `ollama:generate`; remove dead pre-check or branch on result
 
-  * [ ] SubTask 32.3: Remove unnecessary `as any` for `"cache"` path
+  * [x] SubTask 32.3: Remove unnecessary `as any` for `"cache"` path
 
   * [ ] SubTask 32.4: Remove `D5` unused keyframe; fix `D6` progress 100% twice
 
-  * [ ] SubTask 32.5: Fix `helpContent.ts` unescaped `&` in "Drag & drop"
+  * [x] SubTask 32.5: Fix `helpContent.ts` unescaped `&` in "Drag & drop"
 
-  * [ ] SubTask 32.6: `tsconfig.json` — remove `skipLibCheck` (or validate separately)
+  * [x] SubTask 32.6: `tsconfig.json` — remove `skipLibCheck` (or validate separately)
 
   * [ ] SubTask 32.7: Use `const` (or workspace `let`) consistently for non-reassigned bindings in config files
 
