@@ -701,6 +701,9 @@ function setElementText(el: Element, text: string): void{
         return
       }
     }
+    if(el.childNodes.length===0){
+      el.textContent=text
+    }
   }
 }
 
