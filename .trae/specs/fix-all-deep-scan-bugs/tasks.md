@@ -472,17 +472,17 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [x] SubTask 30.6: Use `currentStep/totalSteps*100` so bar reaches 100% only in "ready" branch
 
-* [ ] Task 31: Fix index.html (`index.html`)
+* [x] Task 31: Fix index.html (`index.html`)
 
-  * [ ] SubTask 31.1: Add `ws://localhost:*` to CSP `connect-src` (dev only)
+  * [x] SubTask 31.1: Add `ws://localhost:*` to CSP `connect-src` (dev only)
 
-  * [ ] SubTask 31.2: Remove unused `https://cdnjs.cloudflare.com` from CSP
+  * [x] SubTask 31.2: Remove unused `https://cdnjs.cloudflare.com` from CSP
 
-  * [ ] SubTask 31.3: Add `.markdown` to file `accept`
+  * [x] SubTask 31.3: Add `.markdown` to file `accept`
 
-  * [ ] SubTask 31.4: Update `document.documentElement.lang` on language change
+  * [x] SubTask 31.4: Update `document.documentElement.lang` on language change
 
-  * [ ] SubTask 31.5: Show real JSONL example in placeholder
+  * [x] SubTask 31.5: Show real JSONL example in placeholder
 
 ## Phase 4 — Low (cosmetic, edge-cases, accessibility)
 
