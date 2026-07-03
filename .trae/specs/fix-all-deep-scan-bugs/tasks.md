@@ -326,81 +326,81 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
 ## Phase 3 — Medium (UI sync, leaks, validation)
 
-* [ ] Task 22: Fix UI manager remaining issues (`src/renderer/uiManager.ts`)
+* [x] Task 22: Fix UI manager remaining issues (`src/renderer/uiManager.ts`)
 
-  * [ ] SubTask 22.1: Parse CSS `transitionDuration` for `ms` unit; or use `transitionend`
+  * [x] SubTask 22.1: Parse CSS `transitionDuration` for `ms` unit; or use `transitionend`
 
-  * [ ] SubTask 22.2: Use `getHelpContent()` in `showHelp`; escape `<model-name>` as `&lt;model-name&gt;`
+  * [x] SubTask 22.2: Use `getHelpContent()` in `showHelp`; escape `<model-name>` as `&lt;model-name&gt;`
 
-  * [ ] SubTask 22.3: Add `settings.profileSelect.default` key to all locales in `i18n.ts`
+  * [x] SubTask 22.3: Add `settings.profileSelect.default` key to all locales in `i18n.ts`
 
-  * [ ] SubTask 22.4: Track sequence counter in `applyProfile` to ignore stale results
+  * [x] SubTask 22.4: Track sequence counter in `applyProfile` to ignore stale results
 
-  * [ ] SubTask 22.5: Cache status `<span>` reference with null check
+  * [x] SubTask 22.5: Cache status `<span>` reference with null check
 
-  * [ ] SubTask 22.6: Add null checks in `cacheElements`; scope `modalClose` to `settingsModal`
+  * [x] SubTask 22.6: Add null checks in `cacheElements`; scope `modalClose` to `settingsModal`
 
-  * [ ] SubTask 22.7: Add `:not([disabled])` to `trapFocus` selector
+  * [x] SubTask 22.7: Add `:not([disabled])` to `trapFocus` selector
 
-  * [ ] SubTask 22.8: Route help through `trapFocus`/`restoreFocus`; add Escape handler
+  * [x] SubTask 22.8: Route help through `trapFocus`/`restoreFocus`; add Escape handler
 
-  * [ ] SubTask 22.9: Fix missing space `${settings.language} uses`
+  * [x] SubTask 22.9: Fix missing space `${settings.language} uses`
 
-  * [ ] SubTask 22.10: Don't pre-escape prompt preview (let `addLog` do it)
+  * [x] SubTask 22.10: Don't pre-escape prompt preview (let `addLog` do it)
 
-  * [ ] SubTask 22.11: Add `matchMedia` listener for `applyTheme("auto")`
+  * [x] SubTask 22.11: Add `matchMedia` listener for `applyTheme("auto")`
 
-  * [ ] SubTask 22.12: Validate provider/baseUrl against option lists
+  * [x] SubTask 22.12: Validate provider/baseUrl against option lists
 
-  * [ ] SubTask 22.13: Reset `logCount` to actual `children.length` on external clear
+  * [x] SubTask 22.13: Reset `logCount` to actual `children.length` on external clear
 
-  * [ ] SubTask 22.14: Guard `max===min` in `updateTemperatureDisplay`
+  * [x] SubTask 22.14: Guard `max===min` in `updateTemperatureDisplay`
 
-  * [ ] SubTask 22.15: Use `showConfirm` in `deleteCurrentProfile` (not `window.confirm`)
+  * [x] SubTask 22.15: Use `showConfirm` in `deleteCurrentProfile` (not `window.confirm`)
 
-* [ ] Task 23: Fix dashboard (`src/renderer/dashboard.ts`)
+* [x] Task 23: Fix dashboard (`src/renderer/dashboard.ts`)
 
-  * [ ] SubTask 23.1: Clear previous interval in `start()`
+  * [x] SubTask 23.1: Clear previous interval in `start()`
 
-  * [ ] SubTask 23.2: Compute tokens/s from actual token count; remove `chunksTotal` gate; drop redundant ternary
+  * [x] SubTask 23.2: Compute tokens/s from actual token count; remove `chunksTotal` gate; drop redundant ternary
 
-  * [ ] SubTask 23.3: Round `ms` to integer; branch on `Math.round(ms)`; carry into minutes
+  * [x] SubTask 23.3: Round `ms` to integer; branch on `Math.round(ms)`; carry into minutes
 
-  * [ ] SubTask 23.4: Add `role="dialog"`/`aria-modal`/Escape/focus trap
+  * [x] SubTask 23.4: Add `role="dialog"`/`aria-modal`/Escape/focus trap
 
-  * [ ] SubTask 23.5: Hide panel on `stop()` or document behavior
+  * [x] SubTask 23.5: Hide panel on `stop()` or document behavior
 
-  * [ ] SubTask 23.6: Early-return in `tick` if `!this.visible`
+  * [x] SubTask 23.6: Early-return in `tick` if `!this.visible`
 
-* [ ] Task 24: Fix toast (`src/renderer/toast.ts`)
+* [x] Task 24: Fix toast (`src/renderer/toast.ts`)
 
-  * [ ] SubTask 24.1: Set `role="status"` + `aria-live="polite"` on container (assertive for error)
+  * [x] SubTask 24.1: Set `role="status"` + `aria-live="polite"` on container (assertive for error)
 
-  * [ ] SubTask 24.2: Track "animating out" flag on element; short-circuit if set
+  * [x] SubTask 24.2: Track "animating out" flag on element; short-circuit if set
 
-  * [ ] SubTask 24.3: Read `transition-duration` from computed style for fallback timer
+  * [x] SubTask 24.3: Read `transition-duration` from computed style for fallback timer
 
-  * [ ] SubTask 24.4: Return `id` from `show`; export `dismissToast(id)`
+  * [x] SubTask 24.4: Return `id` from `show`; export `dismissToast(id)`
 
-  * [ ] SubTask 24.5: Disable pointer events on shifted toast
+  * [x] SubTask 24.5: Disable pointer events on shifted toast
 
-* [ ] Task 25: Fix template editor (`src/renderer/templateEditor.ts`)
+* [x] Task 25: Fix template editor (`src/renderer/templateEditor.ts`)
 
-  * [ ] SubTask 25.1: Add `dispose()` removing global `keydown` listener
+  * [x] SubTask 25.1: Add `dispose()` removing global `keydown` listener
 
-  * [ ] SubTask 25.2: Guard `<style>` injection with id check
+  * [x] SubTask 25.2: Guard `<style>` injection with id check
 
-  * [ ] SubTask 25.3: Check for any `.modal.active` with higher z-index in Escape handler
+  * [x] SubTask 25.3: Check for any `.modal.active` with higher z-index in Escape handler
 
-  * [ ] SubTask 25.4: Add focus trap + save/restore
+  * [x] SubTask 25.4: Add focus trap + save/restore
 
-  * [ ] SubTask 25.5: Append file input to DOM before `click()`; remove in `change` handler
+  * [x] SubTask 25.5: Append file input to DOM before `click()`; remove in `change` handler
 
-  * [ ] SubTask 25.6: Defer `URL.revokeObjectURL` with `setTimeout(...,1000)`
+  * [x] SubTask 25.6: Defer `URL.revokeObjectURL` with `setTimeout(...,1000)`
 
-  * [ ] SubTask 25.7: Show toast on empty-template save
+  * [x] SubTask 25.7: Show toast on empty-template save
 
-  * [ ] SubTask 25.8: Document/escape consistently between two preview paths
+  * [x] SubTask 25.8: Document/escape consistently between two preview paths
 
 * [x] Task 26: Fix config profiles (`src/renderer/configProfiles.ts`)
 
@@ -416,43 +416,43 @@ Each task is one commit. Commit as you go. Run `npx tsc --noEmit`, `npm test`, a
 
   * [x] SubTask 26.6: Add `version` field + migration in `listProfiles`
 
-* [ ] Task 27: Fix i18n (`src/renderer/i18n.ts`)
+* [x] Task 27: Fix i18n (`src/renderer/i18n.ts`)
 
-  * [ ] SubTask 27.1: Add missing `fr` keys for `maxOutputItems`/`maxChunks`
+  * [x] SubTask 27.1: Add missing `fr` keys for `maxOutputItems`/`maxChunks`
 
-  * [ ] SubTask 27.2: Add `settings.profileSelect.default` to all locales
+  * [x] SubTask 27.2: Add `settings.profileSelect.default` to all locales
 
-  * [ ] SubTask 27.3: Translate only child text node (don't destroy button icons)
+  * [x] SubTask 27.3: Translate only child text node (don't destroy button icons)
 
-  * [ ] SubTask 27.4: Use `??` instead of `||` in `t`
+  * [x] SubTask 27.4: Use `??` instead of `||` in `t`
 
-  * [ ] SubTask 27.5: Detect locale via `navigator.language` on first run
+  * [x] SubTask 27.5: Detect locale via `navigator.language` on first run
 
-  * [ ] SubTask 27.6: Call `applyLanguage(currentLang)` after rebuilding dynamic content
+  * [x] SubTask 27.6: Call `applyLanguage(currentLang)` after rebuilding dynamic content
 
-  * [ ] SubTask 27.7: Add interpolation support `t(key, lang, params)`
+  * [x] SubTask 27.7: Add interpolation support `t(key, lang, params)`
 
-  * [ ] SubTask 27.8: Quote all locale keys consistently
+  * [x] SubTask 27.8: Quote all locale keys consistently
 
 * [x] Task 28: Fix checkpoint, rate limiter, stats, audit, logger, provenance, qualityValidator
 
   * [x] SubTask 28.1: `checkpoint.ts` — validate loaded shape; re-throw/save-failure signal; document `completedChunks` semantics; auto-clear on completion
 
-  * [ ] SubTask 28.2: `rateLimiter.ts` — guard `tokensPerMinute>0`; treat `<=0` retry-after as default; re-cap tokens on `setRate`; add max-wait/AbortSignal; set `lastRefill=Date.now()` not `pausedUntil`
+  * [x] SubTask 28.2: `rateLimiter.ts` — guard `tokensPerMinute>0`; treat `<=0` retry-after as default; re-cap tokens on `setRate`; add max-wait/AbortSignal; set `lastRefill=Date.now()` not `pausedUntil`
 
-  * [ ] SubTask 28.3: `statsTracker.ts` — fix `formatDuration` 60s rollover; return 0 when `startTime===0`; return 0 (or null) `successRate` when `totalChunks===0`; require `elapsed>=100ms` for tokens/sec
+  * [x] SubTask 28.3: `statsTracker.ts` — fix `formatDuration` 60s rollover; return 0 when `startTime===0`; return 0 (or null) `successRate` when `totalChunks===0`; require `elapsed>=100ms` for tokens/sec
 
-  * [ ] SubTask 28.4: `audit.ts` — cap `entries` (ring buffer); maintain running `operations` counter
+  * [x] SubTask 28.4: `audit.ts` — cap `entries` (ring buffer); maintain running `operations` counter
 
-  * [ ] SubTask 28.5: `logger.ts` — cap `entries`; iterate snapshot of listeners; return deep copies from `getEntriesByLevel`/`getEntriesByModule`; add `setLevel`
+  * [x] SubTask 28.5: `logger.ts` — cap `entries`; iterate snapshot of listeners; return deep copies from `getEntriesByLevel`/`getEntriesByModule`; add `setLevel`
 
-  * [ ] SubTask 28.6: `provenance.ts` — accept surviving item's source as parameter; dedup `_mergedFrom`; refuse to overwrite existing `_provenance` in `tagItem`
+  * [x] SubTask 28.6: `provenance.ts` — accept surviving item's source as parameter; dedup `_mergedFrom`; refuse to overwrite existing `_provenance` in `tagItem`
 
-  * [ ] SubTask 28.7: `qualityValidator.ts` — remove dead `if(!item.text)` branch; drop or implement `sourceText`; make `answer_too_short`/`missing_answer` mutually exclusive; expand CJK range to include Kana/Hangul; apply `language_mismatch` to messages/text formats
+  * [x] SubTask 28.7: `qualityValidator.ts` — remove dead `if(!item.text)` branch; drop or implement `sourceText`; make `answer_too_short`/`missing_answer` mutually exclusive; expand CJK range to include Kana/Hangul; apply `language_mismatch` to messages/text formats
 
 * [ ] Task 29: Fix fileManager, outputManager, promptManager
 
-  * [ ] SubTask 29.1: `fileManager.ts` — null-check DOM lookups; use `data-id` not `data-name`; fix missing spaces in log messages; format "1 Byte"; guard `e.dataTransfer`/`e.target.files`; optional-chain `uiManager?.ollamaStatus`; partial-add on cap
+  * [x] SubTask 29.1: `fileManager.ts` — null-check DOM lookups; use `data-id` not `data-name`; fix missing spaces in log messages; format "1 Byte"; guard `e.dataTransfer`/`e.target.files`; optional-chain `uiManager?.ollamaStatus`; partial-add on cap
 
   * [ ] SubTask 29.2: `outputManager.ts` — pre-choose directory for multi-part export; default `format` to "jsonl"; push partial QA pairs with warning; require regex labels at line start; size-guard `copyOutput`; fall back to `input`/`instruction` in `getItemText`
 
