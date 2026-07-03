@@ -66,47 +66,54 @@ class UIManager{
         this.cacheElements()
         this.initTemperatureSlider()
     }
+    private getEl<T extends HTMLElement>(id:string):T{
+        let el=document.getElementById(id) as T|null
+        if(!el){
+            console.warn(`UIManager: missing DOM element #${id}`)
+        }
+        return el as T
+    }
     cacheElements():void{
-        this.progressText=document.getElementById("progress-text") as HTMLElement
-        this.progressPercent=document.getElementById("progress-percent") as HTMLElement
-        this.progressFill=document.getElementById("progress-fill") as HTMLElement
-        this.processingLog=document.getElementById("processing-log") as HTMLElement
-        this.outputPreview=document.getElementById("output-preview") as HTMLElement
-        this.exportBtn=document.getElementById("export-btn") as HTMLButtonElement
-        this.copyBtn=document.getElementById("copy-btn") as HTMLButtonElement
-        this.exportFormat=document.getElementById("export-format") as HTMLSelectElement
-        this.ollamaStatusEl=document.getElementById("ollama-status") as HTMLElement
+        this.progressText=this.getEl<HTMLElement>("progress-text")
+        this.progressPercent=this.getEl<HTMLElement>("progress-percent")
+        this.progressFill=this.getEl<HTMLElement>("progress-fill")
+        this.processingLog=this.getEl<HTMLElement>("processing-log")
+        this.outputPreview=this.getEl<HTMLElement>("output-preview")
+        this.exportBtn=this.getEl<HTMLButtonElement>("export-btn")
+        this.copyBtn=this.getEl<HTMLButtonElement>("copy-btn")
+        this.exportFormat=this.getEl<HTMLSelectElement>("export-format")
+        this.ollamaStatusEl=this.getEl<HTMLElement>("ollama-status")
         if(this.ollamaStatusEl){
             this.statusSpan=this.ollamaStatusEl.querySelector("span")
         }
-        this.settingsBtn=document.getElementById("settings-btn") as HTMLElement
-        this.settingsModal=document.getElementById("settings-modal") as HTMLElement
+        this.settingsBtn=this.getEl<HTMLElement>("settings-btn")
+        this.settingsModal=this.getEl<HTMLElement>("settings-modal")
         if(this.settingsModal){
             this.modalClose=this.settingsModal.querySelector(".modal-close") as HTMLElement
         }
-        this.helpBtn=document.getElementById("help-btn") as HTMLElement
-        this.modelSelect=document.getElementById("model-select") as HTMLSelectElement
-        this.processingType=document.getElementById("processing-type") as HTMLSelectElement
-        this.outputFormat=document.getElementById("output-format") as HTMLSelectElement
-        this.languageSelect=document.getElementById("language-select") as HTMLSelectElement
-        this.chunkSize=document.getElementById("chunk-size") as HTMLInputElement
-        this.concurrencySelect=document.getElementById("concurrency") as HTMLSelectElement
-        this.savePresetBtn=document.getElementById("save-preset") as HTMLElement
-        this.demoBtn=document.getElementById("demo-btn") as HTMLButtonElement
-        this.providerSelect=document.getElementById("provider") as HTMLSelectElement
-        this.apiKeyInput=document.getElementById("api-key") as HTMLInputElement
-        this.baseUrlInput=document.getElementById("base-url") as HTMLInputElement
-        this.apiKeyGroup=document.getElementById("api-key-group") as HTMLElement
-        this.baseUrlGroup=document.getElementById("base-url-group") as HTMLElement
-        this.smartSizingCheckbox=document.getElementById("smart-sizing") as HTMLInputElement
-        this.profileSelect=document.getElementById("profile-select") as HTMLSelectElement
-        this.saveProfileBtn=document.getElementById("save-profile-btn") as HTMLElement
-        this.deleteProfileBtn=document.getElementById("delete-profile-btn") as HTMLElement
-        this.editTemplatesBtn=document.getElementById("edit-templates-btn") as HTMLElement
-        this.dashboardBtn=document.getElementById("dashboard-btn") as HTMLElement
-        this.maxParallelFilesSelect=document.getElementById("max-parallel-files") as HTMLSelectElement
-        this.temperatureInput=document.getElementById("temperature") as HTMLInputElement
-        this.temperatureValue=document.getElementById("temperature-value") as HTMLElement
+        this.helpBtn=this.getEl<HTMLElement>("help-btn")
+        this.modelSelect=this.getEl<HTMLSelectElement>("model-select")
+        this.processingType=this.getEl<HTMLSelectElement>("processing-type")
+        this.outputFormat=this.getEl<HTMLSelectElement>("output-format")
+        this.languageSelect=this.getEl<HTMLSelectElement>("language-select")
+        this.chunkSize=this.getEl<HTMLInputElement>("chunk-size")
+        this.concurrencySelect=this.getEl<HTMLSelectElement>("concurrency")
+        this.savePresetBtn=this.getEl<HTMLElement>("save-preset")
+        this.demoBtn=this.getEl<HTMLButtonElement>("demo-btn")
+        this.providerSelect=this.getEl<HTMLSelectElement>("provider")
+        this.apiKeyInput=this.getEl<HTMLInputElement>("api-key")
+        this.baseUrlInput=this.getEl<HTMLInputElement>("base-url")
+        this.apiKeyGroup=this.getEl<HTMLElement>("api-key-group")
+        this.baseUrlGroup=this.getEl<HTMLElement>("base-url-group")
+        this.smartSizingCheckbox=this.getEl<HTMLInputElement>("smart-sizing")
+        this.profileSelect=this.getEl<HTMLSelectElement>("profile-select")
+        this.saveProfileBtn=this.getEl<HTMLElement>("save-profile-btn")
+        this.deleteProfileBtn=this.getEl<HTMLElement>("delete-profile-btn")
+        this.editTemplatesBtn=this.getEl<HTMLElement>("edit-templates-btn")
+        this.dashboardBtn=this.getEl<HTMLElement>("dashboard-btn")
+        this.maxParallelFilesSelect=this.getEl<HTMLSelectElement>("max-parallel-files")
+        this.temperatureInput=this.getEl<HTMLInputElement>("temperature")
+        this.temperatureValue=this.getEl<HTMLElement>("temperature-value")
     }
     initTemperatureSlider():void{
         if(!this.temperatureInput||!this.temperatureValue)return
@@ -433,6 +440,16 @@ class UIManager{
         if(apiKeyValue){
             encryptedApiKey=await encryptKey(apiKeyValue)
         }
+        let validProviders=Array.from(this.providerSelect.options).map(o=>o.value)
+        let provider=this.providerSelect.value
+        if(!validProviders.includes(provider)){
+            provider="ollama"
+        }
+        let baseUrl=this.baseUrlInput.value.trim()
+        if(provider!=="ollama" && baseUrl && !/^https?:\/\//.test(baseUrl)){
+            baseUrl=""
+            this.addLog("Invalid base URL for cloud provider; clearing","warning")
+        }
         let settings:AppSettings={
             model:this.modelSelect.value,
             processingType:this.processingType.value,
@@ -440,9 +457,9 @@ class UIManager{
             language:this.languageSelect.value,
             chunkSize:parseInt(this.chunkSize.value)||2000,
             concurrency:parseInt(this.concurrencySelect.value)||3,
-            provider:this.providerSelect.value,
+            provider:provider,
             apiKey:encryptedApiKey,
-            baseUrl:this.baseUrlInput.value,
+            baseUrl:baseUrl,
             temperature:parseFloat(this.temperatureInput.value)||0.7
         }
         try{
