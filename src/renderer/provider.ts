@@ -394,3 +394,335 @@ export class ProviderRegistry{
         return this.health.get(configId)
     }
 }
+export class OpenAICompatibleProvider implements Provider{
+    name:string
+    apiKey:string
+    baseUrl:string
+    rateLimiter:RateLimiter
+    constructor(name:string,apiKey:string,baseUrl:string){
+        this.name=name
+        this.apiKey=apiKey
+        this.baseUrl=baseUrl
+        this.rateLimiter=new RateLimiter(60,10)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch(`${this.baseUrl}/v1/models`,{
+                headers:{
+                    "Authorization":`Bearer ${this.apiKey}`,
+                    "Content-Type":"application/json"
+                }
+            })
+            return response.ok
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        let api=window.electronAPI
+        if(!api)throw new Error("Electron API not available")
+        try{
+            await this.rateLimiter.acquire()
+            let result=await retryWithBackoff(async()=>{
+                let r=await api.generateWithOpenAI(
+                    this.apiKey,this.baseUrl,model,prompt,{
+                        temperature:options?.temperature??0.7,
+                        top_p:options?.top_p??0.9,
+                        max_tokens:options?.max_tokens??4096
+                    }
+                )
+                if(!r.success)throw new Error(r.error||`${this.name} generation failed`)
+                return r
+            },3,1000,undefined,this.rateLimiter)
+            return{
+                text:result.response!,
+                tokens:result.usage?.total_tokens??Math.ceil((result.response||"").length/4),
+                provider:this.name
+            }
+        }
+        catch(error){
+            console.error(`${this.name}.generate failed:`,(error as Error).message)
+            throw error
+        }
+    }
+}
+export class MistralProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string){
+        super("mistral",apiKey,"https://api.mistral.ai")
+    }
+}
+export class TogetherProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string){
+        super("together",apiKey,"https://api.together.xyz")
+    }
+}
+export class GroqProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string){
+        super("groq",apiKey,"https://api.groq.com/openai")
+    }
+}
+export class PerplexityProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string){
+        super("perplexity",apiKey,"https://api.perplexity.ai")
+    }
+}
+export class DeepSeekProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string){
+        super("deepseek",apiKey,"https://api.deepseek.com")
+    }
+}
+export class LocalAIProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string="",baseUrl:string="http://localhost:8080"){
+        super("localai",apiKey,baseUrl)
+    }
+}
+export class LMStudioProvider extends OpenAICompatibleProvider{
+    constructor(baseUrl:string="http://localhost:1234"){
+        super("lmstudio","",baseUrl)
+    }
+}
+export class VllmProvider extends OpenAICompatibleProvider{
+    constructor(apiKey:string="",baseUrl:string="http://localhost:8000"){
+        super("vllm",apiKey,baseUrl)
+    }
+}
+export class AzureOpenAIProvider implements Provider{
+    name="azure-openai"
+    apiKey:string
+    baseUrl:string
+    deployment:string
+    apiVersion:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string,baseUrl:string,deployment:string,apiVersion:string="2024-02-15-preview"){
+        this.apiKey=apiKey
+        this.baseUrl=baseUrl
+        this.deployment=deployment
+        this.apiVersion=apiVersion
+        this.rateLimiter=new RateLimiter(60,10)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let url=`${this.baseUrl}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.apiVersion}`
+            let response=await fetch(url,{
+                method:"POST",
+                headers:{
+                    "api-key":this.apiKey,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({messages:[{role:"user",content:"ping"}],max_tokens:1})
+            })
+            return response.ok||response.status===400
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        try{
+            await this.rateLimiter.acquire()
+            let url=`${this.baseUrl}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.apiVersion}`
+            let response=await fetch(url,{
+                method:"POST",
+                headers:{
+                    "api-key":this.apiKey,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    messages:[{role:"user",content:prompt}],
+                    temperature:options?.temperature??0.7,
+                    top_p:options?.top_p??0.9,
+                    max_tokens:options?.max_tokens??4096
+                })
+            })
+            if(!response.ok){
+                let errorText=await response.text()
+                throw new Error(`Azure OpenAI error ${response.status}: ${errorText}`)
+            }
+            let data=await response.json()
+            let text=data.choices?.[0]?.message?.content||""
+            return{text,tokens:data.usage?.total_tokens??Math.ceil(text.length/4),provider:"azure-openai"}
+        }
+        catch(error){
+            console.error("AzureOpenAIProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
+export class CohereProvider implements Provider{
+    name="cohere"
+    apiKey:string
+    baseUrl:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string,baseUrl:string="https://api.cohere.ai"){
+        this.apiKey=apiKey
+        this.baseUrl=baseUrl
+        this.rateLimiter=new RateLimiter(60,10)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch(`${this.baseUrl}/v1/models`,{
+                headers:{"Authorization":`Bearer ${this.apiKey}`}
+            })
+            return response.ok
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        try{
+            await this.rateLimiter.acquire()
+            let response=await fetch(`${this.baseUrl}/v1/chat`,{
+                method:"POST",
+                headers:{
+                    "Authorization":`Bearer ${this.apiKey}`,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    message:prompt,
+                    model:model,
+                    temperature:options?.temperature??0.7
+                })
+            })
+            if(!response.ok){
+                let errorText=await response.text()
+                throw new Error(`Cohere error ${response.status}: ${errorText}`)
+            }
+            let data=await response.json()
+            let text=data.text||""
+            return{text,tokens:Math.ceil(text.length/4),provider:"cohere"}
+        }
+        catch(error){
+            console.error("CohereProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
+export class HuggingFaceProvider implements Provider{
+    name="huggingface"
+    apiKey:string
+    baseUrl:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string,baseUrl:string="https://api-inference.huggingface.co"){
+        this.apiKey=apiKey
+        this.baseUrl=baseUrl
+        this.rateLimiter=new RateLimiter(30,5)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch(`${this.baseUrl}/models/gpt2`,{
+                headers:{"Authorization":`Bearer ${this.apiKey}`}
+            })
+            return response.ok||response.status===503
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        try{
+            await this.rateLimiter.acquire()
+            let response=await fetch(`${this.baseUrl}/models/${model}`,{
+                method:"POST",
+                headers:{
+                    "Authorization":`Bearer ${this.apiKey}`,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    inputs:prompt,
+                    parameters:{
+                        temperature:options?.temperature??0.7,
+                        top_p:options?.top_p??0.9,
+                        max_new_tokens:options?.max_tokens??4096
+                    }
+                })
+            })
+            if(!response.ok){
+                let errorText=await response.text()
+                throw new Error(`HuggingFace error ${response.status}: ${errorText}`)
+            }
+            let data=await response.json()
+            let text=Array.isArray(data)?(data[0]?.generated_text||""):(data.generated_text||"")
+            return{text,tokens:Math.ceil(text.length/4),provider:"huggingface"}
+        }
+        catch(error){
+            console.error("HuggingFaceProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
+export class ReplicateProvider implements Provider{
+    name="replicate"
+    apiKey:string
+    baseUrl:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string,baseUrl:string="https://api.replicate.com"){
+        this.apiKey=apiKey
+        this.baseUrl=baseUrl
+        this.rateLimiter=new RateLimiter(20,5)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch(`${this.baseUrl}/v1/account`,{
+                headers:{"Authorization":`Token ${this.apiKey}`}
+            })
+            return response.ok
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        try{
+            await this.rateLimiter.acquire()
+            let [owner,modelName]=model.split("/")
+            if(!owner||!modelName)throw new Error("Replicate model must be in format owner/model:version")
+            let createResponse=await fetch(`${this.baseUrl}/v1/predictions`,{
+                method:"POST",
+                headers:{
+                    "Authorization":`Token ${this.apiKey}`,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    version:modelName,
+                    input:{prompt,temperature:options?.temperature??0.7}
+                })
+            })
+            if(!createResponse.ok){
+                let errorText=await createResponse.text()
+                throw new Error(`Replicate create error ${createResponse.status}: ${errorText}`)
+            }
+            let prediction=await createResponse.json()
+            let predictionUrl=prediction.urls?.get
+            if(!predictionUrl)throw new Error("Replicate: no prediction URL returned")
+            // Poll until complete
+            for(let i=0;i<120;i++){
+                await new Promise(resolve=>setTimeout(resolve,1000))
+                let pollResponse=await fetch(predictionUrl,{
+                    headers:{"Authorization":`Token ${this.apiKey}`}
+                })
+                if(!pollResponse.ok){
+                    let errorText=await pollResponse.text()
+                    throw new Error(`Replicate poll error ${pollResponse.status}: ${errorText}`)
+                }
+                let pollData=await pollResponse.json()
+                if(pollData.status==="succeeded"){
+                    let text=Array.isArray(pollData.output)?pollData.output.join(""):(pollData.output||"")
+                    return{text,tokens:Math.ceil(text.length/4),provider:"replicate"}
+                }
+                else if(pollData.status==="failed")throw new Error(`Replicate prediction failed: ${pollData.error||"unknown"}`)
+            }
+            throw new Error("Replicate prediction timed out after 120s")
+        }
+        catch(error){
+            console.error("ReplicateProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
