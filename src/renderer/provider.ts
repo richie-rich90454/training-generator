@@ -1,4 +1,5 @@
 import{RateLimiter}from"./rateLimiter.js"
+import type{ProviderConfig}from"../types/interfaces.js"
 
 export interface ProviderOptions{
     temperature?:number
@@ -278,4 +279,118 @@ export function createProvider(type:string,config?:{apiKey?:string;baseUrl?:stri
         providers.push(new OllamaProvider())
     }
     return new ProviderManager(providers)
+}
+export interface HealthCheckResult{
+    ok:boolean
+    latencyMs:number
+    error?:string
+}
+export class ProviderRegistry{
+    name="provider-registry"
+    private configs:ProviderConfig[]
+    private providers:Map<string, Provider>
+    private health:Map<string, {consecutiveFailures:number, isHealthy:boolean, lastCheck:number, lastLatencyMs:number}>
+    private failoverLog:{provider:string, reason:string, timestamp:number}[]
+    constructor(configs:ProviderConfig[], providers:Map<string, Provider>){
+        this.configs=configs.filter(c=>c.enabled).sort((a,b)=>a.priority-b.priority)
+        this.providers=providers
+        this.health=new Map()
+        this.failoverLog=[]
+        for(let config of this.configs){
+            this.health.set(config.id, {consecutiveFailures:0, isHealthy:true, lastCheck:0, lastLatencyMs:0})
+        }
+    }
+    getConfigs():ProviderConfig[]{
+        return this.configs
+    }
+    getFailoverLog():{provider:string, reason:string, timestamp:number}[]{
+        return this.failoverLog
+    }
+    getCurrentProvider():Provider|null{
+        for(let config of this.configs){
+            let h=this.health.get(config.id)
+            if(h&&h.isHealthy){
+                let provider=this.providers.get(config.id)
+                if(provider)return provider
+            }
+        }
+        return null
+    }
+    async healthCheck(configId:string):Promise<HealthCheckResult>{
+        let config=this.configs.find(c=>c.id===configId)
+        if(!config)return{ok:false, latencyMs:0, error:"Provider config not found"}
+        let provider=this.providers.get(configId)
+        if(!provider)return{ok:false, latencyMs:0, error:"Provider not registered"}
+        if(!provider.healthCheck)return{ok:true, latencyMs:0}
+        let start=Date.now()
+        try{
+            let ok=await provider.healthCheck()
+            let latencyMs=Date.now()-start
+            let h=this.health.get(configId)
+            if(h){
+                h.lastCheck=start
+                h.lastLatencyMs=latencyMs
+                h.isHealthy=ok
+                if(ok)h.consecutiveFailures=0
+            }
+            return{ok, latencyMs}
+        }
+        catch(error){
+            let latencyMs=Date.now()-start
+            let h=this.health.get(configId)
+            if(h){
+                h.lastCheck=start
+                h.lastLatencyMs=latencyMs
+                h.isHealthy=false
+            }
+            return{ok:false, latencyMs, error:(error as Error).message}
+        }
+    }
+    async healthCheckAll():Promise<Map<string, HealthCheckResult>>{
+        let results=new Map<string, HealthCheckResult>()
+        let promises=this.configs.map(async(config)=>{
+            let result=await this.healthCheck(config.id)
+            results.set(config.id, result)
+        })
+        await Promise.allSettled(promises)
+        return results
+    }
+    async generateWithFailover(prompt:string, model:string, options?:ProviderOptions):Promise<ProviderResult>{
+        let lastError:Error
+        for(let config of this.configs){
+            let h=this.health.get(config.id)
+            if(!h||!h.isHealthy)continue
+            let provider=this.providers.get(config.id)
+            if(!provider)continue
+            try{
+                let result=await provider.generate(prompt, model, options)
+                h.consecutiveFailures=0
+                return result
+            }
+            catch(error){
+                lastError=error as Error
+                h.consecutiveFailures++
+                let reason=(error as Error).message||"unknown error"
+                if(h.consecutiveFailures>=3){
+                    h.isHealthy=false
+                    this.failoverLog.push({provider:config.id, reason, timestamp:Date.now()})
+                    console.warn(`ProviderRegistry: ${config.id} marked unhealthy after 3 consecutive failures: ${reason}`)
+                }
+                else{
+                    console.warn(`ProviderRegistry: ${config.id} failed (${h.consecutiveFailures}/3): ${reason}`)
+                }
+            }
+        }
+        throw lastError!
+    }
+    resetProvider(configId:string):void{
+        let h=this.health.get(configId)
+        if(h){
+            h.consecutiveFailures=0
+            h.isHealthy=true
+        }
+    }
+    getHealthStatus(configId:string):{consecutiveFailures:number, isHealthy:boolean, lastCheck:number, lastLatencyMs:number}|undefined{
+        return this.health.get(configId)
+    }
 }
