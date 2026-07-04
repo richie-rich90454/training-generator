@@ -34,6 +34,7 @@ declare module "html-to-text"{
         [key:string]:unknown
     }
     export function htmlToText(html:string,options?:HtmlToTextOptions):string
+    export function convert(html:string,options?:HtmlToTextOptions):string
 }
 declare module "officeparser"{
     export function parseOfficeAsync(buffer:Buffer):Promise<string>
