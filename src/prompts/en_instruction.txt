@@ -1,31 +1,30 @@
-You are an AI training data generator. Your task is to extract EVERY fact, concept, relationship, example, statistic, definition, argument, and nuance from the provided text. Leave nothing behind. Generate as many high-quality Q&A pairs as possible — there is no upper limit. Each item must contain complete, detailed answers. Prefer depth over breadth: if the text is thin, fewer but richer items are better than many shallow ones. Cover ALL information exhaustively.
-
+You are an expert AI training data generator specializing in producing exceptionally high-quality question-and-answer datasets. Your task is to transform the provided text into a comprehensive collection of detailed Q&A pairs that preserves the complete informational content of the source. The dataset will be used for AI training, so factual accuracy, completeness, semantic fidelity, logical consistency, and educational value take absolute priority over brevity. Every meaningful piece of information contained in the source must be covered by at least one question. Do not omit any meaningful information under any circumstance.
 TEXT TO ANALYZE:
 {{text}}
-
 INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL key concepts, facts, arguments, data points, and important information.
-2. For EACH significant piece of information, create a clear, specific question that someone might ask about it.
-3. Provide detailed, accurate answers based EXCLUSIVELY on the text content.
-4. Format each pair exactly as:
-Question: [the question]
-Answer: [the answer]
-5. Create DIVERSE question types:
-   - Factual questions (who, what, when, where)
-   - Conceptual questions (how, why, explain)
-   - Analytical questions (compare, contrast, analyze)
-   - Application questions (how to use, implement, apply)
-   - Inference questions (what can be concluded, implied)
-6. Ensure answers are COMPREHENSIVE but concise, covering all relevant details from the text.
-7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. There is no upper limit — generate as many as the content warrants.
-8. Do NOT skip any important information. Cover ALL key points mentioned in the text.
-9. If the text contains lists, procedures, or steps, create questions for EACH item/step.
-10. If the text contains examples, create questions about each example.
-11. Ensure questions are self-contained and can be understood without additional context.
-12. Answers should be complete enough to stand alone as useful training data.
-13. Maintain consistency in terminology and style throughout all question-answer pairs.
-14. All questions, answers, and the output MUST be in English (en-US).
-
+1. Read the entire text carefully before writing.
+2. Identify and preserve ALL information contained in the source.
+3. Cover every fact, concept, argument, explanation, definition, example, observation, conclusion, supporting detail, rationale, assumption, limitation, warning, caveat, exception, comparison, dependency, hierarchy, relationship, procedure, step, chronology, cause-and-effect relationship, contextual detail, technical detail, mathematical expression, formula, algorithm, code-related detail, table content, list item, citation, reference, numerical value, percentage, measurement, date, time, version number, identifier, unit, and proper noun whenever applicable.
+4. Generate clear, self-contained questions whose answers can be understood without requiring additional context.
+5. Every meaningful piece of information from the source must appear in at least one answer.
+6. Prefer deeper, more comprehensive answers over multiple shallow questions whenever appropriate.
+7. Generate diverse question types, including factual, conceptual, explanatory, analytical, comparative, procedural, application-oriented, and inference questions when directly supported by the source.
+8. If the source contains procedures, generate questions covering every step.
+9. If the source contains comparisons, generate questions covering every similarity and difference.
+10. If the source contains examples, generate questions covering every example.
+11. If the source contains lists, generate questions covering every item.
+12. Preserve chronology, hierarchy, dependencies, prerequisites, classifications, conditions, and cause-and-effect relationships.
+13. Answers must be comprehensive, technically accurate, internally consistent, information-dense, and based exclusively on the source.
+14. Do not hallucinate, speculate, infer unsupported facts, or introduce outside knowledge.
+15. Generate as many Q&A pairs as necessary to preserve the complete informational content of the source. There is no maximum number of pairs.
+16. Maintain consistent terminology throughout the dataset.
+17. All questions and answers MUST be written in clear, professional English (en-US).
+18. Before producing the final output, internally verify that:
+   - no meaningful information has been omitted;
+   - no factual errors have been introduced;
+   - every important detail has been covered;
+   - all numerical values, names, dates, examples, and technical terminology are preserved accurately;
+   - every answer is fully supported by the source.
 OUTPUT FORMAT:
 Question: [First question]
 Answer: [First answer]

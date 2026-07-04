@@ -1,26 +1,32 @@
-You are an AI training data generator. Your task is to create comprehensive, informative conversations between a user and an AI assistant based on ALL information in the provided text. Every fact, concept, statistic, relationship, and detail must appear in at least one exchange. Generate as many exchanges as the content warrants — no upper limit. Each exchange should be thorough and detailed.
-
+You are an expert AI training data generator specializing in producing exceptionally high-quality conversational training datasets. Your task is to transform the provided text into a comprehensive, information-preserving conversation between a user and an AI assistant. The conversation will be used for AI training, so factual accuracy, completeness, semantic fidelity, logical consistency, and educational value take absolute priority over brevity. Every meaningful piece of information contained in the source must appear naturally in at least one exchange. Do not omit any meaningful information under any circumstance.
 TEXT TO ANALYZE:
 {{text}}
-
 INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL main topics, key information, arguments, and details.
-2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text.
-3. The assistant should provide detailed, accurate responses based EXCLUSIVELY on the text.
-4. Format the conversation exactly as:
-User: [user message]
-Assistant: [assistant response]
-5. Make the conversation flow naturally while covering ALL key information.
-6. Generate as many exchanges (user-assistant pairs) as the content warrants — there is no upper limit. Cover different aspects of the text COMPLETELY.
-7. The assistant's responses should be informative, comprehensive, and directly based on the text content.
-8. Cover ALL important points: main ideas, supporting details, examples, data points, conclusions.
-9. If the text contains multiple sections or topics, create conversation exchanges for EACH one.
-10. Ensure the conversation explores the text DEEPLY, not just superficially.
-11. Create a natural dialogue progression that builds understanding incrementally.
-12. Include follow-up questions that probe deeper into complex topics.
-13. Ensure the assistant's responses are well-structured and easy to understand.
-14. All conversation text and the output MUST be in English (en-US).
-
+1. Read the entire text carefully before writing.
+2. Identify and preserve ALL information contained in the source.
+3. Cover every fact, concept, argument, explanation, definition, example, observation, conclusion, supporting detail, rationale, assumption, limitation, warning, caveat, exception, comparison, dependency, hierarchy, relationship, procedure, step, chronology, cause-and-effect relationship, contextual detail, technical detail, mathematical expression, formula, algorithm, code-related detail, table content, list item, citation, reference, numerical value, percentage, measurement, date, time, version number, identifier, unit, and proper noun whenever applicable.
+4. Generate a natural conversation that completely covers the source without introducing information that is not explicitly supported by the text.
+5. The assistant must answer exclusively using information contained in the source.
+6. Do not hallucinate, speculate, infer unsupported facts, or introduce outside knowledge.
+7. Make every exchange meaningful, information-rich, and educational.
+8. Progress naturally from introductory concepts to increasingly detailed discussions while preserving logical relationships between ideas.
+9. Include follow-up questions whenever they naturally deepen understanding or allow additional information from the source to be covered.
+10. If the source contains multiple sections or topics, create conversation exchanges covering EVERY section completely.
+11. If the source contains procedures, explain every step.
+12. If the source contains comparisons, discuss every similarity and difference.
+13. If the source contains examples, discuss every example.
+14. If the source contains lists, discuss every item.
+15. Preserve chronology, hierarchy, dependencies, prerequisites, conditions, classifications, and cause-and-effect relationships.
+16. The assistant's responses should be detailed, technically accurate, internally consistent, well-structured, and self-contained.
+17. Generate as many exchanges as necessary to preserve the complete informational content of the source. There is no maximum number of exchanges.
+18. Every meaningful piece of information from the source must appear in at least one assistant response.
+19. All conversation text MUST be written in clear, professional English (en-US).
+20. Before producing the final output, internally verify that:
+   - no meaningful information has been omitted;
+   - no factual errors have been introduced;
+   - every important detail has been covered;
+   - all numerical values, names, dates, examples, and technical terminology are preserved accurately;
+   - every assistant response is fully supported by the source.
 OUTPUT FORMAT:
 User: [First user message]
 Assistant: [First assistant response]
