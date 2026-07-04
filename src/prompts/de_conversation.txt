@@ -1,28 +1,40 @@
-Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, vollständige und informative Gespräche zwischen einem Benutzer und einem KI-Assistenten zu erstellen, die auf ALLEN Informationen des bereitgestellten Textes basieren. Jede Tatsache, jedes Konzept, jede Statistik, jede Beziehung und jedes Detail muss in mindestens einem Austausch erscheinen. Generieren Sie so viele Austausche, wie der Inhalt erfordert — keine Obergrenze. Jeder Austausch sollte gründlich und detailliert sein.
+Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf die Erzeugung außergewöhnlich hochwertiger dialogbasierter Trainingsdatensätze. Deine Aufgabe besteht darin, den bereitgestellten Text in einen umfassenden, informationsbewahrenden Dialog zwischen einem Benutzer und einem KI-Assistenten umzuwandeln. Dieser Dialog wird als KI-Trainingsdatensatz verwendet. Daher haben sachliche Genauigkeit, Vollständigkeit, semantische Treue, logische Konsistenz und pädagogischer Wert uneingeschränkten Vorrang vor Kürze. Jede bedeutungsvolle Information aus dem Ausgangstext muss auf natürliche Weise in mindestens einem Dialogaustausch erscheinen. Unter keinen Umständen darf irgendeine bedeutungsvolle Information ausgelassen werden.
 
 ZU ANALYSIERENDER TEXT:
 {{text}}
 
-Fragen und Antworten MÜSSEN auf Deutsch sein. Alle Ausgabetexte müssen auf Deutsch sein.
 ANWEISUNGEN:
-1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptthemen, Schlüsselinformationen, Argumente und Details.
-2. Erstellen Sie ein vollständiges Gespräch, in dem der Benutzer Fragen stellt oder ALLE wichtigen Aspekte des Textes diskutiert.
-3. Der Assistent muss detaillierte und genaue Antworten geben, die AUSSCHLIESSLICH auf dem Text basieren.
-4. Formatieren Sie das Gespräch genau wie folgt:
-User: [Benutzernachricht]
-Assistant: [Assistentenantwort]
-5. Lassen Sie das Gespräch natürlich fließen, während es ALLE Schlüsselinformationen abdeckt.
-6. Nehmen Sie so viele Austausche (Benutzer-Assistent-Paare) auf, wie der Inhalt erfordert — keine Obergrenze. Decken Sie UNTERSCHIEDLICHE Aspekte des Textes VOLLSTÄNDIG ab.
-7. Die Antworten des Assistenten müssen informativ, vollständig und direkt auf dem Textinhalt basierend sein.
-8. Decken Sie ALLE wichtigen Punkte ab: Hauptideen, unterstützende Details, Beispiele, Datenpunkte, Schlussfolgerungen.
-9. Wenn der Text mehrere Abschnitte oder Themen enthält, erstellen Sie Gesprächsaustausche für JEDES davon.
-10. Stellen Sie sicher, dass das Gespräch den Text in der TIEFE erkundet, nicht nur oberflächlich.
+1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
+2. Identifiziere und bewahre ALLE im Ausgangstext enthaltenen Informationen.
+3. Berücksichtige jede Tatsache, jedes Konzept, jedes Argument, jede Erklärung, jede Definition, jedes Beispiel, jede Beobachtung, jede Schlussfolgerung, jedes unterstützende Detail, jede Begründung, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jeden Vergleich, jede Abhängigkeit, jede Hierarchie, jede Beziehung, jedes Verfahren, jeden einzelnen Schritt, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jeden Zahlenwert, jeden Prozentwert, jede Messgröße, jedes Datum, jede Uhrzeit, jede Versionsnummer, jede Kennung, jede Einheit sowie jeden Eigennamen, sofern zutreffend.
+4. Erzeuge einen natürlichen Dialog, der den gesamten Inhalt des Ausgangstextes vollständig abdeckt, ohne Informationen einzuführen, die nicht ausdrücklich durch den Text gestützt werden.
+5. Der KI-Assistent darf ausschließlich Informationen verwenden, die im Ausgangstext enthalten sind.
+6. Erfinde keine Informationen, spekuliere nicht, ziehe keine unbegründeten Schlussfolgerungen und füge keinerlei externes Wissen hinzu.
+7. Jeder Dialogaustausch muss inhaltlich wertvoll, informationsreich und didaktisch sinnvoll sein.
+8. Lasse den Dialog auf natürliche Weise von grundlegenden Themen zu zunehmend detaillierten und komplexeren Inhalten fortschreiten und bewahre dabei sämtliche logischen Beziehungen zwischen den Ideen.
+9. Füge geeignete Anschlussfragen hinzu, sofern diese das Verständnis vertiefen oder ermöglichen, weitere Informationen aus dem Ausgangstext abzudecken.
+10. Falls der Ausgangstext mehrere Abschnitte oder Themen enthält, erstelle Dialogaustausche, welche JEDEN Abschnitt bzw. JEDES Thema vollständig behandeln.
+11. Falls der Ausgangstext Verfahren oder Abläufe enthält, erläutere jeden einzelnen Schritt vollständig.
+12. Falls der Ausgangstext Vergleiche enthält, behandle sämtliche Gemeinsamkeiten und Unterschiede vollständig.
+13. Falls der Ausgangstext Beispiele enthält, behandle jedes einzelne Beispiel vollständig.
+14. Falls der Ausgangstext Listen enthält, behandle jeden einzelnen Listeneintrag vollständig.
+15. Bewahre sämtliche chronologischen Abläufe, Hierarchien, Abhängigkeiten, Voraussetzungen, Bedingungen, Klassifikationen und Ursache-Wirkungs-Beziehungen.
+16. Die Antworten des KI-Assistenten müssen ausführlich, technisch korrekt, logisch konsistent, klar strukturiert und eigenständig verständlich sein.
+17. Erzeuge so viele Dialogaustausche wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes zu bewahren. Es gibt keine Obergrenze für die Anzahl der Dialoge.
+18. Jede bedeutungsvolle Information aus dem Ausgangstext muss in mindestens einer Antwort des KI-Assistenten enthalten sein.
+19. Sämtliche Benutzernachrichten und Antworten des KI-Assistenten müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden. Die Formatkennzeichnungen „User:“ und „Assistant:“ müssen jedoch unverändert auf Englisch bleiben und dürfen nicht übersetzt werden, um ein konsistentes Ausgabeformat sicherzustellen.
+20. Führe vor der Ausgabe des Endergebnisses eine vollständige interne Überprüfung durch, um sicherzustellen, dass:
+   - keine bedeutungsvolle Information ausgelassen wurde;
+   - keine sachlichen Fehler eingeführt wurden;
+   - jedes wichtige Detail vollständig abgedeckt wurde;
+   - sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind;
+   - jede Antwort des KI-Assistenten vollständig durch den Ausgangstext gestützt wird.
 
 AUSGABEFORMAT:
 User: [Erste Benutzernachricht]
-Assistant: [Erste Assistentenantwort]
+Assistant: [Erste Antwort des KI-Assistenten]
 
 User: [Zweite Benutzernachricht]
-Assistant: [Zweite Assistentenantwort]
+Assistant: [Zweite Antwort des KI-Assistenten]
 
-[Fahren Sie mit so vielen Austauschen fort, wie nötig sind, um alle Informationen abzudecken, mit einer Leerzeile zwischen jedem Benutzer-Assistent-Paar]
+[Setze den Dialog mit so vielen Dialogaustauschen fort, wie erforderlich sind, um sämtliche Informationen vollständig abzudecken. Zwischen jedem User-Assistant-Paar muss genau eine Leerzeile stehen. Sämtliche Benutzernachrichten und Antworten des KI-Assistenten müssen vollständig auf Deutsch verfasst sein.]

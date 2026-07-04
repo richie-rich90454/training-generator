@@ -1,24 +1,29 @@
-Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, ALLE strukturierten Informationen aus dem bereitgestellten Text erschöpfend zu extrahieren. Extrahieren Sie: jedes Schlüsselkonzept, jedes Thema, jede Tatsache, jeden Datenpunkt, jede Statistik, jedes Argument, jeden Beweis, jedes Beispiel, jede Definition, jede Beziehung, jede Schlussfolgerung und jede Implikation. Für Verfahren: jeden Schritt. Für Vergleiche: jeden Unterschied und jede Ähnlichkeit. Für Listen: jedes Element mit vollständiger Beschreibung. Generieren Sie so viele strukturierte Elemente, wie der Inhalt erfordert — keine Obergrenze.
+Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf hochgradig informationsgetreue strukturierte Wissensextraktion (High-Fidelity Structured Knowledge Extraction). Deine Aufgabe besteht darin, sämtliche im bereitgestellten Text enthaltenen Informationen vollständig zu extrahieren, logisch zu organisieren und in eine umfassende, hierarchisch strukturierte Wissensrepräsentation umzuwandeln, die sich optimal für das Training von KI-Modellen eignet. Bewahre jede bedeutungsvolle Information vollständig. Unter keinen Umständen darf irgendeine bedeutungsvolle Information ausgelassen werden.
 
 ZU ANALYSIERENDER TEXT:
 {{text}}
 
-Verfassen Sie die gesamte Analyse auf Deutsch.
 ANWEISUNGEN:
-1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLES:
-   - Schlüsselkonzepte, Themen und Schwerpunkte
-   - Wichtige Fakten, Datenpunkte, Statistiken
-   - Hauptargumente, Erzählungen, Thesenaussagen
-   - Unterstützende Beweise, Beispiele, Fallstudien
-   - Technische Begriffe, Definitionen, Fachjargon (mit Erklärungen)
-   - Beziehungen, Verbindungen, Abhängigkeiten zwischen Informationen
-   - Schlussfolgerungen, Implikationen, Empfehlungen
-2. Organisieren Sie ALLE Informationen auf strukturierte und hierarchische Weise, die für das KI-Training optimal ist.
-3. Konzentrieren Sie sich auf die Extraktion VOLLSTÄNDIGER, faktischer und überprüfbarer Informationen aus dem Text.
-4. Wenn der Text Anweisungen oder Verfahren enthält, extrahieren Sie ALLE Schritte im Detail.
-5. Wenn der Text Vergleiche oder Gegenüberstellungen enthält, heben Sie ALLE wichtigen Unterschiede und Ähnlichkeiten hervor.
-6. Wenn der Text Listen enthält, extrahieren Sie ALLE Elemente mit ihren Beschreibungen.
-7. Formatieren Sie Ihre Analyse klar, organisiert und vollständig, die ALLES Wichtige im Text erfasst.
+1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
+2. Extrahiere und organisiere ALLE im Ausgangstext enthaltenen Informationen.
+3. Berücksichtige jedes Konzept, jedes Thema, jeden Sachverhalt, jede Tatsache, jede Statistik, jeden Zahlenwert, jedes Argument, jede Erklärung, jede Definition, jede Beobachtung, jedes Beispiel, jede Fallstudie, jedes Verfahren, jede Empfehlung, jede Schlussfolgerung, jede Implikation, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jede Abhängigkeit, jede Beziehung, jede Hierarchie, jeden Vergleich, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jede Kennung, jede Versionsnummer, jede Messgröße, jedes Datum, jede Uhrzeit, jede Einheit sowie jeden Eigennamen, sofern zutreffend.
+4. Organisiere sämtliche extrahierten Informationen in einer klaren hierarchischen Struktur unter Verwendung logisch aufgebauter Überschriften und Unterüberschriften.
+5. Bewahre die logische Organisation sowie sämtliche Beziehungen zwischen den Informationen des Originals.
+6. Falls der Ausgangstext Verfahren oder Abläufe enthält, extrahiere jeden einzelnen Schritt vollständig.
+7. Falls der Ausgangstext Vergleiche enthält, extrahiere sämtliche Gemeinsamkeiten und Unterschiede vollständig.
+8. Falls der Ausgangstext Listen enthält, extrahiere jeden einzelnen Listeneintrag einschließlich seiner vollständigen Beschreibung.
+9. Falls der Ausgangstext Beispiele, Fallstudien oder Belege enthält, bewahre jedes einzelne Beispiel vollständig.
+10. Bewahre sämtliche chronologischen Abläufe, Hierarchien, Abhängigkeiten, Voraussetzungen, Klassifikationen, Bedingungen und Ursache-Wirkungs-Beziehungen.
+11. Bewahre sämtliche Fachbegriffe exakt, sofern sie im Original nicht ausdrücklich erklärt oder definiert werden.
+12. Ziehe keine Schlussfolgerungen, spekuliere nicht, interpretiere Informationen nicht neu, vereinfache sie nicht und erfinde keinerlei Informationen.
+13. Bewahre die ursprüngliche Bedeutung, sämtliche semantischen Nuancen sowie den vollständigen technischen Detailgrad des Originals.
+14. Sämtliche Ausgaben müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden.
+15. Erzeuge so viele strukturierte Inhalte wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes zu bewahren. Es gibt keine maximale Längenbegrenzung. Falls Vollständigkeit und Kürze miteinander in Konflikt stehen, hat Vollständigkeit stets oberste Priorität.
+16. Führe vor der Ausgabe des Endergebnisses eine vollständige interne Überprüfung durch, um sicherzustellen, dass:
+   - keine bedeutungsvolle Information ausgelassen wurde;
+   - keine sachlichen Fehler eingeführt wurden;
+   - sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind;
+   - die extrahierte Struktur den Aufbau, die Bedeutung und den Informationsgehalt des Originaldokuments vollständig und originalgetreu widerspiegelt.
 
 AUSGABEFORMAT:
-Geben Sie Ihre Analyse in einem gut strukturierten und vollständigen Format aus.
+Gib ausschließlich die strukturierte Analyse aus. Die Analyse muss klar gegliedert, umfassend und logisch strukturiert sein. Die gesamte Ausgabe muss vollständig auf Deutsch erfolgen.

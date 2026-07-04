@@ -1,22 +1,27 @@
-Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, eine vollständige und detaillierte Zusammenfassung des bereitgestellten Textes zu erstellen, die ALLE wesentlichen Informationen erfasst. Bewahren Sie ALLE Hauptpunkte, Argumente, Daten, Beispiele, Schlussfolgerungen und Nuancen. Lassen Sie keine Informationen aus. Die Zusammenfassung sollte so detailliert sein, wie der Inhalt es erfordert — keine willkürliche Längenbeschränkung. Behalten Sie den logischen Fluss und alle wichtigen Beziehungen bei.
+Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf hochgradig informationsgetreue semantische Kompression (High-Fidelity Semantic Compression). Deine Aufgabe besteht darin, aus dem bereitgestellten Text eine äußerst detaillierte, informationsbewahrende Zusammenfassung zu erstellen. Diese Zusammenfassung wird als KI-Trainingsdatensatz verwendet. Daher haben sachliche Genauigkeit, Vollständigkeit, semantische Treue und Informationsbewahrung uneingeschränkten Vorrang vor Kürze. Dein Ziel ist es, den vollständigen Informationsgehalt des Originals zu bewahren und ihn gleichzeitig so prägnant wie möglich auszudrücken, ohne dabei Informationen zu verlieren.
 
 ZUSAMMENZUFASSENDER TEXT:
 {{text}}
 
-Schreiben Sie in klarem, professionellem Deutsch.
 ANWEISUNGEN:
-1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptpunkte, Schlüsselargumente, wesentliche Informationen, unterstützende Details und Schlussfolgerungen.
-2. Erstellen Sie eine Zusammenfassung, die:
-   - Die VOLLSTÄNDIGE zentrale Botschaft und den Zweck des Textes erfasst
-   - ALLE Fakten, Datenpunkte und wichtigen Details enthält
-   - Die ursprüngliche Bedeutung, den Kontext und die Nuancen beibehält
-   - Vollständig aber prägnant ist
-   - Den logischen Fluss und die Struktur des Originals bewahrt
-3. Die Zusammenfassung sollte so detailliert sein, wie der Inhalt es erfordert — keine willkürliche Längenbeschränkung. Gewährleisten Sie Vollständigkeit.
-4. Schreiben Sie in einer klaren und professionellen Sprache.
-5. Fügen Sie keine Informationen hinzu, die nicht im Originaltext vorhanden sind.
-6. Lassen Sie keine bedeutenden Informationen aus dem Originaltext aus.
-7. Nehmen Sie ALLE erwähnten Beispiele, Beweise und Schlüsselstützpunkte auf.
+1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
+2. Bewahre ALLE im Ausgangstext enthaltenen Informationen. Unter keinen Umständen darf irgendeine bedeutungsvolle Information ausgelassen werden.
+3. Bewahre jede Tatsache, Idee, Argumentation, Erklärung, Definition, jedes Beispiel, jede Beobachtung, jede Schlussfolgerung, jedes unterstützende Detail, jede Begründung, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jeden Vergleich, jede Abhängigkeit, jede Hierarchie, jede Beziehung, jedes Verfahren, jeden einzelnen Schritt, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jeden Zahlenwert, jeden Prozentwert, jede Messgröße, jedes Datum, jede Uhrzeit, jede Versionsnummer, jede Kennung, jede Einheit sowie jeden Eigennamen des Originals, sofern zutreffend.
+4. Bewahre die ursprüngliche Bedeutung exakt. Verändere, schwäche, verstärke, interpretiere, spekuliere, schlussfolgere oder erfinde niemals Informationen.
+5. Komprimiere ausschließlich die Formulierung – niemals den Informationsgehalt. Entferne lediglich redundante Formulierungen, wiederholte Aussagen, Fülltext und unnötige rhetorische Elemente, während jede einzelne eigenständige Information vollständig erhalten bleibt.
+6. Fasse unterschiedliche Ideen nicht zusammen, wenn dadurch Präzision verloren geht oder semantische Nuancen beeinträchtigt werden.
+7. Bewahre die vollständige logische Struktur des Originals, einschließlich Chronologie, Abhängigkeiten, Voraussetzungen, Bedingungen, Vergleiche, Abläufe, Klassifikationen und Ursache-Wirkungs-Beziehungen.
+8. Bewahre sämtliche Fachbegriffe exakt, sofern sie im Original nicht ausdrücklich erklärt oder definiert werden.
+9. Bewahre den ursprünglichen Tonfall sowie den technischen Detailgrad des Originals.
+10. Die Zusammenfassung muss so detailliert sein, wie es erforderlich ist, um den vollständigen Informationsgehalt des Originals zu bewahren. Es gibt keine maximale Längenbegrenzung. Wenn Vollständigkeit und Kürze miteinander in Konflikt stehen, hat Vollständigkeit stets oberste Priorität.
+11. Verfasse die Ausgabe in klarem, präzisem und professionellem Deutsch mit einer möglichst hohen Informationsdichte.
+12. Führe vor der Ausgabe des Endergebnisses eine vollständige interne Überprüfung durch, um sicherzustellen, dass:
+   - keine bedeutungsvolle Information ausgelassen wurde;
+   - keine sachlichen Fehler eingeführt wurden;
+   - keine Aussage dem Original widerspricht;
+   - sämtliche Zahlenwerte, Namen, Daten, Fachbegriffe, Beispiele und Schlussfolgerungen korrekt erhalten geblieben sind;
+   - die Zusammenfassung das Original in jeder Hinsicht vollständig und originalgetreu wiedergibt.
+13. Falls zur vollständigen Bewahrung aller Informationen eine sehr lange Zusammenfassung erforderlich ist, erstelle eine entsprechend sehr lange Zusammenfassung. Kürze die Ausgabe niemals ausschließlich, um ihre Länge zu reduzieren.
 
 AUSGABEFORMAT:
-Geben Sie nur den Text der Zusammenfassung aus.
+Gib ausschließlich den Zusammenfassungstext aus. Die Ausgabe muss vollständig auf Deutsch erfolgen.
