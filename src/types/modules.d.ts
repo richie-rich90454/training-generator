@@ -39,6 +39,10 @@ declare module "html-to-text"{
 declare module "officeparser"{
     export function parseOfficeAsync(buffer:Buffer):Promise<string>
 }
+declare module "node-whisper"{
+    const Whisper:any;
+    export default Whisper;
+}
 declare module "*.css"{
     let content:string;
     export default content;
