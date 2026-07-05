@@ -159,6 +159,8 @@
     ]
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/test-utils": "^2.4.11",
     "concurrently": "^9.2.3",
     "cross-env": "^10.1.0",
     "electron": "^42.3.3",
@@ -171,7 +173,8 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vite-plugin-copy": "^0.1.6",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "vue": "^3.5.39"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
