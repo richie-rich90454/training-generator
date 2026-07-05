@@ -1,0 +1,183 @@
+// @vitest-environment node
+import { describe, it, expect } from "vitest"
+import { CostEstimator, estimateTokens, PricingTier } from "../src/core/costEstimator.js"
+function makePricing(): PricingTier[]{
+    return [
+        {provider: "openai", model: "gpt-4", inputPricePer1k: 0.03, outputPricePer1k: 0.06, currency: "USD"},
+        {provider: "openai", model: "gpt-3.5", inputPricePer1k: 0.003, outputPricePer1k: 0.006, currency: "USD"},
+        {provider: "anthropic", model: "claude", inputPricePer1k: 0.008, outputPricePer1k: 0.024, currency: "USD"}
+    ];
+}
+describe("estimateTokens", ()=>{
+    it("should return 0 for empty string", ()=>{
+        expect(estimateTokens("")).toBe(0)
+    })
+    it("should estimate chars divided by 4 rounded up", ()=>{
+        expect(estimateTokens("abcd")).toBe(1)
+        expect(estimateTokens("abcde")).toBe(2)
+        expect(estimateTokens("hello world")).toBe(3)
+    })
+})
+describe("CostEstimator estimate", ()=>{
+    it("should compute cost for exact tier match", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let estimate=estimator.estimate("abcd", "openai", "gpt-4")
+        expect(estimate.estimatedInputTokens).toBe(1)
+        expect(estimate.estimatedOutputTokens).toBe(1)
+        expect(estimate.inputCost).toBeCloseTo(0.00003)
+        expect(estimate.outputCost).toBeCloseTo(0.00006)
+        expect(estimate.totalCost).toBeCloseTo(0.00009)
+        expect(estimate.currency).toBe("USD")
+    })
+    it("should use provider fallback when model not found", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let estimate=estimator.estimate("abcd", "openai", "unknown-model")
+        expect(estimate.inputCost).toBeCloseTo(0.00003)
+        expect(estimate.outputCost).toBeCloseTo(0.00006)
+        expect(estimate.currency).toBe("USD")
+    })
+    it("should use default fallback when provider not found", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let estimate=estimator.estimate("abcd", "unknown", "unknown")
+        expect(estimate.inputCost).toBeCloseTo(0.00003)
+        expect(estimate.outputCost).toBeCloseTo(0.00006)
+        expect(estimate.currency).toBe("USD")
+    })
+    it("should use custom tokenizer when provided", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing(), tokenizer: ()=>100})
+        let estimate=estimator.estimate("abcd", "openai", "gpt-4")
+        expect(estimate.estimatedInputTokens).toBe(100)
+        expect(estimate.estimatedOutputTokens).toBe(100)
+        expect(estimate.inputCost).toBeCloseTo(0.003)
+        expect(estimate.outputCost).toBeCloseTo(0.006)
+    })
+    it("should preserve provider and model in estimate", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let estimate=estimator.estimate("x", "anthropic", "claude")
+        expect(estimate.provider).toBe("anthropic")
+        expect(estimate.model).toBe("claude")
+    })
+    it("should handle empty text estimate", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let estimate=estimator.estimate("", "openai", "gpt-4")
+        expect(estimate.estimatedInputTokens).toBe(0)
+        expect(estimate.totalCost).toBe(0)
+    })
+})
+describe("CostEstimator recordUsage", ()=>{
+    it("should accumulate usage records", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "openai", model: "gpt-4", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let summary=estimator.getUsageSummary()
+        expect(summary.totalCost).toBeCloseTo(0.03)
+        expect(summary.totalInputTokens).toBe(300)
+        expect(summary.totalOutputTokens).toBe(150)
+        expect(summary.count).toBe(2)
+    })
+    it("should filter summary by provider", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "anthropic", model: "claude", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let summary=estimator.getUsageSummary("openai")
+        expect(summary.totalCost).toBeCloseTo(0.01)
+        expect(summary.count).toBe(1)
+    })
+    it("should filter summary by model", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "openai", model: "gpt-3.5", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let summary=estimator.getUsageSummary("openai", "gpt-4")
+        expect(summary.totalCost).toBeCloseTo(0.01)
+        expect(summary.count).toBe(1)
+    })
+    it("should filter summary by time range", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 2000, provider: "openai", model: "gpt-4", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        estimator.recordUsage({timestamp: 3000, provider: "openai", model: "gpt-4", inputTokens: 300, outputTokens: 150, cost: 0.03})
+        let summary=estimator.getUsageSummary("openai", "gpt-4", 1500, 2500)
+        expect(summary.totalCost).toBeCloseTo(0.02)
+        expect(summary.totalInputTokens).toBe(200)
+        expect(summary.count).toBe(1)
+    })
+    it("should return empty summary when no records match", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        let summary=estimator.getUsageSummary("anthropic")
+        expect(summary.totalCost).toBe(0)
+        expect(summary.count).toBe(0)
+    })
+    it("should filter by provider model and time range combined", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 2000, provider: "openai", model: "gpt-3.5", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        estimator.recordUsage({timestamp: 2500, provider: "openai", model: "gpt-4", inputTokens: 300, outputTokens: 150, cost: 0.03})
+        let summary=estimator.getUsageSummary("openai", "gpt-4", 1500, 3000)
+        expect(summary.totalCost).toBeCloseTo(0.03)
+        expect(summary.count).toBe(1)
+    })
+})
+describe("CostEstimator dashboard", ()=>{
+    it("should aggregate usage by provider", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "anthropic", model: "claude", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let dashboard=estimator.getDashboardData()
+        expect(dashboard.byProvider.openai.totalCost).toBeCloseTo(0.01)
+        expect(dashboard.byProvider.anthropic.totalCost).toBeCloseTo(0.02)
+    })
+    it("should aggregate usage by provider and model", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "openai", model: "gpt-3.5", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let dashboard=estimator.getDashboardData()
+        expect(dashboard.byModel["openai/gpt-4"].totalCost).toBeCloseTo(0.01)
+        expect(dashboard.byModel["openai/gpt-3.5"].totalCost).toBeCloseTo(0.02)
+    })
+    it("should aggregate usage by day", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let day1=Date.parse("2026-01-01T10:00:00Z")
+        let day2=Date.parse("2026-01-02T10:00:00Z")
+        estimator.recordUsage({timestamp: day1, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: day1, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: day2, provider: "openai", model: "gpt-4", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        let dashboard=estimator.getDashboardData()
+        expect(dashboard.daily["2026-01-01"].totalCost).toBeCloseTo(0.02)
+        expect(dashboard.daily["2026-01-01"].count).toBe(2)
+        expect(dashboard.daily["2026-01-02"].totalCost).toBeCloseTo(0.02)
+        expect(dashboard.daily["2026-01-02"].count).toBe(1)
+    })
+    it("should return empty dashboard when no usage", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        let dashboard=estimator.getDashboardData()
+        expect(Object.keys(dashboard.byProvider)).toHaveLength(0)
+        expect(Object.keys(dashboard.byModel)).toHaveLength(0)
+        expect(Object.keys(dashboard.daily)).toHaveLength(0)
+    })
+})
+describe("CostEstimator multiple providers", ()=>{
+    it("should sum records separately per provider", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1002, provider: "anthropic", model: "claude", inputTokens: 500, outputTokens: 200, cost: 0.05})
+        let openaiSummary=estimator.getUsageSummary("openai")
+        let anthropicSummary=estimator.getUsageSummary("anthropic")
+        expect(openaiSummary.totalCost).toBeCloseTo(0.02)
+        expect(openaiSummary.totalInputTokens).toBe(200)
+        expect(anthropicSummary.totalCost).toBeCloseTo(0.05)
+        expect(anthropicSummary.totalInputTokens).toBe(500)
+    })
+    it("should keep provider buckets separate in dashboard", ()=>{
+        let estimator=new CostEstimator({pricing: makePricing()})
+        estimator.recordUsage({timestamp: 1000, provider: "openai", model: "gpt-4", inputTokens: 100, outputTokens: 50, cost: 0.01})
+        estimator.recordUsage({timestamp: 1001, provider: "anthropic", model: "claude", inputTokens: 200, outputTokens: 100, cost: 0.02})
+        estimator.recordUsage({timestamp: 1002, provider: "openai", model: "gpt-4", inputTokens: 300, outputTokens: 150, cost: 0.03})
+        let dashboard=estimator.getDashboardData()
+        expect(dashboard.byProvider.openai.totalInputTokens).toBe(400)
+        expect(dashboard.byProvider.openai.count).toBe(2)
+        expect(dashboard.byProvider.anthropic.totalInputTokens).toBe(200)
+        expect(dashboard.byProvider.anthropic.count).toBe(1)
+    })
+})
