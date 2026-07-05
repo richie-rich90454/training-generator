@@ -1,5 +1,6 @@
-import{contextBridge}from "electron"
+import{contextBridge,ipcRenderer}from "electron"
 import{invoke}from "./ipcRenderer.ts"
+import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANNEL,WINDOW_IS_MAXIMIZED_CHANNEL,WINDOW_MAXIMIZED_CHANGED_EVENT}from "./types/ipc.ts"
 import type{FileObj}from "./types/index.js"
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>invoke("dialog:openFile"),
@@ -29,5 +30,16 @@ contextBridge.exposeInMainWorld("electronAPI",{
     exportLogs:(data:string)=>invoke("export-logs",{data}),
     saveCheckpoint:(data:unknown)=>invoke("save-checkpoint",{data}),
     loadCheckpoint:()=>invoke("load-checkpoint"),
-    clearCheckpoint:()=>invoke("clear-checkpoint")
+    clearCheckpoint:()=>invoke("clear-checkpoint"),
+    windowMinimize:()=>invoke(WINDOW_MINIMIZE_CHANNEL),
+    windowMaximizeToggle:()=>invoke(WINDOW_MAXIMIZE_TOGGLE_CHANNEL),
+    windowClose:()=>invoke(WINDOW_CLOSE_CHANNEL),
+    windowIsMaximized:()=>invoke(WINDOW_IS_MAXIMIZED_CHANNEL),
+    onWindowMaximizedChange:(cb:(isMaximized:boolean)=>void):()=>void=>{
+        let handler=(_:unknown,isMaximized:boolean)=>cb(isMaximized)
+        ipcRenderer.on(WINDOW_MAXIMIZED_CHANGED_EVENT,handler)
+        return ()=>{
+            ipcRenderer.off(WINDOW_MAXIMIZED_CHANGED_EVENT,handler)
+        }
+    }
 })
