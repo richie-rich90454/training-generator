@@ -26,7 +26,8 @@ export async function compressData(data: unknown): Promise<{buffer: Buffer; comp
     let json=JSON.stringify(data);
     let raw=Buffer.from(json, "utf-8");
     try{
-        let zstd=await import("@mongodb-js/zstd");
+        let moduleName="@mongodb-js/zstd";
+        let zstd=await import(/* @vite-ignore */ moduleName);
         let compressed=await zstd.compress(raw, 3);
         return {buffer: compressed, compressed: true};
     }
@@ -37,7 +38,8 @@ export async function compressData(data: unknown): Promise<{buffer: Buffer; comp
 export async function decompressData(buffer: Buffer): Promise<unknown>{
     if(buffer.length>=4&&buffer[0]===0x28&&buffer[1]===0xb5&&buffer[2]===0x2f&&buffer[3]===0xfd){
         try{
-            let zstd=await import("@mongodb-js/zstd");
+            let moduleName="@mongodb-js/zstd";
+        let zstd=await import(/* @vite-ignore */ moduleName);
             let decompressed=await zstd.decompress(buffer);
             return JSON.parse(decompressed.toString("utf-8"));
         }
