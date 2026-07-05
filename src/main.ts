@@ -9,6 +9,7 @@ import https from "https"
 import crypto from "crypto"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
+import{SmartCache}from "./core/smartCache.ts"
 import{handle}from "./ipcMain.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 
@@ -21,6 +22,7 @@ let mainWindow:BrowserWindow|null=null
 let splashWindow:BrowserWindow|null=null
 let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
+let smartCache=new SmartCache({maxEntries:1000,maxSizeBytes:50*1024*1024,maxAgeMs:24*60*60*1000,compress:true})
 let deferredIpcRegistered=false
 let isAppQuitting=false
 let writeLogQueue:Promise<void>=Promise.resolve()
@@ -1042,6 +1044,15 @@ function registerDeferredIpcHandlers():void{
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
             if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
+            return{success:true}
+        }
+        catch{
+            return{success:false}
+        }
+    })
+    handle("cache:compact",async():Promise<{success:boolean}>=>{
+        try{
+            await smartCache.compact()
             return{success:true}
         }
         catch{

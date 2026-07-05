@@ -80,6 +80,10 @@ export interface IpcChannels{
         request:void
         response:{success:boolean}
     }
+    'cache:compact':{
+        request:void
+        response:{success:boolean}
+    }
     'progress:save':{
         request:{data:unknown}
         response:{success:boolean}

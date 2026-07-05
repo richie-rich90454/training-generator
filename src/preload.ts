@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("electronAPI",{
     loadCache:()=>invoke("cache:load"),
     saveCache:(data:Record<string,any>)=>invoke("cache:save",{data}),
     clearCache:()=>invoke("cache:clear"),
+    compactCache:()=>invoke("cache:compact"),
     saveProgress:(data:any)=>invoke("progress:save",{data}),
     loadProgress:()=>invoke("progress:load"),
     clearProgress:()=>invoke("progress:clear"),
