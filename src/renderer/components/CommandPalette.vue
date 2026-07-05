@@ -84,69 +84,69 @@ defineExpose({
 })
 </script>
 <style scoped>
-.command-palette-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 100px;
-    z-index: 1000;
+.command-palette-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:100px;
+    z-index:1000;
 }
-.command-palette {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: 480px;
-    max-width: 90%;
-    overflow: hidden;
+.command-palette{
+    background:var(--surface-color);
+    border-radius:8px;
+    box-shadow:var(--shadow-3);
+    width:480px;
+    max-width:90%;
+    overflow:hidden;
 }
-.command-palette-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: none;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    outline: none;
+.command-palette-input{
+    width:100%;
+    padding:12px 16px;
+    border:none;
+    border-bottom:1px solid var(--border-color);
+    font-size:14px;
+    outline:none;
 }
-.command-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 300px;
-    overflow-y: auto;
+.command-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    max-height:300px;
+    overflow-y:auto;
 }
-.command-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    cursor: pointer;
+.command-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    cursor:pointer;
 }
-.command-item.selected {
-    background: #e3f2fd;
+.command-item.selected{
+    background:var(--selection-color);
 }
-.command-icon {
-    font-size: 14px;
+.command-icon{
+    font-size:14px;
 }
-.command-label {
-    flex: 1;
-    font-size: 14px;
+.command-label{
+    flex:1;
+    font-size:14px;
 }
-.command-shortcut {
-    font-size: 12px;
-    color: #666;
-    background: #f5f5f5;
-    padding: 2px 6px;
-    border-radius: 4px;
+.command-shortcut{
+    font-size:12px;
+    color:var(--text-secondary);
+    background:var(--surface-variant);
+    padding:2px 6px;
+    border-radius:4px;
 }
-.command-empty {
-    padding: 16px;
-    color: #666;
-    font-size: 14px;
+.command-empty{
+    padding:16px;
+    color:var(--text-secondary);
+    font-size:14px;
 }
 </style>
