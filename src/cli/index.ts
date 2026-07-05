@@ -8,6 +8,7 @@ import type { TrainingItem } from "../types/index.ts"
 import FileParser from "../core/fileParser.ts"
 import { exportJSONL, exportJSONArray, exportCSV } from "../renderer/exportFormats.ts"
 import { parseQAPairs, parseConversationTurns } from "./parsers.ts"
+import { parseProxyUrl, ProxyManager } from "../core/proxyManager.ts"
 
 interface CliArgs {
     input: string
@@ -16,6 +17,7 @@ interface CliArgs {
     model: string
     provider: string
     config: string | null
+    proxy: string | null
     chunkSize: number
     concurrency: number
 }
@@ -29,6 +31,7 @@ function parseArgs(): CliArgs {
         model: "llama3",
         provider: "ollama",
         config: null,
+        proxy: null,
         chunkSize: 8000,
         concurrency: 3
     }
@@ -60,6 +63,9 @@ function parseArgs(): CliArgs {
                 break
             case "--concurrency":
                 if (next) { result.concurrency = parseInt(next, 10) || 3; i++ }
+                break
+            case "--proxy":
+                if (next) { result.proxy = next; i++ }
                 break
         }
     }
@@ -253,6 +259,7 @@ async function main() {
         if (configData.provider) args.provider = configData.provider
         if (configData.chunkSize) args.chunkSize = configData.chunkSize
         if (configData.concurrency) args.concurrency = configData.concurrency
+        if (configData.proxy) args.proxy = configData.proxy
     }
 
     if (!args.input) {
@@ -283,6 +290,13 @@ async function main() {
     console.log(`Provider: ${args.provider}`)
     console.log(`Chunk size: ${args.chunkSize}`)
     console.log(`Concurrency: ${args.concurrency}`)
+
+    let proxyManager: ProxyManager | undefined
+    if (args.proxy) {
+        let proxyConfig = parseProxyUrl(args.proxy)
+        proxyManager = new ProxyManager({ proxy: proxyConfig })
+        console.log(`Proxy: ${args.proxy}`)
+    }
 
     // Read all files from input directory
     let entries = fs.readdirSync(inputDir, { withFileTypes: true })

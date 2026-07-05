@@ -115,3 +115,30 @@ declare module "@mongodb-js/zstd"{
     export function compress(data: Buffer, level?: number): Promise<Buffer>
     export function decompress(data: Buffer): Promise<Buffer>
 }
+declare module "http-proxy-agent"{
+    export class HttpProxyAgent{
+        constructor(url: string)
+    }
+}
+declare module "https-proxy-agent"{
+    export class HttpsProxyAgent{
+        constructor(url: string)
+    }
+}
+declare module "socks-proxy-agent"{
+    export class SocksProxyAgent{
+        constructor(url: string)
+    }
+}
+declare module "otpauth"{
+    export class Secret{
+        static fromBase32(input: string): Secret
+        readonly base32: string
+    }
+    export class TOTP{
+        constructor(options: {secret?: Secret; algorithm?: string; digits?: number; period?: number; issuer?: string; label?: string})
+        generate(options?: {timestamp?: number}): string
+        validate(options: {token: string; window?: number; timestamp?: number}): number|null
+        toString(): string
+    }
+}
