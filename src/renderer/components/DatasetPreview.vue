@@ -221,69 +221,68 @@ defineExpose({
 })
 </script>
 <style scoped>
-.dataset-preview {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    font-family: sans-serif;
+.dataset-preview{
+    display:flex;
+    flex-direction:column;
+    height:100%;
 }
-.preview-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
+.preview-toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-bottom:1px solid var(--border-color);
 }
-.index-display {
-    min-width: 60px;
-    text-align: center;
+.index-display{
+    min-width:60px;
+    text-align:center;
 }
-.split-view {
-    display: flex;
-    flex: 1;
-    overflow: auto;
+.split-view{
+    display:flex;
+    flex:1;
+    overflow:auto;
 }
 .original-panel,
-.generated-panel {
-    padding: 8px;
-    overflow: auto;
-    border-right: 1px solid #eee;
+.generated-panel{
+    padding:8px;
+    overflow:auto;
+    border-right:1px solid var(--border-color);
 }
-.generated-panel {
-    border-right: none;
+.generated-panel{
+    border-right:none;
 }
-.single-view {
-    flex: 1;
-    padding: 8px;
-    overflow: auto;
+.single-view{
+    flex:1;
+    padding:8px;
+    overflow:auto;
 }
-.card {
-    margin-bottom: 8px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.card{
+    margin-bottom:8px;
+    padding:8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
 }
-.message-bubble {
-    margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 8px;
+.message-bubble{
+    margin-bottom:8px;
+    padding:8px;
+    border-radius:8px;
 }
-.message-bubble.user {
-    background: #e3f2fd;
+.message-bubble.user{
+    background:var(--bubble-user);
 }
-.message-bubble.assistant {
-    background: #f3e5f5;
+.message-bubble.assistant{
+    background:var(--bubble-assistant);
 }
-.message-bubble.system {
-    background: #f5f5f5;
+.message-bubble.system{
+    background:var(--bubble-system);
 }
-.message-role {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 4px;
+.message-role{
+    display:block;
+    font-weight:bold;
+    margin-bottom:4px;
 }
-pre {
-    white-space: pre-wrap;
-    word-break: break-word;
+pre{
+    white-space:pre-wrap;
+    word-break:break-word;
 }
 </style>
