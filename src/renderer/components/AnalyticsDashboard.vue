@@ -225,74 +225,73 @@ defineExpose({
 })
 </script>
 <style scoped>
-.analytics-dashboard {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-    font-family: sans-serif;
+.analytics-dashboard{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding:16px;
 }
-.metrics-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+.metrics-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:12px;
 }
-.metric-card {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
+.metric-card{
+    padding:12px;
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-large);
+    background:var(--surface-color);
 }
-.metric-label {
-    margin: 0 0 6px 0;
-    font-size: 12px;
-    color: #666;
+.metric-label{
+    margin:0 0 6px 0;
+    font-size:12px;
+    color:var(--text-secondary);
 }
-.metric-value {
-    margin: 0;
-    font-size: 22px;
-    font-weight: bold;
+.metric-value{
+    margin:0;
+    font-size:22px;
+    font-weight:bold;
 }
-.section-title {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    font-weight: bold;
+.section-title{
+    margin:0 0 8px 0;
+    font-size:14px;
+    font-weight:bold;
 }
 .format-list,
-.status-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.status-list{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
 .format-row,
 .status-row,
-.issue-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 8px;
-    border: 1px solid #eee;
-    border-radius: 4px;
+.issue-item{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 8px;
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
 }
-.validator-table {
-    width: 100%;
-    border-collapse: collapse;
+.validator-table{
+    width:100%;
+    border-collapse:collapse;
 }
 .validator-table th,
-.validator-table td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: left;
+.validator-table td{
+    padding:8px;
+    border:1px solid var(--border-color);
+    text-align:left;
 }
-.issues-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.issues-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
-.issues-empty {
-    color: #999;
-    font-style: italic;
+.issues-empty{
+    color:var(--text-disabled);
+    font-style:italic;
 }
 </style>
