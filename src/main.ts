@@ -10,7 +10,7 @@ import crypto from "crypto"
 import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
 import{SmartCache}from "./core/smartCache.ts"
-import{handle}from "./ipcMain.ts"
+import{handle,registerWindowControlHandlers}from "./ipcMain.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
@@ -425,6 +425,14 @@ function createMainWindow(){
     else{
         mainWindow.loadFile(path.join(path.dirname(fileURLToPath(import.meta.url)),"../dist/index.html"))
     }
+    mainWindow.on("maximize",()=>{
+        if(!mainWindow||mainWindow.isDestroyed())return
+        mainWindow.webContents.send("window:maximizedChanged",true)
+    })
+    mainWindow.on("unmaximize",()=>{
+        if(!mainWindow||mainWindow.isDestroyed())return
+        mainWindow.webContents.send("window:maximizedChanged",false)
+    })
     mainWindow.webContents.once("dom-ready",()=>{
         registerDeferredIpcHandlers()
         stopSplash()
@@ -1169,6 +1177,7 @@ app.whenReady().then(()=>{
     startSplash()
     registerCriticalIpcHandlers()
     createMainWindow()
+    registerWindowControlHandlers(()=>mainWindow)
     registerDeferredIpcHandlers()
     setTimeout(()=>registerDeferredIpcHandlers(),5000)
 }).catch((error)=>{
