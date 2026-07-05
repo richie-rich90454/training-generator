@@ -1,4 +1,9 @@
 import type{FileObj,OllamaModel,OllamaStatus,OllamaGenerateOptions,OllamaGenerateResult,LogEntry,ParseBatchItem}from "./interfaces.js"
+export const WINDOW_MINIMIZE_CHANNEL="window:minimize" as const
+export const WINDOW_MAXIMIZE_TOGGLE_CHANNEL="window:maximizeToggle" as const
+export const WINDOW_CLOSE_CHANNEL="window:close" as const
+export const WINDOW_IS_MAXIMIZED_CHANNEL="window:isMaximized" as const
+export const WINDOW_MAXIMIZED_CHANGED_EVENT="window:maximizedChanged" as const
 export interface IpcChannels{
     'file:parse':{
         request:{filePath:string;fileType:string}
@@ -116,9 +121,34 @@ export interface IpcChannels{
         request:{data:string}
         response:{success:boolean;error?:string}
     }
+    'window:minimize':{
+        request:void
+        response:void
+    }
+    'window:maximizeToggle':{
+        request:void
+        response:void
+    }
+    'window:close':{
+        request:void
+        response:void
+    }
+    'window:isMaximized':{
+        request:void
+        response:boolean
+    }
 }
 export type IpcChannel=keyof IpcChannels
 export type IpcRequest<C extends IpcChannel>=IpcChannels[C]['request']
 export type IpcResponse<C extends IpcChannel>=IpcChannels[C]['response']
 export type IpcInvoke=<C extends IpcChannel>(channel:C,request:IpcRequest<C>)=>Promise<IpcResponse<C>>
 export type IpcHandle=<C extends IpcChannel>(channel:C,handler:(event:Electron.IpcMainInvokeEvent,request:IpcRequest<C>)=>IpcResponse<C>|Promise<IpcResponse<C>>)=>void
+declare module "./electron"{
+    interface ElectronAPI{
+        windowMinimize():Promise<void>
+        windowMaximizeToggle():Promise<void>
+        windowClose():Promise<void>
+        windowIsMaximized():Promise<boolean>
+        onWindowMaximizedChange(cb:(isMaximized:boolean)=>void):()=>void
+    }
+}
