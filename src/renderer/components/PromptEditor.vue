@@ -162,121 +162,120 @@ defineExpose({
 })
 </script>
 <style scoped>
-.prompt-editor {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    font-family: sans-serif;
+.prompt-editor{
+    display:flex;
+    flex-direction:column;
+    height:100%;
 }
-.editor-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
+.editor-toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-bottom:1px solid var(--border-color);
 }
-.version-name-input {
-    flex: 1;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.version-name-input{
+    flex:1;
+    padding:4px 8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
 }
-.toolbar-button {
-    padding: 4px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
-    cursor: pointer;
+.toolbar-button{
+    padding:4px 12px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    background:var(--surface-color);
+    cursor:pointer;
 }
-.editor-main {
-    display: flex;
-    flex: 1;
-    overflow: auto;
-    gap: 8px;
-    padding: 8px;
+.editor-main{
+    display:flex;
+    flex:1;
+    overflow:auto;
+    gap:8px;
+    padding:8px;
 }
-.editor-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 200px;
+.editor-panel{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:200px;
 }
-.prompt-textarea {
-    flex: 1;
-    width: 100%;
-    min-height: 120px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-    font-family: inherit;
+.prompt-textarea{
+    flex:1;
+    width:100%;
+    min-height:120px;
+    padding:8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    resize:vertical;
+    font-family:inherit;
 }
-.variable-panel {
-    margin-top: 8px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.variable-panel{
+    margin-top:8px;
+    padding:8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
 }
-.variable-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+.variable-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:4px;
 }
-.variable-label {
-    min-width: 100px;
-    font-weight: bold;
+.variable-label{
+    min-width:100px;
+    font-weight:bold;
 }
-.variable-input {
-    flex: 1;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.variable-input{
+    flex:1;
+    padding:4px 8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
 }
 .preview-panel,
-.history-panel {
-    flex: 1;
-    min-width: 200px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    overflow: auto;
+.history-panel{
+    flex:1;
+    min-width:200px;
+    padding:8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    overflow:auto;
 }
-.panel-title {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    font-weight: bold;
+.panel-title{
+    margin:0 0 8px 0;
+    font-size:14px;
+    font-weight:bold;
 }
-.preview-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-    margin: 0;
+.preview-text{
+    white-space:pre-wrap;
+    word-break:break-word;
+    margin:0;
 }
-.history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.history-list{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
-.history-item {
-    padding: 4px 8px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    cursor: pointer;
+.history-item{
+    padding:4px 8px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    cursor:pointer;
 }
-.history-item.selected {
-    background: #e3f2fd;
+.history-item.selected{
+    background:var(--selection-color);
 }
-.history-name {
-    display: block;
-    font-weight: bold;
+.history-name{
+    display:block;
+    font-weight:bold;
 }
-.history-date {
-    display: block;
-    font-size: 12px;
-    color: #666;
+.history-date{
+    display:block;
+    font-size:12px;
+    color:var(--text-secondary);
 }
-.history-empty {
-    color: #999;
-    font-style: italic;
+.history-empty{
+    color:var(--text-disabled);
+    font-style:italic;
 }
 </style>
