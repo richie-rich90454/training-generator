@@ -340,12 +340,22 @@ class UIManager{
                     </div>
                     <div class="modal-body">
                         ${helpContent}
+                        <div class="help-tour-section" style="margin-top: 1rem; text-align: center;">
+                            <button id="restart-tour-btn" class="btn btn-secondary">Restart Tour</button>
+                        </div>
                     </div>
                 </div>
             `
             document.body.appendChild(helpModal)
             helpModal.querySelector(".help-close")!.addEventListener("click",()=>{
                 this.hideHelp()
+            })
+            helpModal.querySelector("#restart-tour-btn")?.addEventListener("click",()=>{
+                this.hideHelp()
+                import("../core/onboardingTour.js").then((module)=>{
+                    let tour=new module.OnboardingTour({steps: module.DEFAULT_TOUR_STEPS})
+                    tour.start()
+                })
             })
             helpModal.addEventListener("click",(e:Event)=>{
                 if(e.target==helpModal){
