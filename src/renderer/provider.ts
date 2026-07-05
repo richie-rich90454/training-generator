@@ -1,5 +1,7 @@
 import{RateLimiter}from"./rateLimiter.js"
 import type{ProviderConfig}from"../types/interfaces.js"
+import{ProviderScopeEnforcer, ScopeError}from"../core/providerScopes.js"
+import type{ProviderScopesConfig}from"../core/providerScopes.js"
 
 export interface ProviderOptions{
     temperature?:number
@@ -291,14 +293,19 @@ export class ProviderRegistry{
     private providers:Map<string, Provider>
     private health:Map<string, {consecutiveFailures:number, isHealthy:boolean, lastCheck:number, lastLatencyMs:number}>
     private failoverLog:{provider:string, reason:string, timestamp:number}[]
+    private scopeEnforcer:ProviderScopeEnforcer
     constructor(configs:ProviderConfig[], providers:Map<string, Provider>){
         this.configs=configs.filter(c=>c.enabled).sort((a,b)=>a.priority-b.priority)
         this.providers=providers
         this.health=new Map()
         this.failoverLog=[]
+        this.scopeEnforcer=new ProviderScopeEnforcer({scopes:{}})
         for(let config of this.configs){
             this.health.set(config.id, {consecutiveFailures:0, isHealthy:true, lastCheck:0, lastLatencyMs:0})
         }
+    }
+    setProviderScopes(scopes:ProviderScopesConfig):void{
+        this.scopeEnforcer=new ProviderScopeEnforcer({scopes})
     }
     getConfigs():ProviderConfig[]{
         return this.configs
@@ -357,11 +364,16 @@ export class ProviderRegistry{
     }
     async generateWithFailover(prompt:string, model:string, options?:ProviderOptions):Promise<ProviderResult>{
         let lastError:Error
+        let scopeMissing=false
         for(let config of this.configs){
             let h=this.health.get(config.id)
             if(!h||!h.isHealthy)continue
             let provider=this.providers.get(config.id)
             if(!provider)continue
+            if(!this.scopeEnforcer.hasScope(config.id,"generate")){
+                scopeMissing=true
+                continue
+            }
             try{
                 let result=await provider.generate(prompt, model, options)
                 h.consecutiveFailures=0
@@ -381,6 +393,7 @@ export class ProviderRegistry{
                 }
             }
         }
+        if(scopeMissing)throw new ScopeError("No provider with generate scope available")
         throw lastError!
     }
     resetProvider(configId:string):void{
