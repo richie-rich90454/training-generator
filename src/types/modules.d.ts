@@ -39,6 +39,11 @@ declare module "html-to-text"{
 declare module "officeparser"{
     export function parseOfficeAsync(buffer:Buffer):Promise<string>
 }
+declare module "chokidar"{
+    export function watch(paths:string|string[], options?:Record<string, unknown>):any;
+    const _default:{watch: typeof watch};
+    export default _default;
+}
 declare module "node-whisper"{
     const Whisper:any;
     export default Whisper;
@@ -54,4 +59,29 @@ declare module "*.vue"{
     import type{DefineComponent}from "vue"
     const component:DefineComponent<{}, {}, any>
     export default component
+}
+declare module "express"{
+    const express:any
+    export default express
+}
+declare module "graphql-yoga"{
+    export function createYoga(options: any): any
+}
+declare module "apollo-server"{
+    export class ApolloServer{
+        constructor(options: any)
+        start(): Promise<void>
+        getMiddleware(): any
+    }
+}
+declare module "node-cron"{
+    export interface Task{
+        stop(): void
+        start?(): void
+        destroy?(): void
+    }
+    export function schedule(expression: string, handler: ()=>void|Promise<void>, options?: Record<string, unknown>): Task
+    export function validate(expression: string): boolean
+    const _default: {schedule: typeof schedule, validate: typeof validate}
+    export default _default
 }
