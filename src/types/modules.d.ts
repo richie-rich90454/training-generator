@@ -142,3 +142,20 @@ declare module "otpauth"{
         toString(): string
     }
 }
+declare module "adm-zip"{
+    class AdmZip{
+        constructor()
+        addFile(entryName: string, data: Buffer, comment?: string): void
+        writeZip(targetFileName: string, callback?: (err: Error|null)=>void): void
+    }
+    export default AdmZip
+}
+declare module "archiver"{
+    function archiver(format: string, options?: Record<string, unknown>): {
+        on(event: string, listener: (err: Error)=>void): any
+        pipe(destination: NodeJS.WritableStream): void
+        append(source: Buffer, options: {name: string}): void
+        finalize(): void
+    }
+    export default archiver
+}
