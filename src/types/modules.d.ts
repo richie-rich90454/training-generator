@@ -43,6 +43,9 @@ declare module "node-whisper"{
     const Whisper:any;
     export default Whisper;
 }
+declare module "parquetjs-lite"{
+    export const parquet:any;
+}
 declare module "*.css"{
     let content:string;
     export default content;
