@@ -1,21 +1,34 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es crear conversaciones completas e informativas entre un usuario y un asistente de IA basadas en TODA la información del texto proporcionado. Cada hecho, concepto, estadística, relación y detalle debe aparecer en al menos un intercambio. Genera tantos intercambios como el contenido requiera — no hay límite superior. Cada intercambio debe ser completo y detallado.
+Eres un generador experto de datos de entrenamiento para IA especializado en la creación de conjuntos de datos conversacionales de calidad excepcional. Tu tarea consiste en transformar el texto proporcionado en una conversación completa entre un usuario y un asistente de IA que preserve íntegramente toda la información del texto original. Esta conversación se utilizará como datos de entrenamiento para IA; por lo tanto, la precisión factual, la integridad, la fidelidad semántica, la coherencia lógica y el valor educativo tienen prioridad absoluta sobre la brevedad. Toda información significativa contenida en el texto original debe aparecer de forma natural en al menos un intercambio de la conversación. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
 
 TEXTO PARA ANALIZAR:
 {{text}}
 
 INSTRUCCIONES:
-1. Lee el texto detenidamente e identifica TODOS los temas principales, información clave, argumentos y detalles.
-2. Crea una conversación completa donde el usuario haga preguntas o discuta TODOS los aspectos importantes del texto. Las preguntas y respuestas DEBEN estar en español. Todo el texto de salida debe estar en español.
-3. El asistente debe proporcionar respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el texto.
-4. Formatea la conversación exactamente como:
-User: [mensaje del usuario]
-Assistant: [respuesta del asistente]
-5. Haz que la conversación fluya naturalmente mientras cubre TODA la información clave.
-6. Incluye tantos intercambios (pares usuario-asistente) como el contenido requiera — no hay límite superior. Cubre COMPLETAMENTE diferentes aspectos del texto.
-7. Las respuestas del asistente deben ser informativas, completas y basadas directamente en el contenido del texto.
-8. Cubre TODOS los puntos importantes: ideas principales, detalles de apoyo, ejemplos, puntos de datos, conclusiones.
-9. Si el texto contiene múltiples secciones o temas, crea intercambios de conversación para CADA uno.
-10. Asegúrate de que la conversación explore el texto en PROFUNDIDAD, no solo superficialmente.
+1. Lee detenidamente el texto completo antes de comenzar a escribir.
+2. Identifica y conserva TODA la información contenida en el texto original.
+3. Incluye cada hecho, concepto, argumento, explicación, definición, ejemplo, observación, conclusión, detalle de apoyo, justificación, supuesto, limitación, advertencia, aclaración, excepción, comparación, dependencia, jerarquía, relación, procedimiento, paso, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, valor numérico, porcentaje, medición, fecha, hora, número de versión, identificador, unidad y nombre propio, cuando corresponda.
+4. Genera una conversación natural que cubra completamente el contenido del texto original sin introducir información que no esté explícitamente respaldada por él.
+5. El asistente debe responder exclusivamente utilizando la información contenida en el texto original.
+6. No inventes información, no especules, no infieras hechos no respaldados ni introduzcas conocimientos externos.
+7. Haz que cada intercambio sea significativo, rico en información y con valor educativo.
+8. Desarrolla la conversación de forma natural, comenzando por los conceptos introductorios y avanzando progresivamente hacia explicaciones cada vez más detalladas, preservando las relaciones lógicas entre las ideas.
+9. Incluye preguntas de seguimiento siempre que contribuyan de forma natural a profundizar la comprensión o permitan cubrir información adicional del texto original.
+10. Si el texto original contiene múltiples secciones o temas, crea intercambios de conversación que cubran COMPLETAMENTE cada una de ellas.
+11. Si el texto original contiene procedimientos, explica cada paso de forma completa.
+12. Si el texto original contiene comparaciones, analiza todas las similitudes y diferencias.
+13. Si el texto original contiene ejemplos, analiza cada uno de ellos.
+14. Si el texto original contiene listas, analiza cada uno de sus elementos.
+15. Conserva la cronología, las jerarquías, las dependencias, los requisitos previos, las condiciones, las clasificaciones y las relaciones de causa y efecto.
+16. Las respuestas del asistente deben ser detalladas, técnicamente precisas, internamente coherentes, bien estructuradas y autosuficientes.
+17. Genera tantos intercambios de conversación como sean necesarios para preservar el contenido informativo completo del texto original. No existe un límite máximo para el número de intercambios.
+18. Toda información significativa del texto original debe aparecer en al menos una respuesta del asistente.
+19. Todos los mensajes del usuario y todas las respuestas del asistente deben estar escritos en un español claro, profesional y natural. Salvo los nombres propios, la terminología técnica, el código fuente, las fórmulas, los nombres de archivos o cualquier otro contenido que deba conservarse explícitamente en otro idioma según el texto original, no debe utilizarse ningún otro idioma. Las etiquetas de formato "User:" y "Assistant:" deben permanecer en inglés y no deben traducirse para garantizar la compatibilidad con el formato de salida.
+20. Antes de generar el resultado final, realiza una verificación interna completa para asegurarte de que:
+   - no se haya omitido ninguna información significativa;
+   - no se haya introducido ningún error factual;
+   - se haya cubierto cada detalle importante;
+   - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
+   - cada respuesta del asistente esté completamente respaldada por el texto original.
 
 FORMATO DE SALIDA:
 User: [Primer mensaje del usuario]
@@ -24,4 +37,4 @@ Assistant: [Primera respuesta del asistente]
 User: [Segundo mensaje del usuario]
 Assistant: [Segunda respuesta del asistente]
 
-[Continúa con tantos intercambios como sea necesario para cubrir toda la información, con una línea en blanco entre cada par usuario-asistente]
+[Continúa generando tantos intercambios como sean necesarios para cubrir completamente toda la información. Deja exactamente una línea en blanco entre cada par User-Assistant. Todos los mensajes del usuario y todas las respuestas del asistente deben estar escritos íntegramente en español.]

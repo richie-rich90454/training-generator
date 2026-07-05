@@ -1,22 +1,27 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es crear un resumen completo y detallado del texto proporcionado que capture TODA la información esencial. Conserva TODOS los puntos clave, argumentos, datos, ejemplos, conclusiones y matices. No omitas ninguna información. El resumen debe ser tan detallado como el contenido lo requiera — sin límite de longitud arbitrario. Mantén el flujo lógico y todas las relaciones importantes.
+Eres un generador experto de datos de entrenamiento para IA especializado en compresión semántica de alta fidelidad (High-Fidelity Semantic Compression). Tu tarea consiste en producir un resumen extremadamente detallado que preserve toda la información contenida en el texto proporcionado. Este resumen se utilizará como datos de entrenamiento para IA; por lo tanto, la precisión factual, la integridad, la fidelidad semántica y la preservación de la información tienen prioridad absoluta sobre la brevedad. Tu objetivo es conservar el contenido informativo completo del texto original mientras lo expresas de la forma más concisa posible, sin perder ninguna información.
 
 TEXTO PARA RESUMIR:
 {{text}}
 
-Escribe en español claro y profesional.
 INSTRUCCIONES:
-1. Lee el texto cuidadosamente e identifica TODOS los puntos principales, argumentos clave, información esencial, detalles de apoyo y conclusiones.
-2. Crea un resumen que:
-   - Capture el mensaje y propósito central COMPLETO del texto
-   - Incluya TODOS los hechos, puntos de datos y detalles importantes
-   - Mantenga el significado, contexto y matices originales
-   - Sea completo pero conciso
-   - Preserve el flujo lógico y la estructura del original
-3. El resumen debe ser tan detallado como el contenido lo requiera — sin límite de longitud arbitrario. Garantiza la integridad.
-4. Escribe en un lenguaje claro y profesional.
-5. No agregues ninguna información que no esté presente en el texto original.
-6. No omitas ninguna información significativa del texto original.
-7. Incluye TODOS los ejemplos, evidencia y puntos de apoyo clave mencionados.
+1. Lee detenidamente el texto completo antes de comenzar a escribir.
+2. Conserva TODA la información contenida en el texto original. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
+3. Conserva cada hecho, idea, argumento, explicación, definición, ejemplo, observación, conclusión, detalle de apoyo, justificación, supuesto, limitación, advertencia, aclaración, excepción, comparación, dependencia, jerarquía, relación, procedimiento, paso, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, valor numérico, porcentaje, medición, fecha, hora, número de versión, identificador, unidad y nombre propio presentes en el texto original, cuando corresponda.
+4. Conserva exactamente el significado original. Nunca modifiques, debilites, refuerces, reinterpretes, especules, infieras ni inventes información.
+5. Comprime únicamente la redacción, nunca la información. Elimina solamente expresiones redundantes, afirmaciones repetidas, texto de relleno y lenguaje retórico innecesario, preservando cada pieza única de información.
+6. No combines ideas distintas si ello reduce la precisión o provoca la pérdida de matices.
+7. Conserva toda la estructura lógica del texto original, incluyendo la cronología, las dependencias, los requisitos previos, las condiciones, las comparaciones, las secuencias, las clasificaciones y las relaciones de causa y efecto.
+8. Conserva exactamente la terminología técnica, salvo que el propio texto original la explique o la defina explícitamente.
+9. Conserva el tono original y el mismo nivel de detalle técnico.
+10. El resumen debe ser tan detallado como sea necesario para preservar el contenido informativo completo del texto original. No existe un límite máximo de longitud. Siempre que haya un conflicto entre integridad y brevedad, prioriza la integridad.
+11. Escribe en un español claro, preciso y profesional, con la máxima densidad de información posible.
+12. Antes de generar la respuesta final, realiza una verificación interna completa para asegurarte de que:
+   - no se haya omitido ninguna información significativa;
+   - no se haya introducido ningún error factual;
+   - ninguna afirmación contradiga el texto original;
+   - todos los valores numéricos, nombres, fechas, términos técnicos, ejemplos y conclusiones se conserven con exactitud;
+   - el resumen represente fielmente el texto original en todos los aspectos.
+13. Si preservar toda la información requiere un resumen muy extenso, genera un resumen muy extenso. Nunca acortes la salida únicamente para reducir su longitud.
 
 FORMATO DE SALIDA:
-Proporciona solo el texto del resumen.
+Proporciona únicamente el texto del resumen. Toda la salida debe estar escrita íntegramente en español.

@@ -1,23 +1,29 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es extraer exhaustivamente TODA la información estructurada del texto proporcionado. Extrae: cada concepto clave, tema, hecho, punto de datos, estadística, argumento, evidencia, ejemplo, definición, relación, conclusión e implicación. Para procedimientos: cada paso. Para comparaciones: cada diferencia y similitud. Para listas: cada elemento con descripción completa. Genera tantos elementos estructurados como el contenido requiera — no hay límite superior.
+Eres un generador experto de datos de entrenamiento para IA especializado en la extracción estructurada de conocimiento de alta fidelidad (High-Fidelity Structured Knowledge Extraction). Tu tarea consiste en extraer y organizar exhaustivamente TODA la información contenida en el texto proporcionado en una estructura jerárquica completa y adecuada para el entrenamiento de modelos de IA. Conserva cada pieza de información significativa. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
 
 TEXTO PARA ANALIZAR:
 {{text}}
 
 INSTRUCCIONES:
-1. Lee el texto detenidamente e identifica TODOS:
-   - Conceptos, temas y tópicos clave
-   - Hechos, puntos de datos, estadísticas importantes
-   - Argumentos, narrativas, declaraciones de tesis principales
-   - Evidencia de apoyo, ejemplos, estudios de caso
-   - Términos técnicos, definiciones, jerga (con explicaciones)
-   - Relaciones, conexiones, dependencias entre información
-   - Conclusiones, implicaciones, recomendaciones
-2. Organiza TODA la información de manera estructurada y jerárquica que sea óptima para el entrenamiento de IA.
-3. Enfócate en extraer información COMPLETA, factual y verificable del texto.
-4. Si el texto contiene instrucciones o procedimientos, extrae TODOS los pasos en detalle.
-5. Si el texto contiene comparaciones o contrastes, destaca TODAS las diferencias y similitudes clave.
-6. Si el texto contiene listas, extrae TODOS los elementos con sus descripciones.
-7. Escribe todo el análisis en español que capture TODO lo importante del texto.
+1. Lee detenidamente el texto completo antes de comenzar a escribir.
+2. Extrae y organiza TODA la información contenida en el texto original.
+3. Incluye cada concepto, tema, asunto, hecho, estadística, valor numérico, argumento, explicación, definición, observación, ejemplo, caso de estudio, procedimiento, recomendación, conclusión, implicación, supuesto, limitación, advertencia, aclaración, excepción, dependencia, relación, jerarquía, comparación, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, identificador, número de versión, medición, fecha, hora, unidad y nombre propio, cuando corresponda.
+4. Organiza toda la información extraída en una estructura jerárquica clara utilizando títulos y subtítulos organizados de forma lógica.
+5. Conserva la organización lógica y las relaciones presentes en el texto original.
+6. Si el texto original contiene procedimientos, extrae cada paso de forma completa.
+7. Si el texto original contiene comparaciones, extrae todas las similitudes y diferencias.
+8. Si el texto original contiene listas, extrae cada elemento junto con su descripción completa.
+9. Si el texto original contiene ejemplos, casos de estudio o evidencias, conserva íntegramente cada uno de ellos.
+10. Conserva la cronología, las jerarquías, las dependencias, los requisitos previos, las clasificaciones, las condiciones y las relaciones de causa y efecto.
+11. Conserva exactamente la terminología técnica, salvo que el propio texto original la explique o la defina explícitamente.
+12. No infieras, no especules, no reinterpretes, no simplifiques ni inventes información.
+13. Conserva el significado original, todos sus matices y el mismo nivel de detalle técnico.
+14. Toda la salida debe estar escrita en un español claro, preciso, profesional y natural. Salvo los nombres propios, la terminología técnica, el código fuente, las fórmulas, los nombres de archivos o cualquier otro contenido que deba conservarse explícitamente en otro idioma según el texto original, no debe utilizarse ningún otro idioma.
+15. Genera tanto contenido estructurado como sea necesario para preservar íntegramente el contenido informativo del texto original. No existe un límite máximo de longitud. Siempre que exista un conflicto entre integridad y brevedad, prioriza la integridad.
+16. Antes de generar el resultado final, realiza una verificación interna completa para asegurarte de que:
+   - no se haya omitido ninguna información significativa;
+   - no se haya introducido ningún error factual;
+   - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
+   - la estructura extraída represente fielmente el contenido, la organización y el significado del documento original.
 
 FORMATO DE SALIDA:
-Proporciona tu análisis en un formato bien estructurado y completo.
+Proporciona únicamente el análisis estructurado. El análisis debe estar claramente organizado, ser exhaustivo y presentar una estructura jerárquica lógica. Toda la salida debe estar escrita íntegramente en español.

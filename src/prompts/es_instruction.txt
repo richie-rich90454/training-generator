@@ -1,26 +1,32 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es extraer CADA hecho, concepto, relación, ejemplo, estadística, definición, argumento y matiz del texto proporcionado. No dejes nada atrás. Genera tantos pares de preguntas y respuestas de alta calidad como sea posible — no hay límite superior. Cada elemento debe contener respuestas completas y detalladas. Prefiere la profundidad sobre la amplitud: si el texto es escaso, menos elementos pero más ricos son mejores que muchos superficiales. Cubre TODA la información exhaustivamente.
+Eres un generador experto de datos de entrenamiento para IA especializado en la creación de conjuntos de datos de preguntas y respuestas de calidad excepcional. Tu tarea consiste en transformar el texto proporcionado en una colección completa de pares de preguntas y respuestas (Q&A) detallados que preserven íntegramente todo el contenido informativo del texto original. Este conjunto de datos se utilizará como datos de entrenamiento para IA; por lo tanto, la precisión factual, la integridad, la fidelidad semántica, la coherencia lógica y el valor educativo tienen prioridad absoluta sobre la brevedad. Toda información significativa contenida en el texto original debe estar cubierta por al menos una pregunta. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
 
 TEXTO PARA ANALIZAR:
 {{text}}
 
 INSTRUCCIONES:
-1. Lee el texto detenidamente e identifica TODOS los conceptos clave, hechos, argumentos, puntos de datos e información importante.
-2. Para CADA pieza significativa de información, crea una pregunta clara y específica que alguien podría hacer sobre ella. Las preguntas y respuestas DEBEN estar en español. Todo el texto de salida debe estar en español.
-3. Proporciona respuestas detalladas y precisas basadas EXCLUSIVAMENTE en el contenido del texto.
-4. Formatea cada par exactamente como:
-Question: [la pregunta]
-Answer: [la respuesta]
-5. Crea tipos de preguntas DIVERSAS:
-   - Preguntas factuales (quién, qué, cuándo, dónde)
-   - Preguntas conceptuales (cómo, por qué, explicar)
-   - Preguntas analíticas (comparar, contrastar, analizar)
-   - Preguntas de aplicación (cómo usar, implementar, aplicar)
-   - Preguntas de inferencia (qué se puede concluir, qué implica)
-6. Asegúrate de que las respuestas sean COMPLETAS pero concisas, cubriendo todos los detalles relevantes del texto.
-7. Genera TANTOS pares de preguntas y respuestas de alta calidad como sea necesario para cubrir TODA la información importante en el texto. No hay límite superior — genera tantos como el contenido requiera.
-8. NO omitas ninguna información importante. Cubre TODOS los puntos clave mencionados en el texto.
-9. Si el texto contiene listas, procedimientos o pasos, crea preguntas para CADA elemento/paso.
-10. Si el texto contiene ejemplos, crea preguntas sobre cada ejemplo.
+1. Lee detenidamente el texto completo antes de comenzar a escribir.
+2. Identifica y conserva TODA la información contenida en el texto original.
+3. Incluye cada hecho, concepto, argumento, explicación, definición, ejemplo, observación, conclusión, detalle de apoyo, justificación, supuesto, limitación, advertencia, aclaración, excepción, comparación, dependencia, jerarquía, relación, procedimiento, paso, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, valor numérico, porcentaje, medición, fecha, hora, número de versión, identificador, unidad y nombre propio, cuando corresponda.
+4. Genera preguntas claras, autosuficientes y comprensibles cuyas respuestas puedan entenderse sin necesidad de contexto adicional.
+5. Toda información significativa del texto original debe aparecer en al menos una respuesta.
+6. Siempre que sea apropiado, prioriza respuestas más profundas y completas en lugar de generar numerosas preguntas superficiales.
+7. Genera una amplia variedad de tipos de preguntas, incluyendo preguntas factuales, conceptuales, explicativas, analíticas, comparativas, procedimentales, orientadas a la aplicación y de inferencia, siempre que estén directamente respaldadas por el texto original.
+8. Si el texto original contiene procedimientos, genera preguntas que cubran cada uno de sus pasos.
+9. Si el texto original contiene comparaciones, genera preguntas que cubran todas las similitudes y diferencias.
+10. Si el texto original contiene ejemplos, genera preguntas para cada uno de ellos.
+11. Si el texto original contiene listas, genera preguntas para cada uno de sus elementos.
+12. Conserva la cronología, las jerarquías, las dependencias, los requisitos previos, las clasificaciones, las condiciones y las relaciones de causa y efecto.
+13. Las respuestas deben ser completas, técnicamente precisas, internamente coherentes, con una alta densidad de información y basadas exclusivamente en el contenido del texto original.
+14. No inventes información, no especules, no infieras hechos no respaldados ni introduzcas conocimientos externos.
+15. Genera tantos pares de preguntas y respuestas como sean necesarios para preservar íntegramente el contenido informativo del texto original. No existe un límite máximo para el número de pares de preguntas y respuestas.
+16. Mantén una terminología coherente y consistente en todo el conjunto de datos.
+17. Todas las preguntas y respuestas deben estar escritas en un español claro, profesional y natural. Salvo los nombres propios, la terminología técnica, el código fuente, las fórmulas, los nombres de archivos o cualquier otro contenido que deba conservarse explícitamente en otro idioma según el texto original, no debe utilizarse ningún otro idioma. Las etiquetas de formato "Question:" y "Answer:" deben permanecer en inglés y no deben traducirse para garantizar la compatibilidad con el formato de salida.
+18. Antes de generar el resultado final, realiza una verificación interna completa para asegurarte de que:
+   - no se haya omitido ninguna información significativa;
+   - no se haya introducido ningún error factual;
+   - se haya cubierto cada detalle importante;
+   - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
+   - cada respuesta esté completamente respaldada por el texto original.
 
 FORMATO DE SALIDA:
 Question: [Primera pregunta]
@@ -29,4 +35,4 @@ Answer: [Primera respuesta]
 Question: [Segunda pregunta]
 Answer: [Segunda respuesta]
 
-[Continúa con tantos pares como sea necesario para cubrir toda la información, con una línea en blanco entre cada par pregunta-respuesta]
+[Continúa generando tantos pares de preguntas y respuestas como sean necesarios para cubrir completamente toda la información. Deja exactamente una línea en blanco entre cada par Question-Answer. Todas las preguntas y respuestas deben estar escritas íntegramente en español.]
