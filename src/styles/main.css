@@ -1,23 +1,4 @@
 @import "./tokens.css";
-:root{
-    --primary-color:#0078D4;
-    --primary-hover:#106EBE;
-    --secondary-color:#107C10;
-    --secondary-hover:#0B5C0B;
-    --accent-color:#D13438;
-    --accent-hover:#A4262C;
-    --warning-color:#F7630C;
-    --warning-hover:#CA5010;
-    --surface-color:#FFFFFF;
-    --surface-variant:#F3F3F3;
-    --background-color:#FAFAFA;
-    --background-elevated:#FFFFFF;
-    --text-primary:#323130;
-    --text-secondary:#605E5C;
-    --text-disabled:#A19F9D;
-    --border-color:#EDEBE9;
-    --border-hover:#C8C6C4;
-}
 @font-face{
     font-family: "Noto Sans";
     src: url("../../assets/NotoSans-VariableFont_wdth_wght.ttf") format("truetype");
@@ -547,7 +528,7 @@ html[data-platform="windows"] .app-container{
 }
 .progress-fill{
     height:100%;
-    background:linear-gradient(90deg,var(--primary-color),var(--secondary-color));
+    background:var(--primary-color);
     border-radius:var(--radius-full);
     transition:width var(--transition-slow);
     width:0%;
@@ -1025,6 +1006,38 @@ html[data-platform="windows"] .app-container{
 }
 .modal-body{
     color:var(--text-primary);
+}
+/* Onboarding tour tooltip */
+.tg-onboarding-tooltip{
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-xlarge);
+    box-shadow:var(--shadow-4);
+    padding:var(--spacing-lg);
+    max-width:360px;
+}
+.tg-tour-title{
+    color:var(--text-primary);
+    font-weight:600;
+    margin-bottom:var(--spacing-sm);
+}
+.tg-tour-content{
+    color:var(--text-secondary);
+    font-size:.875rem;
+    line-height:1.5;
+    margin-bottom:var(--spacing-md);
+}
+.tg-tour-action-text{
+    color:var(--text-secondary);
+    font-size:.875rem;
+    line-height:1.5;
+    margin-top:var(--spacing-sm);
+}
+.tg-tour-actions{
+    display:flex;
+    gap:var(--spacing-sm);
+    justify-content:flex-end;
+    margin-top:var(--spacing-sm);
 }
 ::-webkit-scrollbar{
     width:10px;
