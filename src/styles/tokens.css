@@ -19,6 +19,10 @@
     --transition-fast:100ms cubic-bezier(.4,0,.2,1);
     --transition-medium:150ms cubic-bezier(.4,0,.2,1);
     --transition-slow:250ms cubic-bezier(.4,0,.2,1);
+    --title-bar-height:36px;
+    --caption-btn-width:46px;
+    --caption-btn-height:32px;
+    --close-hover:#C42B1C;
 }
 .theme-light{
     --primary-color:#1A73E8;
