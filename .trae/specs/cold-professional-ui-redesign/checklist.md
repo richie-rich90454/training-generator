@@ -1,0 +1,34 @@
+# Checklist
+- [x] `src/styles/tokens.css` exists and is the only file defining color tokens
+- [x] `main.css` imports `tokens.css` via `@import` and no longer defines `.theme-light`/`.theme-dark` inline
+- [x] `--selection-color` token defined in `tokens.css` (replaces `#e3f2fd`)
+- [x] `--bubble-assistant` token defined in `tokens.css` (replaces `#f3e5f5`)
+- [x] Dead Fluent `:root` palette block removed from `main.css`
+- [x] Splash inline palette block (lines 10-40 of `src/splash.html`) removed
+- [x] Splash loads `tokens.css` (via `<link>` or `splash.js` injection)
+- [x] Splash `.splash-title` no longer uses `background-clip: text` with a gradient
+- [x] Splash `.splash-container` no longer uses `backdrop-filter` for decorative glassmorphism
+- [x] Splash loading-progress-bar uses solid `var(--primary-color)`, not a gradient
+- [ ] Splash renders correctly in light AND dark mode (manual screenshot verified)
+- [x] `.progress-fill` in `main.css` uses solid `var(--primary-color)`, not a `linear-gradient`
+- [x] `AnalyticsDashboard.vue` `<style>` block contains zero hardcoded hex colors
+- [x] `CommandPalette.vue` `<style>` block contains zero hardcoded hex colors
+- [x] `DatasetPreview.vue` `<style>` block contains zero hardcoded hex colors
+- [x] `DatasetPreview.vue` no longer uses `#f3e5f5` (lilac) for the assistant bubble
+- [x] `PromptEditor.vue` `<style>` block contains zero hardcoded hex colors
+- [x] No `.vue` file in `src/renderer/components/` declares `font-family: sans-serif`
+- [ ] All four Vue components render correctly in light AND dark mode (manual screenshot verified)
+- [x] Onboarding tour tooltip (`onboardingTour.ts:buildTourTooltip`) is styled using tokens or `.modal-content`/`.btn` classes
+- [ ] Onboarding tooltip renders correctly in light AND dark mode (manual screenshot verified)
+- [x] Zero purple/violet/lilac/magenta hex colors anywhere in `src/` (verified by `tests/zero-ai-tells.test.ts`)
+- [x] Zero `backdrop-filter` decorative usage anywhere in `src/` (verified by test)
+- [x] Zero `background-clip: text` + gradient combinations anywhere in `src/` (verified by test)
+- [x] Zero `font-family: sans-serif` declarations in `src/renderer/components/` (verified by test)
+- [x] Existing tests for the four Vue components still pass (`tests/AnalyticsDashboard.test.ts`, `tests/CommandPalette.test.ts`, `tests/DatasetPreview.test.ts`, `tests/PromptEditor.test.ts`)
+- [x] `tests/onboardingTour.test.ts` still passes
+- [x] `npx tsc --noEmit` returns zero errors
+- [x] Full test suite (`npx vitest run`) passes, including new `tests/zero-ai-tells.test.ts`
+- [x] Linter (if configured) returns zero errors
+- [ ] Visual spot-check: light-mode screenshots show no AI-tells (purple, glassmorphism, gradient text, decorative glows)
+- [ ] Visual spot-check: dark-mode screenshots show no AI-tells
+- [ ] Light and dark screenshots are visually consistent (no theme flips mid-page, same accent color throughout)
