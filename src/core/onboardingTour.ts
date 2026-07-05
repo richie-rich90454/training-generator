@@ -121,7 +121,7 @@ export class OnboardingTour{
         this.doc.body.appendChild(this.overlay);
         this.tooltip=buildTourTooltip(step);
         this.tooltip.style.position="absolute";
-        this.tooltip.style.zIndex="9999";
+        this.tooltip.style.zIndex="1100";
         let pos=this.positionTooltip(step);
         this.tooltip.style.top=pos.top+"px";
         this.tooltip.style.left=pos.left+"px";
@@ -198,13 +198,13 @@ export function buildTourTooltip(step: TourStep): HTMLElement{
     let actions=document.createElement("div");
     actions.className="tg-tour-actions";
     let prevBtn=document.createElement("button");
-    prevBtn.className="tg-tour-btn tg-tour-prev";
+    prevBtn.className="tg-tour-btn tg-tour-prev btn btn-secondary";
     prevBtn.textContent="Back";
     let nextBtn=document.createElement("button");
-    nextBtn.className="tg-tour-btn tg-tour-next";
+    nextBtn.className="tg-tour-btn tg-tour-next btn btn-primary";
     nextBtn.textContent="Next";
     let skipBtn=document.createElement("button");
-    skipBtn.className="tg-tour-btn tg-tour-skip";
+    skipBtn.className="tg-tour-btn tg-tour-skip btn btn-secondary";
     skipBtn.textContent="Skip";
     actions.appendChild(prevBtn);
     actions.appendChild(nextBtn);
