@@ -85,3 +85,33 @@ declare module "node-cron"{
     const _default: {schedule: typeof schedule, validate: typeof validate}
     export default _default
 }
+declare module "mmap-io"{
+    export const PROT_READ: number
+    export const MAP_SHARED: number
+    export function map(size: number, prot: number, flags: number, fd: number, offset?: number): Buffer
+}
+declare module "ws"{
+    export class WebSocket{
+        constructor(url: string)
+        send(data: string|Buffer): void
+        close(): void
+        on(event: string, listener: (...args: any[])=>void): this
+        once(event: string, listener: (...args: any[])=>void): this
+        off(event: string, listener: (...args: any[])=>void): this
+        readyState: number
+    }
+    export class WebSocketServer{
+        constructor(options: {port?: number; [key: string]: any})
+        on(event: "connection", listener: (socket: WebSocket)=>void): this
+        on(event: "listening", listener: ()=>void): this
+        on(event: "close", listener: ()=>void): this
+        on(event: "error", listener: (err: Error)=>void): this
+        close(callback?: ()=>void): void
+        clients: Set<WebSocket>
+    }
+    export default WebSocket
+}
+declare module "@mongodb-js/zstd"{
+    export function compress(data: Buffer, level?: number): Promise<Buffer>
+    export function decompress(data: Buffer): Promise<Buffer>
+}
