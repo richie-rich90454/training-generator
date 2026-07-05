@@ -1549,3 +1549,130 @@ html[data-platform="windows"] .app-container{
         color:var(--text-primary);
     }
 }
+/* Title bar */
+.title-bar{
+    height:var(--title-bar-height);
+    display:flex;
+    align-items:center;
+    padding:0 12px;
+    background:var(--surface-color);
+    border-bottom:1px solid var(--border-color);
+    -webkit-app-region:drag;
+    user-select:none;
+    flex-shrink:0;
+}
+.title-bar-icon{
+    width:16px;
+    height:16px;
+    color:var(--primary-color);
+    flex-shrink:0;
+}
+.title-bar-icon svg{
+    width:100%;
+    height:100%;
+    display:block;
+}
+.title-bar-title{
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-primary);
+    margin-left:8px;
+    user-select:none;
+}
+.title-bar-actions{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    margin-left:12px;
+    -webkit-app-region:no-drag;
+}
+.title-bar-actions .btn-icon{
+    width:28px;
+    height:28px;
+    border:none;
+    background:transparent;
+    color:var(--text-secondary);
+    border-radius:var(--radius-medium);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background var(--transition-medium),color var(--transition-medium);
+}
+.title-bar-actions .btn-icon:hover{
+    background:var(--surface-variant);
+    color:var(--text-primary);
+}
+.title-bar-actions .btn-icon:active{
+    background:var(--border-color);
+}
+.title-bar-actions .btn-icon:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:-2px;
+}
+.title-bar-actions .btn-icon svg{
+    width:16px;
+    height:16px;
+}
+.window-controls{
+    display:flex;
+    align-items:center;
+    margin-left:auto;
+    -webkit-app-region:no-drag;
+}
+.window-btn{
+    width:var(--caption-btn-width);
+    height:var(--caption-btn-height);
+    border:none;
+    background:transparent;
+    color:var(--text-secondary);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:default;
+    transition:background var(--transition-medium);
+}
+.window-btn svg{
+    width:10px;
+    height:10px;
+}
+.window-btn:hover{
+    background:var(--surface-variant);
+    color:var(--text-primary);
+}
+.window-btn:active{
+    background:var(--border-color);
+}
+.window-btn:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:-2px;
+}
+.window-btn-close:hover{
+    background:var(--close-hover);
+    color:#fff;
+}
+.window-btn-close:active{
+    background:#9c2017;
+    color:#fff;
+}
+.window-btn-max .icon-maximize{
+    display:block;
+}
+.window-btn-max .icon-restore{
+    display:none;
+}
+.window-btn-max.is-maximized .icon-maximize{
+    display:none;
+}
+.window-btn-max.is-maximized .icon-restore{
+    display:block;
+}
+html[data-platform="macos"] .window-controls{
+    display:none;
+}
+html[data-platform="macos"] .title-bar{
+    padding-left:80px;
+}
+html[data-platform="macos"] .title-bar-title{
+    margin-left:0;
+}
