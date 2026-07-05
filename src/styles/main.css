@@ -389,7 +389,7 @@ html[data-platform="windows"] .app-container{
 }
 @media (min-width:1024px){
     .content-grid{
-        grid-template-columns:2fr 1fr;
+        grid-template-columns:2fr 4px 1fr;
     }
 }
 .left-column,.right-column{
@@ -641,17 +641,13 @@ html[data-platform="windows"] .app-container{
 .config-panel{
     background:var(--surface-color);
     border-radius:var(--radius-medium);
-    padding:var(--spacing-lg);
+    padding:var(--spacing-md);
     border:1px solid var(--border-color);
 }
-.config-panel>h3{
+.config-panel .card-header{
     margin-bottom:var(--spacing-lg);
     padding-bottom:var(--spacing-md);
     border-bottom:1px solid var(--border-color);
-    display:flex;
-    align-items:center;
-    gap:var(--spacing-sm);
-    font-size:1rem;
 }
 .range-value{
     text-align:center;
