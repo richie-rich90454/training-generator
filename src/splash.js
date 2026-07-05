@@ -13,6 +13,12 @@
         return "linux"
     }
     document.documentElement.setAttribute("data-platform", getPlatform())
+    let prefersDark=window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.add(prefersDark ? "theme-dark" : "theme-light");
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e)=>{
+        document.documentElement.classList.remove("theme-light", "theme-dark");
+        document.documentElement.classList.add(e.matches ? "theme-dark" : "theme-light");
+    });
     try{
         let fontUrl=new URL("../assets/NotoSans-VariableFont_wdth_wght.ttf", window.location.href).href
         let style=document.createElement("style")
