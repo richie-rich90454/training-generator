@@ -176,7 +176,7 @@ class FileManager{
         }
         let iconMap:Record<string,string>={
             waiting:renderIcon("fa-clock"),
-            processing:'<span class="fa-spinner">'+renderIcon("fa-spinner")+'</span>',
+            processing:'<span class="tg-spinner">'+renderIcon("fa-spinner")+'</span>',
             completed:renderIcon("fa-check-circle"),
             failed:renderIcon("fa-times-circle")
         }
