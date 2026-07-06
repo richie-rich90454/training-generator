@@ -13,30 +13,22 @@ let auditedFiles: string[]=[
     "src/renderer/templateEditor.ts",
     "src/renderer/uiManager.ts"
 ];
-function extractFaNames(content: string): Set<string>{
-    let names: Set<string>=new Set();
-    let regex: RegExp=/fas fa-([a-z-]+)/g;
-    let match: RegExpExecArray|null=regex.exec(content);
-    while(match!==null){
-        names.add("fa-"+match[1]);
-        match=regex.exec(content);
-    }
-    return names;
-}
 describe("icon registry completeness", ()=>{
-    test("every audited fas fa-<name> has a registry entry", ()=>{
+    test("every renderIcon name referenced in source files has a registry entry", ()=>{
         let allNames: Set<string>=new Set();
+        let pattern: RegExp=/renderIcon\(["'`]fa-([a-z-]+)/g;
         for(let file of auditedFiles){
             let fullPath: string=path.resolve(process.cwd(), file);
             let content: string=fs.readFileSync(fullPath, "utf-8");
-            let names: Set<string>=extractFaNames(content);
-            for(let name of names){
-                allNames.add(name);
+            let match: RegExpExecArray|null=pattern.exec(content);
+            while(match!==null){
+                allNames.add("fa-"+match[1]);
+                match=pattern.exec(content);
             }
         }
         expect(allNames.size).toBeGreaterThan(0);
         for(let name of allNames){
-            expect(iconRegistry[name]).toBeDefined();
+            expect(iconRegistry).toHaveProperty(name);
         }
     });
 });
