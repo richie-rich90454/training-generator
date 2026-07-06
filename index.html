@@ -6,48 +6,61 @@
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' http://localhost:* ws://localhost:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com; img-src 'self' data:">
         <title>Training Generator-AI Training Data Creator</title>
         <link rel="stylesheet" href="./src/styles/main.css">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+        <link rel="icon" href="./assets/favicon.png">
+        <link rel="apple-touch-icon" href="./assets/favicon.png">
     </head>
     <body>
         <div class="app-container fade-in">
-            <header class="app-header">
-                <div class="header-content">
-                    <div class="header-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="header-text">
-                        <h1 data-i18n="app.title">Training Generator</h1>
-                        <p class="subtitle" data-i18n="app.subtitle">Convert documents to AI training data using Ollama</p>
-                    </div>
+            <div class="title-bar">
+                <div class="title-bar-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 3 L14 3 L20 9 L20 16 L15 21 L5 21 Z"/>
+                        <path d="M14 3 L14 9 L20 9"/>
+                        <path d="M8 12 L17 12"/>
+                        <path d="M8 15 L13 15"/>
+                    </svg>
                 </div>
-                <div class="header-actions">
+                <span class="title-bar-title" data-i18n="app.title">Training Generator</span>
+                <div class="title-bar-actions">
                     <button id="edit-templates-btn" class="btn-icon" title="Edit Prompt Templates" aria-label="Edit prompt templates">
-                        <i class="fas fa-edit"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     </button>
                     <button id="settings-btn" class="btn-icon" title="Settings" aria-label="Open settings" data-i18n="header.settings">
-                        <i class="fas fa-cog"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
                     </button>
                     <button id="help-btn" class="btn-icon" title="Help" aria-label="Show help" data-i18n="header.help">
-                        <i class="fas fa-question-circle"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                     </button>
                 </div>
-            </header>
+                <div class="window-controls">
+                    <button class="window-btn window-btn-min" aria-label="Minimize" tabindex="0">
+                        <svg viewBox="0 0 10 10" width="10" height="10"><line x1="2" y1="5" x2="8" y2="5" stroke="currentColor" stroke-width="1"/></svg>
+                    </button>
+                    <button class="window-btn window-btn-max" aria-label="Maximize" tabindex="0">
+                        <svg class="icon-maximize" viewBox="0 0 10 10" width="10" height="10"><rect x="2" y="2" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+                        <svg class="icon-restore" viewBox="0 0 10 10" width="10" height="10"><rect x="2" y="3" width="5" height="5" fill="none" stroke="currentColor" stroke-width="1"/><rect x="3" y="2" width="5" height="5" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+                    </button>
+                    <button class="window-btn window-btn-close" aria-label="Close" tabindex="0">
+                        <svg viewBox="0 0 10 10" width="10" height="10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1"/></svg>
+                    </button>
+                </div>
+            </div>
             <div class="toast-container" id="toast-container"></div>
             <div class="content-grid">
                 <div class="left-column">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 21V12"/><path d="m8 16 4-4 4 4"/></svg>
                                 <span data-i18n="upload.title">Upload Documents</span>
                             </div>
                             <button id="clear-btn" class=" btn btn-secondary" aria-label="Clear all files">
-                                <i class="fas fa-trash"></i> <span data-i18n="upload.clear">Clear All</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> <span data-i18n="upload.clear">Clear All</span>
                             </button>
                         </div>
                         <div id="drop-zone" class="file-upload-area" role="button" aria-label="Drop files here or press Enter to browse" tabindex="0">
                             <div class="upload-icon">
-                                <i class="fas fa-file-upload"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
                             </div>
                             <div class="upload-text">
                                 <h3 data-i18n="upload.dropzone">Drop files here or click to browse</h3>
@@ -55,11 +68,11 @@
                             </div>
                             <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html" style="display:none">
                             <button id="browse-btn" class="btn btn-primary" title="Ctrl+O" aria-label="Browse for files (Ctrl+O)">
-                                <i class="fas fa-folder-open"></i> <span data-i18n="upload.browse">Browse Files</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> <span data-i18n="upload.browse">Browse Files</span>
                             </button>
                         </div>
                         <div class="file-list-section">
-                            <h3><i class="fas fa-file-alt"></i> <span data-i18n="files.selected">Selected Files</span></h3>
+                            <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> <span data-i18n="files.selected">Selected Files</span></h3>
                             <div id="file-list" class="file-list" role="list" aria-label="Selected files">
                                 <p class="empty-state" data-i18n="files.empty">No files selected</p>
                             </div>
@@ -68,19 +81,19 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-cogs"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg>
                                 <span data-i18n="processing.title">Processing</span>
                             </div>
                             <div class="section-actions">
                                 <button id="process-btn" class="btn btn-primary" disabled title="Ctrl+Enter" aria-label="Process files (Ctrl+Enter)">
-                                    <i class="fas fa-play"></i> <span data-i18n="processing.start">Process Files</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="6 3 20 12 6 21 6 3"/></svg> <span data-i18n="processing.start">Process Files</span>
                                 </button>
                                 <button id="demo-btn" class="btn btn-secondary" title="Run without Ollama using demo data" aria-label="Toggle demo mode">
-                                    <i class="fas fa-magic"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 21 12 12"/><path d="M15 6l3 3"/><path d="M18 3v4"/><path d="M16 5h4"/><path d="M12 2v3"/><path d="M10 3.5h4"/></svg>
                                     <span data-i18n="processing.demo">Demo</span>
                                 </button>
                                 <button id="dashboard-btn" class="btn btn-secondary" title="Show/Hide processing dashboard" aria-label="Toggle dashboard">
-                                    <i class="fas fa-tachometer-alt"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
                                     <span>Dashboard</span>
                                 </button>
                             </div>
@@ -96,7 +109,7 @@
                         </div>
                         <div id="processing-log" class="processing-log" role="log" aria-live="polite" aria-label="Processing log">
                             <div class="log-entry info">
-                                <i class="fas fa-info-circle"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                                 <span data-i18n="processing.welcome">Welcome to Training Generator! Upload files to begin.</span>
                             </div>
                         </div>
@@ -104,7 +117,7 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-file-code"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="10 12 8 14 10 16"/><polyline points="14 12 16 14 14 16"/></svg>
                                 <span data-i18n="output.title">Output Preview</span>
                             </div>
                             <div class="section-actions">
@@ -114,10 +127,10 @@
                                     <option value="csv">CSV</option>
                                 </select>
                                 <button id="export-btn" class="btn btn-primary" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
-                                    <i class="fas fa-download"></i> <span data-i18n="output.export">Export</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span data-i18n="output.export">Export</span>
                                 </button>
                                 <button id="copy-btn" class="btn btn-secondary" disabled title="Ctrl+Shift+C" aria-label="Copy output to clipboard (Ctrl+Shift+C)">
-                                    <i class="fas fa-copy"></i> <span data-i18n="output.copy">Copy</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> <span data-i18n="output.copy">Copy</span>
                                 </button>
                             </div>
                         </div>
@@ -132,13 +145,13 @@
                     <div class="card config-panel" role="form" aria-label="Processing configuration">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-sliders-h"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
                                 <span data-i18n="config.title">Configuration</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="model-select" class="form-label">
-                                <i class="fas fa-brain"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
                                 <span data-i18n="config.model">Ollama Model</span>
                             </label>
                             <select id="model-select" class="form-control">
@@ -147,7 +160,7 @@
                         </div>
                         <div class="form-group">
                             <label for="provider" class="form-label">
-                                <i class="fas fa-cloud"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
                                 <span data-i18n="config.provider">Provider</span>
                             </label>
                             <select id="provider" class="form-control">
@@ -159,21 +172,21 @@
                         </div>
                         <div class="form-group form-group-hidden" id="api-key-group">
                             <label for="api-key" class="form-label">
-                                <i class="fas fa-key"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
                                 <span data-i18n="config.apiKey">API Key</span>
                             </label>
                             <input type="password" id="api-key" class="form-control" data-i18n-placeholder="config.apiKey.placeholder" placeholder="sk-..." autocomplete="off">
                         </div>
                         <div class="form-group form-group-hidden" id="base-url-group">
                             <label for="base-url" class="form-label">
-                                <i class="fas fa-link"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                                 <span data-i18n="config.baseUrl">Base URL</span>
                             </label>
                             <input type="text" id="base-url" class="form-control" data-i18n-placeholder="config.baseUrl.placeholder" placeholder="https://api.openai.com">
                         </div>
                         <div class="form-group">
                             <label for="processing-type" class="form-label">
-                                <i class="fas fa-cogs"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg>
                                 <span data-i18n="config.processingType">Processing Type</span>
                             </label>
                             <select id="processing-type" class="form-control">
@@ -185,7 +198,7 @@
                         </div>
                         <div class="form-group">
                             <label for="output-format" class="form-label">
-                                <i class="fas fa-file-export"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="13" y1="12" x2="22" y2="12"/><polyline points="19 9 22 12 19 15"/></svg>
                                 <span data-i18n="config.outputFormat">Output Format</span>
                             </label>
                             <select id="output-format" class="form-control">
@@ -197,7 +210,7 @@
                         </div>
                         <div class="form-group">
                             <label for="language-select" class="form-label">
-                                <i class="fas fa-language"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-2.5-8.5L17 22"/><path d="M14 18h6"/><path d="m17.5 16 2 6"/></svg>
                                 <span data-i18n="config.outputLanguage">Output Language</span>
                             </label>
                             <select id="language-select" class="form-control">
@@ -213,14 +226,14 @@
                         </div>
                         <div class="form-group">
                             <label for="chunk-size" class="form-label">
-                                <i class="fas fa-cut"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>
                                 <span data-i18n="config.chunkSize">Chunk Size (characters)</span>
                             </label>
                             <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
                         </div>
                         <div class="form-group">
                             <label for="concurrency" class="form-label">
-                                <i class="fas fa-bolt"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                                 <span data-i18n="config.concurrency">Concurrency</span>
                             </label>
                             <select id="concurrency" class="form-control">
@@ -233,7 +246,7 @@
                         </div>
                         <div class="form-group">
                             <label for="temperature" class="form-label">
-                                <i class="fas fa-thermometer-half"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 4v10.54a4 4 0 1 0-4 0V4a2 2 0 0 1 4 0Z"/><line x1="8" y1="12" x2="12" y2="12"/></svg>
                                 <span data-i18n="config.temperature">Temperature</span>
                             </label>
                             <input type="range" id="temperature" class="form-control" min="0" max="1" step="0.1" value="0.7">
@@ -242,13 +255,13 @@
                             </div>
                         </div>
                         <button id="save-preset" class="btn btn-secondary" aria-label="Save preset">
-                            <i class="fas fa-save"></i> <span data-i18n="config.savePreset">Save Preset</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="config.savePreset">Save Preset</span>
                         </button>
                     </div>
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-server"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
                                 <span data-i18n="status.title">System Status</span>
                             </div>
                         </div>
@@ -259,11 +272,11 @@
                             </div>
                             <div class="status-info">
                                 <div class="status-item">
-                                    <i class="fas fa-database"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
                                     <span><span data-i18n="status.filesProcessed">Files Processed:</span> <strong id="files-count">0</strong></span>
                                 </div>
                                 <div class="status-item">
-                                    <i class="fas fa-clock"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     <span><span data-i18n="status.lastProcessed">Last Processed:</span> <strong id="last-processed" data-i18n="status.lastProcessedNever">Never</strong></span>
                                 </div>
                             </div>
@@ -278,9 +291,9 @@
                         <span data-i18n="status.version">Training Generator v2.0.0</span>
                     </div>
                     <div class="footer-links">
-                        <a href="#" id="docs-link" class="footer-link"><i class="fas fa-book"></i> <span data-i18n="footer.documentation">Documentation</span></a>
-                        <a href="https://github.com/richie-rich90454/training-generator/issues" class="footer-link" target="_blank"><i class="fas fa-bug"></i> <span data-i18n="footer.reportIssue">Report Issue</span></a>
-                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><i class="fas fa-star"></i> <span data-i18n="footer.star">Star on GitHub</span></a>
+                        <a href="#" id="docs-link" class="footer-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> <span data-i18n="footer.documentation">Documentation</span></a>
+                        <a href="https://github.com/richie-rich90454/training-generator/issues" class="footer-link" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3 3 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg> <span data-i18n="footer.reportIssue">Report Issue</span></a>
+                        <a href="https://github.com/richie-rich90454/training-generator" class="footer-link" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span data-i18n="footer.star">Star on GitHub</span></a>
                     </div>
                 </div>
             </footer>
@@ -288,15 +301,15 @@
         <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-label="Settings">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2><i class="fas fa-cog"></i> <span data-i18n="settings.title">Settings</span></h2>
+                    <h2><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> <span data-i18n="settings.title">Settings</span></h2>
                     <button class="modal-close" aria-label="Close settings">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="settings-section">
-                        <h3><i class="fas fa-display"></i> <span data-i18n="settings.appearance">Appearance</span></h3>
+                        <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> <span data-i18n="settings.appearance">Appearance</span></h3>
                         <div class="form-group">
                             <label for="theme-select" class="form-label">
-                                <i class="fas fa-palette"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
                                 <span data-i18n="settings.theme">Theme</span>
                             </label>
                             <select id="theme-select" class="form-control">
@@ -307,7 +320,7 @@
                         </div>
                         <div class="form-group">
                             <label for="font-size" class="form-label">
-                                <i class="fas fa-text-height"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="18" y1="8" x2="18" y2="16"/><polyline points="16 10 18 8 20 10"/><polyline points="16 14 18 16 20 14"/></svg>
                                 <span data-i18n="settings.fontSize">Font Size</span>
                             </label>
                             <select id="font-size" class="form-control">
@@ -318,7 +331,7 @@
                         </div>
                         <div class="form-group">
                             <label for="ui-language-select" class="form-label">
-                                <i class="fas fa-language"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-2.5-8.5L17 22"/><path d="M14 18h6"/><path d="m17.5 16 2 6"/></svg>
                                 <span data-i18n="settings.uiLanguage">UI Language</span>
                             </label>
                             <select id="ui-language-select" class="form-control">
@@ -334,10 +347,10 @@
                         </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-save"></i> <span data-i18n="settings.profiles">Configuration Profiles</span></h3>
+                        <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="settings.profiles">Configuration Profiles</span></h3>
                         <div class="form-group">
                             <label for="profile-select" class="form-label">
-                                <i class="fas fa-layer-group"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                                 <span data-i18n="settings.profileSelect">Saved Profiles</span>
                             </label>
                             <select id="profile-select" class="form-control">
@@ -346,46 +359,46 @@
                         </div>
                         <div class="settings-actions" style="margin-bottom:12px">
                             <button id="save-profile-btn" class="btn btn-secondary" aria-label="Save current settings as profile">
-                                <i class="fas fa-save"></i> <span data-i18n="settings.saveProfile">Save Profile</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="settings.saveProfile">Save Profile</span>
                             </button>
                             <button id="delete-profile-btn" class="btn btn-secondary" aria-label="Delete selected profile">
-                                <i class="fas fa-trash"></i> <span data-i18n="settings.deleteProfile">Delete Profile</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> <span data-i18n="settings.deleteProfile">Delete Profile</span>
                             </button>
                         </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-cogs"></i> <span data-i18n="settings.processing">Processing</span></h3>
+                        <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg> <span data-i18n="settings.processing">Processing</span></h3>
                         <div class="form-group">
                             <label for="auto-save" class="form-label">
-                                <i class="fas fa-save"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
                                 <span data-i18n="settings.autoSave">Auto-save Presets</span>
                             </label>
                             <input type="checkbox" id="auto-save" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="auto-check-ollama" class="form-label">
-                                <i class="fas fa-heartbeat"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="3 12 6 12 8 8 11 16 13 12 21 12"/></svg>
                                 <span data-i18n="settings.autoCheckOllama">Auto-check Ollama Status</span>
                             </label>
                             <input type="checkbox" id="auto-check-ollama" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="smart-sizing" class="form-label">
-                                <i class="fas fa-brain"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
                                 <span data-i18n="settings.smartSizing">Smart Sizing</span>
                             </label>
                             <input type="checkbox" id="smart-sizing" class="form-checkbox" checked>
                         </div>
                         <div class="form-group">
                             <label for="max-file-size" class="form-label">
-                                <i class="fas fa-hdd"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
                                 <span data-i18n="settings.maxFileSize">Max File Size (MB)</span>
                             </label>
                             <input type="number" id="max-file-size" class="form-control" value="100" min="10" max="1000">
                         </div>
                         <div class="form-group">
                             <label for="max-output-items" class="form-label">
-                                <i class="fas fa-list-ol"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 4v4"/><path d="M3 8h2"/><path d="M3 11h3v3a1.5 1.5 0 0 1-3 0"/><path d="M3 17a1 1 0 0 1 1-1 1 1 0 0 1 0 2 1 1 0 0 1 0 2H3"/></svg>
                                 <span data-i18n="settings.maxOutputItems">Max Output Items per File</span>
                             </label>
                             <select id="max-output-items" class="form-control">
@@ -399,7 +412,7 @@
                         </div>
                         <div class="form-group">
                             <label for="max-chunks" class="form-label">
-                                <i class="fas fa-puzzle-piece"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568a2.41 2.41 0 0 1 0 3.408l-1.568 1.568c-.23.23-.338.556-.289.878.094.623.094 1.246 0 1.868a1 1 0 0 1-.291.883l-1.566 1.566a2.41 2.41 0 0 1-3.408 0l-1.568-1.568c-.23-.23-.556-.338-.878-.289a4.5 4.5 0 0 1-1.868 0c-.322-.049-.648.059-.878.289l-1.568 1.568a2.41 2.41 0 0 1-3.408 0l-1.568-1.568a1 1 0 0 1-.289-.878 4.5 4.5 0 0 1 0-1.868c.049-.322-.059-.648-.289-.878l-1.568-1.568a2.41 2.41 0 0 1 0-3.408l1.568-1.568c.23-.23.338-.556.289-.878a4.5 4.5 0 0 1 0-1.868 1 1 0 0 1 .289-.883l1.568-1.566a2.41 2.41 0 0 1 3.408 0l1.568 1.568c.23.23.556.338.878.289a4.5 4.5 0 0 1 1.868 0c.322.049.648-.059.878-.289l1.568-1.568a2.41 2.41 0 0 1 3.408 0l1.568 1.568c.23.23.338.556.289.878z"/></svg>
                                 <span data-i18n="settings.maxChunks">Max Chunks per File</span>
                             </label>
                             <select id="max-chunks" class="form-control">
@@ -413,7 +426,7 @@
                         </div>
                         <div class="form-group">
                             <label for="max-parallel-files" class="form-label">
-                                <i class="fas fa-layer-group"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                                 <span>Max Parallel Files</span>
                             </label>
                             <select id="max-parallel-files" class="form-control">
@@ -428,17 +441,17 @@
                         </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-window-restore"></i> <span data-i18n="settings.window">Window</span></h3>
+                        <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M8 8h8v8H8z"/><path d="M4 14v6h6"/><path d="M20 10V4h-6"/></svg> <span data-i18n="settings.window">Window</span></h3>
                         <div class="form-group">
                             <label for="start-maximized" class="form-label">
-                                <i class="fas fa-expand"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                                 <span data-i18n="settings.startMaximized">Start Maximized</span>
                             </label>
                             <input type="checkbox" id="start-maximized" class="form-checkbox">
                         </div>
                         <div class="form-group">
                             <label for="remember-window-size" class="form-label">
-                                <i class="fas fa-memory"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg>
                                 <span data-i18n="settings.rememberWindowSize">Remember Window Size</span>
                             </label>
                             <input type="checkbox" id="remember-window-size" class="form-checkbox" checked>
@@ -446,10 +459,10 @@
                     </div>
                     <div class="settings-actions">
                         <button id="reset-settings" class="btn btn-secondary" aria-label="Reset settings to defaults">
-                            <i class="fas fa-undo"></i> <span data-i18n="settings.reset">Reset to Defaults</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg> <span data-i18n="settings.reset">Reset to Defaults</span>
                         </button>
                         <button id="save-settings" class="btn btn-primary" aria-label="Save settings">
-                            <i class="fas fa-check"></i> <span data-i18n="settings.save">Save Settings</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="settings.save">Save Settings</span>
                         </button>
                     </div>
                 </div>
