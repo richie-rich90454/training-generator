@@ -13,6 +13,7 @@ import{showToast}from"./toast.js"
 import{Logger,LogLevel}from"./logger.js"
 import{chunkInWorker,dedupInWorker}from"./workers/workerPool.js"
 import{showConfirm}from"./confirm.js"
+import{renderIcon}from"./icons.js"
 import{saveCheckpoint,loadCheckpoint,clearCheckpoint}from"./checkpoint.js"
 import{getCacheStats,resetCacheStats,warmCache}from"./cache.js"
 import type{ProvenanceData}from"./provenance.js"
@@ -197,14 +198,14 @@ class TrainGeneratorApp{
         this.addEventListener(this.uiManager.demoBtn,"click",()=>{
             if(this.processor.demoMode){
                 this.processor.disableDemoMode()
-                this.uiManager.demoBtn.innerHTML='<i class="fas fa-magic"></i> Demo'
+                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} Demo`
                 this.uiManager.demoBtn.classList.remove("active")
                 this.logger.info("app","Demo mode disabled")
                 this.fileManager.updateProcessButton()
             }
             else{
                 this.processor.enableDemoMode()
-                this.uiManager.demoBtn.innerHTML='<i class="fas fa-magic"></i> Demo (Active)'
+                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} Demo (Active)`
                 this.uiManager.demoBtn.classList.add("active")
                 this.logger.info("app","Demo mode enabled - processing without Ollama")
                 this.fileManager.updateProcessButton()
@@ -290,7 +291,7 @@ class TrainGeneratorApp{
             this.checkpointInterval=null
         }
         this.fileManager.processBtn.disabled=false
-        this.fileManager.processBtn.innerHTML='<i class="fas fa-play"></i> Process Files'
+        this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")} Process Files`
         this.fileManager.clearBtn.disabled=false
         this.fileManager.browseBtn.removeAttribute("disabled")
         this.fileManager.fileInput.disabled=false
@@ -405,7 +406,7 @@ class TrainGeneratorApp{
             this.fileManager.setFileStatus(file.name,"waiting")
         }
         this.fileManager.processBtn.disabled=true
-        this.fileManager.processBtn.innerHTML="<i class=\"fas fa-spinner fa-spin\"></i>Processing..."
+        this.fileManager.processBtn.innerHTML=`<span class="fa-spinner">${renderIcon("fa-spinner")}</span>Processing...`
         this.fileManager.clearBtn.disabled=true
         this.uiManager.exportBtn.disabled=true
         this.uiManager.copyBtn.disabled=true
@@ -624,7 +625,7 @@ class TrainGeneratorApp{
                 this.checkpointInterval=null
             }
             this.fileManager.processBtn.disabled=false
-            this.fileManager.processBtn.innerHTML="<i class=\"fas fa-play\"></i>Process Files"
+            this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")}Process Files`
             this.fileManager.clearBtn.disabled=false
             this.fileManager.browseBtn.removeAttribute("disabled")
             this.fileManager.fileInput.disabled=false
@@ -656,7 +657,7 @@ class TrainGeneratorApp{
         if(this.qualityReport){
             qrHtml=`<div class="settings-actions">
                 <button id="quality-report-btn" class="btn btn-secondary" aria-label="View quality report">
-                    <i class="fas fa-clipboard-check"></i> Quality Report (${this.qualityReport.passRate}% pass, ${this.qualityReport.flaggedItems} flagged)
+                    ${renderIcon("fa-clipboard-check")} Quality Report (${this.qualityReport.passRate}% pass, ${this.qualityReport.flaggedItems} flagged)
                 </button>
             </div>`
         }
@@ -689,7 +690,7 @@ class TrainGeneratorApp{
             </table>
             <div class="settings-actions">
                 <button id="warm-cache-btn" class="btn btn-secondary" aria-label="Import from previous output to warm cache">
-                    <i class="fas fa-database"></i> Import from previous output
+                    ${renderIcon("fa-database")} Import from previous output
                 </button>
             </div>
             ${qrHtml}
