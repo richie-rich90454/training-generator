@@ -26,7 +26,7 @@ export class Devtools{
         panel.innerHTML=`
       <div class="devtools-header">
         <h3>Devtools</h3>
-        <button id="devtools-close">&times;</button>
+        <button id="devtools-close" class="devtools-close">&times;</button>
       </div>
       <div class="devtools-tabs">
         <button class="devtools-tab active" data-tab="logs">Logs</button>
