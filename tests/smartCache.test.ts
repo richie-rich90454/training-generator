@@ -37,6 +37,7 @@ describe("SmartCache", ()=>{
         let cache=new SmartCache({maxEntries: 2});
         await cache.set("a", "first");
         await cache.set("b", "second");
+        await new Promise(r=>setTimeout(r, 10));
         await cache.get("a");
         await cache.set("c", "third");
         let a=await cache.get("a");
