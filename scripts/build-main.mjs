@@ -37,7 +37,8 @@ await esbuild.build({
 await esbuild.build({
     ...commonOptions,
     entryPoints: [path.join(root, "src/preload.ts")],
-    outfile: path.join(root, "dist-main/preload.js")
+    outfile: path.join(root, "dist-main/preload.cjs"),
+    format: "cjs"
 })
 
 console.log("Main process bundled to dist-main/")
