@@ -12,15 +12,20 @@
     <body>
         <div class="app-container fade-in">
             <div class="title-bar">
-                <div class="title-bar-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 3 L14 3 L20 9 L20 16 L15 21 L5 21 Z"/>
-                        <path d="M14 3 L14 9 L20 9"/>
-                        <path d="M8 12 L17 12"/>
-                        <path d="M8 15 L13 15"/>
-                    </svg>
+                <div class="title-bar-drag-region">
+                    <div class="title-bar-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="7" x2="12" y2="12"/>
+                            <line x1="12" y1="12" x2="8" y2="17"/>
+                            <line x1="12" y1="12" x2="16" y2="17"/>
+                            <circle cx="12" cy="7" r="2"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <circle cx="8" cy="17" r="2"/>
+                            <circle cx="16" cy="17" r="2"/>
+                        </svg>
+                    </div>
+                    <span class="title-bar-title" data-i18n="app.title">Training Generator</span>
                 </div>
-                <span class="title-bar-title" data-i18n="app.title">Training Generator</span>
                 <div class="title-bar-actions">
                     <button id="edit-templates-btn" class="btn-icon" title="Edit Prompt Templates" aria-label="Edit prompt templates">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -66,7 +71,7 @@
                                 <h3 data-i18n="upload.dropzone">Drop files here or click to browse</h3>
                                 <p data-i18n="upload.formats">Supports PDF, DOCX, RTF, DOC, TXT, MD, HTML (up to 100MB)</p>
                             </div>
-                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html" style="display:none">
+                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html" class="file-input">
                             <button id="browse-btn" class="btn btn-primary" title="Ctrl+O" aria-label="Browse for files (Ctrl+O)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> <span data-i18n="upload.browse">Browse Files</span>
                             </button>
@@ -121,15 +126,15 @@
                                 <span data-i18n="output.title">Output Preview</span>
                             </div>
                             <div class="section-actions">
-                                <select id="export-format" class="form-control" style="width:auto;margin-right:8px" aria-label="Export format">
+                                <select id="export-format" class="form-control output-format-select" aria-label="Export format">
                                     <option value="jsonl" selected>JSONL</option>
                                     <option value="json">JSON Array</option>
                                     <option value="csv">CSV</option>
                                 </select>
-                                <button id="export-btn" class="btn btn-primary" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
+                                <button id="export-btn" class="btn btn--export" disabled title="Ctrl+E" aria-label="Export output (Ctrl+E)">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span data-i18n="output.export">Export</span>
                                 </button>
-                                <button id="copy-btn" class="btn btn-secondary" disabled title="Ctrl+Shift+C" aria-label="Copy output to clipboard (Ctrl+Shift+C)">
+                                <button id="copy-btn" class="btn btn--copy" disabled title="Ctrl+Shift+C" aria-label="Copy output to clipboard (Ctrl+Shift+C)">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> <span data-i18n="output.copy">Copy</span>
                                 </button>
                             </div>
@@ -143,118 +148,147 @@
                 <div class="splitter-bar" id="splitter-bar" tabindex="0" role="separator" aria-valuenow="50" aria-valuemin="10" aria-valuemax="90" aria-label="Resize panels"></div>
                 <div class="right-column">
                     <div class="card config-panel" role="form" aria-label="Processing configuration">
-                        <div class="card-header">
+                        <div class="card-header config-panel__header">
                             <div class="card-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
                                 <span data-i18n="config.title">Configuration</span>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="model-select" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-                                <span data-i18n="config.model">Ollama Model</span>
-                            </label>
-                            <select id="model-select" class="form-control">
-                                <option value="" disabled selected data-i18n="config.model.loading">Loading models from Ollama...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="provider" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
-                                <span data-i18n="config.provider">Provider</span>
-                            </label>
-                            <select id="provider" class="form-control">
-                                <option value="ollama">Ollama (Local)</option>
-                                <option value="openai">OpenAI</option>
-                                <option value="anthropic">Anthropic</option>
-                                <option value="gemini">Google Gemini</option>
-                            </select>
-                        </div>
-                        <div class="form-group form-group-hidden" id="api-key-group">
-                            <label for="api-key" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-                                <span data-i18n="config.apiKey">API Key</span>
-                            </label>
-                            <input type="password" id="api-key" class="form-control" data-i18n-placeholder="config.apiKey.placeholder" placeholder="sk-..." autocomplete="off">
-                        </div>
-                        <div class="form-group form-group-hidden" id="base-url-group">
-                            <label for="base-url" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                                <span data-i18n="config.baseUrl">Base URL</span>
-                            </label>
-                            <input type="text" id="base-url" class="form-control" data-i18n-placeholder="config.baseUrl.placeholder" placeholder="https://api.openai.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="processing-type" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg>
-                                <span data-i18n="config.processingType">Processing Type</span>
-                            </label>
-                            <select id="processing-type" class="form-control">
-                                <option value="instruction" selected data-i18n="config.processingType.instruction">Instruction Tuning (Q&A)</option>
-                                <option value="conversation" data-i18n="config.processingType.conversation">Conversation Generation</option>
-                                <option value="chunking" data-i18n="config.processingType.chunking">Text Chunking</option>
-                                <option value="custom" data-i18n="config.processingType.custom">Custom Prompt</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="output-format" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="13" y1="12" x2="22" y2="12"/><polyline points="19 9 22 12 19 15"/></svg>
-                                <span data-i18n="config.outputFormat">Output Format</span>
-                            </label>
-                            <select id="output-format" class="form-control">
-                                <option value="jsonl" selected data-i18n="config.outputFormat.jsonl">JSONL (Alpaca style)</option>
-                                <option value="chatml" data-i18n="config.outputFormat.chatml">ChatML Format</option>
-                                <option value="text" data-i18n="config.outputFormat.text">Plain Text</option>
-                                <option value="csv" data-i18n="config.outputFormat.csv">CSV</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="language-select" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-2.5-8.5L17 22"/><path d="M14 18h6"/><path d="m17.5 16 2 6"/></svg>
-                                <span data-i18n="config.outputLanguage">Output Language</span>
-                            </label>
-                            <select id="language-select" class="form-control">
-                                <option value="en" selected>English</option>
-                                <option value="zh-Hans">Chinese (Simplified)</option>
-                                <option value="zh-Hant">Chinese (Traditional)</option>
-                                <option value="es">Spanish</option>
-                                <option value="fr">French</option>
-                                <option value="de">German</option>
-                                <option value="ja">Japanese</option>
-                                <option value="ko">Korean</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="chunk-size" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>
-                                <span data-i18n="config.chunkSize">Chunk Size (characters)</span>
-                            </label>
-                            <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
-                        </div>
-                        <div class="form-group">
-                            <label for="concurrency" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                <span data-i18n="config.concurrency">Concurrency</span>
-                            </label>
-                            <select id="concurrency" class="form-control">
-                                <option value="1" data-i18n="config.concurrency.serial">1 (Serial)</option>
-                                <option value="2">2</option>
-                                <option value="3" selected data-i18n="config.concurrency.recommended">3 (Recommended)</option>
-                                <option value="4">4</option>
-                                <option value="5" data-i18n="config.concurrency.fast">5 (Fast)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="temperature" class="form-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 4v10.54a4 4 0 1 0-4 0V4a2 2 0 0 1 4 0Z"/><line x1="8" y1="12" x2="12" y2="12"/></svg>
-                                <span data-i18n="config.temperature">Temperature</span>
-                            </label>
-                            <input type="range" id="temperature" class="form-control" min="0" max="1" step="0.1" value="0.7">
-                            <div class="range-value">
-                                <span id="temperature-value">0.7</span>
+                        <div class="config-panel__fields">
+                            <div class="config-field">
+                                <label for="model-select" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+                                    <span data-i18n="config.model">Ollama Model</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="model-select" class="form-control">
+                                        <option value="" disabled selected data-i18n="config.model.loading">Loading models from Ollama...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="provider" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                                    <span data-i18n="config.provider">Provider</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="provider" class="form-control">
+                                        <option value="ollama">Ollama (Local)</option>
+                                        <option value="openai">OpenAI</option>
+                                        <option value="anthropic">Anthropic</option>
+                                        <option value="gemini">Google Gemini</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field config-field--hidden" id="api-key-group">
+                                <label for="api-key" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                                    <span data-i18n="config.apiKey">API Key</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <input type="password" id="api-key" class="form-control" data-i18n-placeholder="config.apiKey.placeholder" placeholder="sk-..." autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="config-field config-field--hidden" id="base-url-group">
+                                <label for="base-url" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                    <span data-i18n="config.baseUrl">Base URL</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <input type="text" id="base-url" class="form-control" data-i18n-placeholder="config.baseUrl.placeholder" placeholder="https://api.openai.com">
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="processing-type" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg>
+                                    <span data-i18n="config.processingType">Processing Type</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="processing-type" class="form-control">
+                                        <option value="instruction" selected data-i18n="config.processingType.instruction">Instruction Tuning (Q&A)</option>
+                                        <option value="conversation" data-i18n="config.processingType.conversation">Conversation Generation</option>
+                                        <option value="chunking" data-i18n="config.processingType.chunking">Text Chunking</option>
+                                        <option value="custom" data-i18n="config.processingType.custom">Custom Prompt</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="output-format" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="13" y1="12" x2="22" y2="12"/><polyline points="19 9 22 12 19 15"/></svg>
+                                    <span data-i18n="config.outputFormat">Output Format</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="output-format" class="form-control">
+                                        <option value="jsonl" selected data-i18n="config.outputFormat.jsonl">JSONL (Alpaca style)</option>
+                                        <option value="chatml" data-i18n="config.outputFormat.chatml">ChatML Format</option>
+                                        <option value="text" data-i18n="config.outputFormat.text">Plain Text</option>
+                                        <option value="csv" data-i18n="config.outputFormat.csv">CSV</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="language-select" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-2.5-8.5L17 22"/><path d="M14 18h6"/><path d="m17.5 16 2 6"/></svg>
+                                    <span data-i18n="config.outputLanguage">Output Language</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="language-select" class="form-control">
+                                        <option value="en" selected>English</option>
+                                        <option value="zh-Hans">Chinese (Simplified)</option>
+                                        <option value="zh-Hant">Chinese (Traditional)</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                        <option value="ja">Japanese</option>
+                                        <option value="ko">Korean</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="chunk-size" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>
+                                    <span data-i18n="config.chunkSize">Chunk Size (characters)</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <input type="number" id="chunk-size" class="form-control" value="2000" min="500" max="10000">
+                                </div>
+                            </div>
+                            <div class="config-field">
+                                <label for="concurrency" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                    <span data-i18n="config.concurrency">Concurrency</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <select id="concurrency" class="form-control">
+                                        <option value="1" data-i18n="config.concurrency.serial">1 (Serial)</option>
+                                        <option value="2">2</option>
+                                        <option value="3" selected data-i18n="config.concurrency.recommended">3 (Recommended)</option>
+                                        <option value="4">4</option>
+                                        <option value="5" data-i18n="config.concurrency.fast">5 (Fast)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-field config-field--range">
+                                <label for="temperature" class="config-field__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 4v10.54a4 4 0 1 0-4 0V4a2 2 0 0 1 4 0Z"/><line x1="8" y1="12" x2="12" y2="12"/></svg>
+                                    <span data-i18n="config.temperature">Temperature</span>
+                                </label>
+                                <div class="config-field__control">
+                                    <div class="range-control">
+                                        <div class="range-track-wrapper">
+                                            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" aria-describedby="temperature-value">
+                                            <div class="range-ticks" aria-hidden="true">
+                                                <span>0</span>
+                                                <span>0.5</span>
+                                                <span>1</span>
+                                            </div>
+                                        </div>
+                                        <div class="range-value-pill" id="temperature-value" aria-live="polite">0.7</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <button id="save-preset" class="btn btn-secondary" aria-label="Save preset">
+                        <button id="save-preset" class="btn btn--save-preset" aria-label="Save preset">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="config.savePreset">Save Preset</span>
                         </button>
                     </div>
@@ -307,8 +341,8 @@
                 <div class="modal-body">
                     <div class="settings-section">
                         <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> <span data-i18n="settings.appearance">Appearance</span></h3>
-                        <div class="form-group">
-                            <label for="theme-select" class="form-label">
+                        <div class="settings-field">
+                            <label for="theme-select" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
                                 <span data-i18n="settings.theme">Theme</span>
                             </label>
@@ -318,8 +352,8 @@
                                 <option value="dark" data-i18n="settings.theme.dark">Dark</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="font-size" class="form-label">
+                        <div class="settings-field">
+                            <label for="font-size" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="18" y1="8" x2="18" y2="16"/><polyline points="16 10 18 8 20 10"/><polyline points="16 14 18 16 20 14"/></svg>
                                 <span data-i18n="settings.fontSize">Font Size</span>
                             </label>
@@ -329,8 +363,8 @@
                                 <option value="large" data-i18n="settings.fontSize.large">Large</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="ui-language-select" class="form-label">
+                        <div class="settings-field">
+                            <label for="ui-language-select" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-2.5-8.5L17 22"/><path d="M14 18h6"/><path d="m17.5 16 2 6"/></svg>
                                 <span data-i18n="settings.uiLanguage">UI Language</span>
                             </label>
@@ -348,8 +382,8 @@
                     </div>
                     <div class="settings-section">
                         <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="settings.profiles">Configuration Profiles</span></h3>
-                        <div class="form-group">
-                            <label for="profile-select" class="form-label">
+                        <div class="settings-field">
+                            <label for="profile-select" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                                 <span data-i18n="settings.profileSelect">Saved Profiles</span>
                             </label>
@@ -357,7 +391,7 @@
                                 <option value="" selected data-i18n="settings.profileSelect.default">-- Select a profile --</option>
                             </select>
                         </div>
-                        <div class="settings-actions" style="margin-bottom:12px">
+                        <div class="settings-actions settings-actions--inline">
                             <button id="save-profile-btn" class="btn btn-secondary" aria-label="Save current settings as profile">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg> <span data-i18n="settings.saveProfile">Save Profile</span>
                             </button>
@@ -368,36 +402,36 @@
                     </div>
                     <div class="settings-section">
                         <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M10 4C4.5 4 3 7 3 10h7l-3 3 3 3h7"/><circle cx="7" cy="7" r="3"/></svg> <span data-i18n="settings.processing">Processing</span></h3>
-                        <div class="form-group">
-                            <label for="auto-save" class="form-label">
+                        <div class="settings-field">
+                            <label for="auto-save" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
                                 <span data-i18n="settings.autoSave">Auto-save Presets</span>
                             </label>
                             <input type="checkbox" id="auto-save" class="form-checkbox" checked>
                         </div>
-                        <div class="form-group">
-                            <label for="auto-check-ollama" class="form-label">
+                        <div class="settings-field">
+                            <label for="auto-check-ollama" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="3 12 6 12 8 8 11 16 13 12 21 12"/></svg>
                                 <span data-i18n="settings.autoCheckOllama">Auto-check Ollama Status</span>
                             </label>
                             <input type="checkbox" id="auto-check-ollama" class="form-checkbox" checked>
                         </div>
-                        <div class="form-group">
-                            <label for="smart-sizing" class="form-label">
+                        <div class="settings-field">
+                            <label for="smart-sizing" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
                                 <span data-i18n="settings.smartSizing">Smart Sizing</span>
                             </label>
                             <input type="checkbox" id="smart-sizing" class="form-checkbox" checked>
                         </div>
-                        <div class="form-group">
-                            <label for="max-file-size" class="form-label">
+                        <div class="settings-field">
+                            <label for="max-file-size" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
                                 <span data-i18n="settings.maxFileSize">Max File Size (MB)</span>
                             </label>
                             <input type="number" id="max-file-size" class="form-control" value="100" min="10" max="1000">
                         </div>
-                        <div class="form-group">
-                            <label for="max-output-items" class="form-label">
+                        <div class="settings-field">
+                            <label for="max-output-items" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 4v4"/><path d="M3 8h2"/><path d="M3 11h3v3a1.5 1.5 0 0 1-3 0"/><path d="M3 17a1 1 0 0 1 1-1 1 1 0 0 1 0 2 1 1 0 0 1 0 2H3"/></svg>
                                 <span data-i18n="settings.maxOutputItems">Max Output Items per File</span>
                             </label>
@@ -410,8 +444,8 @@
                                 <option value="1000000">1,000,000</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="max-chunks" class="form-label">
+                        <div class="settings-field">
+                            <label for="max-chunks" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568a2.41 2.41 0 0 1 0 3.408l-1.568 1.568c-.23.23-.338.556-.289.878.094.623.094 1.246 0 1.868a1 1 0 0 1-.291.883l-1.566 1.566a2.41 2.41 0 0 1-3.408 0l-1.568-1.568c-.23-.23-.556-.338-.878-.289a4.5 4.5 0 0 1-1.868 0c-.322-.049-.648.059-.878.289l-1.568 1.568a2.41 2.41 0 0 1-3.408 0l-1.568-1.568a1 1 0 0 1-.289-.878 4.5 4.5 0 0 1 0-1.868c.049-.322-.059-.648-.289-.878l-1.568-1.568a2.41 2.41 0 0 1 0-3.408l1.568-1.568c.23-.23.338-.556.289-.878a4.5 4.5 0 0 1 0-1.868 1 1 0 0 1 .289-.883l1.568-1.566a2.41 2.41 0 0 1 3.408 0l1.568 1.568c.23.23.556.338.878.289a4.5 4.5 0 0 1 1.868 0c.322.049.648-.059.878-.289l1.568-1.568a2.41 2.41 0 0 1 3.408 0l1.568 1.568c.23.23.338.556.289.878z"/></svg>
                                 <span data-i18n="settings.maxChunks">Max Chunks per File</span>
                             </label>
@@ -424,8 +458,8 @@
                                 <option value="5000">5,000</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="max-parallel-files" class="form-label">
+                        <div class="settings-field">
+                            <label for="max-parallel-files" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                                 <span>Max Parallel Files</span>
                             </label>
@@ -442,15 +476,15 @@
                     </div>
                     <div class="settings-section">
                         <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M8 8h8v8H8z"/><path d="M4 14v6h6"/><path d="M20 10V4h-6"/></svg> <span data-i18n="settings.window">Window</span></h3>
-                        <div class="form-group">
-                            <label for="start-maximized" class="form-label">
+                        <div class="settings-field">
+                            <label for="start-maximized" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                                 <span data-i18n="settings.startMaximized">Start Maximized</span>
                             </label>
                             <input type="checkbox" id="start-maximized" class="form-checkbox">
                         </div>
-                        <div class="form-group">
-                            <label for="remember-window-size" class="form-label">
+                        <div class="settings-field">
+                            <label for="remember-window-size" class="settings-field__label">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg>
                                 <span data-i18n="settings.rememberWindowSize">Remember Window Size</span>
                             </label>
