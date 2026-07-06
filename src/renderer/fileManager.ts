@@ -119,7 +119,7 @@ class FileManager{
         fileItem.setAttribute("data-id",fileId)
         fileItem.innerHTML=`
             <div class="file-info">
-                <span class="file-icon">${renderIcon("fa-file-", 20)}</span>
+                <span class="file-icon">${renderIcon(`fa-file-${this.getFileIcon(fileObj.type)}`, 20)}</span>
                 <div class="file-details">
                     <div class="file-name" title="${escapedName}">${escapedName}</div>
                     <div class="file-size">${this.formatFileSize(fileObj.size)}</div>
