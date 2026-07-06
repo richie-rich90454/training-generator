@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 let svg=readFileSync("assets/icon.svg");
 let DENSITY=384;
 function renderPng(size){
-    let cmd=`magick -density ${DENSITY} assets/icon.svg -background none -resize ${size}x${size} PNG:-`;
+    let cmd=`magick -background none -density ${DENSITY} assets/icon.svg -resize ${size}x${size} -depth 8 PNG:-`;
     return execSync(cmd);
 }
 function buildIco(sizes){
