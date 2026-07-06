@@ -22,6 +22,7 @@ import{AuditTrail}from"./audit.js"
 import{validateItems,type QualityReport}from"./qualityValidator.js"
 import{Dashboard}from"./dashboard.js"
 import{Devtools}from"./devtools.js"
+import{initWindowControls}from"./windowControls.js"
 
 class TrainGeneratorApp{
     fileManager:FileManager
@@ -109,6 +110,7 @@ class TrainGeneratorApp{
             await new Promise<void>(resolve=>{document.addEventListener("DOMContentLoaded",()=>resolve())})
         }
         await this.detectPlatform()
+        initWindowControls()
         window.addEventListener("unhandledrejection",(event)=>{
             this.logger.error("app","Unhandled promise rejection",{reason:String(event.reason)})
             showToast("An unexpected error occurred","error")
