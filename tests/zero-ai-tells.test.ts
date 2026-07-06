@@ -146,9 +146,10 @@ describe("Native app shell verification", ()=>{
             expect(fs.existsSync(file)).toBe(true);
         }
     });
-    it("index.html has title bar and local favicon link", ()=>{
+    it("index.html has title bar and local favicon link",()=>{
         let content: string=fs.readFileSync("index.html", "utf-8");
         expect(content).toContain('<div class="title-bar">');
+        expect(content).toContain('<div class="title-bar-drag-region">');
         expect(content).toContain('<link rel="icon" href="./assets/favicon.png">');
         expect(content).toContain('<link rel="apple-touch-icon" href="./assets/favicon.png">');
     });
