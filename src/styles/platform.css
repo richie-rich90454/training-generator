@@ -1,0 +1,75 @@
+html[data-platform="windows"]{
+    --platform:windows;
+}
+html[data-platform="macos"]{
+    --platform:macos;
+}
+html[data-platform="linux"]{
+    --platform:linux;
+}
+html[data-platform="windows"] .card,html[data-platform="windows"] .config-panel,html[data-platform="windows"] .app-footer{
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    box-shadow:var(--shadow-1);
+    border-radius:var(--radius-medium);
+}
+html[data-platform="windows"] .btn{
+    border-radius:var(--radius-medium);
+    border:1px solid transparent;
+    font-weight:600;
+    padding:var(--spacing-sm) var(--spacing-md);
+    box-shadow:none;
+}
+html[data-platform="windows"] .btn:hover{
+    transform:none;
+    box-shadow:none;
+}
+html[data-platform="windows"] .btn-primary{
+    background:var(--primary-color);
+    border-color:var(--primary-color);
+    color:var(--surface-color);
+}
+html[data-platform="windows"] .btn-secondary{
+    background:var(--surface-variant);
+    border-color:var(--text-disabled);
+    color:var(--text-primary);
+}
+html[data-platform="windows"] .btn-secondary:hover{
+    background:var(--border-color);
+    border-color:var(--text-disabled);
+}
+html[data-platform="windows"] .form-control{
+    border-radius:var(--radius-medium);
+    border:1px solid var(--text-disabled);
+    padding:var(--spacing-sm) var(--spacing-md);
+}
+html[data-platform="windows"] .form-control:focus{
+    border-color:var(--primary-color);
+    box-shadow:0 0 0 2px rgba(0,120,212,.25);
+}
+html[data-platform="windows"] .card,html[data-platform="windows"] .app-footer,html[data-platform="windows"] .config-panel{
+    border-radius:var(--radius-medium);
+    box-shadow:var(--shadow-1);
+}
+html[data-platform="windows"] .file-upload-area{
+    border-radius:var(--radius-medium);
+    border:2px dashed var(--text-disabled);
+}
+html[data-platform="windows"] .file-item{
+    border-radius:var(--radius-medium);
+    border:1px solid var(--border-color);
+}
+html[data-platform="windows"] .progress-bar{
+    border-radius:var(--radius-medium);
+    height:6px;
+}
+html[data-platform="windows"] .progress-fill{
+    border-radius:var(--radius-medium);
+}
+html[data-platform="windows"] .modal-content{
+    border-radius:var(--radius-xlarge);
+}
+html[data-platform="macos"] .card,
+html[data-platform="macos"] .config-panel{
+    border-color:var(--text-disabled);
+}
