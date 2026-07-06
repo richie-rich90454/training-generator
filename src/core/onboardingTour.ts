@@ -99,9 +99,9 @@ export class OnboardingTour{
             tooltipSize.width=this.tooltip.offsetWidth || tooltipSize.width;
             tooltipSize.height=this.tooltip.offsetHeight || tooltipSize.height;
         }
+        let viewWidth=this.doc.defaultView?.innerWidth ?? 800;
+        let viewHeight=this.doc.defaultView?.innerHeight ?? 600;
         if (!target){
-            let viewWidth=this.doc.defaultView?.innerWidth ?? 800;
-            let viewHeight=this.doc.defaultView?.innerHeight ?? 600;
             return {
                 top: viewHeight/2-tooltipSize.height/2,
                 left: viewWidth/2-tooltipSize.width/2
@@ -109,7 +109,11 @@ export class OnboardingTour{
         }
         let rect=target.getBoundingClientRect();
         let placement=step.placement ?? "bottom";
-        return calculatePlacement(rect, tooltipSize, placement);
+        let pos=calculatePlacement(rect, tooltipSize, placement);
+        let padding=8;
+        pos.top=Math.max(padding, Math.min(pos.top, viewHeight-tooltipSize.height-padding));
+        pos.left=Math.max(padding, Math.min(pos.left, viewWidth-tooltipSize.width-padding));
+        return pos;
     }
     private render(): void{
         this.destroy();
@@ -120,12 +124,16 @@ export class OnboardingTour{
         this.overlay=this.renderOverlay();
         this.doc.body.appendChild(this.overlay);
         this.tooltip=buildTourTooltip(step);
-        this.tooltip.style.position="absolute";
-        this.tooltip.style.zIndex="1100";
+        this.tooltip.style.position="fixed";
+        this.tooltip.style.zIndex="9999";
+        this.tooltip.style.visibility="hidden";
+        this.tooltip.style.top="0px";
+        this.tooltip.style.left="0px";
+        this.doc.body.appendChild(this.tooltip);
         let pos=this.positionTooltip(step);
         this.tooltip.style.top=pos.top+"px";
         this.tooltip.style.left=pos.left+"px";
-        this.doc.body.appendChild(this.tooltip);
+        this.tooltip.style.visibility="visible";
         this.attachTooltipListeners();
     }
     private attachTooltipListeners(): void{
