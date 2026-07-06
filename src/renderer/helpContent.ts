@@ -1,6 +1,7 @@
+import{renderIcon}from"./icons.js"
 export function getHelpContent():string{
     return`
-            <h3><i class="fas fa-question-circle"></i>Training Generator Help</h3>
+            <h3>${renderIcon("fa-question-circle", 20)}Training Generator Help</h3>
             <div class="help-section">
                 <h4>Getting Started</h4>
                 <p>1.<strong>Upload Files</strong>:Drag &amp; drop or click to browse for documents(PDF,DOCX,DOC,RTF,TXT,MD,HTML)</p>
