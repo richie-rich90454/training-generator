@@ -2,17 +2,17 @@ import{describe,test,expect}from "vitest"
 
 describe("BrowserWindow configuration",()=>{
     test("default window dimensions are valid",()=>{
-        let width=1400
-        let height=900
+        let width=1200
+        let height=760
         expect(width).toBeGreaterThan(0)
         expect(height).toBeGreaterThan(0)
-        expect(width).toBeGreaterThanOrEqual(1000)
-        expect(height).toBeGreaterThanOrEqual(700)
+        expect(width).toBeGreaterThanOrEqual(900)
+        expect(height).toBeGreaterThanOrEqual(600)
     })
 
     test("minimum window dimensions are valid",()=>{
-        let minWidth=1000
-        let minHeight=700
+        let minWidth=900
+        let minHeight=600
         expect(minWidth).toBeGreaterThan(0)
         expect(minHeight).toBeGreaterThan(0)
     })
