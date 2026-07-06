@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Training Generator brand mark">
+  <!--
+    Concept: Document silhouette with a data-stream notch cut from the bottom-right corner.
+
+    Visual language:
+      * The folded top-right corner signals "document" (source material).
+      * The angled notch in the bottom-right represents data being extracted /
+        transformed out of the source document — the "stream" leaving the page.
+      * The two horizontal lines inside suggest structured data rows (the
+        training dataset produced from the source document).
+
+    Why this mark: it maps directly to the app's core action — converting
+    documents into AI training data — and reads cleanly from a 16px favicon
+    through to a 1024px installer hero, because the silhouette stays simple
+    and the notch is the unique differentiator vs. a generic "page" icon.
+
+    Style: single-color stroke (#1A73E8, the project primary-color token),
+    no gradients, no shadows, no glow, transparent background. Single path
+    geometry scales losslessly via the 24x24 viewBox.
+  -->
+  <g fill="none" stroke="#1A73E8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Document outline: rectangle with the top-right corner folded (diagonal cut 14,3 -> 20,9)
+         and the bottom-right corner notched (diagonal cut 20,16 -> 15,21) -->
+    <path d="M5 3 L14 3 L20 9 L20 16 L15 21 L5 21 Z" />
+    <!-- Fold indicator: the L-shaped line inside the top-right showing where the corner is folded over -->
+    <path d="M14 3 L14 9 L20 9" />
+    <!-- Two horizontal data rows: the second is shorter, suggesting an in-progress / partial dataset -->
+    <path d="M8 12 L17 12" />
+    <path d="M8 15 L13 15" />
+  </g>
+</svg>
