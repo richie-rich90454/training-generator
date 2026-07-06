@@ -1,0 +1,33 @@
+.progress-section{
+    margin-top:var(--spacing-xl);
+}
+.progress-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:var(--spacing-sm);
+    font-size:.875rem;
+    font-weight:500;
+}
+.progress-percent{
+    font-variant-numeric:tabular-nums;
+    color:var(--text-secondary);
+}
+.progress-bar{
+    height:8px;
+    background:var(--surface-variant);
+    border-radius:var(--radius-full);
+    overflow:hidden;
+    margin-bottom:var(--spacing-md);
+    border:1px solid var(--border-color);
+}
+.progress-fill{
+    height:100%;
+    background:var(--primary-color);
+    border-radius:var(--radius-full);
+    transition:width var(--transition-slow);
+    width:0%;
+}
+.progress-section.stopped .progress-fill{
+    background:var(--text-disabled);
+}
