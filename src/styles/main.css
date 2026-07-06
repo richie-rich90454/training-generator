@@ -14,7 +14,7 @@ html[data-platform="macos"]{
 html[data-platform="linux"]{
     --platform:linux;
 }
-html[data-platform="windows"] .card,html[data-platform="windows"] .config-panel,html[data-platform="windows"] .app-header,html[data-platform="windows"] .app-footer{
+html[data-platform="windows"] .card,html[data-platform="windows"] .config-panel,html[data-platform="windows"] .app-footer{
     background:var(--surface-color);
     border:1px solid var(--border-color);
     box-shadow:var(--shadow-1);
@@ -58,7 +58,7 @@ html[data-platform="windows"] .form-control:focus{
     border-color:var(--primary-color);
     box-shadow:0 0 0 2px rgba(0,120,212,.25);
 }
-html[data-platform="windows"] .card,html[data-platform="windows"] .app-header,html[data-platform="windows"] .app-footer,html[data-platform="windows"] .config-panel{
+html[data-platform="windows"] .card,html[data-platform="windows"] .app-footer,html[data-platform="windows"] .config-panel{
     border-radius:var(--radius-medium);
     box-shadow:var(--shadow-1);
 }
@@ -268,67 +268,21 @@ h3{
     max-width:1600px;
     margin:0 auto;
     padding:var(--spacing-xl);
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
 }
 html[data-platform="windows"] .app-container{
-    padding-top:calc(var(--spacing-xl) + 8px);
-}
-.app-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:var(--spacing-md);
-    margin-bottom:var(--spacing-xl);
-    padding:var(--spacing-md) var(--spacing-lg);
-    background:var(--surface-color);
-    border-bottom:1px solid var(--border-color);
-    box-shadow:none;
-    min-height:64px;
-}
-.header-content{
-    display:flex;
-    align-items:center;
-    gap:var(--spacing-md);
-    min-width:0;
-    flex:1;
-}
-.header-icon{
-    font-size:1.75rem;
-    color:var(--primary-color);
-    flex-shrink:0;
-    width:40px;
-    height:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--surface-variant);
-    border-radius:var(--radius-medium);
-}
-.header-text{
-    min-width:0;
-    flex:1;
-}
-.header-text h1{
-    margin-bottom:var(--spacing-xs);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-.header-text .subtitle{
-    margin-bottom:0;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-.header-actions{
-    display:flex;
-    gap:var(--spacing-sm);
-    flex-shrink:0;
+    padding-top:var(--spacing-md);
 }
 .content-grid{
     display:grid;
     grid-template-columns:1fr;
     gap:var(--spacing-xl);
     margin-bottom:var(--spacing-xl);
+    flex:1;
+    overflow:hidden;
 }
 @media (min-width:1024px){
     .content-grid{
@@ -339,6 +293,8 @@ html[data-platform="windows"] .app-container{
     display:flex;
     flex-direction:column;
     gap:var(--spacing-xl);
+    overflow-y:auto;
+    height:100%;
 }
 .card{
     background:var(--surface-color);
@@ -843,6 +799,7 @@ html[data-platform="windows"] .app-container{
     border-top:1px solid var(--border-color);
     margin-top:var(--spacing-xl);
     min-height:56px;
+    flex-shrink:0;
 }
 .footer-status{
     display:flex;
@@ -1168,19 +1125,6 @@ html[data-platform="windows"] .app-container{
     .app-container{
         padding:var(--spacing-md);
     }
-    .app-header{
-        flex-direction:column;
-        gap:var(--spacing-md);
-        text-align:center;
-        min-height:auto;
-    }
-    .header-content{
-        justify-content:center;
-    }
-    .header-text h1,
-    .header-text .subtitle{
-        white-space:normal;
-    }
     .app-footer{
         flex-direction:column;
         gap:var(--spacing-md);
@@ -1424,7 +1368,7 @@ html[data-platform="windows"] .app-container{
         --border-color:#000000;
         --border-hover:#000000;
     }
-    .card,.config-panel,.app-header,.app-footer{
+    .card,.config-panel,.app-footer{
         border:2px solid var(--border-color);
         box-shadow:none;
         background:var(--surface-color);
@@ -1448,7 +1392,7 @@ html[data-platform="windows"] .app-container{
     }
 }
 @media (forced-colors: active){
-    .card,.config-panel,.app-header,.app-footer{
+    .card,.config-panel,.app-footer{
         border:1px solid ButtonText;
         background:Canvas;
         color:CanvasText;
@@ -1566,6 +1510,8 @@ html[data-platform="windows"] .app-container{
     height:16px;
     color:var(--primary-color);
     flex-shrink:0;
+    display:flex;
+    align-items:center;
 }
 .title-bar-icon svg{
     width:100%;
