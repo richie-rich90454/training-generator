@@ -1,0 +1,42 @@
+body.rtl{
+    direction:rtl;
+}
+body.rtl .card-title,
+body.rtl .settings-field__label,
+body.rtl .config-field__label,
+body.rtl .file-info,
+body.rtl .status-item,
+body.rtl .footer-link{
+    flex-direction:row-reverse;
+}
+body.rtl .section-actions,
+body.rtl .settings-actions,
+body.rtl .footer-status{
+    justify-content:flex-start;
+}
+body.rtl .modal-header h2{
+    flex-direction:row-reverse;
+}
+body.rtl .range-ticks{
+    direction:ltr;
+}
+body.rtl .config-field{
+    direction:rtl;
+}
+body.rtl .config-field__label{
+    text-align:right;
+}
+body.rtl .settings-field{
+    direction:rtl;
+}
+body.rtl .settings-field__label{
+    text-align:right;
+}
+body.rtl .form-control{
+    direction:ltr;
+    text-align:right;
+}
+body.rtl .output-preview pre{
+    direction:ltr;
+    text-align:right;
+}
