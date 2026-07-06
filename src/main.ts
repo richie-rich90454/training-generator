@@ -393,17 +393,28 @@ function createMainWindow(){
         path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","preload.ts"),
     ]
     let preloadPath=preloadCandidates.find(p=>fs.existsSync(p))||preloadCandidates[0]
+    let iconPath:string|undefined
+    try{
+        iconPath=path.join(app.getAppPath(),"assets","icon.png")
+        if(!fs.existsSync(iconPath)){
+            iconPath=undefined
+        }
+    }
+    catch{
+        iconPath=undefined
+    }
     mainWindow=new BrowserWindow({
         width:1400,
         height:900,
         minWidth:1000,
         minHeight:700,
         show:false,
-        frame:true,
+        frame:isMac?true:false,
         transparent:isMac,
         backgroundColor:isMac?"#000000":"#FFFFFF",
-        titleBarStyle:"default",
+        titleBarStyle:isMac?"hiddenInset":"default",
         useContentSize:true,
+        ...(iconPath?{icon:iconPath}:{}),
         webPreferences:{
             preload:preloadPath,
             nodeIntegration:false,
@@ -417,6 +428,14 @@ function createMainWindow(){
             scrollBounce:true
         }
     })
+    if(isWin&&typeof mainWindow.setBackgroundMaterial==="function"){
+        try{
+            mainWindow.setBackgroundMaterial("mica")
+        }
+        catch{
+            // Mica not supported on this Windows version / Electron version — fall back silently
+        }
+    }
     mainWindow.setMenu(null)
     if(process.env.NODE_ENV==="development"){
         mainWindow.loadURL("http://localhost:5173")
