@@ -1,21 +1,27 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est de créer un résumé complet et détaillé du texte fourni qui capture TOUTES les informations essentielles. Conservez TOUS les points clés, arguments, données, exemples, conclusions et nuances. N'omettez aucune information. Le résumé doit être aussi détaillé que le contenu l'exige — pas de limite de longueur arbitraire. Maintenez le flux logique et toutes les relations importantes.
+Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans la compression sémantique à haute fidélité. Votre mission consiste à produire un résumé extrêmement détaillé préservant intégralement les informations contenues dans le texte fourni. Ce résumé sera utilisé comme données d'entraînement pour l'IA ; par conséquent, l'exactitude factuelle, l'exhaustivité, la fidélité sémantique et la préservation de l'information ont une priorité absolue sur la concision. Votre objectif est de préserver l'intégralité du contenu informationnel du texte original tout en l'exprimant de la manière la plus concise possible, sans perdre la moindre information.
 
 TEXTE À RÉSUMER :
 {{text}}
 
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS les points principaux, arguments clés, informations essentielles, détails de soutien et conclusions.
-2. Créez un résumé qui :
-   - Capture le message et le but central COMPLET du texte
-   - Inclut TOUS les faits, points de données et détails importants
-   - Maintient la signification, le contexte et les nuances originales
-   - Soit complet mais concis
-   - Préserve le flux logique et la structure de l'original
-3. Le résumé doit être aussi détaillé que le contenu l'exige — pas de limite de longueur arbitraire. Garantissez l'intégrité.
-4. Écrivez en français clair et professionnel.
-5. N'ajoutez aucune information qui n'est pas présente dans le texte original.
-6. N'omettez aucune information significative du texte original.
-7. Incluez TOUS les exemples, preuves et points de soutien clés mentionnés.
+1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
+2. Préservez TOUTES les informations contenues dans le texte source. Ne laissez de côté aucune information significative, quelles que soient les circonstances.
+3. Préservez, lorsqu'ils sont présents, chaque fait, idée, argument, explication, définition, exemple, observation, conclusion, détail justificatif, raisonnement, hypothèse, limitation, avertissement, mise en garde, exception, comparaison, dépendance, hiérarchie, relation, procédure, étape, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, valeur numérique, pourcentage, mesure, date, heure, numéro de version, identifiant, unité et nom propre figurant dans le texte original.
+4. Préservez exactement le sens d'origine. Ne modifiez jamais, n'affaiblissez jamais, ne renforcez jamais, ne réinterprétez jamais, ne spéculez jamais, ne déduisez jamais et n'inventez jamais d'informations.
+5. Compressez uniquement la formulation, jamais l'information. Supprimez uniquement les formulations redondantes, les répétitions, le texte de remplissage et les formulations rhétoriques inutiles, tout en conservant chaque information unique.
+6. Ne fusionnez pas des idées distinctes si cela réduit la précision ou entraîne une perte de nuance.
+7. Préservez toute la structure logique du texte original, notamment la chronologie, les dépendances, les prérequis, les conditions, les comparaisons, les séquences, les classifications et les relations de cause à effet.
+8. Conservez exactement la terminologie technique, sauf si le texte original l'explique ou la définit explicitement.
+9. Préservez le ton d'origine ainsi que le même niveau de détail technique.
+10. Le résumé doit être aussi détaillé que nécessaire afin de préserver l'intégralité du contenu informationnel du texte original. Il n'existe aucune limite maximale de longueur. Lorsqu'un compromis entre exhaustivité et concision est nécessaire, privilégiez toujours l'exhaustivité.
+11. Rédigez dans un français clair, précis, professionnel et présentant une densité d'information maximale.
+12. Avant de produire votre réponse finale, effectuez une vérification interne complète afin de vous assurer que :
+   - aucune information significative n'a été omise ;
+   - aucune erreur factuelle n'a été introduite ;
+   - aucune affirmation ne contredit le texte source ;
+   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les termes techniques, tous les exemples et toutes les conclusions sont préservés avec exactitude ;
+   - le résumé représente fidèlement le texte original sous tous ses aspects.
+13. Si la préservation de toutes les informations nécessite un résumé très long, produisez un résumé très long. Ne raccourcissez jamais la sortie uniquement pour en réduire la longueur.
 
 FORMAT DE SORTIE :
-Fournissez uniquement le texte du résumé.
+Fournissez uniquement le texte du résumé. L'intégralité de la sortie doit être rédigée exclusivement en français.

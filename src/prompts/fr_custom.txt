@@ -1,23 +1,29 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est d'extraire de manière exhaustive TOUTES les informations structurées du texte fourni. Extrayez : chaque concept clé, thème, fait, point de données, statistique, argument, preuve, exemple, définition, relation, conclusion et implication. Pour les procédures : chaque étape. Pour les comparaisons : chaque différence et similarité. Pour les listes : chaque élément avec description complète. Générez autant d'éléments structurés que le contenu l'exige — pas de limite supérieure.
+Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans l'extraction structurée de connaissances à haute fidélité (High-Fidelity Structured Knowledge Extraction). Votre mission consiste à extraire de manière exhaustive et à organiser l'intégralité des informations contenues dans le texte fourni sous la forme d'une structure hiérarchique complète, adaptée à l'entraînement des modèles d'IA. Préservez chaque information significative. Aucune information significative ne doit être omise, quelles que soient les circonstances.
 
 TEXTE À ANALYSER :
 {{text}}
 
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS :
-   - Concepts, thèmes et sujets clés
-   - Faits, points de données, statistiques importantes
-   - Arguments, récits, déclarations de thèse principales
-   - Preuves de soutien, exemples, études de cas
-   - Termes techniques, définitions, jargon (avec explications)
-   - Relations, connexions, dépendances entre informations
-   - Conclusions, implications, recommandations
-2. Organisez TOUTES les informations de manière structurée et hiérarchique qui soit optimale pour l'entraînement de l'IA.
-3. Concentrez-vous sur l'extraction d'informations COMPLÈTES, factuelles et vérifiables du texte.
-4. Si le texte contient des instructions ou des procédures, extrayez TOUTES les étapes en détail.
-5. Si le texte contient des comparaisons ou des contrastes, mettez en évidence TOUTES les différences et similitudes clés.
-6. Si le texte contient des listes, extrayez TOUS les éléments avec leurs descriptions.
-7. Rédigez toute l'analyse en français qui capture TOUT ce qui est important dans le texte.
+1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
+2. Extrayez et organisez TOUTES les informations contenues dans le texte source.
+3. Incluez, lorsqu'ils sont présents, chaque concept, thème, sujet, fait, statistique, valeur numérique, argument, explication, définition, observation, exemple, étude de cas, procédure, recommandation, conclusion, implication, hypothèse, limitation, avertissement, mise en garde, exception, dépendance, relation, hiérarchie, comparaison, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, identifiant, numéro de version, mesure, date, heure, unité et nom propre.
+4. Organisez l'ensemble des informations extraites au sein d'une structure hiérarchique claire en utilisant des titres et des sous-titres logiquement organisés.
+5. Préservez l'organisation logique ainsi que toutes les relations présentes dans le texte original.
+6. Si le texte source contient des procédures ou des processus, extrayez intégralement chacune de leurs étapes.
+7. Si le texte source contient des comparaisons, extrayez l'ensemble des similitudes et des différences.
+8. Si le texte source contient des listes, extrayez chaque élément accompagné de sa description complète.
+9. Si le texte source contient des exemples, des études de cas ou des éléments de preuve, préservez-les intégralement.
+10. Préservez la chronologie, les hiérarchies, les dépendances, les prérequis, les classifications, les conditions ainsi que les relations de cause à effet.
+11. Conservez exactement la terminologie technique, sauf si le texte source la définit ou l'explique explicitement.
+12. N'effectuez aucune déduction, ne spéculez pas, ne réinterprétez pas, ne simplifiez pas et n'inventez aucune information.
+13. Préservez le sens original, toutes les nuances sémantiques ainsi que le niveau de détail technique du texte source.
+14. L'intégralité de la sortie doit être rédigée dans un français clair, précis, professionnel et naturel. À l'exception des noms propres, de la terminologie technique, du code source, des formules, des noms de fichiers ou de tout autre contenu devant explicitement être conservé dans une autre langue conformément au texte source, aucune autre langue ne doit être utilisée.
+15. Générez autant de contenu structuré que nécessaire afin de préserver intégralement le contenu informationnel du texte source. Il n'existe aucune limite maximale de longueur. En cas de conflit entre l'exhaustivité et la concision, privilégiez toujours l'exhaustivité.
+16. Avant de produire le résultat final, effectuez une vérification interne complète afin de vous assurer que :
+   - aucune information significative n'a été omise ;
+   - aucune erreur factuelle n'a été introduite ;
+   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
+   - la structure extraite représente fidèlement le contenu, l'organisation et le sens du document original.
 
 FORMAT DE SORTIE :
-Fournissez votre analyse dans un format bien structuré et complet.
+Fournissez uniquement l'analyse structurée. L'analyse doit être clairement organisée, exhaustive et présenter une structure hiérarchique logique. L'intégralité de la sortie doit être rédigée exclusivement en français.

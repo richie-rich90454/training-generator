@@ -1,26 +1,32 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est d'extraire CHAQUE fait, concept, relation, exemple, statistique, définition, argument et nuance du texte fourni. Ne laissez rien derrière. Générez autant de paires de questions-réponses de haute qualité que possible — il n'y a pas de limite supérieure. Chaque élément doit contenir des réponses complètes et détaillées. Préférez la profondeur à la largeur : si le texte est mince, moins d'éléments mais plus riches valent mieux que beaucoup d'éléments superficiels. Couvrez TOUTES les informations de manière exhaustive.
+Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans la création de jeux de données de questions-réponses (Question-and-Answer, Q&A) d'une qualité exceptionnelle. Votre mission consiste à transformer le texte fourni en une collection complète de paires de questions-réponses (Q&A) détaillées préservant intégralement le contenu informationnel du texte source. Ce jeu de données sera utilisé comme données d'entraînement pour l'IA ; par conséquent, l'exactitude factuelle, l'exhaustivité, la fidélité sémantique, la cohérence logique et la valeur pédagogique ont une priorité absolue sur la concision. Chaque information significative contenue dans le texte source doit être couverte par au moins une question. Aucune information significative ne doit être omise, quelles que soient les circonstances.
 
 TEXTE À ANALYSER :
 {{text}}
 
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS les concepts clés, faits, arguments, points de données et informations importantes.
-2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français.
-3. Fournissez des réponses détaillées et précises basées EXCLUSIVEMENT sur le contenu du texte.
-4. Formatez chaque paire exactement comme suit :
-Question: [la question]
-Answer: [la réponse]
-5. Créez des types de questions DIVERSIFIÉS :
-   - Questions factuelles (qui, quoi, quand, où)
-   - Questions conceptuelles (comment, pourquoi, expliquer)
-   - Questions analytiques (comparer, contraster, analyser)
-   - Questions d'application (comment utiliser, mettre en œuvre, appliquer)
-   - Questions d'inférence (que peut-on conclure, qu'est-ce qui est implicite)
-6. Assurez-vous que les réponses sont COMPLÈTES mais concises, couvrant tous les détails pertinents du texte.
-7. Générez AUTANT de paires de questions-réponses de haute qualité que nécessaire pour couvrir TOUTES les informations importantes du texte. Il n'y a pas de limite supérieure — générez autant que le contenu l'exige.
-8. Ne sautez AUCUNE information importante. Couvrez TOUS les points clés mentionnés dans le texte.
-9. Si le texte contient des listes, des procédures ou des étapes, créez des questions pour CHAQUE élément/étape.
-10. Si le texte contient des exemples, créez des questions sur chaque exemple.
+1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
+2. Identifiez et préservez TOUTES les informations contenues dans le texte source.
+3. Prenez en compte, lorsqu'ils sont présents, chaque fait, concept, argument, explication, définition, exemple, observation, conclusion, détail justificatif, raisonnement, hypothèse, limitation, avertissement, mise en garde, exception, comparaison, dépendance, hiérarchie, relation, procédure, étape, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, valeur numérique, pourcentage, mesure, date, heure, numéro de version, identifiant, unité et nom propre.
+4. Générez des questions claires, autonomes et suffisamment complètes pour que leurs réponses puissent être comprises sans nécessiter de contexte supplémentaire.
+5. Chaque information significative du texte source doit apparaître dans au moins une réponse.
+6. Lorsque cela est approprié, privilégiez des réponses plus approfondies et plus complètes plutôt qu'un grand nombre de questions superficielles.
+7. Générez une grande variété de types de questions, notamment des questions factuelles, conceptuelles, explicatives, analytiques, comparatives, procédurales, orientées vers l'application ainsi que des questions d'inférence lorsqu'elles sont directement étayées par le texte source.
+8. Si le texte source contient des procédures ou des processus, générez des questions couvrant chacune de leurs étapes.
+9. Si le texte source contient des comparaisons, générez des questions couvrant toutes les similitudes et toutes les différences.
+10. Si le texte source contient des exemples, générez des questions portant sur chacun d'entre eux.
+11. Si le texte source contient des listes, générez des questions portant sur chacun de leurs éléments.
+12. Préservez la chronologie, les hiérarchies, les dépendances, les prérequis, les classifications, les conditions ainsi que les relations de cause à effet.
+13. Les réponses doivent être complètes, techniquement exactes, logiquement cohérentes, riches en informations et fondées exclusivement sur le contenu du texte source.
+14. N'inventez aucune information, ne spéculez pas, ne déduisez aucun fait non étayé et n'introduisez aucune connaissance externe.
+15. Générez autant de paires de questions-réponses que nécessaire afin de préserver intégralement le contenu informationnel du texte source. Il n'existe aucune limite maximale au nombre de paires de questions-réponses.
+16. Maintenez une terminologie cohérente et uniforme dans l'ensemble du jeu de données.
+17. Toutes les questions et toutes les réponses doivent être rédigées dans un français clair, précis, professionnel et naturel. À l'exception des noms propres, de la terminologie technique, du code source, des formules, des noms de fichiers ou de tout autre contenu devant explicitement être conservé dans une autre langue conformément au texte source, aucune autre langue ne doit être utilisée. Les libellés de format « Question: » et « Answer: » doivent toutefois rester en anglais et ne doivent pas être traduits afin de garantir la compatibilité du format de sortie.
+18. Avant de produire le résultat final, effectuez une vérification interne complète afin de vous assurer que :
+   - aucune information significative n'a été omise ;
+   - aucune erreur factuelle n'a été introduite ;
+   - chaque détail important a été entièrement couvert ;
+   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
+   - chaque réponse est entièrement étayée par le texte source.
 
 FORMAT DE SORTIE :
 Question: [Première question]
@@ -29,4 +35,4 @@ Answer: [Première réponse]
 Question: [Deuxième question]
 Answer: [Deuxième réponse]
 
-[Continuez avec autant de paires que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire question-réponse]
+[Poursuivez avec autant de paires de questions-réponses que nécessaire afin de couvrir intégralement toutes les informations. Laissez exactement une ligne vide entre chaque paire Question-Answer. Toutes les questions et toutes les réponses doivent être rédigées intégralement en français.]
