@@ -1,8 +1,12 @@
 :root{
     --primary-color:#1A73E8;
+    --primary-hover:#1557B0;
     --secondary-color:#34A853;
+    --secondary-hover:#2E7D32;
     --accent-color:#EA4335;
+    --accent-hover:#C53929;
     --warning-color:#FBBC05;
+    --warning-hover:#F9A825;
     --surface-color:#FFFFFF;
     --surface-variant:#F3F3F3;
     --background-color:#FAFAFA;
@@ -38,12 +42,19 @@
     --bubble-assistant:var(--surface-variant);
     --bubble-user:var(--selection-color);
     --bubble-system:var(--surface-variant);
+    --scrollbar-track:transparent;
+    --scrollbar-thumb:rgba(0,0,0,.25);
+    --scrollbar-thumb-hover:rgba(0,0,0,.4);
 }
 .theme-dark{
     --primary-color:#8AB4F8;
+    --primary-hover:#AECBFA;
     --secondary-color:#81C995;
+    --secondary-hover:#A8D5BA;
     --accent-color:#F28B82;
+    --accent-hover:#F6AEA9;
     --warning-color:#FDD663;
+    --warning-hover:#FDE293;
     --surface-color:#202124;
     --surface-variant:#2D2E30;
     --background-color:#1A1A1A;
@@ -57,4 +68,7 @@
     --bubble-assistant:var(--surface-variant);
     --bubble-user:var(--selection-color);
     --bubble-system:var(--surface-variant);
+    --scrollbar-track:transparent;
+    --scrollbar-thumb:rgba(255,255,255,.25);
+    --scrollbar-thumb-hover:rgba(255,255,255,.4);
 }
