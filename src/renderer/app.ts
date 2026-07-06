@@ -1,4 +1,3 @@
-import '@fortawesome/fontawesome-free/css/all.min.css'
 import type{SelectedFile,TrainingItem,ProcessFileResult}from"../types/index.js"
 import PromptManager from"./promptManager.js"
 import FileManager from"./fileManager.js"
