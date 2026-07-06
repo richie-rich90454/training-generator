@@ -1,3 +1,4 @@
+import { renderIcon } from "./icons.js"
 let confirmModal: HTMLDivElement | null = null
 let resolveRef: ((value: boolean) => void) | null = null
 let dismissRef: (() => void) | null = null
@@ -16,7 +17,7 @@ function getConfirmModal(): HTMLDivElement {
     confirmModal.innerHTML = `
       <div class="modal-content confirm-dialog">
         <div class="modal-header">
-          <h2><i class="fas fa-question-circle"></i> <span id="confirm-title">Confirm</span></h2>
+          <h2>${renderIcon("fa-question-circle", 20)} <span id="confirm-title">Confirm</span></h2>
         </div>
         <div class="modal-body">
           <p id="confirm-message"></p>
