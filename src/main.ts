@@ -1,4 +1,4 @@
-import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage}from "electron"
+import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage,Tray,Menu,nativeImage}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
@@ -19,6 +19,7 @@ let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:1
 let isWin:boolean=process.platform==="win32"
 let isMac:boolean=process.platform==="darwin"
 let mainWindow:BrowserWindow|null=null
+let tray:Tray|null=null
 let splashWindow:BrowserWindow|null=null
 let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
@@ -385,14 +386,19 @@ function stopSplash(){
     }
 }
 function createMainWindow(){
-    let isCompiled=import.meta.url.endsWith(".js")||import.meta.url.endsWith(".mjs")
-    let preloadName=isCompiled?"preload.js":"preload.ts"
+    let isCompiled=import.meta.url.endsWith(".js")||import.meta.url.endsWith(".mjs")||import.meta.url.endsWith(".cjs")
+    let preloadName=isCompiled?"preload.cjs":"preload.ts"
     let preloadCandidates=[
         path.join(path.dirname(fileURLToPath(import.meta.url)),preloadName),
-        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","src","preload.ts"),
-        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","preload.ts"),
     ]
+    if(!isCompiled){
+        let builtPreload=path.join(path.dirname(fileURLToPath(import.meta.url)),"..","dist-main","preload.cjs")
+        preloadCandidates.unshift(builtPreload)
+        preloadCandidates.push(path.join(path.dirname(fileURLToPath(import.meta.url)),"..","src","preload.ts"))
+        preloadCandidates.push(path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","preload.ts"))
+    }
     let preloadPath=preloadCandidates.find(p=>fs.existsSync(p))||preloadCandidates[0]
+    console.log(`[main] using preload script: ${preloadPath}`)
     let iconPath:string|undefined
     try{
         iconPath=path.join(app.getAppPath(),"assets","icon.png")
@@ -404,15 +410,13 @@ function createMainWindow(){
         iconPath=undefined
     }
     mainWindow=new BrowserWindow({
-        width:1400,
-        height:900,
-        minWidth:1000,
-        minHeight:700,
+        width:1000,
+        height:700,
+        minWidth:760,
+        minHeight:520,
         show:false,
-        frame:isMac?true:false,
-        transparent:isMac,
-        backgroundColor:isMac?"#000000":"#FFFFFF",
-        titleBarStyle:isMac?"hiddenInset":"default",
+        frame:false,
+        backgroundColor:"#FFFFFF",
         useContentSize:true,
         ...(iconPath?{icon:iconPath}:{}),
         webPreferences:{
@@ -428,6 +432,7 @@ function createMainWindow(){
             scrollBounce:true
         }
     })
+    mainWindow.center()
     if(isWin&&typeof mainWindow.setBackgroundMaterial==="function"){
         try{
             mainWindow.setBackgroundMaterial("mica")
@@ -444,6 +449,28 @@ function createMainWindow(){
     else{
         mainWindow.loadFile(path.join(path.dirname(fileURLToPath(import.meta.url)),"../dist/index.html"))
     }
+    mainWindow.webContents.setWindowOpenHandler(({url})=>{
+        try{
+            let parsed=new URL(url)
+            if(parsed.protocol==="http:"||parsed.protocol==="https:"){
+                shell.openExternal(url)
+            }
+        }
+        catch{}
+        return{action:"deny"}
+    })
+    mainWindow.webContents.on("will-navigate",(event,url)=>{
+        let appUrl=mainWindow?.webContents.getURL()||""
+        if(url===appUrl)return
+        event.preventDefault()
+        try{
+            let parsed=new URL(url)
+            if(parsed.protocol==="http:"||parsed.protocol==="https:"){
+                shell.openExternal(url)
+            }
+        }
+        catch{}
+    })
     mainWindow.on("maximize",()=>{
         if(!mainWindow||mainWindow.isDestroyed())return
         mainWindow.webContents.send("window:maximizedChanged",true)
@@ -491,6 +518,78 @@ function createMainWindow(){
         stopSplash()
         mainWindow=null
     })
+}
+function getTrayIconPath():string|null{
+    let fileName=isWin?"tray-icon.ico":"tray-icon.png"
+    let candidates:string[]=[
+        path.join(app.getAppPath(),"assets",fileName),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","assets",fileName),
+        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","assets",fileName)
+    ]
+    if(typeof process!=="undefined"&&process.resourcesPath){
+        candidates.splice(1,0,path.join(process.resourcesPath,"assets",fileName))
+    }
+    for(let p of candidates){
+        if(fs.existsSync(p))return p
+    }
+    console.error("[tray] icon not found:",candidates.join("; "))
+    return null
+}
+function toggleWindowFromTray():void{
+    if(!mainWindow)return
+    if(mainWindow.isVisible()){
+        if(mainWindow.isFocused()){
+            mainWindow.hide()
+        }
+        else{
+            mainWindow.focus()
+        }
+    }
+    else{
+        if(mainWindow.isMinimized()){
+            mainWindow.restore()
+        }
+        mainWindow.show()
+        mainWindow.focus()
+    }
+}
+function buildTrayMenu():Electron.Menu{
+    let label=(mainWindow&&mainWindow.isVisible())?"Hide Training Generator":"Show Training Generator"
+    return Menu.buildFromTemplate([
+        {label:label,click:toggleWindowFromTray},
+        {type:"separator"},
+        {label:"Quit",click:()=>{isAppQuitting=true;app.quit()}}
+    ])
+}
+function createTray():void{
+    if(tray)return
+    let iconPath=getTrayIconPath()
+    if(!iconPath)return
+    let icon:Electron.NativeImage
+    try{
+        icon=nativeImage.createFromPath(iconPath)
+        if(icon.isEmpty()){
+            console.error("[tray] loaded icon is empty")
+            return
+        }
+    }
+    catch(error){
+        console.error("[tray] failed to load icon:",error)
+        return
+    }
+    tray=new Tray(icon)
+    tray.setToolTip("Training Generator")
+    if(isMac){
+        tray.setContextMenu(buildTrayMenu())
+    }
+    else{
+        tray.on("click",()=>{
+            toggleWindowFromTray()
+        })
+        tray.on("right-click",()=>{
+            if(tray)tray.popUpContextMenu(buildTrayMenu())
+        })
+    }
 }
 export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options}=payload
@@ -1197,6 +1296,7 @@ app.whenReady().then(()=>{
     registerCriticalIpcHandlers()
     createMainWindow()
     registerWindowControlHandlers(()=>mainWindow)
+    createTray()
     registerDeferredIpcHandlers()
     setTimeout(()=>registerDeferredIpcHandlers(),5000)
 }).catch((error)=>{
@@ -1221,6 +1321,10 @@ app.on("before-quit",async(event)=>{
     if(fileParser){
         try{await fileParser.dispose()}catch{}
         fileParser=null
+    }
+    if(tray&&!tray.isDestroyed()){
+        tray.destroy()
+        tray=null
     }
     httpAgent.destroy()
     httpsAgent.destroy()
