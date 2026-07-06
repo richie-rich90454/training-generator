@@ -22,6 +22,7 @@ import{validateItems,type QualityReport}from"./qualityValidator.js"
 import{Dashboard}from"./dashboard.js"
 import{Devtools}from"./devtools.js"
 import{initWindowControls}from"./windowControls.js"
+import{OnboardingTour,DEFAULT_TOUR_STEPS,STORAGE_KEY}from"../core/onboardingTour.js"
 
 class TrainGeneratorApp{
     fileManager:FileManager
@@ -133,7 +134,20 @@ class TrainGeneratorApp{
         this.uiManager.initSettings()
         await this.uiManager.checkOllamaStatus()
         this.uiManager.startOllamaMonitor()
+        this.maybeStartTour()
 
+    }
+    maybeStartTour():void{
+        try{
+            if(typeof localStorage!=="undefined"&&localStorage.getItem(STORAGE_KEY)==="true"){
+                return
+            }
+            let tour=new OnboardingTour({ steps: DEFAULT_TOUR_STEPS })
+            window.setTimeout(()=>tour.start(), 500)
+        }
+        catch(error){
+            this.logger.error("app","Failed to start onboarding tour",{error:(error as Error).message})
+        }
     }
     bindEvents():void{
         this.addEventListener(this.fileManager.dropZone,"dragover",this.fileManager.handleDragOver.bind(this.fileManager) as EventListener)
@@ -407,7 +421,7 @@ class TrainGeneratorApp{
             this.fileManager.setFileStatus(file.name,"waiting")
         }
         this.fileManager.processBtn.disabled=true
-        this.fileManager.processBtn.innerHTML=`<span class="fa-spinner">${renderIcon("fa-spinner")}</span>Processing...`
+        this.fileManager.processBtn.innerHTML=`<span class="tg-spinner">${renderIcon("fa-spinner")}</span>Processing...`
         this.fileManager.clearBtn.disabled=true
         this.uiManager.exportBtn.disabled=true
         this.uiManager.copyBtn.disabled=true
