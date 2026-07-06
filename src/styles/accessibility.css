@@ -1,0 +1,89 @@
+.sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0, 0, 0, 0);
+    white-space:nowrap;
+    border-width:0;
+}
+@media (prefers-contrast: more){
+    :root{
+        --primary-color:#0000FF;
+        --primary-hover:#0000CC;
+        --secondary-color:#008000;
+        --secondary-hover:#006600;
+        --accent-color:#CC0000;
+        --accent-hover:#990000;
+        --warning-color:#CC6600;
+        --warning-hover:#994C00;
+        --surface-color:#FFFFFF;
+        --surface-variant:#F0F0F0;
+        --background-color:#FFFFFF;
+        --text-primary:#000000;
+        --text-secondary:#333333;
+        --text-disabled:#666666;
+        --border-color:#000000;
+        --border-hover:#000000;
+    }
+    .card,.config-panel,.app-footer{
+        border:2px solid var(--border-color);
+        box-shadow:none;
+        background:var(--surface-color);
+    }
+    .btn{
+        border:2px solid var(--text-primary);
+        box-shadow:none;
+    }
+    .progress-fill{
+        background:var(--primary-color);
+    }
+}
+@media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+        transition-duration:0s !important;
+        animation-duration:0s !important;
+        animation:none !important;
+    }
+    .modal-content{
+        transform:none;
+    }
+    .toast,
+    .toast-visible,
+    .toast-hiding{
+        transition:none;
+        transform:none;
+    }
+}
+@media (forced-colors: active){
+    .card,.config-panel,.app-footer{
+        border:1px solid ButtonText;
+        background:Canvas;
+        color:CanvasText;
+    }
+    .btn{
+        border:1px solid ButtonText;
+        background:ButtonFace;
+        color:ButtonText;
+    }
+    .btn-primary{
+        background:Highlight;
+        color:HighlightText;
+        border-color:Highlight;
+    }
+    .btn:hover{
+        background:Highlight;
+        color:HighlightText;
+    }
+    .progress-fill{
+        background:Highlight;
+    }
+    .splitter-bar{
+        background:ButtonText;
+    }
+    .toast{
+        border:1px solid ButtonText;
+    }
+}
