@@ -41,34 +41,59 @@ function killProcess(proc){
         proc.kill("SIGTERM")
     }
 }
-const viteProcess=spawn(process.execPath, ["node_modules/vite/bin/vite.js"], {
-    stdio: "inherit",
-    env: {...process.env, NODE_ENV: "development"}
-})
-waitForVite().then(()=>{
-    const electronProcess=spawn(process.execPath, ["--import", "tsx/esm", "node_modules/electron/cli.js", "."], {
+function runBuildMain(){
+    return new Promise((resolve,reject)=>{
+        console.log("[dev] building main process...")
+        let buildProcess=spawn(process.execPath, ["scripts/build-main.mjs"], {
+            stdio: "inherit",
+            env: {...process.env, NODE_ENV: "development"}
+        })
+        buildProcess.on("exit",(code)=>{
+            if(code===0){
+                resolve()
+            }
+            else{
+                reject(new Error(`build-main exited with code ${code}`))
+            }
+        })
+        buildProcess.on("error",(error)=>{
+            reject(error)
+        })
+    })
+}
+runBuildMain().then(()=>{
+    const viteProcess=spawn(process.execPath, ["node_modules/vite/bin/vite.js"], {
         stdio: "inherit",
         env: {...process.env, NODE_ENV: "development"}
     })
-    electronProcess.on("exit",(code)=>{
-        killProcess(viteProcess)
-        process.exit(code??0)
-    })
-    electronProcess.on("error",(error)=>{
-        console.error("[dev] failed to start electron:",error)
+    waitForVite().then(()=>{
+        const electronProcess=spawn(process.execPath, ["--import", "tsx/esm", "node_modules/electron/cli.js", ".", "--remote-debugging-port=9223"], {
+            stdio: "inherit",
+            env: {...process.env, NODE_ENV: "development"}
+        })
+        electronProcess.on("exit",(code)=>{
+            killProcess(viteProcess)
+            process.exit(code??0)
+        })
+        electronProcess.on("error",(error)=>{
+            console.error("[dev] failed to start electron:",error)
+            killProcess(viteProcess)
+            process.exit(1)
+        })
+    }).catch((error)=>{
+        console.error("[dev]",error.message)
         killProcess(viteProcess)
         process.exit(1)
     })
+    process.on("SIGINT",()=>{
+        killProcess(viteProcess)
+        process.exit(0)
+    })
+    process.on("SIGTERM",()=>{
+        killProcess(viteProcess)
+        process.exit(0)
+    })
 }).catch((error)=>{
-    console.error("[dev]",error.message)
-    killProcess(viteProcess)
+    console.error("[dev] failed to build main process:",error)
     process.exit(1)
-})
-process.on("SIGINT",()=>{
-    killProcess(viteProcess)
-    process.exit(0)
-})
-process.on("SIGTERM",()=>{
-    killProcess(viteProcess)
-    process.exit(0)
 })
