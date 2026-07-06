@@ -1,0 +1,81 @@
+@font-face{
+    font-family: "Noto Sans";
+    src: url("../../assets/NotoSans-VariableFont_wdth_wght.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 1 1000;
+}
+*,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+html{
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+body{
+    font-family:'Noto Sans',sans-serif;
+    background-color:var(--background-color);
+    color:var(--text-primary);
+    line-height:1.5;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+h1,h2,h3,h4,h5,h6{
+    font-weight:600;
+    line-height:1.2;
+    margin-bottom:var(--spacing-md);
+}
+h1{
+    font-size:1.35rem;
+    font-weight:600;
+    letter-spacing:0;
+}
+h2{
+    font-size:1.15rem;
+    letter-spacing:0;
+}
+h3{
+    font-size:.95rem;
+    font-weight:600;
+}
+.subtitle{
+    font-size:0.875rem;
+    color:var(--text-secondary);
+    margin-bottom:var(--spacing-lg);
+}
+html{
+    scrollbar-width:thin;
+    scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-track);
+}
+::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+::-webkit-scrollbar-corner{
+    background:transparent;
+}
+::-webkit-scrollbar-track{
+    background:var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb{
+    background:var(--scrollbar-thumb);
+    border-radius:5px;
+    border:2px solid transparent;
+    background-clip:padding-box;
+}
+::-webkit-scrollbar-thumb:hover{
+    background:var(--scrollbar-thumb-hover);
+}
+::-webkit-scrollbar-thumb:active{
+    background:var(--scrollbar-thumb-hover);
+}
+:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+}
+::selection{
+    background-color:rgba(26,115,232,.2);
+    color:var(--text-primary);
+}
