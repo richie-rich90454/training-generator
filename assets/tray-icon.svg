@@ -3,203 +3,51 @@
     width="512"
     height="512"
     viewBox="0 0 512 512">
-
 <defs>
-
-<!-- ===================================================== -->
-<!-- Colors -->
-<!-- ===================================================== -->
-
 <linearGradient id="gOuter"
                 x1="64"
                 y1="32"
                 x2="448"
                 y2="480"
                 gradientUnits="userSpaceOnUse">
-
     <stop offset="0%" stop-color="#58A6FF"/>
     <stop offset="38%" stop-color="#2F81F7"/>
     <stop offset="100%" stop-color="#1A73E8"/>
-
 </linearGradient>
-
-<linearGradient id="gInner"
-                x1="180"
-                y1="110"
-                x2="352"
-                y2="404"
-                gradientUnits="userSpaceOnUse">
-
-    <stop offset="0%" stop-color="#FFFFFF"/>
-    <stop offset="100%" stop-color="#DCEBFF"/>
-
-</linearGradient>
-
 <linearGradient id="gCore"
                 x1="160"
                 y1="160"
                 x2="352"
                 y2="352"
                 gradientUnits="userSpaceOnUse">
-
     <stop offset="0%" stop-color="#7FC2FF"/>
     <stop offset="100%" stop-color="#3D8EFF"/>
-
 </linearGradient>
-
-<!-- ===================================================== -->
-<!-- Highlights -->
-<!-- ===================================================== -->
-
 <linearGradient id="gHighlight"
                 x1="0"
                 y1="0"
                 x2="1"
                 y2="1">
-
     <stop offset="0"
           stop-color="white"
           stop-opacity=".95"/>
-
     <stop offset=".55"
           stop-color="white"
           stop-opacity=".20"/>
-
     <stop offset="1"
           stop-color="white"
           stop-opacity="0"/>
-
 </linearGradient>
-
-<!-- ===================================================== -->
-<!-- Shadow -->
-<!-- ===================================================== -->
-
-<filter id="shadow"
-        x="-40%"
-        y="-40%"
-        width="180%"
-        height="180%">
-
-    <feDropShadow
-        dx="0"
-        dy="18"
-        stdDeviation="18"
-        flood-color="#1A73E8"
-        flood-opacity=".28"/>
-
-</filter>
-
-<!-- ===================================================== -->
-<!-- Soft glow -->
-<!-- ===================================================== -->
-
 <filter id="glow">
-
     <feGaussianBlur stdDeviation="10"
                     result="b"/>
-
     <feMerge>
         <feMergeNode in="b"/>
         <feMergeNode in="SourceGraphic"/>
     </feMerge>
-
 </filter>
-
-<!-- ===================================================== -->
-<!-- Clip -->
-<!-- ===================================================== -->
-
-<clipPath id="clip">
-
-<path d="
-
-M256 36
-
-L404 122
-
-L404 390
-
-L256 476
-
-L108 390
-
-L108 122
-
-Z
-
-"/>
-
-</clipPath>
-
 </defs>
-
-<!-- ===================================================== -->
-<!-- Background crystal -->
-<!-- ===================================================== -->
-
-<g filter="url(#shadow)">
-
-<path
-fill="url(#gOuter)"
-
-d="
-
-M256 36
-
-L404 122
-
-L404 390
-
-L256 476
-
-L108 390
-
-L108 122
-
-Z
-
-"/>
-
-</g>
-
-<!-- ===================================================== -->
-<!-- Inner crystal -->
-<!-- ===================================================== -->
-
-<path
-fill="url(#gInner)"
-opacity=".97"
-
-d="
-
-M256 74
-
-L370 141
-
-L370 371
-
-L256 438
-
-L142 371
-
-L142 141
-
-Z
-
-"/>
-
-<!-- ===================================================== -->
-<!-- Begin central symbol -->
-<!-- (continues next part) -->
-<!-- ===================================================== -->
-
-<g clip-path="url(#clip)">
-    <!-- ===================================================== -->
-    <!-- Central woven mark -->
-    <!-- ===================================================== -->
-
-    <!-- Back ribbon -->
+<g>
     <path
         d="
             M256 122
@@ -213,8 +61,6 @@ Z
         stroke-width="30"
         stroke-linecap="round"
         stroke-linejoin="round"/>
-
-    <!-- Front ribbon -->
     <path
         d="
             M256 122
@@ -228,8 +74,6 @@ Z
         stroke-width="30"
         stroke-linecap="round"
         stroke-linejoin="round"/>
-
-    <!-- Upper bridge -->
     <path
         d="
             M208 186
@@ -241,8 +85,6 @@ Z
         stroke-opacity=".82"
         stroke-width="10"
         stroke-linecap="round"/>
-
-    <!-- Lower bridge -->
     <path
         d="
             M208 326
@@ -254,8 +96,6 @@ Z
         stroke-opacity=".82"
         stroke-width="10"
         stroke-linecap="round"/>
-
-    <!-- Core glow -->
     <circle
         cx="256"
         cy="256"
@@ -263,76 +103,61 @@ Z
         fill="#7FC2FF"
         opacity=".18"
         filter="url(#glow)"/>
-
-    <!-- Core node -->
     <circle
         cx="256"
         cy="256"
         r="24"
         fill="url(#gCore)"/>
-
     <circle
         cx="256"
         cy="256"
         r="12"
         fill="#FFFFFF"
         opacity=".94"/>
-
-    <!-- Four satellite nodes -->
     <circle
         cx="256"
         cy="154"
         r="13"
         fill="url(#gOuter)"/>
-
     <circle
         cx="358"
         cy="256"
         r="13"
         fill="url(#gOuter)"/>
-
     <circle
         cx="256"
         cy="358"
         r="13"
         fill="url(#gOuter)"/>
-
     <circle
         cx="154"
         cy="256"
         r="13"
         fill="url(#gOuter)"/>
-
-    <!-- Connecting stems -->
     <path
         d="M256 167 V232"
         fill="none"
         stroke="#5AABFF"
         stroke-width="8"
         stroke-linecap="round"/>
-
     <path
         d="M280 256 H345"
         fill="none"
         stroke="#5AABFF"
         stroke-width="8"
         stroke-linecap="round"/>
-
     <path
         d="M256 280 V345"
         fill="none"
         stroke="#5AABFF"
         stroke-width="8"
         stroke-linecap="round"/>
-
     <path
         d="M167 256 H232"
         fill="none"
         stroke="#5AABFF"
         stroke-width="8"
         stroke-linecap="round"/>
-
-    <!-- Inner highlight -->
     <ellipse
         cx="230"
         cy="206"
@@ -340,217 +165,6 @@ Z
         ry="42"
         fill="url(#gHighlight)"
         opacity=".45"/>
-
-    <!-- Begin decorative crystal facets -->
-        <!-- ===================================================== -->
-    <!-- Crystal facets -->
-    <!-- ===================================================== -->
-
-    <!-- Top-left facet -->
-    <path
-        d="
-            M142 141
-            L256 74
-            L224 176
-            Z"
-        fill="#FFFFFF"
-        opacity=".14"/>
-
-    <!-- Top-right facet -->
-    <path
-        d="
-            M256 74
-            L370 141
-            L288 176
-            Z"
-        fill="#FFFFFF"
-        opacity=".08"/>
-
-    <!-- Left facet -->
-    <path
-        d="
-            M142 141
-            L142 371
-            L208 320
-            L224 176
-            Z"
-        fill="#4FA7FF"
-        opacity=".07"/>
-
-    <!-- Right facet -->
-    <path
-        d="
-            M370 141
-            L370 371
-            L304 320
-            L288 176
-            Z"
-        fill="#0D6CF2"
-        opacity=".08"/>
-
-    <!-- Bottom-left -->
-    <path
-        d="
-            M142 371
-            L256 438
-            L224 336
-            Z"
-        fill="#FFFFFF"
-        opacity=".10"/>
-
-    <!-- Bottom-right -->
-    <path
-        d="
-            M256 438
-            L370 371
-            L288 336
-            Z"
-        fill="#FFFFFF"
-        opacity=".06"/>
-
-    <!-- ===================================================== -->
-    <!-- Data flow particles -->
-    <!-- ===================================================== -->
-
-    <circle cx="256" cy="112" r="4" fill="#FFFFFF" opacity=".95"/>
-    <circle cx="256" cy="126" r="3.5" fill="#D8ECFF" opacity=".88"/>
-    <circle cx="256" cy="140" r="3" fill="#B8DBFF" opacity=".80"/>
-
-    <circle cx="333" cy="179" r="3.5" fill="#FFFFFF" opacity=".86"/>
-    <circle cx="349" cy="194" r="3" fill="#D6EAFF" opacity=".78"/>
-    <circle cx="362" cy="210" r="2.6" fill="#C3E2FF" opacity=".72"/>
-
-    <circle cx="333" cy="333" r="3.5" fill="#FFFFFF" opacity=".86"/>
-    <circle cx="349" cy="318" r="3" fill="#D6EAFF" opacity=".78"/>
-    <circle cx="362" cy="302" r="2.6" fill="#C3E2FF" opacity=".72"/>
-
-    <circle cx="179" cy="333" r="3.5" fill="#FFFFFF" opacity=".86"/>
-    <circle cx="163" cy="318" r="3" fill="#D6EAFF" opacity=".78"/>
-    <circle cx="150" cy="302" r="2.6" fill="#C3E2FF" opacity=".72"/>
-
-    <circle cx="179" cy="179" r="3.5" fill="#FFFFFF" opacity=".86"/>
-    <circle cx="163" cy="194" r="3" fill="#D6EAFF" opacity=".78"/>
-    <circle cx="150" cy="210" r="2.6" fill="#C3E2FF" opacity=".72"/>
-
-    <!-- ===================================================== -->
-    <!-- Specular reflections -->
-    <!-- ===================================================== -->
-
-    <path
-        d="
-            M176 118
-            C214 88 272 80 320 104
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="7"
-        stroke-linecap="round"
-        opacity=".46"/>
-
-    <path
-        d="
-            M174 136
-            C222 110 280 108 330 130
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="3.5"
-        stroke-linecap="round"
-        opacity=".24"/>
-
-    <!-- Beginning of outer lighting effects -->
-        <!-- ===================================================== -->
-    <!-- Edge illumination -->
-    <!-- ===================================================== -->
-
-    <!-- Upper left rim -->
-    <path
-        d="
-            M162 108
-            L246 60
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity=".62"/>
-
-    <!-- Upper right rim -->
-    <path
-        d="
-            M266 60
-            L350 108
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity=".40"/>
-
-    <!-- Left rim -->
-    <path
-        d="
-            M128 150
-            L128 360
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="3"
-        stroke-linecap="round"
-        opacity=".22"/>
-
-    <!-- Right rim -->
-    <path
-        d="
-            M384 150
-            L384 360
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="3"
-        stroke-linecap="round"
-        opacity=".18"/>
-
-    <!-- ===================================================== -->
-    <!-- Floating training tokens -->
-    <!-- ===================================================== -->
-
-    <!-- Top -->
-    <circle cx="256" cy="96" r="2.6" fill="#FFFFFF"/>
-    <circle cx="256" cy="84" r="1.8" fill="#FFFFFF" opacity=".72"/>
-
-    <!-- Upper-right -->
-    <circle cx="332" cy="136" r="2.5" fill="#FFFFFF"/>
-    <circle cx="344" cy="126" r="1.8" fill="#FFFFFF" opacity=".68"/>
-
-    <!-- Right -->
-    <circle cx="396" cy="256" r="2.5" fill="#FFFFFF"/>
-    <circle cx="410" cy="256" r="1.7" fill="#FFFFFF" opacity=".64"/>
-
-    <!-- Lower-right -->
-    <circle cx="332" cy="376" r="2.5" fill="#FFFFFF"/>
-    <circle cx="344" cy="386" r="1.8" fill="#FFFFFF" opacity=".68"/>
-
-    <!-- Bottom -->
-    <circle cx="256" cy="416" r="2.6" fill="#FFFFFF"/>
-    <circle cx="256" cy="428" r="1.8" fill="#FFFFFF" opacity=".72"/>
-
-    <!-- Lower-left -->
-    <circle cx="180" cy="376" r="2.5" fill="#FFFFFF"/>
-    <circle cx="168" cy="386" r="1.8" fill="#FFFFFF" opacity=".68"/>
-
-    <!-- Left -->
-    <circle cx="116" cy="256" r="2.5" fill="#FFFFFF"/>
-    <circle cx="102" cy="256" r="1.7" fill="#FFFFFF" opacity=".64"/>
-
-    <!-- Upper-left -->
-    <circle cx="180" cy="136" r="2.5" fill="#FFFFFF"/>
-    <circle cx="168" cy="126" r="1.8" fill="#FFFFFF" opacity=".68"/>
-
-    <!-- ===================================================== -->
-    <!-- Soft radial bloom -->
-    <!-- ===================================================== -->
-
     <circle
         cx="256"
         cy="256"
@@ -558,102 +172,6 @@ Z
         fill="#58A6FF"
         opacity=".05"
         filter="url(#glow)"/>
-
-    <!-- ===================================================== -->
-    <!-- Fine facet strokes -->
-    <!-- ===================================================== -->
-
-    <path
-        d="M256 74 L224 176"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.4"
-        opacity=".16"/>
-
-    <path
-        d="M256 74 L288 176"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.4"
-        opacity=".16"/>
-
-    <path
-        d="M224 336 L256 438"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.4"
-        opacity=".12"/>
-
-    <path
-        d="M288 336 L256 438"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.4"
-        opacity=".12"/>
-
-    <path
-        d="M142 141 L224 176"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.2"
-        opacity=".10"/>
-
-    <path
-        d="M370 141 L288 176"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.2"
-        opacity=".10"/>
-
-    <path
-        d="M142 371 L224 336"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.2"
-        opacity=".10"/>
-
-    <path
-        d="M370 371 L288 336"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1.2"
-        opacity=".10"/>
-
-    <!-- ===================================================== -->
-    <!-- Preparing outer polish (continues in Part 5) -->
-    <!-- ===================================================== -->
-        <!-- ===================================================== -->
-    <!-- Premium surface polish -->
-    <!-- ===================================================== -->
-
-    <!-- Main glossy sweep -->
-    <path
-        d="
-            M156 118
-            C212 84 304 82 360 128
-            C320 122 286 136 258 164
-            C220 202 186 214 154 198
-            C142 174 144 144 156 118
-            Z"
-        fill="url(#gHighlight)"
-        opacity=".30"/>
-
-    <!-- Secondary gloss -->
-    <path
-        d="
-            M186 148
-            C228 126 284 128 326 152
-            C294 154 270 166 250 186
-            C222 212 196 220 176 210
-            C170 188 174 166 186 148
-            Z"
-        fill="#FFFFFF"
-        opacity=".12"/>
-
-    <!-- ===================================================== -->
-    <!-- Central energy ring -->
-    <!-- ===================================================== -->
-
     <circle
         cx="256"
         cy="256"
@@ -662,7 +180,6 @@ Z
         stroke="#FFFFFF"
         stroke-width="2"
         opacity=".18"/>
-
     <circle
         cx="256"
         cy="256"
@@ -671,368 +188,36 @@ Z
         stroke="#7FC2FF"
         stroke-width="2"
         opacity=".12"/>
-
-    <!-- ===================================================== -->
-    <!-- Spark particles -->
-    <!-- ===================================================== -->
-
-    <circle cx="221" cy="210" r="2.0" fill="#FFFFFF"/>
-    <circle cx="287" cy="214" r="1.8" fill="#FFFFFF"/>
-    <circle cx="233" cy="298" r="1.8" fill="#FFFFFF"/>
-    <circle cx="292" cy="291" r="2.1" fill="#FFFFFF"/>
-
-    <circle cx="243" cy="243" r="1.2" fill="#FFFFFF" opacity=".70"/>
-    <circle cx="270" cy="244" r="1.2" fill="#FFFFFF" opacity=".70"/>
-    <circle cx="243" cy="270" r="1.2" fill="#FFFFFF" opacity=".70"/>
-    <circle cx="270" cy="270" r="1.2" fill="#FFFFFF" opacity=".70"/>
-
-    <!-- ===================================================== -->
-    <!-- Node highlights -->
-    <!-- ===================================================== -->
-
     <circle
         cx="256"
         cy="154"
         r="5"
         fill="#FFFFFF"
         opacity=".70"/>
-
     <circle
         cx="358"
         cy="256"
         r="5"
         fill="#FFFFFF"
         opacity=".70"/>
-
     <circle
         cx="256"
         cy="358"
         r="5"
         fill="#FFFFFF"
         opacity=".70"/>
-
     <circle
         cx="154"
         cy="256"
         r="5"
         fill="#FFFFFF"
         opacity=".70"/>
-
     <circle
         cx="256"
         cy="256"
         r="8"
         fill="#FFFFFF"
         opacity=".92"/>
-
-    <!-- ===================================================== -->
-    <!-- Crystal edge bloom -->
-    <!-- ===================================================== -->
-
-    <path
-        d="M256 36 L404 122"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".20"/>
-
-    <path
-        d="M404 122 L404 390"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".10"/>
-
-    <path
-        d="M404 390 L256 476"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".16"/>
-
-    <path
-        d="M256 476 L108 390"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".10"/>
-
-    <path
-        d="M108 390 L108 122"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".16"/>
-
-    <path
-        d="M108 122 L256 36"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity=".22"/>
-
-    <!-- ===================================================== -->
-    <!-- Ambient floating points -->
-    <!-- ===================================================== -->
-
-    <circle cx="206" cy="100" r="1.4" fill="#FFFFFF" opacity=".60"/>
-    <circle cx="310" cy="92"  r="1.4" fill="#FFFFFF" opacity=".50"/>
-    <circle cx="386" cy="192" r="1.5" fill="#FFFFFF" opacity=".55"/>
-    <circle cx="404" cy="320" r="1.3" fill="#FFFFFF" opacity=".48"/>
-    <circle cx="306" cy="420" r="1.5" fill="#FFFFFF" opacity=".60"/>
-    <circle cx="208" cy="424" r="1.4" fill="#FFFFFF" opacity=".52"/>
-    <circle cx="120" cy="318" r="1.4" fill="#FFFFFF" opacity=".48"/>
-    <circle cx="128" cy="186" r="1.5" fill="#FFFFFF" opacity=".55"/>
-
-    <!-- ===================================================== -->
-    <!-- Continue with finishing details -->
-    <!-- ===================================================== -->
-        <!-- ===================================================== -->
-    <!-- Internal light rays -->
-    <!-- ===================================================== -->
-
-    <g opacity=".13">
-
-        <path
-            d="M256 76 L256 438"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="2"/>
-
-        <path
-            d="M146 144 L366 368"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1.6"/>
-
-        <path
-            d="M366 144 L146 368"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1.6"/>
-
-    </g>
-
-    <!-- ===================================================== -->
-    <!-- Fine geometric mesh -->
-    <!-- ===================================================== -->
-
-    <g opacity=".08">
-
-        <path
-            d="M224 176 L288 176"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-        <path
-            d="M224 336 L288 336"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-        <path
-            d="M224 176 L224 336"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-        <path
-            d="M288 176 L288 336"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-        <path
-            d="M224 176 L288 336"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-        <path
-            d="M288 176 L224 336"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="1"/>
-
-    </g>
-
-    <!-- ===================================================== -->
-    <!-- Outer shimmer -->
-    <!-- ===================================================== -->
-
-    <path
-        d="
-            M170 94
-            C214 70 298 70 342 94"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="3"
-        stroke-linecap="round"
-        opacity=".34"/>
-
-    <path
-        d="
-            M186 400
-            C232 420 280 420 326 400"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        opacity=".20"/>
-
-    <!-- ===================================================== -->
-    <!-- Lens sparkle -->
-    <!-- ===================================================== -->
-
-    <g opacity=".92">
-
-        <path
-            d="
-                M104 108
-                L116 108
-            "
-            stroke="#FFFFFF"
-            stroke-width="2"
-            stroke-linecap="round"/>
-
-        <path
-            d="
-                M110 102
-                L110 114
-            "
-            stroke="#FFFFFF"
-            stroke-width="2"
-            stroke-linecap="round"/>
-
-    </g>
-
-    <g opacity=".70">
-
-        <path
-            d="M392 396 L402 396"
-            stroke="#FFFFFF"
-            stroke-width="2"
-            stroke-linecap="round"/>
-
-        <path
-            d="M397 391 L397 401"
-            stroke="#FFFFFF"
-            stroke-width="2"
-            stroke-linecap="round"/>
-
-    </g>
-
-    <!-- ===================================================== -->
-    <!-- Micro particles -->
-    <!-- ===================================================== -->
-
-    <g fill="#FFFFFF">
-
-        <circle cx="186" cy="118" r="0.9" opacity=".75"/>
-        <circle cx="212" cy="102" r="0.8" opacity=".55"/>
-        <circle cx="302" cy="104" r="0.9" opacity=".68"/>
-        <circle cx="338" cy="126" r="0.8" opacity=".60"/>
-
-        <circle cx="372" cy="184" r="0.9" opacity=".64"/>
-        <circle cx="386" cy="230" r="0.8" opacity=".56"/>
-
-        <circle cx="386" cy="284" r="0.9" opacity=".60"/>
-        <circle cx="370" cy="334" r="0.8" opacity=".56"/>
-
-        <circle cx="334" cy="390" r="0.9" opacity=".70"/>
-        <circle cx="294" cy="410" r="0.8" opacity=".54"/>
-
-        <circle cx="216" cy="410" r="0.8" opacity=".54"/>
-        <circle cx="176" cy="390" r="0.9" opacity=".70"/>
-
-        <circle cx="140" cy="334" r="0.8" opacity=".56"/>
-        <circle cx="126" cy="284" r="0.9" opacity=".60"/>
-
-        <circle cx="126" cy="228" r="0.8" opacity=".56"/>
-        <circle cx="140" cy="180" r="0.9" opacity=".64"/>
-
-    </g>
-
-    <!-- ===================================================== -->
-    <!-- Soft white bloom over center -->
-    <!-- ===================================================== -->
-
-    <ellipse
-        cx="256"
-        cy="238"
-        rx="74"
-        ry="48"
-        fill="#FFFFFF"
-        opacity=".045"/>
-
-    <ellipse
-        cx="256"
-        cy="282"
-        rx="64"
-        ry="38"
-        fill="#FFFFFF"
-        opacity=".025"/>
-
-    <!-- ===================================================== -->
-    <!-- Finishing layer continues in Part 7 -->
-    <!-- ===================================================== -->
-        <!-- ===================================================== -->
-    <!-- Premium finishing layer -->
-    <!-- ===================================================== -->
-
-    <!-- Top crystal highlight -->
-    <path
-        d="
-            M256 52
-            L278 96
-            L256 88
-            L234 96
-            Z"
-        fill="#FFFFFF"
-        opacity=".38"/>
-
-    <!-- Bottom crystal highlight -->
-    <path
-        d="
-            M256 460
-            L278 416
-            L256 424
-            L234 416
-            Z"
-        fill="#FFFFFF"
-        opacity=".18"/>
-
-    <!-- ===================================================== -->
-    <!-- Orbital arcs -->
-    <!-- ===================================================== -->
-
-    <path
-        d="
-            M182 182
-            A105 105 0 0 1 330 182
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".10"/>
-
-    <path
-        d="
-            M182 330
-            A105 105 0 0 0 330 330
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".10"/>
-
-    <!-- ===================================================== -->
-    <!-- Central shimmer -->
-    <!-- ===================================================== -->
-
     <ellipse
         cx="256"
         cy="256"
@@ -1040,7 +225,6 @@ Z
         ry="10"
         fill="#FFFFFF"
         opacity=".26"/>
-
     <ellipse
         cx="256"
         cy="250"
@@ -1048,101 +232,6 @@ Z
         ry="5"
         fill="#FFFFFF"
         opacity=".48"/>
-
-    <!-- ===================================================== -->
-    <!-- Tiny reflective specks -->
-    <!-- ===================================================== -->
-
-    <g fill="#FFFFFF">
-
-        <circle cx="196" cy="164" r="1.0" opacity=".75"/>
-        <circle cx="316" cy="164" r="1.0" opacity=".72"/>
-
-        <circle cx="164" cy="196" r="1.0" opacity=".70"/>
-        <circle cx="348" cy="196" r="1.0" opacity=".70"/>
-
-        <circle cx="164" cy="316" r="1.0" opacity=".70"/>
-        <circle cx="348" cy="316" r="1.0" opacity=".70"/>
-
-        <circle cx="196" cy="348" r="1.0" opacity=".72"/>
-        <circle cx="316" cy="348" r="1.0" opacity=".72"/>
-
-    </g>
-
-    <!-- ===================================================== -->
-    <!-- Outer glow accents -->
-    <!-- ===================================================== -->
-
-    <path
-        d="M170 106 L188 118"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".18"/>
-
-    <path
-        d="M324 118 L342 106"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".18"/>
-
-    <path
-        d="M170 406 L188 394"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".14"/>
-
-    <path
-        d="M324 394 L342 406"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        stroke-linecap="round"
-        opacity=".14"/>
-
-    <!-- ===================================================== -->
-    <!-- Fine edge polish -->
-    <!-- ===================================================== -->
-
-    <path
-        d="
-            M256 38
-            L398 120
-            L398 392
-            L256 474
-            L114 392
-            L114 120
-            Z
-        "
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="1"
-        opacity=".16"/>
-
-    <path
-        d="
-            M256 42
-            L394 122
-            L394 390
-            L256 470
-            L118 390
-            L118 122
-            Z
-        "
-        fill="none"
-        stroke="#8CC6FF"
-        stroke-width=".8"
-        opacity=".22"/>
-
-    <!-- ===================================================== -->
-    <!-- Final center glow -->
-    <!-- ===================================================== -->
-
     <circle
         cx="256"
         cy="256"
@@ -1150,99 +239,5 @@ Z
         fill="#FFFFFF"
         opacity=".10"
         filter="url(#glow)"/>
-
-    <!-- ===================================================== -->
-    <!-- End of clipped artwork -->
-    <!-- ===================================================== -->
-
 </g>
-
-<!-- SVG closes in Part 8 -->
-<!-- ===================================================== -->
-<!-- Final ambient glow -->
-<!-- ===================================================== -->
-
-<circle
-    cx="256"
-    cy="256"
-    r="148"
-    fill="#58A6FF"
-    opacity=".018"
-    filter="url(#glow)"/>
-
-<!-- ===================================================== -->
-<!-- Corner sparkles -->
-<!-- ===================================================== -->
-
-<g fill="#FFFFFF">
-
-    <!-- Top -->
-    <path
-        d="M256 24 L259 32 L267 35 L259 38 L256 46 L253 38 L245 35 L253 32 Z"
-        opacity=".34"/>
-
-    <!-- Right -->
-    <path
-        d="M488 256 L482 259 L479 267 L476 259 L468 256 L476 253 L479 245 L482 253 Z"
-        opacity=".24"/>
-
-    <!-- Bottom -->
-    <path
-        d="M256 488 L259 480 L267 477 L259 474 L256 466 L253 474 L245 477 L253 480 Z"
-        opacity=".18"/>
-
-    <!-- Left -->
-    <path
-        d="M24 256 L32 259 L35 267 L38 259 L46 256 L38 253 L35 245 L32 253 Z"
-        opacity=".24"/>
-
-</g>
-
-<!-- ===================================================== -->
-<!-- Outer vignette -->
-<!-- ===================================================== -->
-
-<path
-    d="
-        M256 12
-        L420 107
-        L420 405
-        L256 500
-        L92 405
-        L92 107
-        Z"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-width="1"
-    opacity=".08"/>
-
-<!-- ===================================================== -->
-<!-- Final white edge -->
-<!-- ===================================================== -->
-
-<path
-    d="
-        M256 36
-        L404 122
-        L404 390
-        L256 476
-        L108 390
-        L108 122
-        Z"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-width=".8"
-    opacity=".28"/>
-
-<!-- ===================================================== -->
-<!-- Invisible bounds -->
-<!-- ===================================================== -->
-
-<rect
-    x="0"
-    y="0"
-    width="512"
-    height="512"
-    fill="none"/>
-
 </svg>
