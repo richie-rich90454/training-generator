@@ -23,6 +23,7 @@ export interface QuarantinedItem{
     item: TrainingItem
     reason: string
     quarantinedAt: number
+    seq: number
 }
 export interface QuarantineManagerOptions{
     quarantineDir?: string
@@ -167,6 +168,7 @@ export class DataClassifier{
 export class QuarantineManager{
     private quarantineDir: string
     private maxRetentionDays: number
+    private static nextSeq=0
     constructor(options?: QuarantineManagerOptions){
         this.quarantineDir=options?.quarantineDir??path.join(os.tmpdir(), "training-generator-quarantine")
         this.maxRetentionDays=options?.maxRetentionDays??30
@@ -183,7 +185,8 @@ export class QuarantineManager{
             id: crypto.randomUUID(),
             item,
             reason,
-            quarantinedAt: Date.now()
+            quarantinedAt: Date.now(),
+            seq: QuarantineManager.nextSeq++
         }
         await fs.promises.writeFile(this.itemPath(quarantinedItem.id), JSON.stringify(quarantinedItem), "utf8")
         return quarantinedItem
@@ -215,7 +218,17 @@ export class QuarantineManager{
                 continue
             }
         }
-        items.sort((a, b)=>b.quarantinedAt-a.quarantinedAt)
+        items.sort((a, b)=>{
+            let timeDiff=b.quarantinedAt-a.quarantinedAt
+            if(timeDiff!==0){
+                return timeDiff
+            }
+            let seqDiff=(b.seq ?? 0)-(a.seq ?? 0)
+            if(seqDiff!==0){
+                return seqDiff
+            }
+            return b.id.localeCompare(a.id)
+        })
         return items
     }
     async release(id: string): Promise<boolean>{
