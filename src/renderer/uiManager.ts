@@ -5,6 +5,7 @@ import{encryptKey,decryptKey}from"./security.js"
 import{listProfiles,saveProfile,loadProfile,deleteProfile}from"./configProfiles.js"
 import{getHelpContent}from"./helpContent.js"
 import{showConfirm}from"./confirm.js"
+import{renderIcon}from"./icons.js"
 
 class UIManager{
     app:any
@@ -158,7 +159,7 @@ class UIManager{
         let logEntry=document.createElement("div")
         logEntry.className=`log-entry ${type}`
         logEntry.innerHTML=`
-            <i class="fas fa-${this.getLogIcon(type)}"></i>
+            ${renderIcon(`fa-${this.getLogIcon(type)}`)}
             <span>${this.sanitizeText(message)}</span>
         `
         this.processingLog.appendChild(logEntry)
@@ -335,7 +336,7 @@ class UIManager{
             helpModal.innerHTML=`
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2><i class="fas fa-question-circle"></i>Help</h2>
+                        <h2>${renderIcon("fa-question-circle", 20)}Help</h2>
                         <button class="modal-close help-close" aria-label="Close help">&times;</button>
                     </div>
                     <div class="modal-body">
