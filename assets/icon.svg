@@ -1,31 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Training Generator brand mark">
-  <!--
-    Concept: Document silhouette with a data-stream notch cut from the bottom-right corner.
+    <!--
+        Concept: a training graph inside a rounded app-icon tile.
 
-    Visual language:
-      * The folded top-right corner signals "document" (source material).
-      * The angled notch in the bottom-right represents data being extracted /
-        transformed out of the source document — the "stream" leaving the page.
-      * The two horizontal lines inside suggest structured data rows (the
-        training dataset produced from the source document).
-
-    Why this mark: it maps directly to the app's core action — converting
-    documents into AI training data — and reads cleanly from a 16px favicon
-    through to a 1024px installer hero, because the silhouette stays simple
-    and the notch is the unique differentiator vs. a generic "page" icon.
-
-    Style: single-color stroke (#1A73E8, the project primary-color token),
-    no gradients, no shadows, no glow, transparent background. Single path
-    geometry scales losslessly via the 24x24 viewBox.
-  -->
-  <g fill="none" stroke="#1A73E8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
-    <!-- Document outline: rectangle with the top-right corner folded (diagonal cut 14,3 -> 20,9)
-         and the bottom-right corner notched (diagonal cut 20,16 -> 15,21) -->
-    <path d="M5 3 L14 3 L20 9 L20 16 L15 21 L5 21 Z" />
-    <!-- Fold indicator: the L-shaped line inside the top-right showing where the corner is folded over -->
-    <path d="M14 3 L14 9 L20 9" />
-    <!-- Two horizontal data rows: the second is shorter, suggesting an in-progress / partial dataset -->
-    <path d="M8 12 L17 12" />
-    <path d="M8 15 L13 15" />
-  </g>
+        Visual language:
+            * The rounded square uses the project primary-to-secondary gradient,
+              signalling an AI-powered, modern application.
+            * The white network inside is a small decision-tree / neural graph:
+              one input node flows through a hidden node and branches to two
+              output nodes. It reads as "training data" rather than a generic
+              document or file icon.
+            * The mark stays simple and bold so it remains legible from a 16px
+              favicon up to a 1024px installer hero.
+    -->
+    <defs>
+        <linearGradient id="appIconGradient" x1="0" y1="0" x2="24" y2="24">
+            <stop offset="0%" stop-color="#1A73E8"/>
+            <stop offset="100%" stop-color="#34A853"/>
+        </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="20" height="20" rx="4" fill="url(#appIconGradient)"/>
+    <g fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="7" x2="12" y2="12"/>
+        <line x1="12" y1="12" x2="8" y2="17"/>
+        <line x1="12" y1="12" x2="16" y2="17"/>
+    </g>
+    <circle cx="12" cy="7" r="2" fill="#FFFFFF"/>
+    <circle cx="12" cy="12" r="2" fill="#FFFFFF"/>
+    <circle cx="8" cy="17" r="2" fill="#FFFFFF"/>
+    <circle cx="16" cy="17" r="2" fill="#FFFFFF"/>
 </svg>
