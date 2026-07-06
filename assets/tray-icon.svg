@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-label="Training Generator tray mark">
+    <!--
+        Concept: a training graph / decision-tree mark inside a protective hexagon.
+        The hexagon evokes a chip or cell; the branching graph inside represents
+        a model being trained from structured data. The top source node feeds a
+        central node that splits into two output nodes, visualising the app's
+        core action: turning source documents into AI training datasets.
+        This is intentionally not a document/page silhouette, so it reads as a
+        distinct, meaningful brand mark at tray sizes (16-64px).
+        Style: primary blue (#1A73E8), transparent background, bold 2px strokes,
+        filled nodes for instant recognition.
+    -->
+    <g fill="none" stroke="#1A73E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 L20 7 V17 L12 22 L4 17 V7 Z"/>
+        <path d="M12 7 V11 M12 11 L8 15 M12 11 L16 15"/>
+    </g>
+    <g fill="#1A73E8" stroke="none">
+        <circle cx="12" cy="6" r="1.6"/>
+        <circle cx="12" cy="11" r="1.6"/>
+        <circle cx="8" cy="16" r="1.6"/>
+        <circle cx="16" cy="16" r="1.6"/>
+    </g>
+</svg>
