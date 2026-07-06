@@ -76,6 +76,10 @@
       {
         "from": "native-splash",
         "to": "native-splash"
+      },
+      {
+        "from": "docs",
+        "to": "docs"
       }
     ],
     "asar": true,
@@ -177,7 +181,6 @@
     "vue": "^3.5.39"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.2.0",
     "axios": "^1.17.0",
     "compromise": "^14.15.1",
     "html-to-text": "^10.0.0",
