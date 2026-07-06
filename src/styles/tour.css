@@ -1,0 +1,42 @@
+.tg-onboarding-overlay,
+.tg-onboarding-tooltip{
+    -webkit-app-region:no-drag;
+}
+.tg-onboarding-tooltip{
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-xlarge);
+    box-shadow:var(--shadow-4);
+    padding:var(--spacing-lg);
+    max-width:min(360px,calc(100vw - 32px));
+    min-width:220px;
+    box-sizing:border-box;
+}
+.tg-tour-title{
+    color:var(--text-primary);
+    font-weight:600;
+    margin-bottom:var(--spacing-sm);
+    font-size:1rem;
+}
+.tg-tour-content{
+    color:var(--text-secondary);
+    font-size:.875rem;
+    line-height:1.5;
+    margin-bottom:var(--spacing-md);
+}
+.tg-tour-action-text{
+    color:var(--text-secondary);
+    font-size:.875rem;
+    line-height:1.5;
+    margin-top:var(--spacing-sm);
+}
+.tg-tour-actions{
+    display:flex;
+    gap:var(--spacing-sm);
+    justify-content:flex-end;
+    margin-top:var(--spacing-sm);
+    flex-wrap:wrap;
+}
+.tg-tour-actions .btn{
+    min-height:32px;
+}
