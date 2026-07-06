@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import{describe,test,expect,vi,beforeEach}from "vitest"
+import{describe,test,expect,vi,beforeEach,afterEach}from "vitest"
 import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANNEL,WINDOW_IS_MAXIMIZED_CHANNEL,WINDOW_MAXIMIZED_CHANGED_EVENT}from "../src/types/ipc.ts"
+import{initWindowControls,disposeWindowControls}from "../src/renderer/windowControls.ts"
 let state=vi.hoisted(()=>({
     exposedAPI:undefined as any,
     listeners:{} as Record<string,Array<(...args:any[])=>void>>
@@ -103,5 +104,78 @@ describe("onWindowMaximizedChange",()=>{
         expect(cb).toHaveBeenCalledWith(true)
         handlers[0]({},false)
         expect(cb).toHaveBeenCalledWith(false)
+    })
+})
+describe("renderer window controls",()=>{
+    let mockUnsubscribe:ReturnType<typeof vi.fn>
+    let mockOnWindowMaximizedChange:ReturnType<typeof vi.fn>
+    let savedElectronAPI:unknown
+    beforeEach(()=>{
+        savedElectronAPI=(window as any).electronAPI
+        mockUnsubscribe=vi.fn()
+        mockOnWindowMaximizedChange=vi.fn((cb:(isMaximized:boolean)=>void)=>{
+            return mockUnsubscribe
+        })
+        ;(window as any).electronAPI={
+            windowMinimize:vi.fn(),
+            windowMaximizeToggle:vi.fn(),
+            windowClose:vi.fn(),
+            onWindowMaximizedChange:mockOnWindowMaximizedChange
+        }
+        document.body.innerHTML='<div class="window-controls"><button class="window-btn window-btn-min"></button><button class="window-btn window-btn-max"></button><button class="window-btn window-btn-close"></button></div>'
+        disposeWindowControls()
+    })
+    afterEach(()=>{
+        disposeWindowControls()
+        ;(window as any).electronAPI=savedElectronAPI
+        document.body.innerHTML=""
+    })
+    test("clicking min button calls windowMinimize",()=>{
+        initWindowControls()
+        let minBtn=document.querySelector<HTMLButtonElement>(".window-btn-min")!
+        minBtn.click()
+        expect((window as any).electronAPI.windowMinimize).toHaveBeenCalled()
+    })
+    test("clicking max button calls windowMaximizeToggle",()=>{
+        initWindowControls()
+        let maxBtn=document.querySelector<HTMLButtonElement>(".window-btn-max")!
+        maxBtn.click()
+        expect((window as any).electronAPI.windowMaximizeToggle).toHaveBeenCalled()
+    })
+    test("clicking close button calls windowClose",()=>{
+        initWindowControls()
+        let closeBtn=document.querySelector<HTMLButtonElement>(".window-btn-close")!
+        closeBtn.click()
+        expect((window as any).electronAPI.windowClose).toHaveBeenCalled()
+    })
+    test("subscribes to onWindowMaximizedChange",()=>{
+        initWindowControls()
+        expect(mockOnWindowMaximizedChange).toHaveBeenCalledWith(expect.any(Function))
+    })
+    test("maximized=true adds is-maximized class to max button",()=>{
+        initWindowControls()
+        let cb=mockOnWindowMaximizedChange.mock.calls[0][0] as any
+        let maxBtn=document.querySelector<HTMLButtonElement>(".window-btn-max")!
+        cb(true)
+        expect(maxBtn.classList.contains("is-maximized")).toBe(true)
+    })
+    test("maximized=false removes is-maximized class from max button",()=>{
+        initWindowControls()
+        let cb=mockOnWindowMaximizedChange.mock.calls[0][0] as any
+        let maxBtn=document.querySelector<HTMLButtonElement>(".window-btn-max")!
+        cb(true)
+        cb(false)
+        expect(maxBtn.classList.contains("is-maximized")).toBe(false)
+    })
+    test("disposeWindowControls calls unsubscribe",()=>{
+        initWindowControls()
+        disposeWindowControls()
+        expect(mockUnsubscribe).toHaveBeenCalled()
+    })
+    test("handles missing electronAPI gracefully",()=>{
+        ;(window as any).electronAPI=undefined
+        initWindowControls()
+        let minBtn=document.querySelector<HTMLButtonElement>(".window-btn-min")!
+        expect(()=>minBtn.click()).not.toThrow()
     })
 })
