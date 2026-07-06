@@ -108,3 +108,52 @@ describe("Zero AI-tells verification", ()=>{
         expect(hits, `font-family:sans-serif found in: ${hits.join(", ")}`).toEqual([]);
     });
 });
+describe("Native app shell verification", ()=>{
+    it("has zero Font Awesome class=\"fas\" references in source files", ()=>{
+        let files: string[]=[
+            "index.html",
+            "src/splash.html",
+            "src/renderer/components/AnalyticsDashboard.vue",
+            "src/renderer/components/CommandPalette.vue",
+            "src/renderer/components/DatasetPreview.vue",
+            "src/renderer/components/PromptEditor.vue"
+        ];
+        let tsFiles: string[]=[
+            "src/renderer/app.ts",
+            "src/renderer/confirm.ts",
+            "src/renderer/dashboard.ts",
+            "src/renderer/fileManager.ts",
+            "src/renderer/helpContent.ts",
+            "src/renderer/templateEditor.ts",
+            "src/renderer/uiManager.ts"
+        ];
+        let allFiles: string[]=[...files, ...tsFiles];
+        for (let file of allFiles){
+            let content: string=fs.readFileSync(file, "utf-8");
+            expect(content).not.toMatch(/class="fas\b/);
+            expect(content).not.toMatch(/class='fas\b/);
+        }
+    });
+    it("has all required brand icon asset files", ()=>{
+        let requiredFiles: string[]=[
+            "assets/icon.svg",
+            "assets/icon.png",
+            "assets/favicon.png",
+            "assets/favicon.ico",
+            "assets/favicon.icns"
+        ];
+        for (let file of requiredFiles){
+            expect(fs.existsSync(file)).toBe(true);
+        }
+    });
+    it("index.html has title bar and local favicon link", ()=>{
+        let content: string=fs.readFileSync("index.html", "utf-8");
+        expect(content).toContain('<div class="title-bar">');
+        expect(content).toContain('<link rel="icon" href="./assets/favicon.png">');
+        expect(content).toContain('<link rel="apple-touch-icon" href="./assets/favicon.png">');
+    });
+    it("index.html has zero robot emoji occurrences", ()=>{
+        let content: string=fs.readFileSync("index.html", "utf-8");
+        expect(content).not.toContain("🤖");
+    });
+});
