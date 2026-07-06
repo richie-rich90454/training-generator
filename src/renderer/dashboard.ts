@@ -1,3 +1,4 @@
+import { renderIcon } from "./icons.js"
 export interface DashboardMetrics {
   chunksDone: number
   chunksTotal: number
@@ -41,7 +42,7 @@ export class Dashboard {
     el.innerHTML = `
       <div class="dashboard-panel" role="document">
         <div class="dashboard-header">
-          <h3><i class="fas fa-tachometer-alt"></i> Processing Dashboard</h3>
+          <h3>${renderIcon("fa-tachometer-alt", 20)} Processing Dashboard</h3>
           <button class="dashboard-close" aria-label="Close dashboard">&times;</button>
         </div>
         <div class="dashboard-body">
