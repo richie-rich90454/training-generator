@@ -76,12 +76,16 @@ describe("Renderer process",()=>{
 describe("CSS and HTML",()=>{
     test("CSS and HTML files are valid",async()=>{
         let cssPath:string="./src/styles/main.css"
+        let tokensPath:string="./src/styles/tokens.css"
         let htmlPath:string="./index.html"
         await expect(fsp.access(cssPath)).resolves.toBeUndefined()
+        await expect(fsp.access(tokensPath)).resolves.toBeUndefined()
         await expect(fsp.access(htmlPath)).resolves.toBeUndefined()
         let cssContent:string=await fsp.readFile(cssPath,"utf-8")
+        let tokensContent:string=await fsp.readFile(tokensPath,"utf-8")
         let htmlContent:string=await fsp.readFile(htmlPath,"utf-8")
-        expect(cssContent).toContain(":root")
+        expect(cssContent).toContain("@import \"./tokens.css\"")
+        expect(tokensContent).toContain(":root")
         expect(htmlContent).toContain("<!DOCTYPE html>")
     })
 })
