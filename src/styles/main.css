@@ -267,20 +267,17 @@ h3{
 .app-container{
     max-width:1600px;
     margin:0 auto;
-    padding:var(--spacing-xl);
+    padding:0;
     display:flex;
     flex-direction:column;
     height:100vh;
     overflow:hidden;
 }
-html[data-platform="windows"] .app-container{
-    padding-top:var(--spacing-md);
-}
 .content-grid{
     display:grid;
     grid-template-columns:1fr;
     gap:var(--spacing-xl);
-    margin-bottom:var(--spacing-xl);
+    padding:var(--spacing-xl);
     flex:1;
     overflow:hidden;
 }
@@ -794,10 +791,9 @@ html[data-platform="windows"] .app-container{
     justify-content:space-between;
     align-items:center;
     gap:var(--spacing-md);
-    padding:var(--spacing-md) var(--spacing-lg);
+    padding:var(--spacing-md) var(--spacing-xl);
     background:var(--surface-color);
     border-top:1px solid var(--border-color);
-    margin-top:var(--spacing-xl);
     min-height:56px;
     flex-shrink:0;
 }
@@ -1498,7 +1494,7 @@ html[data-platform="windows"] .app-container{
     height:var(--title-bar-height);
     display:flex;
     align-items:center;
-    padding:0 12px;
+    padding:0 0 0 12px;
     background:var(--surface-color);
     border-bottom:1px solid var(--border-color);
     -webkit-app-region:drag;
