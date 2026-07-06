@@ -1,6 +1,14 @@
 const STORAGE_KEY="train-generator-encryption-key"
 const CHUNK_SIZE=65536
-const REKEY_THRESHOLD=Number(process.env.TRAINING_GENERATOR_REKEY_THRESHOLD??"100000")
+let rekeyThreshold=100000
+try{
+    if(typeof process!=="undefined"&&process.env&&process.env.TRAINING_GENERATOR_REKEY_THRESHOLD){
+        rekeyThreshold=Number(process.env.TRAINING_GENERATOR_REKEY_THRESHOLD)
+    }
+}catch{
+    rekeyThreshold=100000
+}
+const REKEY_THRESHOLD=rekeyThreshold
 let memoryKey:CryptoKey|null=null
 let encryptionCount=0
 async function importKeyNonExtractable(raw:Uint8Array):Promise<CryptoKey>{
