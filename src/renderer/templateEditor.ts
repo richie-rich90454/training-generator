@@ -1,4 +1,5 @@
 import { showToast } from "./toast.js"
+import { renderIcon } from "./icons.js"
 
 export class TemplateEditor{
     private overlay:HTMLDivElement
@@ -74,7 +75,7 @@ export class TemplateEditor{
 
         let header=document.createElement("div")
         header.className="template-editor-header"
-        header.innerHTML='<h2><i class="fas fa-edit"></i> Edit Prompt Template</h2>'
+        header.innerHTML=`<h2>${renderIcon("fa-edit", 20)} Edit Prompt Template</h2>`
         let closeBtn=document.createElement("button")
         closeBtn.className="template-editor-close"
         closeBtn.innerHTML="&times;"
@@ -86,18 +87,18 @@ export class TemplateEditor{
         body.className="template-editor-body"
 
         let textareaLabel=document.createElement("label")
-        textareaLabel.innerHTML='<i class="fas fa-code"></i> Template:'
+        textareaLabel.innerHTML=`${renderIcon("fa-code")} Template:`
         this.textarea.className="template-editor-textarea"
         this.textarea.setAttribute("aria-label","Prompt template content")
         this.textarea.placeholder="Enter your prompt template with {text}, {language}, {prompt_type} variables..."
         this.textarea.spellcheck=false
 
         let previewLabel=document.createElement("label")
-        previewLabel.innerHTML='<i class="fas fa-highlighter"></i> Highlighted Variables:'
+        previewLabel.innerHTML=`${renderIcon("fa-highlighter")} Highlighted Variables:`
         this.highlightedPreview.className="template-editor-preview"
 
         let liveLabel=document.createElement("label")
-        liveLabel.innerHTML='<i class="fas fa-eye"></i> Live Preview (with sample values):'
+        liveLabel.innerHTML=`${renderIcon("fa-eye")} Live Preview (with sample values):`
         this.livePreview.className="template-editor-preview"
 
         body.appendChild(textareaLabel)
@@ -112,19 +113,19 @@ export class TemplateEditor{
 
         let loadBtn=document.createElement("button")
         loadBtn.className="btn btn-secondary"
-        loadBtn.innerHTML='<i class="fas fa-folder-open"></i> Load Template'
+        loadBtn.innerHTML=`${renderIcon("fa-folder-open")} Load Template`
         loadBtn.setAttribute("aria-label","Load template from file")
         loadBtn.addEventListener("click",()=>this.handleLoad())
 
         let saveBtn=document.createElement("button")
         saveBtn.className="btn btn-primary"
-        saveBtn.innerHTML='<i class="fas fa-save"></i> Save Template'
+        saveBtn.innerHTML=`${renderIcon("fa-save")} Save Template`
         saveBtn.setAttribute("aria-label","Save template to file")
         saveBtn.addEventListener("click",()=>this.handleSave())
 
         let closeFooterBtn=document.createElement("button")
         closeFooterBtn.className="btn btn-secondary"
-        closeFooterBtn.innerHTML='<i class="fas fa-times"></i> Close'
+        closeFooterBtn.innerHTML=`${renderIcon("fa-times")} Close`
         closeFooterBtn.setAttribute("aria-label","Close template editor")
         closeFooterBtn.addEventListener("click",()=>this.hide())
 
