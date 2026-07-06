@@ -1,5 +1,4 @@
 import type{OllamaModel,OllamaStatus,AppSettings,FullAppSettings}from"../types/index.js"
-import{createVirtualList}from"./virtualList.js"
 import{applyLanguage,getCurrentLang}from"./i18n.js"
 import{encryptKey,decryptKey}from"./security.js"
 import{listProfiles,saveProfile,loadProfile,deleteProfile}from"./configProfiles.js"
@@ -139,6 +138,19 @@ class UIManager{
         }
         this.temperatureInput.style.setProperty("--range-fill",`${percentage}%`)
         this.temperatureValue.textContent=value.toFixed(1)
+        let normalized=0
+        if(max>min){
+            normalized=(value-min)/(max-min)
+        }
+        let hue=220-(normalized*190)
+        let saturation=80
+        let lightness=55
+        let color=`hsl(${hue}, ${saturation}%, ${lightness}%)`
+        let hover=`hsl(${hue}, ${saturation}%, ${lightness-8}%)`
+        let shadow=`hsla(${hue}, ${saturation}%, ${lightness}%, .25)`
+        this.temperatureValue.style.setProperty("--temperature-color",color)
+        this.temperatureValue.style.setProperty("--temperature-color-hover",hover)
+        this.temperatureValue.style.setProperty("--temperature-shadow",shadow)
     }
     setProgress(percent:number,text:string):void{
         if(isNaN(percent)||!isFinite(percent))percent=0
@@ -181,7 +193,6 @@ class UIManager{
         return icons[type]||"info-circle"
     }
     private outputPreviewTimer:ReturnType<typeof setTimeout>|null=null
-    private virtualListInstance:{destroy:()=>void}|null=null
     updateOutputPreviewDebounced():void{
         if(this.outputPreviewTimer){
             clearTimeout(this.outputPreviewTimer)
@@ -203,28 +214,10 @@ class UIManager{
             }
             return
         }
-        if(data.length>100){
-            const ITEM_HEIGHT=28
-            this.outputPreview.classList.add("virtual-list-container")
-            if(this.virtualListInstance){
-                this.virtualListInstance.destroy()
-            }
-            this.virtualListInstance=createVirtualList({
-                container:this.outputPreview,
-                items:data,
-                itemHeight:ITEM_HEIGHT,
-                renderItem:(item)=>{
-                    return `<pre style="margin:0;font-family:'Noto Sans',sans-serif;font-size:.875rem;line-height:${ITEM_HEIGHT}px;white-space:pre-wrap;word-wrap:break-word">${this.escapeHtml(JSON.stringify(item))}</pre>`
-                }
-            })
-            return
-        }
-        this.outputPreview.classList.remove("virtual-list-container")
         let sample=data.slice(-3)
         let jsonStr=JSON.stringify(sample,null,2)
         let totalCount=data.length
         this.outputPreview.innerHTML=`<pre><code>// Total items: ${totalCount} (showing last 3)\n${this.escapeHtml(jsonStr)}</code></pre>`
-        this.outputPreview.scrollTop=this.outputPreview.scrollHeight
     }
     escapeHtml(text:string):string{
         if(text==null)return""
@@ -892,16 +885,12 @@ class UIManager{
     updateProviderVisibility():void{
         let isCloud=this.providerSelect.value!=="ollama"
         if(isCloud){
-            this.apiKeyGroup.classList.remove("form-group-hidden")
-            this.apiKeyGroup.classList.add("form-group-visible")
-            this.baseUrlGroup.classList.remove("form-group-hidden")
-            this.baseUrlGroup.classList.add("form-group-visible")
+            this.apiKeyGroup.classList.remove("config-field--hidden")
+            this.baseUrlGroup.classList.remove("config-field--hidden")
         }
         else{
-            this.apiKeyGroup.classList.remove("form-group-visible")
-            this.apiKeyGroup.classList.add("form-group-hidden")
-            this.baseUrlGroup.classList.remove("form-group-visible")
-            this.baseUrlGroup.classList.add("form-group-hidden")
+            this.apiKeyGroup.classList.add("config-field--hidden")
+            this.baseUrlGroup.classList.add("config-field--hidden")
         }
     }
     startOllamaMonitor():void{
@@ -920,10 +909,6 @@ class UIManager{
             this.outputPreviewTimer=null
         }
         this.removeFocusTrap()
-        if(this.virtualListInstance){
-            this.virtualListInstance.destroy()
-            this.virtualListInstance=null
-        }
     }
 }
 
