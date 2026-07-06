@@ -1,0 +1,103 @@
+.fade-in{
+    animation:fadeIn var(--transition-medium) ease-out;
+}
+@keyframes fadeIn{
+    from{
+        opacity:0;
+    }
+    to{
+        opacity:1;
+    }
+}
+@keyframes spin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+.tg-spinner{
+    animation:spin 1s linear infinite;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+@keyframes skeleton-pulse{
+    0%{opacity:0.6}
+    50%{opacity:1.0}
+    100%{opacity:0.6}
+}
+.skeleton{
+    background:var(--text-disabled);
+    border-radius:var(--radius-medium);
+    animation:skeleton-pulse 1.5s ease-in-out infinite;
+}
+.font-small{
+    font-size:14px;
+}
+.font-small h1{
+    font-size:2rem;
+}
+.font-small h2{
+    font-size:1.75rem;
+}
+.font-small h3{
+    font-size:1.25rem;
+}
+.font-small .subtitle{
+    font-size:1rem;
+}
+.font-small .btn{
+    font-size:.875rem;
+    padding:.5rem 1rem;
+}
+.font-medium{
+    font-size:16px;
+}
+.font-large{
+    font-size:18px;
+}
+.font-large h1{
+    font-size:3rem;
+}
+.font-large h2{
+    font-size:2.25rem;
+}
+.font-large h3{
+    font-size:1.75rem;
+}
+.font-large .subtitle{
+    font-size:1.25rem;
+}
+.font-large .btn{
+    font-size:1.125rem;
+    padding:.75rem 1.5rem;
+}
+.text-center{
+    text-align:center;
+}
+.mt-1{
+    margin-top:var(--spacing-sm);
+}
+.mt-2{
+    margin-top:var(--spacing-md);
+}
+.mt-3{
+    margin-top:var(--spacing-lg);
+}
+.mt-4{
+    margin-top:var(--spacing-xl);
+}
+.mb-1{
+    margin-bottom:var(--spacing-sm);
+}
+.mb-2{
+    margin-bottom:var(--spacing-md);
+}
+.mb-3{
+    margin-bottom:var(--spacing-lg);
+}
+.mb-4{
+    margin-bottom:var(--spacing-xl);
+}
