@@ -1,4 +1,5 @@
 import type{SelectedFile}from"../types/index.js"
+import{renderIcon}from"./icons.js"
 
 class FileManager{
     app:any
@@ -118,7 +119,7 @@ class FileManager{
         fileItem.setAttribute("data-id",fileId)
         fileItem.innerHTML=`
             <div class="file-info">
-                <i class="fas fa-file-${this.getFileIcon(fileObj.type)} file-icon"></i>
+                <span class="file-icon">${renderIcon("fa-file-", 20)}</span>
                 <div class="file-details">
                     <div class="file-name" title="${escapedName}">${escapedName}</div>
                     <div class="file-size">${this.formatFileSize(fileObj.size)}</div>
@@ -126,7 +127,7 @@ class FileManager{
             </div>
             <span class="file-status" aria-label="Status: waiting"></span>
             <button class="file-remove" data-id="${fileId}" aria-label="Remove ${escapedName}">
-                <i class="fas fa-times"></i>
+                ${renderIcon("fa-times")}
             </button>
         `
         fileItem.querySelector(".file-remove")!.addEventListener("click",(e:Event)=>{
@@ -174,10 +175,10 @@ class FileManager{
             fileItem.appendChild(statusEl)
         }
         let iconMap:Record<string,string>={
-            waiting:"fa-clock",
-            processing:"fa-spinner fa-spin",
-            completed:"fa-check-circle",
-            failed:"fa-times-circle"
+            waiting:renderIcon("fa-clock"),
+            processing:'<span class="fa-spinner">'+renderIcon("fa-spinner")+'</span>',
+            completed:renderIcon("fa-check-circle"),
+            failed:renderIcon("fa-times-circle")
         }
         let labelMap:Record<string,string>={
             waiting:"Waiting",
@@ -192,10 +193,10 @@ class FileManager{
             failed:"#D13438"
         }
         let label=labelMap[status]||"Waiting"
-        let iconClass=iconMap[status]||"fa-clock"
+        let iconSvg=iconMap[status]||renderIcon("fa-clock")
         let iconColor=colorMap[status]||"#A19F9D"
         statusEl.setAttribute("aria-label","Status: "+label)
-        statusEl.innerHTML='<i class="fas '+iconClass+'" style="color:'+iconColor+'" aria-hidden="true"></i><span class="file-status-label">'+label+"</span>"
+        statusEl.innerHTML='<span style="color:'+iconColor+'" aria-hidden="true">'+iconSvg+'</span><span class="file-status-label">'+label+"</span>"
     }
     updateProcessButton():void{
         let ollamaReady=this.app.uiManager?.ollamaStatus?.running??false
