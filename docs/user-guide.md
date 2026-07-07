@@ -178,6 +178,10 @@ Use the **Configuration** panel on the right to choose how files are converted i
 
 Choose from English, Chinese (Simplified), Chinese (Traditional), Spanish, French, German, Japanese, or Korean. Make sure your selected model supports the chosen language.
 
+### UI Language
+
+Open the settings modal and use the **UI Language** dropdown to change the language of the entire application interface. All user-facing text — including menus, buttons, status messages, tooltips, error dialogs, analytics labels, exporter content, and splash screen text — is translated. If you add or modify any UI string in the codebase, make sure it is added to `src/renderer/i18n.ts` for every supported language.
+
 ### Chunk Size
 
 The number of characters per chunk. The allowed range is 500 to 10,000. Smaller chunks are easier for models to process; larger chunks preserve more context.
