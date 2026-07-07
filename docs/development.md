@@ -127,3 +127,15 @@ All source files in this project follow a dense, consistent formatting style def
 14. **No trailing spaces** — ensure every line ends cleanly.
 
 Following these conventions keeps the codebase uniform and matches the formatting applied to the existing TypeScript files.
+
+## Internationalization (i18n)
+
+Every user-facing string must be translatable. The source of truth is `src/renderer/i18n.ts`, which exports a `t(key, options?)` helper.
+
+When adding or changing UI text:
+
+1. Add a unique key to `src/renderer/i18n.ts` for each supported language (`en`, `zh-Hans`, `zh-Hant`, `ja`, `ko`, `es`, `fr`, `de`).
+2. Use `t('your.key')` in TypeScript modules, Vue templates, exporters, and the splash screen instead of literal strings.
+3. For dynamic values, pass replacements through the third argument: `t('error.unsupportedFileFormat', undefined, { format })`.
+4. Run `npm run typecheck` after changing keys to catch missing imports or type mismatches.
+5. Update `docs/user-guide.md` and `docs/configuration.md` if the new option changes user-facing behavior.
