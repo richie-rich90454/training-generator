@@ -156,7 +156,7 @@ describe("Prompt template validation",()=>{
     })
 })
 
-// Real getFallbackPrompt from app.ts: getFallbackPrompt(text, processingType, language)
+// Real getFallbackPrompt from promptManager.ts: getFallbackPrompt(text, processingType, language)
 function getFallbackPromptWithText(text:string,processingType:string,language:string="en"):string{
     let fallbackPrompts:Record<string,string>={
         instruction:`You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.\nTEXT TO ANALYZE:\n${text}\nINSTRUCTIONS:\n1. Read the text thoroughly and identify ALL key concepts,facts,arguments,data points,and important information.\n2. For EACH significant piece of information,create a clear,specific question that someone might ask about it. Questions and answers should be in the same language as the source text.\n3. Provide detailed,accurate answers based EXCLUSIVELY on the text content.`,
