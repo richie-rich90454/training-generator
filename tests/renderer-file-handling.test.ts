@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import{describe,test,it,expect}from "vitest"
+import{createFileStore}from "../src/renderer/stores/fileStore.js"
 
 function isValidFileSize(size:number,maxSizeMB:number=100):boolean{
     return size>=0&&size<=maxSizeMB*1024*1024
@@ -141,51 +142,38 @@ describe("Filename sanitization",()=>{
     })
 })
 
-// FileManager mock with fileStatuses and setFileStatus
-class MockFileManager{
-    fileStatuses:Map<string,string>
-    app:any
-
-    constructor(app:any){
-        this.app=app
-        this.fileStatuses=new Map()
+describe("fileStore file status",()=>{
+    function makeFile(name:string):File{
+        return new File(["content"],name,{type:"application/pdf"})
     }
-
-    setFileStatus(fileName:string,status:string):void{
-        this.fileStatuses.set(fileName,status)
-    }
-
-    removeFile(fileName:string):void{
-        this.fileStatuses.delete(fileName)
-    }
-}
-
-describe("FileManager file status",()=>{
-    let mockApp:any={}
 
     it("should set file status to processing",()=>{
-        let fileManager=new MockFileManager(mockApp)
-        fileManager.setFileStatus("test.pdf","processing")
-        expect(fileManager.fileStatuses.get("test.pdf")).toBe("processing")
+        let fileStore=createFileStore()
+        fileStore.addFiles([makeFile("test.pdf")])
+        fileStore.setFileStatus("test.pdf","processing")
+        expect(fileStore.fileStatuses["test.pdf"]).toBe("processing")
     })
 
     it("should set file status to completed",()=>{
-        let fileManager=new MockFileManager(mockApp)
-        fileManager.setFileStatus("test.pdf","completed")
-        expect(fileManager.fileStatuses.get("test.pdf")).toBe("completed")
+        let fileStore=createFileStore()
+        fileStore.addFiles([makeFile("test.pdf")])
+        fileStore.setFileStatus("test.pdf","completed")
+        expect(fileStore.fileStatuses["test.pdf"]).toBe("completed")
     })
 
     it("should set file status to failed",()=>{
-        let fileManager=new MockFileManager(mockApp)
-        fileManager.setFileStatus("test.pdf","failed")
-        expect(fileManager.fileStatuses.get("test.pdf")).toBe("failed")
+        let fileStore=createFileStore()
+        fileStore.addFiles([makeFile("test.pdf")])
+        fileStore.setFileStatus("test.pdf","failed")
+        expect(fileStore.fileStatuses["test.pdf"]).toBe("failed")
     })
 
     it("should remove file status when file is removed",()=>{
-        let fileManager=new MockFileManager(mockApp)
-        fileManager.setFileStatus("test.pdf","waiting")
-        expect(fileManager.fileStatuses.has("test.pdf")).toBe(true)
-        fileManager.removeFile("test.pdf")
-        expect(fileManager.fileStatuses.has("test.pdf")).toBe(false)
+        let fileStore=createFileStore()
+        fileStore.addFiles([makeFile("test.pdf")])
+        fileStore.setFileStatus("test.pdf","waiting")
+        expect(fileStore.fileStatuses["test.pdf"]).toBe("waiting")
+        fileStore.removeFile("test.pdf")
+        expect(fileStore.fileStatuses["test.pdf"]).toBeUndefined()
     })
 })
