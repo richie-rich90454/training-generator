@@ -1,7 +1,7 @@
 <template>
     <div v-if="visible" class="command-palette-overlay" data-testid="command-palette-overlay" @click="onBackdropClick">
         <div class="command-palette" data-testid="command-palette" @keydown="onKeydown">
-            <input v-model="query" class="command-palette-input" type="text" placeholder="Type a command..." data-testid="command-palette-input" />
+            <input v-model="query" class="command-palette-input" type="text" :placeholder="t('commandPalette.placeholder')" data-testid="command-palette-input" />
             <ul v-if="filteredCommands.length>0" class="command-list" data-testid="command-list">
                 <li v-for="(command, index) in filteredCommands" :key="command.id" class="command-item" :class="{selected:index===selectedIndex}" @click="executeCommand(command)" :data-testid="'command-item-'+command.id">
                     <span v-if="command.icon" class="command-icon">{{ command.icon }}</span>
@@ -9,12 +9,13 @@
                     <span v-if="command.shortcut" class="command-shortcut" :data-testid="'command-shortcut-'+command.id">{{ command.shortcut }}</span>
                 </li>
             </ul>
-            <div v-else class="command-empty" data-testid="command-empty">No commands found</div>
+            <div v-else class="command-empty" data-testid="command-empty">{{ t('commandPalette.noCommands') }}</div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { t } from "../i18n.js"
 export interface Command{
     id: string
     label: string
