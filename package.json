@@ -4,23 +4,21 @@
   "type": "module",
   "main": "src/main.ts",
   "types": "src/types/interfaces.ts",
+  "sideEffects": [
+    "**/*.css",
+    "**/*.module.css"
+  ],
   "scripts": {
+    "prestart": "npm run build",
     "start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
     "dev": "node scripts/dev.mjs",
-    "electron": "electron .",
-    "electron:dev": "node scripts/dev.mjs",
-    "electron:start": "cross-env NODE_ENV=production node --import tsx/esm node_modules/electron/cli.js .",
-    "electron:build": "npm run build:main && vite build",
-    "electron:package": "npm run build && electron-builder",
     "build": "npm run build:main && vite build",
     "build:main": "node scripts/build-main.mjs",
-    "preview": "vite preview",
     "package": "npm run build && electron-builder",
     "package:win": "npm run build && electron-builder --win --publish=never",
     "package:mac": "npm run build && electron-builder --mac",
     "package:linux": "npm run build && electron-builder --linux",
     "test": "vitest run",
-    "test:unit": "vitest run --reporter=verbose",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "cli": "tsx src/cli/index.ts",
@@ -32,11 +30,12 @@
     "ai",
     "training",
     "llm",
-    "fine-tuning"
+    "fine-tuning",
+    "solidjs"
   ],
   "author": "richie-rich90454",
   "license": "MIT",
-  "description": "Desktop application to convert documents into AI training data using Ollama",
+  "description": "Desktop application to convert documents into AI training data using Ollama (SolidJS UI)",
   "build": {
     "appId": "com.training.generator",
     "productName": "Training Generator",
@@ -163,8 +162,8 @@
     ]
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.7",
-    "@vue/test-utils": "^2.4.11",
+    "@solidjs/router": "^0.15.3",
+    "@solidjs/testing-library": "^0.8.10",
     "concurrently": "^9.2.3",
     "cross-env": "^10.1.0",
     "electron": "^42.3.3",
@@ -172,13 +171,14 @@
     "esbuild": "^0.28.0",
     "glob": "^13.0.6",
     "happy-dom": "^20.10.2",
+    "solid-js": "^1.9.5",
     "terser": "^5.48.0",
     "tsx": "^4.19.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vite-plugin-copy": "^0.1.6",
-    "vitest": "^4.1.8",
-    "vue": "^3.5.39"
+    "vite-plugin-solid": "^2.11.6",
+    "vitest": "^4.1.8"
   },
   "dependencies": {
     "axios": "^1.17.0",
