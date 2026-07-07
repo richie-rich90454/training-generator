@@ -1,8 +1,8 @@
 /**
  * Inline SVG icon registry — replaces all `fas fa-*` Font Awesome class references.
  *
- * Audited icons (from index.html, src/renderer/app.ts, confirm.ts, dashboard.ts,
- * fileManager.ts, helpContent.ts, templateEditor.ts, uiManager.ts):
+ * Audited icons (from index.html, src/renderer/App.tsx, confirm.ts, dashboard.ts,
+ * fileStore.ts, helpContent.ts, templateEditor.ts, uiStore.ts and SolidJS components):
  *   fa-robot, fa-edit, fa-cog, fa-question-circle, fa-cloud-upload-alt, fa-trash,
  *   fa-file-upload, fa-folder-open, fa-file-alt, fa-cogs, fa-play, fa-magic,
  *   fa-tachometer-alt, fa-info-circle, fa-file-code, fa-download, fa-copy,
@@ -12,8 +12,8 @@
  *   fa-text-height, fa-list-ol, fa-puzzle-piece, fa-layer-group, fa-window-restore,
  *   fa-expand, fa-memory, fa-check, fa-undo, fa-hdd, fa-heartbeat,
  *   fa-spinner, fa-clipboard-check, fa-times, fa-code, fa-highlighter, fa-eye,
- *   fa-file- (dynamic template prefix in fileManager.ts),
- *   fa-check-circle, fa-times-circle (constructed dynamically in fileManager status map)
+ *   fa-file- (dynamic template prefix in fileStore.ts),
+ *   fa-check-circle, fa-times-circle (constructed dynamically in fileStore status map)
  *
  * Each registry key is the original fa-<name> (with the `fa-` prefix preserved).
  * Design reference: Lucide / Tabler (MIT-licensed, stroke-based, 24x24 viewBox).
