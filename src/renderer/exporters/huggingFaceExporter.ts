@@ -1,5 +1,6 @@
 import type { TrainingItem } from "../../types/index.js"
 import { Exporter, ExportOptions, exportJSONL } from "../exportFormats.js"
+import { t } from "../i18n.js"
 import axios from "axios"
 export interface DatasetCard{
     name: string
@@ -73,8 +74,8 @@ function computeSizeCategory(count: number): string{
 }
 export function generateDatasetCard(items: TrainingItem[], options?: {name?: string, description?: string, license?: string, language?: string[], splits?: string[], stats?: Record<string, unknown>}): string{
     let stats=options?.stats??computeDatasetStats(items)
-    let name=options?.name??"Training Generator Dataset"
-    let description=options?.description??"Dataset exported from Training Generator"
+    let name=options?.name??t("export.huggingface.defaultName")
+    let description=options?.description??t("export.huggingface.defaultDescription")
     let license=options?.license??"mit"
     let language=options?.language??["en"]
     let splits=options?.splits
@@ -103,14 +104,14 @@ export function generateDatasetCard(items: TrainingItem[], options?: {name?: str
     lines.push("")
     lines.push(description)
     lines.push("")
-    lines.push("## Dataset Statistics")
+    lines.push(`## ${t("export.huggingface.datasetStatistics")}`)
     lines.push("")
-    lines.push(`- Items: ${stats.count}`)
-    lines.push(`- Average instruction length: ${stats.avgInstructionLength}`)
-    lines.push(`- Average output length: ${stats.avgOutputLength}`)
-    lines.push(`- Items with metadata: ${stats.hasMetadataCount}`)
+    lines.push(`- ${t("export.huggingface.statItems", undefined, { count: String(stats.count) })}`)
+    lines.push(`- ${t("export.huggingface.statAvgInstructionLength", undefined, { length: String(stats.avgInstructionLength) })}`)
+    lines.push(`- ${t("export.huggingface.statAvgOutputLength", undefined, { length: String(stats.avgOutputLength) })}`)
+    lines.push(`- ${t("export.huggingface.statItemsWithMetadata", undefined, { count: String(stats.hasMetadataCount) })}`)
     lines.push("")
-    lines.push("## Usage")
+    lines.push(`## ${t("export.huggingface.usage")}`)
     lines.push("")
     lines.push("```python")
     lines.push("from datasets import load_dataset")
@@ -118,12 +119,12 @@ export function generateDatasetCard(items: TrainingItem[], options?: {name?: str
     lines.push(`dataset = load_dataset("${name}")`)
     lines.push("```")
     lines.push("")
-    lines.push("## Citation")
+    lines.push(`## ${t("export.huggingface.citation")}`)
     lines.push("")
     lines.push("```bibtex")
     lines.push("@misc{training_generator_dataset,")
     lines.push(`  title={${name}},`)
-    lines.push("  author={Training Generator},")
+    lines.push(`  author={${t("export.huggingface.citationAuthor")}},`)
     lines.push(`  year={${new Date().getFullYear()}},`)
     lines.push("  howpublished={\\url{https://huggingface.co/datasets/}}")
     lines.push("}")
@@ -136,15 +137,15 @@ export async function writeParquet(items: TrainingItem[]): Promise<Buffer>{
         mod=await import("parquetjs-lite")
     }
     catch{
-        throw new Error("parquetjs-lite not installed")
+        throw new Error(t("error.parquetNotInstalled"))
     }
     if(mod==null||mod.parquet==null){
-        throw new Error("parquetjs-lite not installed")
+        throw new Error(t("error.parquetNotInstalled"))
     }
     let ParquetSchema=mod.parquet.ParquetSchema
     let ParquetWriter=mod.parquet.ParquetWriter
     if(ParquetSchema==null||ParquetWriter==null){
-        throw new Error("parquetjs-lite not installed")
+        throw new Error(t("error.parquetNotInstalled"))
     }
     let schema=new ParquetSchema({
         format: { type: "UTF8" },
@@ -185,7 +186,7 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
         }
     })
     if(createResponse.status<200||createResponse.status>=300){
-        throw new Error(`Failed to create repo: ${createResponse.status}`)
+        throw new Error(t("error.huggingfaceCreateRepoFailed", undefined, { status: String(createResponse.status) }))
     }
     let files: {name: string, content: string|Buffer}[]=[
         { name: "train.jsonl", content: jsonl },
@@ -202,7 +203,7 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
             }
         })
         if(response.status<200||response.status>=300){
-            throw new Error(`Failed to upload ${file.name}: ${response.status}`)
+            throw new Error(t("error.huggingfaceUploadFailed", undefined, { name: file.name, status: String(response.status) }))
         }
     }
     return {
