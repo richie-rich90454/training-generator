@@ -1,5 +1,6 @@
 import type{LogEntry}from"./logger.js"
 import{getCacheStats}from"./cache.js"
+import{t}from"./i18n.js"
 const MAX_LOG_ENTRIES=1000
 const LOG_LEVELS=["debug","info","warn","error"] as const
 type LogLevel=typeof LOG_LEVELS[number]
@@ -25,37 +26,37 @@ export class Devtools{
         panel.style.display="none"
         panel.innerHTML=`
       <div class="devtools-header">
-        <h3>Devtools</h3>
+        <h3>${t("devtools.title")}</h3>
         <button id="devtools-close" class="devtools-close">&times;</button>
       </div>
       <div class="devtools-tabs">
-        <button class="devtools-tab active" data-tab="logs">Logs</button>
-        <button class="devtools-tab" data-tab="cache">Cache</button>
-        <button class="devtools-tab" data-tab="workers">Workers</button>
-        <button class="devtools-tab" data-tab="memory">Memory</button>
+        <button class="devtools-tab active" data-tab="logs">${t("devtools.tab.logs")}</button>
+        <button class="devtools-tab" data-tab="cache">${t("devtools.tab.cache")}</button>
+        <button class="devtools-tab" data-tab="workers">${t("devtools.tab.workers")}</button>
+        <button class="devtools-tab" data-tab="memory">${t("devtools.tab.memory")}</button>
       </div>
       <div class="devtools-content">
         <div class="devtools-tab-content active" id="devtools-logs">
           <div class="devtools-log-controls">
             <select id="devtools-log-filter">
-              <option value="all">All</option>
-              <option value="debug">Debug</option>
-              <option value="info">Info</option>
-              <option value="warn">Warn</option>
-              <option value="error">Error</option>
+              <option value="all">${t("devtools.logLevel.all")}</option>
+              <option value="debug">${t("devtools.logLevel.debug")}</option>
+              <option value="info">${t("devtools.logLevel.info")}</option>
+              <option value="warn">${t("devtools.logLevel.warn")}</option>
+              <option value="error">${t("devtools.logLevel.error")}</option>
             </select>
-            <button id="devtools-clear-logs">Clear</button>
+            <button id="devtools-clear-logs">${t("devtools.clearLogs")}</button>
           </div>
           <div id="devtools-log-output"></div>
         </div>
         <div class="devtools-tab-content" id="devtools-cache">
-          <div id="devtools-cache-content">Loading...</div>
+          <div id="devtools-cache-content">${t("common.loading")}</div>
         </div>
         <div class="devtools-tab-content" id="devtools-workers">
-          <div id="devtools-worker-content">Loading...</div>
+          <div id="devtools-worker-content">${t("common.loading")}</div>
         </div>
         <div class="devtools-tab-content" id="devtools-memory">
-          <div id="devtools-memory-content">Loading...</div>
+          <div id="devtools-memory-content">${t("common.loading")}</div>
         </div>
       </div>
     `
@@ -139,7 +140,7 @@ export class Devtools{
         if(filtered.length===0){
             let empty=document.createElement("div")
             empty.className="devtools-empty"
-            empty.textContent="No log entries"
+            empty.textContent=t("devtools.noLogEntries")
             this.logOutput.appendChild(empty)
             return
         }
@@ -182,12 +183,12 @@ export class Devtools{
         let hitRate=cs.totalRequests>0?Math.round((cs.hits/cs.totalRequests)*100):0
         this.cacheContent.innerHTML=`
       <table>
-        <tr><td>Cache Hits:</td><td>${cs.hits}</td></tr>
-        <tr><td>Cache Misses:</td><td>${cs.misses}</td></tr>
-        <tr><td>Total Requests:</td><td>${cs.totalRequests}</td></tr>
-        <tr><td>Hit Rate:</td><td>${hitRate}%</td></tr>
-        <tr><td>Tokens Saved:</td><td>${cs.estimatedTokensSaved.toLocaleString("en-US")}</td></tr>
-        <tr><td>Est. Cost Saved:</td><td>$${cs.estimatedCostSaved.toFixed(4)}</td></tr>
+        <tr><td>${t("devtools.cache.hits")}</td><td>${cs.hits}</td></tr>
+        <tr><td>${t("devtools.cache.misses")}</td><td>${cs.misses}</td></tr>
+        <tr><td>${t("devtools.cache.totalRequests")}</td><td>${cs.totalRequests}</td></tr>
+        <tr><td>${t("devtools.cache.hitRate")}</td><td>${hitRate}%</td></tr>
+        <tr><td>${t("devtools.cache.tokensSaved")}</td><td>${cs.estimatedTokensSaved.toLocaleString("en-US")}</td></tr>
+        <tr><td>${t("devtools.cache.costSaved")}</td><td>${t("devtools.cache.currencyPrefix")}${cs.estimatedCostSaved.toFixed(4)}</td></tr>
       </table>
     `
     }
@@ -195,13 +196,13 @@ export class Devtools{
         if(!this.workerContent)return
         let workerCount=typeof Worker!=="undefined"?2:0
         let workerStatus=typeof Worker!=="undefined"
-            ?"Web Workers are available (chunk + dedup workers)"
-            :"Web Workers are not supported in this environment"
+            ?t("devtools.workers.statusAvailable")
+            :t("devtools.workers.statusUnavailable")
         this.workerContent.innerHTML=`
       <table>
-        <tr><td>Worker Pool:</td><td>${workerCount} workers</td></tr>
-        <tr><td>Status:</td><td>${workerStatus}</td></tr>
-        <tr><td>Types:</td><td>Chunk Worker, Dedup Worker</td></tr>
+        <tr><td>${t("devtools.workers.pool")}</td><td>${workerCount}${t("devtools.workers.countSuffix")}</td></tr>
+        <tr><td>${t("devtools.workers.status")}</td><td>${workerStatus}</td></tr>
+        <tr><td>${t("devtools.workers.types")}</td><td>${t("devtools.workers.chunkWorker")}, ${t("devtools.workers.dedupWorker")}</td></tr>
       </table>
     `
     }
@@ -221,17 +222,17 @@ export class Devtools{
                 :"0"
             this.memoryContent.innerHTML=`
         <table>
-          <tr><td>Used Heap:</td><td>${usedMB} MB</td></tr>
-          <tr><td>Total Heap:</td><td>${totalMB} MB</td></tr>
-          <tr><td>Heap Limit:</td><td>${limitMB} MB</td></tr>
-          <tr><td>Usage:</td><td>${usagePercent}%</td></tr>
+          <tr><td>${t("devtools.memory.usedHeap")}</td><td>${usedMB}${t("devtools.memory.mbSuffix")}</td></tr>
+          <tr><td>${t("devtools.memory.totalHeap")}</td><td>${totalMB}${t("devtools.memory.mbSuffix")}</td></tr>
+          <tr><td>${t("devtools.memory.heapLimit")}</td><td>${limitMB}${t("devtools.memory.mbSuffix")}</td></tr>
+          <tr><td>${t("devtools.memory.usage")}</td><td>${usagePercent}%</td></tr>
         </table>
       `
         }
         else{
             this.memoryContent.innerHTML=`
-        <p>performance.memory is not available in this browser.</p>
-        <p>Use Chrome/Edge with --enable-precise-memory-info flag for detailed stats.</p>
+        <p>${t("devtools.memory.unavailable")}</p>
+        <p>${t("devtools.memory.preciseFlagHint")}</p>
       `
         }
     }
