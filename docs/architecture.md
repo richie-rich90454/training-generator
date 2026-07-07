@@ -98,4 +98,4 @@ The following steps describe the journey from file selection to exported trainin
 7. **Preview and export**  
    The aggregated results are displayed in the UI preview. The user can copy the output to the clipboard or export it through a save dialog back to the main process.
 
-Throughout the pipeline, `Logger` and `AuditTrail` record events, `Dashboard` shows live progress, and periodic checkpoints allow recovery if processing is interrupted.
+Throughout the pipeline, `Logger` and `AuditTrail` record events, `Dashboard` shows live progress, and periodic checkpoints allow recovery if processing is interrupted. All user-facing strings are centralized in `src/renderer/i18n.ts` and translated into eight languages; the `t()` helper is used by renderer modules, Vue components, exporters, and the splash screen so that no hardcoded English text remains in the UI.
