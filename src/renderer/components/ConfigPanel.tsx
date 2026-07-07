@@ -1,0 +1,250 @@
+import type { JSX } from "solid-js"
+import { For, Show } from "solid-js"
+import type { AppStore } from "../stores/appStore.js"
+import { Icon } from "./Icon.js"
+import { renderIcon } from "../icons.js"
+import { t } from "../i18n.js"
+import cardsStyles from "./styles/Cards.module.css"
+import buttonsStyles from "./styles/Buttons.module.css"
+import formsStyles from "./styles/Forms.module.css"
+import configPanelStyles from "./styles/ConfigPanel.module.css"
+const styles = { ...cardsStyles, ...buttonsStyles, ...formsStyles, ...configPanelStyles }
+export interface ConfigPanelProps {
+    appStore: AppStore
+}
+const PROVIDERS = ["ollama", "openai", "anthropic", "gemini"]
+const PROCESSING_TYPES = ["instruction", "conversation", "chunking", "custom"]
+const OUTPUT_FORMATS = ["jsonl", "chatml", "text", "csv"]
+const LANGUAGES = ["en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko"]
+const CONCURRENCY_OPTIONS = [1, 2, 3, 4, 5]
+const CHUNK_OPTIONS = [500, 1000, 2000, 4000, 8000, 10000]
+export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
+    const { settingsStore, savePreset } = props.appStore
+    function handleSavePreset(): void {
+        savePreset()
+    }
+    function temperatureStyle() {
+        const display = settingsStore.updateTemperatureDisplay(settingsStore.settings.temperature ?? 0.7)
+        return {
+            "--range-fill": display.rangeFill,
+            "--temperature-color": display.temperatureColor,
+            "--temperature-color-hover": display.temperatureColorHover,
+            "--temperature-shadow": display.temperatureShadow
+        }
+    }
+    function temperatureDisplay() {
+        return settingsStore.updateTemperatureDisplay(settingsStore.settings.temperature ?? 0.7)
+    }
+    return (
+        <div class={`${styles["card"]} ${styles["config-panel"]}`}>
+            <div class={`${styles["card-header"]} ${styles["config-panel__header"]}`}>
+                <div class={styles["card-title"]}>
+                    <Icon html={renderIcon("fa-sliders-h")} />
+                    <span data-i18n="config.title">{t("config.title")}</span>
+                </div>
+            </div>
+            <form class={styles["config-panel__fields"]} aria-label={t("config.formAria")} data-i18n-aria-label="config.formAria" onSubmit={(e) => e.preventDefault()}>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-model">
+                        <Icon html={renderIcon("fa-brain")} />
+                        <span data-i18n="config.model">{t("config.model")}</span>
+                    </label>
+                    <input
+                        id="config-model"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        type="text"
+                        value={settingsStore.settings.model}
+                        placeholder={t("config.model")}
+                        onInput={(e) => settingsStore.setModel(e.currentTarget.value)}
+                    />
+                </div>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-provider">
+                        <Icon html={renderIcon("fa-cloud")} />
+                        <span data-i18n="config.provider">{t("config.provider")}</span>
+                    </label>
+                    <select
+                        id="config-provider"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.provider}
+                        onChange={(e) => settingsStore.setProvider(e.currentTarget.value)}
+                    >
+                        <For each={PROVIDERS}>
+                            {(provider) => (
+                                <option value={provider} data-i18n={`config.provider.${provider}`}>
+                                    {t(`config.provider.${provider}`)}
+                                </option>
+                            )}
+                        </For>
+                    </select>
+                </div>
+                <Show when={settingsStore.isCloudProvider()}>
+                    <div class={styles["config-field"]}>
+                        <label class={styles["config-field__label"]} for="config-api-key">
+                            <Icon html={renderIcon("fa-key")} />
+                            <span data-i18n="config.apiKey">{t("config.apiKey")}</span>
+                        </label>
+                        <input
+                            id="config-api-key"
+                            class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                            type="password"
+                            value={settingsStore.apiKeyPlain()}
+                            placeholder={t("config.apiKey.placeholder")}
+                            data-i18n-placeholder="config.apiKey.placeholder"
+                            onInput={(e) => settingsStore.setApiKey(e.currentTarget.value)}
+                        />
+                    </div>
+                    <div class={styles["config-field"]}>
+                        <label class={styles["config-field__label"]} for="config-base-url">
+                            <Icon html={renderIcon("fa-link")} />
+                            <span data-i18n="config.baseUrl">{t("config.baseUrl")}</span>
+                        </label>
+                        <input
+                            id="config-base-url"
+                            class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                            type="text"
+                            value={settingsStore.settings.baseUrl}
+                            placeholder={t("config.baseUrl.placeholder")}
+                            data-i18n-placeholder="config.baseUrl.placeholder"
+                            onInput={(e) => settingsStore.setBaseUrl(e.currentTarget.value)}
+                        />
+                    </div>
+                </Show>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-processing-type">
+                        <Icon html={renderIcon("fa-cogs")} />
+                        <span data-i18n="config.processingType">{t("config.processingType")}</span>
+                    </label>
+                    <select
+                        id="config-processing-type"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.processingType}
+                        onChange={(e) => settingsStore.setProcessingType(e.currentTarget.value)}
+                    >
+                        <For each={PROCESSING_TYPES}>
+                            {(type) => (
+                                <option value={type} data-i18n={`config.processingType.${type}`}>
+                                    {t(`config.processingType.${type}`)}
+                                </option>
+                            )}
+                        </For>
+                    </select>
+                </div>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-output-format">
+                        <Icon html={renderIcon("fa-file-export")} />
+                        <span data-i18n="config.outputFormat">{t("config.outputFormat")}</span>
+                    </label>
+                    <select
+                        id="config-output-format"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.outputFormat}
+                        onChange={(e) => settingsStore.setOutputFormat(e.currentTarget.value)}
+                    >
+                        <For each={OUTPUT_FORMATS}>
+                            {(format) => (
+                                <option value={format} data-i18n={`config.outputFormat.${format}`}>
+                                    {t(`config.outputFormat.${format}`)}
+                                </option>
+                            )}
+                        </For>
+                    </select>
+                </div>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-language">
+                        <Icon html={renderIcon("fa-language")} />
+                        <span data-i18n="config.outputLanguage">{t("config.outputLanguage")}</span>
+                    </label>
+                    <select
+                        id="config-language"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.language}
+                        onChange={(e) => settingsStore.setLanguage(e.currentTarget.value)}
+                    >
+                        <For each={LANGUAGES}>
+                            {(lang) => (
+                                <option value={lang} data-i18n={`language.${lang}`}>
+                                    {t(`language.${lang}`)}
+                                </option>
+                            )}
+                        </For>
+                    </select>
+                </div>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-chunk-size">
+                        <Icon html={renderIcon("fa-cut")} />
+                        <span data-i18n="config.chunkSize">{t("config.chunkSize")}</span>
+                    </label>
+                    <select
+                        id="config-chunk-size"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.chunkSize}
+                        onChange={(e) => settingsStore.setChunkSize(parseInt(e.currentTarget.value, 10))}
+                    >
+                        <For each={CHUNK_OPTIONS}>
+                            {(size) => <option value={size}>{size}</option>}
+                        </For>
+                    </select>
+                </div>
+                <div class={styles["config-field"]}>
+                    <label class={styles["config-field__label"]} for="config-concurrency">
+                        <Icon html={renderIcon("fa-bolt")} />
+                        <span data-i18n="config.concurrency">{t("config.concurrency")}</span>
+                    </label>
+                    <select
+                        id="config-concurrency"
+                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                        value={settingsStore.settings.concurrency}
+                        onChange={(e) => settingsStore.setConcurrency(parseInt(e.currentTarget.value, 10))}
+                    >
+                        <For each={CONCURRENCY_OPTIONS}>
+                            {(n) => (
+                                <option value={n} data-i18n={n === 1 ? "config.concurrency.serial" : n === 3 ? "config.concurrency.recommended" : n === 5 ? "config.concurrency.fast" : undefined}>
+                                    {n === 1 ? t("config.concurrency.serial") : n === 3 ? t("config.concurrency.recommended") : n === 5 ? t("config.concurrency.fast") : String(n)}
+                                </option>
+                            )}
+                        </For>
+                    </select>
+                </div>
+                <div class={`${styles["config-field"]} ${styles["config-field--range"]}`}>
+                    <label class={styles["config-field__label"]} for="config-temperature">
+                        <Icon html={renderIcon("fa-thermometer-half")} />
+                        <span data-i18n="config.temperature">{t("config.temperature")}</span>
+                    </label>
+                    <div class={`${styles["range-control"]} ${styles["config-field__control"]}`} style={temperatureStyle()}>
+                        <div class={styles["range-track-wrapper"]}>
+                            <input
+                                id="config-temperature"
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                value={settingsStore.settings.temperature}
+                                aria-valuemin={0}
+                                aria-valuemax={1}
+                                aria-valuenow={settingsStore.settings.temperature}
+                                onInput={(e) => settingsStore.setTemperature(parseFloat(e.currentTarget.value))}
+                            />
+                            <div class={styles["range-ticks"]} aria-hidden="true">
+                                <span data-i18n="config.temperature.tick.0">{t("config.temperature.tick.0")}</span>
+                                <span data-i18n="config.temperature.tick.05">{t("config.temperature.tick.05")}</span>
+                                <span data-i18n="config.temperature.tick.1">{t("config.temperature.tick.1")}</span>
+                            </div>
+                        </div>
+                        <span class={styles["range-value-pill"]} aria-live="polite">{temperatureDisplay().text}</span>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class={`${styles["btn"]} ${styles["btn--save-preset"]}`}
+                    aria-label={t("config.savePresetAria")}
+                    data-i18n-aria-label="config.savePresetAria"
+                    onClick={handleSavePreset}
+                >
+                    <Icon html={renderIcon("fa-save")} />
+                    <span data-i18n="config.savePreset">{t("config.savePreset")}</span>
+                </button>
+            </form>
+        </div>
+    )
+}
