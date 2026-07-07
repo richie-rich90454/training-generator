@@ -10,7 +10,7 @@ function makeProvider(responseText: string="output"): Provider {
         generate: vi.fn(async(): Promise<ProviderResult> => ({ text: responseText, tokens: Math.ceil(responseText.length/4), provider: "mock" }))
     }
 }
-function makeOutputManager(): any {
+function makeOutputStore(): any {
     return {
         createTrainingItem: vi.fn((input: string, output: string, processingType: string): TrainingItem[] => {
             return [{ format: "instruction", instruction: "test", input, output }]
@@ -39,7 +39,7 @@ describe("Processor basic processing", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{ completed++ },
             ()=>{ errors++ }
         )
@@ -56,7 +56,7 @@ describe("Processor basic processing", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -72,7 +72,7 @@ describe("Processor basic processing", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -88,7 +88,7 @@ describe("Processor basic processing", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{ completed++ },
             ()=>{}
         )
@@ -113,7 +113,7 @@ describe("Processor abort", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -154,7 +154,7 @@ describe("Processor demo mode", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{ completed++ },
             ()=>{}
         )
@@ -171,7 +171,7 @@ describe("Processor demo mode", () => {
             "model",
             "conversation",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -199,7 +199,7 @@ describe("Processor batching", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -227,7 +227,7 @@ describe("Processor batching", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{}
         )
@@ -255,7 +255,7 @@ describe("Processor error handling", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             ()=>{ errors++ }
         )
@@ -272,7 +272,7 @@ describe("Processor error handling", () => {
             "model",
             "instruction",
             generatePrompt,
-            makeOutputManager().createTrainingItem,
+            makeOutputStore().createTrainingItem,
             ()=>{},
             (_idx:number,msg:string)=>{ errors++; errorMsg=msg }
         )
