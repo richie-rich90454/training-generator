@@ -5,6 +5,7 @@ import{RtfParser}from "rtf-parser-fixes"
 import{htmlToText}from "html-to-text"
 import fs from "fs"
 import path from "path"
+import{t}from "../renderer/i18n.ts"
 import type{ParseBatchItem}from "../types/index.ts"
 class FileParser{
     supportedFormats:string[]
@@ -35,7 +36,7 @@ class FileParser{
                 case "html":
                     return await this.parseHTML(buffer)
                 default:
-                    throw new Error(`Unsupported file format:${fileType}`)
+                    throw new Error(t("error.unsupportedFileFormat",undefined,{format:fileType}))
             }
         }
         catch(error){
@@ -57,7 +58,7 @@ class FileParser{
                 let buffer=await fs.promises.readFile(filePath)
                 return await this.parseFileBuffer(buffer,fileType)
             default:
-                throw new Error(`Unsupported file format for large files:${fileType}`)
+                throw new Error(t("error.unsupportedLargeFileFormat",undefined,{format:fileType}))
         }
     }
     async streamTextFile(filePath:string):Promise<string>{
@@ -75,7 +76,7 @@ class FileParser{
                 content+=chunk as string
                 if(content.length>maxSize){
                     readStream.destroy()
-                    settle(()=>reject(new Error("Text file too large to process")))
+                    settle(()=>reject(new Error(t("error.textFileTooLarge"))))
                 }
             })
             readStream.on("end",()=>{
@@ -103,7 +104,7 @@ class FileParser{
             case "html":
                 return await this.parseHTML(buffer)
             default:
-                throw new Error(`Unsupported file format:${fileType}`)
+                throw new Error(t("error.unsupportedFileFormat",undefined,{format:fileType}))
         }
     }
     async parsePDF(buffer:Buffer):Promise<string>{
@@ -204,7 +205,7 @@ class FileParser{
             ext="html"
         }
         if(!this.supportedFormats.includes(ext)){
-            throw new Error(`Unsupported file format:${ext}`)
+            throw new Error(t("error.unsupportedFileFormat",undefined,{format:ext}))
         }
         return await this.parseFile(filePath,ext)
     }
