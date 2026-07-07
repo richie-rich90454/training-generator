@@ -1,5 +1,5 @@
 import type{OllamaModel,OllamaStatus,AppSettings,FullAppSettings}from"../types/index.js"
-import{applyLanguage,getCurrentLang}from"./i18n.js"
+import{applyLanguage,getCurrentLang,t}from"./i18n.js"
 import{encryptKey,decryptKey}from"./security.js"
 import{listProfiles,saveProfile,loadProfile,deleteProfile}from"./configProfiles.js"
 import{getHelpContent}from"./helpContent.js"
@@ -156,7 +156,7 @@ class UIManager{
         if(isNaN(percent)||!isFinite(percent))percent=0
         let clampedPercent=Math.max(0,Math.min(100,percent))
         this.progressFill.style.width=`${clampedPercent}%`
-        this.progressPercent.textContent=`${Math.round(clampedPercent)}%`
+        this.progressPercent.textContent=`${Math.round(clampedPercent)}${t("common.percent")}`
         this.progressText.textContent=text
         // Update ARIA
         let progressBar=this.progressFill.closest('[role="progressbar"]')
@@ -210,14 +210,14 @@ class UIManager{
                 this.outputPreview.innerHTML='<pre><code><div class="skeleton" style="height:20px;width:60%;margin-bottom:8px"></div><div class="skeleton" style="height:20px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:20px;width:40%"></div></code></pre>'
             }
             else{
-                this.outputPreview.innerHTML="<pre><code>//No output data yet</code></pre>"
+                this.outputPreview.innerHTML=`<pre><code>${t("output.empty")}</code></pre>`
             }
             return
         }
         let sample=data.slice(-3)
         let jsonStr=JSON.stringify(sample,null,2)
         let totalCount=data.length
-        this.outputPreview.innerHTML=`<pre><code>// Total items: ${totalCount} (showing last 3)\n${this.escapeHtml(jsonStr)}</code></pre>`
+        this.outputPreview.innerHTML=`<pre><code>${t("output.totalItems",undefined,{totalCount:String(totalCount)})}\n${this.escapeHtml(jsonStr)}</code></pre>`
     }
     escapeHtml(text:string):string{
         if(text==null)return""
@@ -316,7 +316,7 @@ class UIManager{
         }
     }
     showHelp():void{
-        this.addLog("Opening help documentation...","info")
+        this.addLog(t("log.openingHelp"),"info")
         let helpContent=getHelpContent()
         let helpModal=document.getElementById("help-modal") as HTMLElement|null
         if(!helpModal){
@@ -325,17 +325,17 @@ class UIManager{
             helpModal.className="modal"
             helpModal.setAttribute("role","dialog")
             helpModal.setAttribute("aria-modal","true")
-            helpModal.setAttribute("aria-label","Help")
+            helpModal.setAttribute("aria-label",t("help.title"))
             helpModal.innerHTML=`
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>${renderIcon("fa-question-circle", 20)}Help</h2>
-                        <button class="modal-close help-close" aria-label="Close help">&times;</button>
+                        <h2>${renderIcon("fa-question-circle", 20)}${t("help.title")}</h2>
+                        <button class="modal-close help-close" data-i18n-aria-label="help.closeAria">&times;</button>
                     </div>
                     <div class="modal-body">
                         ${helpContent}
                         <div class="help-tour-section" style="margin-top: 1rem; text-align: center;">
-                            <button id="restart-tour-btn" class="btn btn-secondary">Restart Tour</button>
+                            <button id="restart-tour-btn" class="btn btn-secondary" data-i18n="help.restartTour">${t("help.restartTour")}</button>
                         </div>
                     </div>
                 </div>
@@ -374,7 +374,7 @@ class UIManager{
         if(focusable.length>0){
             (focusable[0] as HTMLElement).focus()
         }
-        this.addLog("Help documentation opened","success")
+        this.addLog(t("log.helpOpened"),"success")
     }
     private hideHelp():void{
         let helpModal=document.getElementById("help-modal")
@@ -432,7 +432,7 @@ class UIManager{
             }
             this.updateProviderVisibility()
             this.selectedLanguage=this.languageSelect.value||"en"
-            this.addLog("Settings loaded","info")
+            this.addLog(t("log.settingsLoaded"),"info")
         }
         catch(error){
             console.error("Failed to load settings:",error)
@@ -452,7 +452,7 @@ class UIManager{
         let baseUrl=this.baseUrlInput.value.trim()
         if(provider!=="ollama" && baseUrl && !/^https?:\/\//.test(baseUrl)){
             baseUrl=""
-            this.addLog("Invalid base URL for cloud provider; clearing","warning")
+            this.addLog(t("log.invalidBaseUrl"),"warning")
         }
         let settings:AppSettings={
             model:this.modelSelect.value,
@@ -493,10 +493,10 @@ class UIManager{
                             let loadedPrompt=result.content!
                             let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ")
                             if(previewLines.length>100){
-                                previewLines=previewLines.substring(0,100)+"..."
+                                previewLines=previewLines.substring(0,100)+t("common.ellipsis")
                             }
                             if(loadedPrompt.includes("{text}")){
-                                promptPreview=`(prompt:"${previewLines}")`
+                                promptPreview=t("prompt.previewWrapper",undefined,{preview:previewLines})
                             }
                             else{
                                 promptPreview=""
@@ -513,9 +513,9 @@ class UIManager{
                         let loadedPrompt=await response.text()
                         let previewLines=loadedPrompt.split("\n").slice(0,2).join(" ")
                         if(previewLines.length>100){
-                            previewLines=previewLines.substring(0,100)+"..."
+                            previewLines=previewLines.substring(0,100)+t("common.ellipsis")
                         }
-                        promptPreview=`(prompt:"${previewLines}")`
+                        promptPreview=t("prompt.previewWrapper",undefined,{preview:previewLines})
                         break
                     }
                 }
@@ -523,15 +523,15 @@ class UIManager{
 
                 }
             }
-            this.addLog(`Settings saved. Output language set to: ${settings.language}${promptPreview}`,"success")
+            this.addLog(t("log.settingsSaved",undefined,{language:settings.language!,promptPreview}),"success")
             let nonLatinLanguages=["zh-Hans","zh-Hant","ja","ko"]
             if(nonLatinLanguages.includes(settings.language!)){
-                this.addLog(`Note: ${settings.language} uses non-Latin script. Ensure your Ollama model supports this language.`,"warning")
+                this.addLog(t("log.nonLatinScript",undefined,{language:settings.language!}),"warning")
             }
         }
         catch(error){
             console.error("Error in savePreset:",error)
-            this.addLog(`Settings saved. Output language set to: ${settings.language}`,"success")
+            this.addLog(t("log.settingsSaved",undefined,{language:settings.language!,promptPreview:""}),"success")
         }
     }
     initSettings():void{
@@ -552,7 +552,7 @@ class UIManager{
         }
         if(this.saveProfileBtn){
             this.saveProfileBtn.addEventListener("click",()=>{
-                let name=window.prompt("Enter a name for this profile:")
+                let name=window.prompt(t("prompt.profileName"))
                 if(name&&name.trim()){
                     this.saveCurrentProfile(name.trim())
                 }
@@ -627,7 +627,7 @@ class UIManager{
                 let maxParallelFiles=document.getElementById("max-parallel-files") as HTMLSelectElement|null
                 if(maxParallelFiles)maxParallelFiles.value=String(settings.maxParallelFiles)
             }
-            this.addLog("Application settings loaded","info")
+            this.addLog(t("log.appSettingsLoaded"),"info")
         }
         catch(error){
             console.error("Failed to load application settings:",error)
@@ -676,10 +676,10 @@ class UIManager{
                 settings.maxChunks=parseInt(maxChunks.value)||500
             }
             localStorage.setItem("training-generator-app-settings",JSON.stringify(settings))
-            this.addLog("Application settings saved","success")
+            this.addLog(t("log.appSettingsSaved"),"success")
         }
         catch(error){
-            this.addLog("Failed to save application settings","error")
+            this.addLog(t("log.appSettingsSaveFailed"),"error")
         }
     }
     resetSettings():void{
@@ -709,10 +709,10 @@ class UIManager{
             this.applyTheme("auto")
             this.applyFontSize("medium")
             this.saveAppSettings()
-            this.addLog("Settings reset to defaults","success")
+            this.addLog(t("log.settingsReset"),"success")
         }
         catch(error){
-            this.addLog("Failed to reset settings","error")
+            this.addLog(t("log.settingsResetFailed"),"error")
         }
     }
     applyTheme(theme:string):void{
@@ -758,7 +758,7 @@ class UIManager{
     async refreshProfiles():Promise<void>{
         let profiles=await listProfiles()
         let currentValue=this.profileSelect.value
-        this.profileSelect.innerHTML='<option value="" data-i18n="settings.profileSelect.default">-- Select a profile --</option>'
+        this.profileSelect.innerHTML=`<option value="" data-i18n="settings.profileSelect.default">${t("settings.profileSelect.default")}</option>`
         for(let p of profiles){
             let option=document.createElement("option")
             option.value=p.name
@@ -789,7 +789,7 @@ class UIManager{
         this.updateProviderVisibility()
         this.selectedLanguage=profile.language||"en"
         if(this.app&&this.app.initProvider)this.app.initProvider()
-        this.addLog(`Profile "${name}" applied`,"success")
+        this.addLog(t("log.profileApplied",undefined,{name}),"success")
     }
     async saveCurrentProfile(name:string):Promise<void>{
         let profile={
@@ -808,16 +808,16 @@ class UIManager{
         await saveProfile(profile)
         await this.refreshProfiles()
         this.profileSelect.value=name
-        this.addLog(`Profile "${name}" saved`,"success")
+        this.addLog(t("log.profileSaved",undefined,{name}),"success")
     }
     async deleteCurrentProfile():Promise<void>{
         let name=this.profileSelect.value
         if(!name)return
-        let confirmed=await showConfirm(`Delete profile "${name}"?`,`Delete Profile`)
+        let confirmed=await showConfirm(t("log.profileDeleteConfirm",undefined,{name}),t("settings.deleteProfile"))
         if(!confirmed)return
         await deleteProfile(name)
         await this.refreshProfiles()
-        this.addLog(`Profile "${name}" deleted`,"success")
+        this.addLog(t("log.profileDeleted",undefined,{name}),"success")
     }
     updateModelSelect(models:OllamaModel[]):void{
         let previousValue=this.modelSelect.value
@@ -825,7 +825,7 @@ class UIManager{
         if(models.length==0){
             let option=document.createElement("option")
             option.value=""
-            option.textContent="Loading models..."
+            option.textContent=t("config.model.loadingFallback")
             option.disabled=true
             option.selected=true
             option.classList.add("skeleton")
@@ -852,33 +852,33 @@ class UIManager{
         try{
             if(!window.electronAPI ||!window.electronAPI.checkOllama){
                 console.warn("electronAPI not available,running in browser mode")
-                if(this.statusSpan)this.statusSpan.textContent="Ollama:Browser Mode"
+                if(this.statusSpan)this.statusSpan.textContent=t("status.ollamaBrowser")
                 this.ollamaStatusEl.className="status-indicator status-offline"
-                this.addLog("Running in browser mode(Ollama unavailable)","warning")
-                return{running:false,models:[],error:"Browser mode"}
+                this.addLog(t("log.runningInBrowserMode"),"warning")
+                return{running:false,models:[],error:t("error.browserMode")}
             }
             let status=await window.electronAPI.checkOllama()
             this.ollamaStatus=status
             if(status.running){
                 let versionText=status.version&&status.version!=="unknown"?`v${String(status.version).replace(/[\x00-\x1F<>"'&]/g,"")}`:""
-                if(this.statusSpan)this.statusSpan.textContent=`Ollama:Online ${versionText}(${status.models.length}models)`
+                if(this.statusSpan)this.statusSpan.textContent=t("status.ollamaOnline",undefined,{version:versionText,count:String(status.models.length)})
                 this.ollamaStatusEl.className="status-indicator status-online"
-                this.addLog(`Ollama is running(${status.version})with ${status.models.length}models`,"success")
+                this.addLog(t("log.ollamaRunning",undefined,{version:status.version || "",count:String(status.models.length)}),"success")
                 this.updateModelSelect(status.models)
             }
             else{
-                if(this.statusSpan)this.statusSpan.textContent="Ollama:Offline"
+                if(this.statusSpan)this.statusSpan.textContent=t("status.ollamaOffline")
                 this.ollamaStatusEl.className="status-indicator status-offline"
-                this.addLog("Ollama is not running. Please start Ollama to process files.","error")
+                this.addLog(t("log.ollamaNotRunning"),"error")
             }
             this.app.fileManager.updateProcessButton()
             return status
         }
         catch(error){
             console.error("Error checking Ollama status:",error)
-            if(this.statusSpan)this.statusSpan.textContent="Ollama:Error"
+            if(this.statusSpan)this.statusSpan.textContent=t("status.ollamaError")
             this.ollamaStatusEl.className="status-indicator status-offline"
-            this.addLog("Failed to check Ollama status","error")
+            this.addLog(t("log.ollamaCheckFailed"),"error")
             return{running:false,models:[],error:(error as Error).message}
         }
     }
