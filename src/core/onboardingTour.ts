@@ -1,3 +1,4 @@
+import{t}from"../renderer/i18n.js"
 export interface TourStep{
     id: string;
     target: string;
@@ -17,11 +18,11 @@ export interface OnboardingTourOptions{
 }
 export const STORAGE_KEY="tg-onboarding-completed";
 export const DEFAULT_TOUR_STEPS: TourStep[]=[
-    {id: "welcome", target: "#help-btn", title: "Welcome", content: "Welcome to Training Generator. This short tour highlights the main controls.", placement: "bottom"},
-    {id: "upload", target: "#drop-zone", title: "Upload Files", content: "Drag and drop documents here, or click to browse. Supported formats include PDF, DOCX, TXT, MD and more.", placement: "bottom"},
-    {id: "settings", target: "#settings-btn", title: "Settings", content: "Open settings to choose the model, processing type, output format and other options.", placement: "left"},
-    {id: "process", target: "#process-btn", title: "Process Files", content: "Click this button to convert your uploaded documents into training data.", placement: "top"},
-    {id: "output", target: "#output-preview", title: "Output Preview", content: "Review the generated training data before exporting or copying it.", placement: "top"}
+    {id: "welcome", target: "#help-btn", title: t("tour.welcome.title"), content: t("tour.welcome.content"), placement: "bottom"},
+    {id: "upload", target: "#drop-zone", title: t("tour.upload.title"), content: t("tour.upload.content"), placement: "bottom"},
+    {id: "settings", target: "#settings-btn", title: t("tour.settings.title"), content: t("tour.settings.content"), placement: "left"},
+    {id: "process", target: "#process-btn", title: t("tour.process.title"), content: t("tour.process.content"), placement: "top"},
+    {id: "output", target: "#output-preview", title: t("tour.output.title"), content: t("tour.output.content"), placement: "top"}
 ];
 export class OnboardingTour{
     private steps: TourStep[];
@@ -207,13 +208,13 @@ export function buildTourTooltip(step: TourStep): HTMLElement{
     actions.className="tg-tour-actions";
     let prevBtn=document.createElement("button");
     prevBtn.className="tg-tour-btn tg-tour-prev btn btn-secondary";
-    prevBtn.textContent="Back";
+    prevBtn.textContent=t("tour.back");
     let nextBtn=document.createElement("button");
     nextBtn.className="tg-tour-btn tg-tour-next btn btn-primary";
-    nextBtn.textContent="Next";
+    nextBtn.textContent=t("tour.next");
     let skipBtn=document.createElement("button");
     skipBtn.className="tg-tour-btn tg-tour-skip btn btn-secondary";
-    skipBtn.textContent="Skip";
+    skipBtn.textContent=t("tour.skip");
     actions.appendChild(prevBtn);
     actions.appendChild(nextBtn);
     actions.appendChild(skipBtn);
