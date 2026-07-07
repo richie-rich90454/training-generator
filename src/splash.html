@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:">
-        <title>Training Generator - Loading</title>
+        <title data-i18n="splash.pageTitle">Training Generator - Loading</title>
         <link rel="stylesheet" href="./styles/tokens.css">
         <style>
             *{
@@ -167,17 +167,17 @@
                     <circle cx="16" cy="17" r="2"/>
                 </svg>
             </div>
-            <h1 class="splash-title">Training Generator</h1>
-            <p class="splash-subtitle">Converting documents to AI training data using Ollama</p>
+            <h1 class="splash-title" data-i18n="splash.title">Training Generator</h1>
+            <p class="splash-subtitle" data-i18n="splash.subtitle">Converting documents to AI training data using Ollama</p>
             <div class="loading-container">
                 <div class="loading-spinner"></div>
-                <div class="loading-text" id="loading-text">Initializing application...</div>
+                <div class="loading-text" id="loading-text" data-i18n="splash.loading">Initializing application...</div>
                 <div class="loading-progress">
                     <div class="loading-progress-bar" id="progress-bar"></div>
                 </div>
             </div>
             <div class="splash-footer">
-                <p>Version <span id="version-text">1.0.0</span> • Loading please wait...</p>
+                <p data-i18n="splash.footer" data-i18n-version="{{version}}">Version <span id="version-text">1.0.0</span> • Loading please wait...</p>
             </div>
         </div>
         <script src="./splash.js"></script>
