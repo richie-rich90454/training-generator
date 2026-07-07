@@ -13,6 +13,7 @@
 
 [![Electron](https://img.shields.io/badge/Electron-42.3.3-47848F.svg)](https://www.electronjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6.svg)](https://www.typescriptlang.org/)
+[![SolidJS](https://img.shields.io/badge/SolidJS-1.9-2C4F7C.svg)](https://www.solidjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-646cff.svg)](https://vitejs.dev/)
 [![Vitest](https://img.shields.io/badge/Vitest-4.1-6E9F18.svg)](https://vitest.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
@@ -53,7 +54,7 @@
 
 ### Performance
 - **Web Worker Offloading**: Chunking and deduplication run in background workers
-- **Virtual Scrolling**: Efficient rendering of large output lists
+- **Fine-Grained Reactivity**: SolidJS signals and stores for minimal updates and low memory usage
 - **SQLite Caching**: Persistent cache with eviction policies
 - **Exponential Backoff**: Retry with jitter for API resilience
 - **Rate Limiting**: Configurable rate limits per provider
@@ -92,8 +93,14 @@
 - **Service Worker**: Offline app shell caching
 - **Lazy Loading**: On-demand module loading for settings and help
 
+### Frontend Architecture
+- **SolidJS UI**: The renderer is built with SolidJS fine-grained reactivity (`createSignal`, `createStore`, `createMemo`) instead of a virtual DOM framework
+- **CSS Modules**: Plain vanilla CSS with module scoping configured globally to preserve existing class names
+- **Store Pattern**: State lives in framework-agnostic Solid stores under `src/renderer/stores/`
+- **Orchestrator Layer**: File reading, chunking, and processing logic is decoupled from components in `src/renderer/processing/orchestrator.ts`
+
 ### Testing
-- **3328+ Tests**: 139 test files covering unit, integration, and system tests
+- **3300+ Tests**: 139 test files covering unit, integration, and system tests with `@solidjs/testing-library` for UI components
 - **TypeScript Strict Mode**: Full type safety with `tsc --noEmit`
 - **CI/CD**: Automated testing and release packaging via GitHub Actions
 
@@ -139,8 +146,8 @@ npm run cli -- --input ./docs --output ./output --model llama3.2
 ### GUI Mode
 
 ```bash
-npm run dev       # Development with hot reload
-npm start         # Production build
+npm run dev       # Development with hot reload (Vite dev server + Electron)
+npm start         # Run production mode from TypeScript source (no build step required)
 ```
 
 ### CLI Mode
@@ -173,7 +180,7 @@ npm run package:linux   # Linux only
 ### Testing
 
 ```bash
-npm test                # Run all tests (565+ tests)
+npm test                # Run all tests (3300+ tests)
 npm run test:watch      # Watch mode
 npm run typecheck       # TypeScript strict type checking
 ```
@@ -197,35 +204,58 @@ training-generator/
 │   │   ├── fileParser.ts    # Multi-format document parser
 │   │   └── fileParserLazy.ts # Lazy-loaded parser variant
 │   ├── renderer/
-│   │   ├── app.ts           # Main application entry point
-│   │   ├── provider.ts      # Multi-provider abstraction (Ollama, OpenAI, Anthropic, Gemini)
-│   │   ├── processor.ts     # Processing pipeline orchestration
-│   │   ├── chunker.ts       # Semantic chunking with context overlap
-│   │   ├── deduplicator.ts  # Simhash-based near-duplicate detection
-│   │   ├── cache.ts         # SQLite caching with persistence
-│   │   ├── promptManager.ts # Multi-language prompt template management
-│   │   ├── fileManager.ts   # File drag-drop, selection, validation
-│   │   ├── outputManager.ts # Output formatting and export
-│   │   ├── uiManager.ts     # UI state, modals, themes, tooltips
-│   │   ├── statsTracker.ts  # Processing statistics aggregation
-│   │   ├── i18n.ts          # Internationalization framework (8 languages)
-│   │   ├── toast.ts         # Toast notification system
-│   │   ├── virtualList.ts   # Virtual scrolling for large lists
-│   │   ├── confirm.ts       # Confirmation modal dialogs
-│   │   ├── settingsPanel.ts # Settings management
-│   │   ├── helpContent.ts   # Lazy-loaded help content
-│   │   ├── logger.ts        # Structured JSON logging
-│   │   ├── security.ts      # AES-256-GCM encryption, input sanitization
-│   │   ├── checkpoint.ts    # Auto-save state (30s interval)
-│   │   ├── audit.ts         # Audit trail and event logging
-│   │   ├── provenance.ts    # Output lineage tracking
-│   │   ├── qualityValidator.ts # Training data quality validation
-│   │   ├── rateLimiter.ts   # API rate limiting with backoff
-│   │   ├── dashboard.ts     # Real-time observability dashboard
-│   │   ├── devtools.ts      # Developer diagnostics panel
-│   │   ├── configProfiles.ts # Named configuration profiles
-│   │   ├── templateEditor.ts # Visual prompt template editor
-│   │   ├── exportFormats.ts # Multi-format export definitions
+│   │   ├── App.tsx              # SolidJS root component and bootstrap
+│   │   ├── components/          # SolidJS UI components
+│   │   │   ├── AnalyticsDashboard.tsx
+│   │   │   ├── CommandPalette.tsx
+│   │   │   ├── ConfigPanel.tsx
+│   │   │   ├── ContentGrid.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── DatasetPreview.tsx
+│   │   │   ├── Devtools.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Icon.tsx
+│   │   │   ├── OutputCard.tsx
+│   │   │   ├── ProcessingCard.tsx
+│   │   │   ├── PromptEditor.tsx
+│   │   │   ├── SettingsModal.tsx
+│   │   │   ├── StatusPanel.tsx
+│   │   │   ├── TemplateEditor.tsx
+│   │   │   ├── TitleBar.tsx
+│   │   │   ├── ToastContainer.tsx
+│   │   │   └── UploadCard.tsx
+│   │   ├── stores/              # SolidJS reactive stores
+│   │   │   ├── appStore.ts      # Application orchestration store
+│   │   │   ├── fileStore.ts     # File selection and status
+│   │   │   ├── outputStore.ts   # Output data and export
+│   │   │   ├── settingsStore.ts # Settings persistence
+│   │   │   └── uiStore.ts       # UI state, logs, toasts, modals
+│   │   ├── processing/          # Framework-agnostic processing orchestration
+│   │   │   └── orchestrator.ts  # File read, chunk, process, dedupe flow
+│   │   ├── provider.ts          # Multi-provider abstraction (Ollama, OpenAI, Anthropic, Gemini)
+│   │   ├── processor.ts         # Processing pipeline orchestration
+│   │   ├── chunker.ts           # Semantic chunking with context overlap
+│   │   ├── deduplicator.ts      # Simhash-based near-duplicate detection
+│   │   ├── cache.ts             # SQLite caching with persistence
+│   │   ├── promptManager.ts     # Multi-language prompt template management
+│   │   ├── statsTracker.ts      # Processing statistics aggregation
+│   │   ├── i18n.ts              # Internationalization framework (8 languages)
+│   │   ├── toast.ts             # Toast notification system
+│   │   ├── confirm.ts           # Confirmation modal dialogs
+│   │   ├── helpContent.ts       # Lazy-loaded help content
+│   │   ├── logger.ts            # Structured JSON logging
+│   │   ├── security.ts          # AES-256-GCM encryption, input sanitization
+│   │   ├── checkpoint.ts        # Auto-save state (30s interval)
+│   │   ├── audit.ts             # Audit trail and event logging
+│   │   ├── provenance.ts        # Output lineage tracking
+│   │   ├── qualityValidator.ts  # Training data quality validation
+│   │   ├── rateLimiter.ts       # API rate limiting with backoff
+│   │   ├── dashboard.ts         # Real-time observability dashboard
+│   │   ├── devtools.ts          # Developer diagnostics panel
+│   │   ├── configProfiles.ts    # Named configuration profiles
+│   │   ├── templateEditor.ts    # Visual prompt template editor
+│   │   ├── exportFormats.ts     # Multi-format export definitions
+│   │   ├── icons.ts             # Inline SVG icon registry
 │   │   └── workers/
 │   │       ├── chunk.worker.ts  # Web Worker for chunking
 │   │       ├── dedup.worker.ts  # Web Worker for deduplication
