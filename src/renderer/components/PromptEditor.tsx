@@ -1,0 +1,190 @@
+import type { JSX } from "solid-js"
+import { createSignal, createMemo, For, Show } from "solid-js"
+import { t } from "../i18n.js"
+import promptEditorStyles from "./styles/PromptEditor.module.css"
+const styles = { ...promptEditorStyles }
+export interface PromptVersion{
+    id: string
+    name: string
+    content: string
+    createdAt: number
+}
+export interface PromptEditorProps{
+    modelValue: string
+    variables?: Record<string, string>
+    history?: PromptVersion[]
+    placeholder?: string
+    onChange?: (value: string)=>void
+    onSave?: (version: PromptVersion)=>void
+    onRun?: (text: string)=>void
+    onVariableChange?: (name: string, value: string)=>void
+}
+export function PromptEditor(props: PromptEditorProps): JSX.Element{
+    let [localContent, setLocalContent]=createSignal<string>(props.modelValue||"")
+    let [variableValues, setVariableValues]=createSignal<Record<string, string>>({ ...props.variables })
+    let [showPreview, setShowPreview]=createSignal<boolean>(false)
+    let [showHistory, setShowHistory]=createSignal<boolean>(false)
+    let [selectedVersionId, setSelectedVersionId]=createSignal<string|null>(null)
+    let [versionName, setVersionName]=createSignal<string>("")
+    let extractedVariables=createMemo<string[]>(()=>{
+        let regex=/\{\{([^{}]+)\}\}/g
+        let found=new Set<string>()
+        let match=regex.exec(localContent())
+        while (match!==null){
+            let name=match[1].trim()
+            if (name.length>0){
+                found.add(name)
+            }
+            match=regex.exec(localContent())
+        }
+        return Array.from(found)
+    })
+    let previewText=createMemo<string>(()=>{
+        let text=localContent()
+        text=text.replace(/\{\{([^{}]+)\}\}/g,(match: string, name: string)=>{
+            let trimmedName=name.trim()
+            if (variableValues()[trimmedName]!==undefined){
+                return variableValues()[trimmedName]
+            }
+            return match
+        })
+        return text
+    })
+    let isDirty=createMemo<boolean>(()=>{
+        return localContent()!==props.modelValue
+    })
+    let hasVariables=createMemo<boolean>(()=>{
+        return extractedVariables().length>0
+    })
+    function onInput(event: Event):void{
+        let target=event.target as HTMLTextAreaElement
+        setLocalContent(target.value)
+        props.onChange?.(target.value)
+    }
+    function setVariable(name: string, value: string):void{
+        setVariableValues((prev)=>{
+            return { ...prev, [name]: value }
+        })
+        props.onVariableChange?.(name, value)
+    }
+    function handleVariableInput(name: string, event: Event):void{
+        let target=event.target as HTMLInputElement
+        setVariable(name, target.value)
+    }
+    function togglePreview():void{
+        setShowPreview(!showPreview())
+    }
+    function toggleHistory():void{
+        setShowHistory(!showHistory())
+    }
+    function generateId():string{
+        return Math.random().toString(36).substring(2)+Date.now().toString(36)
+    }
+    function saveVersion(name: string):void{
+        let finalName=name||versionName()||t("promptEditor.defaultVersionPrefix")+new Date().toLocaleString()
+        let version: PromptVersion={
+            id: generateId(),
+            name: finalName,
+            content: localContent(),
+            createdAt: Date.now()
+        }
+        props.onSave?.(version)
+    }
+    function loadVersion(version: PromptVersion):void{
+        setLocalContent(version.content)
+        setSelectedVersionId(version.id)
+        props.onChange?.(version.content)
+    }
+    function runPreview():void{
+        props.onRun?.(previewText())
+    }
+    function formatDate(timestamp: number):string{
+        return new Date(timestamp).toLocaleString()
+    }
+    return (
+        <div class={styles["prompt-editor"]} data-testid="prompt-editor">
+            <div style={{ display: "none" }} data-testid="extracted-variables">{JSON.stringify(extractedVariables())}</div>
+            <div style={{ display: "none" }} data-testid="is-dirty">{isDirty().toString()}</div>
+            <div style={{ display: "none" }} data-testid="variable-values">{JSON.stringify(variableValues())}</div>
+            <div style={{ display: "none" }} data-testid="selected-version-id">{selectedVersionId()}</div>
+            <div style={{ display: "none" }} data-testid="has-variables">{hasVariables().toString()}</div>
+            <div style={{ display: "none" }} data-testid="preview-text">{previewText()}</div>
+            <div class={styles["editor-toolbar"]}>
+                <input
+                    class={styles["version-name-input"]}
+                    type="text"
+                    value={versionName()}
+                    placeholder={t("promptEditor.versionNamePlaceholder")}
+                    data-testid="version-name-input"
+                    onInput={(e)=>setVersionName(e.currentTarget.value)}
+                />
+                <button class={styles["toolbar-button"]} type="button" onClick={togglePreview} data-testid="toggle-preview-button">{showPreview()?t("promptEditor.hidePreview"):t("promptEditor.showPreview")}</button>
+                <button class={styles["toolbar-button"]} type="button" onClick={toggleHistory} data-testid="toggle-history-button">{showHistory()?t("promptEditor.hideHistory"):t("promptEditor.showHistory")}</button>
+                <button class={styles["toolbar-button"]} type="button" onClick={runPreview} data-testid="run-button">{t("promptEditor.run")}</button>
+                <button class={styles["toolbar-button"]} type="button" onClick={()=>saveVersion("")} data-testid="save-button">{t("promptEditor.save")}</button>
+            </div>
+            <div class={styles["editor-main"]}>
+                <div class={styles["editor-panel"]}>
+                    <textarea
+                        class={styles["prompt-textarea"]}
+                        placeholder={props.placeholder||""}
+                        value={localContent()}
+                        onInput={onInput}
+                        data-testid="prompt-textarea"
+                    ></textarea>
+                    <Show when={hasVariables()}>
+                        <div class={styles["variable-panel"]} data-testid="variable-panel">
+                            <h4 class={styles["panel-title"]}>{t("promptEditor.variablesTitle")}</h4>
+                            <For each={extractedVariables()}>
+                                {(variable)=>{
+                                    return (
+                                        <div class={styles["variable-row"]} data-testid="variable-row">
+                                            <label class={styles["variable-label"]} data-testid={"variable-label-"+variable}>{variable}</label>
+                                            <input
+                                                class={styles["variable-input"]}
+                                                type="text"
+                                                value={variableValues()[variable]||""}
+                                                onInput={(e)=>handleVariableInput(variable, e)}
+                                                data-testid={"variable-input-"+variable}
+                                            />
+                                        </div>
+                                    )
+                                }}
+                            </For>
+                        </div>
+                    </Show>
+                </div>
+                <Show when={showPreview()}>
+                    <div class={styles["preview-panel"]} data-testid="preview-panel">
+                        <h4 class={styles["panel-title"]}>{t("promptEditor.previewTitle")}</h4>
+                        <pre class={styles["preview-text"]} data-testid="preview-text">{previewText()}</pre>
+                    </div>
+                </Show>
+                <Show when={showHistory()}>
+                    <div class={styles["history-panel"]} data-testid="history-panel">
+                        <h4 class={styles["panel-title"]}>{t("promptEditor.historyTitle")}</h4>
+                        <Show when={props.history && props.history.length>0} fallback={<div class={styles["history-empty"]} data-testid="history-empty">{t("promptEditor.noSavedVersions")}</div>}>
+                            <div class={styles["history-list"]} data-testid="history-list">
+                                <For each={props.history}>
+                                    {(version)=>{
+                                        return (
+                                            <div
+                                                class={styles["history-item"]}
+                                                classList={{ selected: selectedVersionId()===version.id }}
+                                                onClick={()=>loadVersion(version)}
+                                                data-testid={"history-item-"+version.id}
+                                            >
+                                                <span class={styles["history-name"]}>{version.name}</span>
+                                                <span class={styles["history-date"]}>{formatDate(version.createdAt)}</span>
+                                            </div>
+                                        )
+                                    }}
+                                </For>
+                            </div>
+                        </Show>
+                    </div>
+                </Show>
+            </div>
+        </div>
+    )
+}
