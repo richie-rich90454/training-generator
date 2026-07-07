@@ -1,4 +1,5 @@
-import { renderIcon } from "./icons.js"
+import{renderIcon}from"./icons.js"
+import{t}from"./i18n.js"
 export interface DashboardMetrics {
   chunksDone: number
   chunksTotal: number
@@ -11,7 +12,6 @@ export interface DashboardMetrics {
   eta: string
   elapsed: string
 }
-
 export class Dashboard {
   private container: HTMLElement
   visible: boolean = false
@@ -25,36 +25,34 @@ export class Dashboard {
     tokensPerSecond: 0, totalTokens: 0, eta: "--", cacheHitRate: 0,
     providerLatency: 0, activeProvider: "--", elapsed: "0s"
   }
-
   constructor() {
     this.container = this.createContainer()
     document.body.appendChild(this.container)
   }
-
   private createContainer(): HTMLElement {
     let el = document.createElement("div")
     el.id = "dashboard-overlay"
     el.className = "dashboard-overlay"
     el.setAttribute("role", "dialog")
     el.setAttribute("aria-modal", "true")
-    el.setAttribute("aria-label", "Processing dashboard")
+    el.setAttribute("aria-label", t("dashboard.aria"))
     el.style.display = "none"
     el.innerHTML = `
       <div class="dashboard-panel" role="document">
         <div class="dashboard-header">
-          <h3>${renderIcon("fa-tachometer-alt", 20)} Processing Dashboard</h3>
-          <button class="dashboard-close" aria-label="Close dashboard">&times;</button>
+          <h3>${renderIcon("fa-tachometer-alt", 20)} ${t("dashboard.title")}</h3>
+          <button class="dashboard-close" aria-label="${t("dashboard.closeAria")}">&times;</button>
         </div>
         <div class="dashboard-body">
           <table>
-            <tr><td>Chunks:</td><td id="dash-chunks">0 / 0</td></tr>
-            <tr><td>Chunks/s:</td><td id="dash-cps">0</td></tr>
-            <tr><td>Tokens/s:</td><td id="dash-tps">0</td></tr>
-            <tr><td>Cache Hit Rate:</td><td id="dash-cache">0%</td></tr>
-            <tr><td>Provider Latency:</td><td id="dash-latency">0 ms</td></tr>
-            <tr><td>Active Provider:</td><td id="dash-provider">--</td></tr>
-            <tr><td>ETA:</td><td id="dash-eta">--</td></tr>
-            <tr><td>Elapsed:</td><td id="dash-elapsed">0s</td></tr>
+            <tr><td>${t("dashboard.label.chunks")}</td><td id="dash-chunks">0 / 0</td></tr>
+            <tr><td>${t("dashboard.label.chunksPerSecond")}</td><td id="dash-cps">0</td></tr>
+            <tr><td>${t("dashboard.label.tokensPerSecond")}</td><td id="dash-tps">0</td></tr>
+            <tr><td>${t("dashboard.label.cacheHitRate")}</td><td id="dash-cache">0%</td></tr>
+            <tr><td>${t("dashboard.label.providerLatency")}</td><td id="dash-latency">0 ms</td></tr>
+            <tr><td>${t("dashboard.label.activeProvider")}</td><td id="dash-provider">--</td></tr>
+            <tr><td>${t("dashboard.label.eta")}</td><td id="dash-eta">--</td></tr>
+            <tr><td>${t("dashboard.label.elapsed")}</td><td id="dash-elapsed">0s</td></tr>
           </table>
         </div>
       </div>
@@ -62,7 +60,6 @@ export class Dashboard {
     el.querySelector(".dashboard-close")!.addEventListener("click", () => this.hide())
     return el
   }
-
   show(): void {
     this.visible = true
     this.container.style.display = "block"
@@ -75,7 +72,6 @@ export class Dashboard {
       focusable[0].focus()
     }
   }
-
   hide(): void {
     this.visible = false
     this.container.style.display = "none"
@@ -85,20 +81,18 @@ export class Dashboard {
       this.lastFocusedElement = null
     }
   }
-
   toggle(): void {
     if (this.visible) {
       this.hide()
-    } else {
+    }
+    else {
       this.show()
     }
   }
-
   update(metrics: Partial<DashboardMetrics>): void {
     Object.assign(this.metrics, metrics)
     this.render()
   }
-
   start(intervalMs: number = 500): void {
     if (this.updateInterval) {
       clearInterval(this.updateInterval)
@@ -118,7 +112,6 @@ export class Dashboard {
     this.show()
     this.updateInterval = window.setInterval(() => this.tick(), intervalMs)
   }
-
   stop(): void {
     if (this.updateInterval) {
       clearInterval(this.updateInterval)
@@ -126,7 +119,6 @@ export class Dashboard {
     }
     this.hide()
   }
-
   private tick(): void {
     if (!this.visible) return
     let elapsed = (Date.now() - this.startTime) / 1000
@@ -142,7 +134,6 @@ export class Dashboard {
     }
     this.render()
   }
-
   private render(): void {
     let set = (id: string, value: string) => {
       let el = this.container.querySelector("#" + id)
@@ -157,20 +148,18 @@ export class Dashboard {
     set("dash-eta", this.metrics.eta)
     set("dash-elapsed", this.metrics.elapsed)
   }
-
   private formatDuration(ms: number): string {
     ms = Math.round(ms)
-    if (ms < 1000) return `${ms}ms`
-    if (ms < 60000) return `${Math.round(ms / 1000)}s`
+    if (ms < 1000) return t("duration.ms", undefined, { ms: String(ms) })
+    if (ms < 60000) return t("duration.s", undefined, { s: String(Math.round(ms / 1000)) })
     let min = Math.floor(ms / 60000)
     let sec = Math.round((ms % 60000) / 1000)
     if (sec >= 60) {
       min += Math.floor(sec / 60)
       sec = sec % 60
     }
-    return `${min}m ${sec}s`
+    return t("duration.m_s", undefined, { min: String(min), sec: String(sec) })
   }
-
   private trapFocus(): void {
     if (this.focusTrapHandler) return
     let selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
@@ -184,7 +173,8 @@ export class Dashboard {
       if (ke.shiftKey && document.activeElement === first) {
         ke.preventDefault()
         last.focus()
-      } else if (!ke.shiftKey && document.activeElement === last) {
+      }
+      else if (!ke.shiftKey && document.activeElement === last) {
         ke.preventDefault()
         first.focus()
       }
@@ -199,7 +189,6 @@ export class Dashboard {
     document.addEventListener("keydown", this.focusTrapHandler)
     document.addEventListener("keydown", this.keydownHandler)
   }
-
   private removeFocusTrap(): void {
     if (this.focusTrapHandler) {
       document.removeEventListener("keydown", this.focusTrapHandler)
