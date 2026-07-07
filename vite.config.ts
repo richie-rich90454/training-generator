@@ -1,11 +1,26 @@
+// Vite configuration for the SolidJS renderer.
+// vite-plugin-solid compiles JSX and enables HMR. CSS Modules are configured with
+// global-scope behavior so existing class names are preserved in the rendered DOM.
 import{defineConfig}from "vite"
 import path from "path"
 import fs from "fs"
 import{globSync}from "glob"
 import type{Plugin}from "vite"
+import solid from "vite-plugin-solid"
 
 const __dirname=import.meta.dirname
 
+function electronProductionHtmlPlugin():Plugin{
+    return{
+        name:"electron-production-html",
+        // Electron's file:// origin cannot answer CORS preflights, so Vite's
+        // injected crossorigin attributes on stylesheets and module preloads
+        // prevent the CSS from loading in packaged builds. Strip them all.
+        transformIndexHtml(html:string):string{
+            return html.replace(/ crossorigin(="")?/g,"")
+        }
+    }
+}
 function copyPromptsPlugin():Plugin{
     return{
         name:"copy-prompts",
@@ -32,6 +47,33 @@ function copyPromptsPlugin():Plugin{
                 copiedCount++
             }
             console.log(`Copied ${copiedCount} prompt files to dist/prompts`)
+        }
+    }
+}
+function copyStaticAssetsPlugin():Plugin{
+    return{
+        name:"copy-static-assets",
+        writeBundle(){
+            const assetsDir=path.resolve(__dirname,"assets")
+            const destDir=path.resolve(__dirname,"dist/assets")
+            if(!fs.existsSync(assetsDir)){
+                console.warn(`Source directory ${assetsDir} does not exist`)
+                return
+            }
+            if(!fs.existsSync(destDir)){
+                fs.mkdirSync(destDir,{recursive:true})
+            }
+            const files=["icon.svg","tray-icon.svg"]
+            let copiedCount=0
+            for(const file of files){
+                const srcFile=path.join(assetsDir,file)
+                const destFile=path.join(destDir,file)
+                if(fs.existsSync(srcFile)){
+                    fs.copyFileSync(srcFile,destFile)
+                    copiedCount++
+                }
+            }
+            console.log(`Copied ${copiedCount} static asset files to dist/assets`)
         }
     }
 }
@@ -102,8 +144,20 @@ export default defineConfig({
             "@":path.resolve(__dirname,"./src"),
         },
     },
+    css:{
+        modules:{
+            // Keep original class names in the DOM and in the emitted CSS so
+            // the existing component markup matches the styles exactly. Using
+            // generateScopedName "[local]" still exports a usable styles object
+            // (unlike scopeBehaviour "global", which yields empty objects).
+            generateScopedName:"[local]"
+        }
+    },
     clearScreen:false,
     plugins:[
-        copyPromptsPlugin()
+        solid(),
+        electronProductionHtmlPlugin(),
+        copyPromptsPlugin(),
+        copyStaticAssetsPlugin()
     ]
 })
