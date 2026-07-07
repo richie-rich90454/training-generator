@@ -4,7 +4,7 @@ import{StatsTracker}from"./statsTracker.js"
 import{getCachedResult,setCachedResult}from"./cache.js"
 import type{ProvenanceData}from"./provenance.js"
 import{tagItem}from"./provenance.js"
-
+import{t}from"./i18n.js"
 class Processor{
     private abortController:AbortController|null=null
     private aborted:boolean=false
@@ -12,22 +12,18 @@ class Processor{
     demoMode:boolean=false
     provider:Provider|null=null
     stats:StatsTracker
-
     constructor(){
         this.stats=new StatsTracker()
     }
-
     get isAborted():boolean{
         return this.aborted||this.abortController?.signal.aborted||false
     }
-
     splitBatchedResponse(response:string,count:number):string[]{
         let parts=response.split(/--- CHUNK \d+ ---/)
         if(parts.length>0&&parts[0].trim()==="")parts.shift()
         while(parts.length<count)parts.push("")
         return parts.slice(0,count).map(p=>p.trim())
     }
-
     private async batchSmallChunks(
         smallChunks:{chunk:string;index:number}[],
         model:string,
@@ -44,13 +40,11 @@ class Processor{
         let allItems:TrainingItem[]=[]
         let MAX_CHARS_PER_BATCH=100000
         let stats=this.stats
-
         let filtered=smallChunks.filter(item=>item.chunk&&item.chunk.trim().length>0)
         let batches:{chunk:string;index:number}[][]=[]
         let currentBatch:{chunk:string;index:number}[]=[]
         let currentBatchSize=0
         let estimatedPromptMultiplier=3
-
         for(let item of filtered){
             let estimatedSize=item.chunk.length*estimatedPromptMultiplier+50
             if(currentBatch.length>0&&currentBatchSize+estimatedSize>MAX_CHARS_PER_BATCH){
@@ -62,7 +56,6 @@ class Processor{
             currentBatchSize+=estimatedSize
         }
         if(currentBatch.length>0)batches.push(currentBatch)
-
         for(let batch of batches){
             if(signal.aborted)break
             try{
@@ -73,20 +66,15 @@ class Processor{
                     prompts.push(prompt)
                 }
                 if(signal.aborted||prompts.length===0)continue
-
                 let combined=prompts.map((p,j)=>`--- CHUNK ${j+1} ---\n${p}`).join("\n\n")
                 stats.recordPromptTokens(combined)
-
                 let result=await provider.generate(combined,model,{
                     temperature:0.7,
                     top_p:0.9,
                     max_tokens:16384
                 })
-
                 if(signal.aborted)continue
-
                 let responses=this.splitBatchedResponse(result.text,batch.length)
-
                 for(let j=0;j<batch.length;j++){
                     let items=createTrainingItem(batch[j].chunk,responses[j]||"",processingType)
                     if(provenanceBase){
@@ -104,15 +92,13 @@ class Processor{
                     console.error("Batch processing failed:",(err as Error).message)
                     for(let item of batch){
                         stats.recordChunkFailure()
-                        onChunkError(item.index,"Batch processing failed: "+(err as Error).message)
+                        onChunkError(item.index,t("log.batchProcessingFailed",undefined,{error:(err as Error).message}))
                     }
                 }
             }
         }
-
         return allItems
     }
-
     abort():void{
         this.aborted=true
         if(this.abortController){
@@ -120,34 +106,29 @@ class Processor{
             this.abortController=null
         }
     }
-
     reset():void{
         this.aborted=false
         this.abortController=new AbortController()
     }
-
     enableDemoMode():void{
         this.demoMode=true
     }
-
     disableDemoMode():void{
         this.demoMode=false
     }
-
     private getDemoResponse(chunk:string,processingType:string):string{
         let demoResponses:Record<string,string[]>={
             instruction:[
-                "Question: What is the main topic of this document?\nAnswer: This document covers the key concepts and principles of modern software development.",
-                "Question: What are the key takeaways?\nAnswer: The document emphasizes modular design, testing, and continuous integration.",
+                t("demoResponse.instruction.1"),
+                t("demoResponse.instruction.2"),
             ],
             conversation:[
-                "User: Can you explain the main concept?\nAssistant: The main concept revolves around systematic approaches to problem-solving.",
+                t("demoResponse.conversation.1"),
             ]
         }
         let responses=demoResponses[processingType]||demoResponses.instruction
         return responses[Math.floor(Math.random()*responses.length)]
     }
-
     async processChunks(
         chunks:string[],
         model:string,
@@ -167,7 +148,6 @@ class Processor{
         let selfProvider=this.provider
         let batchingEnabled=selfProvider!==null&&selfProvider.name!=="ollama"
         let queue:{chunk:string;index:number}[]=[]
-
         if(batchingEnabled){
             let smallChunks:{chunk:string;index:number}[]=[]
             for(let i=0;i<chunks.length;i++){
@@ -202,10 +182,8 @@ class Processor{
         else{
             queue=chunks.map((chunk,i)=>({chunk,index:i}))
         }
-
         let running=0
         let pending=0
-
         async function processOne(
             chunk:string,
             idx:number,
@@ -260,7 +238,7 @@ class Processor{
                     response=getDemoResponse(chunk,processingType)
                 }
                 else{
-                    if(!provider)throw new Error("No provider configured")
+                    if(!provider)throw new Error(t("error.noProvider"))
                     let responsePromise=provider.generate(prompt,model,{
                         temperature:0.7,
                         top_p:0.9,
@@ -295,7 +273,6 @@ class Processor{
                 onDone()
             }
         }
-
         return new Promise((resolve)=>{
             let onSlotFree=()=>{
                 running--
@@ -317,7 +294,6 @@ class Processor{
                     resolve(allItems)
                 }
             }
-
             let onDone=()=>{
                 pending--
                 if(pending===0&&running===0){
@@ -325,7 +301,6 @@ class Processor{
                     resolve(allItems)
                 }
             }
-
             let initial=Math.min(this.concurrency,queue.length)
             for(let i=0;i<initial;i++){
                 let{chunk,index}=queue.shift()!
@@ -347,5 +322,4 @@ class Processor{
         })
     }
 }
-
 export default Processor
