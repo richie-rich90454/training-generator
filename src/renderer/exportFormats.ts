@@ -1,4 +1,5 @@
 import type { TrainingItem } from "../types/index.js"
+import { t } from "./i18n.js"
 export interface ExportOptions{
     format?: string
     includeMetadata?: boolean
@@ -28,7 +29,7 @@ export class ExporterRegistry{
     export(format: string, items: TrainingItem[], options?: ExportOptions): Buffer|string|Promise<Buffer|string>{
         let exporter=this.exporters.get(format)
         if(!exporter){
-            throw new Error(`Unsupported export format: ${format}`)
+            throw new Error(t("error.unsupportedExportFormat", undefined, { format }))
         }
         return exporter.export(items, options)
     }
