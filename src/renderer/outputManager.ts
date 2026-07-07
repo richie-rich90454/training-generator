@@ -1,5 +1,6 @@
 import type{TrainingItem,QAPair,ConversationTurn,ChatMessage}from"../types/index.js"
 import{exportJSONL,exportJSONArray,exportCSV}from"./exportFormats.js"
+import{t}from"./i18n.js"
 class OutputManager{
     app:any
     outputData:TrainingItem[]
@@ -40,7 +41,7 @@ class OutputManager{
                     else{
                         items.push({
                             format:"instruction",
-                            instruction:"Answer the question based on the text",
+                            instruction:t("training.instruction.question"),
                             input:pair.question,
                             output:pair.answer
                         })
@@ -71,7 +72,7 @@ class OutputManager{
                         else{
                             items.push({
                                 format:"instruction",
-                                instruction:"Respond to the user's message",
+                                instruction:t("training.instruction.conversation"),
                                 input:turn.user,
                                 output:turn.assistant
                             })
@@ -99,7 +100,7 @@ class OutputManager{
         else{
             items.push({
                 format:"instruction",
-                instruction:processingType=="instruction"?"Answer the question based on the text":"Process the following text",
+                instruction:processingType=="instruction"?t("training.instruction.question"):t("training.instruction.default"),
                 input:input,
                 output:output
             })
@@ -123,10 +124,10 @@ class OutputManager{
                     answer:currentAnswer.trim()
                 })
                 if(currentQuestion&&!currentAnswer){
-                    this.app.addLog("QA pair missing answer; exporting partial pair","warning")
+                    this.app.addLog(t("log.qaMissingAnswer"),"warning")
                 }
                 else if(!currentQuestion&&currentAnswer){
-                    this.app.addLog("QA pair missing question; exporting partial pair","warning")
+                    this.app.addLog(t("log.qaMissingQuestion"),"warning")
                 }
             }
             currentQuestion=""
@@ -251,7 +252,7 @@ class OutputManager{
     }
     async exportOutput(exportFormat?:string):Promise<void>{
         if(this.outputData.length==0){
-            this.app.addLog("No data to export","warning")
+            this.app.addLog(t("log.noDataToExport"),"warning")
             return
         }
         try{
@@ -259,10 +260,10 @@ class OutputManager{
             let SPLIT_THRESHOLD=100000
             if(this.outputData.length>SPLIT_THRESHOLD){
                 let partCount=Math.ceil(this.outputData.length/SPLIT_THRESHOLD)
-                this.app.addLog(`Output exceeds ${SPLIT_THRESHOLD} items, splitting into ${partCount} files`,"info")
-                let firstPath=await window.electronAPI!.saveFileDialog(`training_data-1${this.extensionForFormat(format)}`)
+                this.app.addLog(t("log.outputSplit",undefined,{threshold:String(SPLIT_THRESHOLD),count:String(partCount)}),"info")
+                let firstPath=await window.electronAPI!.saveFileDialog(`${t("output.defaultFilename")}-1${this.extensionForFormat(format)}`)
                 if(!firstPath){
-                    this.app.addLog("Export cancelled","info")
+                    this.app.addLog(t("log.exportCancelled"),"info")
                     return
                 }
                 let baseDir=this.dirname(firstPath)
@@ -271,36 +272,36 @@ class OutputManager{
                     let end=Math.min((i+1)*SPLIT_THRESHOLD,this.outputData.length)
                     let partData=this.outputData.slice(start,end)
                     let content=this.formatData(partData,format)
-                    let partFilename=`training_data-${i+1}${this.extensionForFormat(format)}`
+                    let partFilename=`${t("output.defaultFilename")}-${i+1}${this.extensionForFormat(format)}`
                     let savePath=baseDir?`${baseDir}/${partFilename}`:partFilename
                     let result=await window.electronAPI!.saveFile(savePath,content)
                     if(result.success){
-                        this.app.addLog(`Exported part ${i+1}/${partCount} to ${savePath}`,"success")
+                        this.app.addLog(t("log.exportPartSuccess",undefined,{current:String(i+1),total:String(partCount),path:savePath}),"success")
                     }
                     else{
-                        this.app.addLog(`Failed to export part ${i+1}: ${result.error}`,"error")
+                        this.app.addLog(t("log.exportPartFailed",undefined,{current:String(i+1),error:result.error||""}),"error")
                         return
                     }
                 }
                 return
             }
             let content=this.formatData(this.outputData,format)
-            let defaultFilename=`training_data${this.extensionForFormat(format)}`
+            let defaultFilename=`${t("output.defaultFilename")}${this.extensionForFormat(format)}`
             let savePath=await window.electronAPI!.saveFileDialog(defaultFilename)
             if(!savePath){
-                this.app.addLog("Export cancelled","info")
+                this.app.addLog(t("log.exportCancelled"),"info")
                 return
             }
             let result=await window.electronAPI!.saveFile(savePath,content)
             if(result.success){
-                this.app.addLog(`Exported to ${savePath}`,"success")
+                this.app.addLog(t("log.exportSuccess",undefined,{path:savePath}),"success")
             }
             else{
-                this.app.addLog(`Failed to export: ${result.error}`,"error")
+                this.app.addLog(t("log.exportFailed",undefined,{error:result.error||""}),"error")
             }
         }
         catch(error){
-            this.app.addLog(`Export failed: ${(error as Error).message}`,"error")
+            this.app.addLog(t("toast.exportFailed",undefined,{error:(error as Error).message}),"error")
         }
     }
     private formatData(data:TrainingItem[],format:string):string{
@@ -320,7 +321,7 @@ class OutputManager{
     }
     async copyOutput():Promise<void>{
         if(this.outputData.length==0){
-            this.app.addLog("No data to copy","warning")
+            this.app.addLog(t("log.noDataToCopy"),"warning")
             return
         }
         try{
@@ -340,14 +341,14 @@ class OutputManager{
             }
             const MAX_CLIPBOARD_SIZE=5*1024*1024
             if(content.length>MAX_CLIPBOARD_SIZE){
-                this.app.addLog(`Output too large to copy (${content.length} chars); use export instead`,"warning")
+                this.app.addLog(t("log.copyTooLarge",undefined,{size:String(content.length)}),"warning")
                 return
             }
             await navigator.clipboard.writeText(content)
-            this.app.addLog("Copied to clipboard","success")
+            this.app.addLog(t("log.copiedToClipboard"),"success")
         }
         catch(error){
-            this.app.addLog(`Failed to copy: ${(error as Error).message}`,"error")
+            this.app.addLog(t("log.copyFailed",undefined,{error:(error as Error).message}),"error")
         }
     }
 }
