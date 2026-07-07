@@ -12,6 +12,7 @@ import FileParserLazy from "./core/fileParserLazy.ts"
 import{SmartCache}from "./core/smartCache.ts"
 import{handle,registerWindowControlHandlers}from "./ipcMain.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
+import{t}from "./renderer/i18n.ts"
 
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
@@ -495,8 +496,8 @@ function createMainWindow(){
         if(!validatedURL)return
         console.error(`Failed to load:${validatedURL},Code:${errorCode},${errorDescription}`)
         dialog.showErrorBox(
-            "Loading Failed",
-            `Failed to load application:${errorDescription}\n\nPlease check if the application files are complete and try again.`
+            t("dialog.loadingFailedTitle"),
+            t("dialog.loadingFailedMessage",undefined,{errorDescription})
         )
         stopSplash()
         if(mainWindow&&!mainWindow.isDestroyed()){
@@ -506,8 +507,8 @@ function createMainWindow(){
     mainWindow.webContents.on("render-process-gone",(event,details)=>{
         console.error("Renderer process crashed:",details)
         dialog.showErrorBox(
-            "Renderer Crashed",
-            "The application UI has crashed. Please restart the application."
+            t("dialog.rendererCrashedTitle"),
+            t("dialog.rendererCrashedMessage")
         )
         stopSplash()
         if(mainWindow&&!mainWindow.isDestroyed()){
@@ -554,11 +555,11 @@ function toggleWindowFromTray():void{
     }
 }
 function buildTrayMenu():Electron.Menu{
-    let label=(mainWindow&&mainWindow.isVisible())?"Hide Training Generator":"Show Training Generator"
+    let label=(mainWindow&&mainWindow.isVisible())?t("tray.hide"):t("tray.show")
     return Menu.buildFromTemplate([
         {label:label,click:toggleWindowFromTray},
         {type:"separator"},
-        {label:"Quit",click:()=>{isAppQuitting=true;app.quit()}}
+        {label:t("tray.quit"),click:()=>{isAppQuitting=true;app.quit()}}
     ])
 }
 function createTray():void{
@@ -578,7 +579,7 @@ function createTray():void{
         return
     }
     tray=new Tray(icon)
-    tray.setToolTip("Training Generator")
+    tray.setToolTip(t("tray.tooltip"))
     if(isMac){
         tray.setContextMenu(buildTrayMenu())
     }
@@ -595,10 +596,10 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
     let{model,prompt,options}=payload
     options=options??{}
     if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
-        return{success:false,error:"Invalid model name or prompt"}
+        return{success:false,error:t("error.invalidModelNameOrPrompt")}
     }
     if(prompt.length>500000){
-        return{success:false,error:"Prompt is too large"}
+        return{success:false,error:t("error.promptTooLarge")}
     }
     let promptLength=prompt.length
     let timeout=300000
@@ -632,12 +633,12 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         return await new Promise<{success:boolean;response?:string;error?:string}>((resolve,reject)=>{
             let buffer=""
             noDataTimer=setTimeout(()=>{
-                reject(new Error("Stream timed out (no data)"))
+                reject(new Error(t("error.streamTimedOut")))
             },timeout)
             stream.on("data",(chunk:Buffer)=>{
                 if(noDataTimer)clearTimeout(noDataTimer)
                 noDataTimer=setTimeout(()=>{
-                    reject(new Error("Stream timed out (no data)"))
+                    reject(new Error(t("error.streamTimedOut")))
                 },timeout)
                 buffer+=chunk.toString()
                 let lines=buffer.split("\n")
@@ -673,7 +674,7 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                     catch{}
                 }
                 if(!fullResponse){
-                    reject(new Error("Stream ended without response"))
+                    reject(new Error(t("error.streamEndedWithoutResponse")))
                 }
                 else{
                     resolve({success:true,response:fullResponse})
@@ -686,7 +687,7 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         })
     }
     catch(error){
-        return{success:false,error:"Failed to generate response from Ollama"}
+        return{success:false,error:t("error.failedToGenerateResponse")}
     }
 }
 const LOGS_DIR=path.join(userDataPath,"logs")
@@ -740,8 +741,8 @@ function registerCriticalIpcHandlers():void{
         let result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
             properties:["openFile","multiSelections"],
             filters:[
-                {name:"Documents",extensions:["pdf","docx","doc","rtf","txt","md","html"]},
-                {name:"All Files",extensions:["*"]}
+                {name:t("dialog.fileFilter.documents"),extensions:["pdf","docx","doc","rtf","txt","md","html"]},
+                {name:t("dialog.fileFilter.allFiles"),extensions:["*"]}
             ]
         })
         if(result.canceled)return[]
@@ -776,18 +777,18 @@ function registerCriticalIpcHandlers():void{
             }
         })
         if(rejected.length>0){
-            dialog.showErrorBox("File selection rejected","The following files cannot be opened by the application:\n"+rejected.join("\n"))
+            dialog.showErrorBox(t("dialog.fileRejectedTitle"),t("dialog.fileRejectedMessage")+rejected.join("\n"))
         }
         return files.filter(Boolean)as FileObj[]
     })
     handle("dialog:saveFile",async(_event,{defaultFilename}:{defaultFilename?:string}):Promise<string|null>=>{
         let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
-            defaultPath:defaultFilename||"training_data.jsonl",
+            defaultPath:defaultFilename||`${t("dialog.saveDefaultFilename")}.jsonl`,
             filters:[
-                {name:"JSON Lines",extensions:["jsonl"]},
-                {name:"JSON",extensions:["json"]},
-                {name:"Text",extensions:["txt"]},
-                {name:"All Files",extensions:["*"]}
+                {name:t("dialog.saveFilter.jsonl"),extensions:["jsonl"]},
+                {name:t("dialog.saveFilter.json"),extensions:["json"]},
+                {name:t("dialog.saveFilter.text"),extensions:["txt"]},
+                {name:t("dialog.saveFilter.allFiles"),extensions:["*"]}
             ]
         })
         if(result.canceled||!result.filePath)return null
@@ -806,7 +807,7 @@ function registerCriticalIpcHandlers():void{
     handle("file:read",async(_event,{filePath}:{filePath:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"){
-                return{success:false,error:"Invalid file path"}
+                return{success:false,error:t("error.invalidFilePath")}
             }
             let resolvedPath=filePath
             let normalizedPath=normalizePromptsPath(filePath)
@@ -843,22 +844,22 @@ function registerCriticalIpcHandlers():void{
                 }
             }
             if(!isPathSafeForRead(resolvedPath)){
-                return{success:false,error:"File path is outside allowed directories"}
+                return{success:false,error:t("error.filePathOutsideAllowed")}
             }
             let stats=await fsp.stat(resolvedPath)
             if(stats.size>MAX_READ_SIZE){
-                return{success:false,error:"File exceeds maximum read size of 10MB"}
+                return{success:false,error:t("error.fileTooLarge10MB")}
             }
             let content=await fsp.readFile(resolvedPath,"utf-8")
             return{success:true,content}
         }
         catch(error){
-            return{success:false,error:"Failed to read file"}
+            return{success:false,error:t("error.failedToReadFile")}
         }
     })
     handle("prompt:get",async(_event,{language,processingType}:{language:string;processingType:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{
-            if(!language||!processingType)return{success:false,error:"Missing language or processingType"}
+            if(!language||!processingType)return{success:false,error:t("error.missingLanguageOrProcessingType")}
             let fileName=`${language}_${processingType}.txt`
             let possiblePaths:string[]=[]
             let dirs=getSafeReadDirs()
@@ -872,7 +873,7 @@ function registerCriticalIpcHandlers():void{
                     if(fs.existsSync(p)){
                         let stats=await fsp.stat(p)
                         if(stats.size>MAX_READ_SIZE){
-                            return{success:false,error:"Prompt file exceeds maximum read size"}
+                            return{success:false,error:t("error.promptFileTooLarge")}
                         }
                         let content=await fsp.readFile(p,"utf-8")
                         return{success:true,content}
@@ -880,37 +881,37 @@ function registerCriticalIpcHandlers():void{
                 }
                 catch{}
             }
-            return{success:false,error:"Prompt file not found"}
+            return{success:false,error:t("error.promptFileNotFound")}
         }
         catch(error){
-            return{success:false,error:"Failed to load prompt"}
+            return{success:false,error:t("error.failedToLoadPrompt")}
         }
     })
     handle("file:save",async(_event,{filePath,content}:{filePath:string;content:string}):Promise<{success:boolean;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"||content==null||typeof content!=="string"){
-                return{success:false,error:"Invalid file path or content"}
+                return{success:false,error:t("error.invalidFilePathOrContent")}
             }
             if(content.length>100*1024*1024){
-                return{success:false,error:"Content exceeds maximum size of 100MB"}
+                return{success:false,error:t("error.contentTooLarge100MB")}
             }
             if(!isPathSafeForWrite(filePath)&&!isAllowedSavePath(filePath)){
-                return{success:false,error:"File path is outside allowed write directories"}
+                return{success:false,error:t("error.filePathOutsideWriteDirs")}
             }
             await fsp.writeFile(filePath,content,"utf-8")
             return{success:true}
         }
         catch(error){
-            return{success:false,error:"Failed to save file"}
+            return{success:false,error:t("error.failedToSaveFile")}
         }
     })
     handle("file:parse",async(_event,{filePath,fileType}:{filePath:string;fileType:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
         try{
             if(!filePath||typeof filePath!=="string"||!fileType||typeof fileType!=="string"){
-                return{success:false,error:"Invalid file path or type"}
+                return{success:false,error:t("error.invalidFilePathOrType")}
             }
             if(!isPathSafeForParse(filePath)){
-                return{success:false,error:"Invalid or unsafe file path"}
+                return{success:false,error:t("error.invalidOrUnsafeFilePath")}
             }
             if(!fileParser){
                 fileParser=new FileParserLazy()
@@ -919,23 +920,23 @@ function registerCriticalIpcHandlers():void{
             return{success:true,content:text}
         }
         catch(error){
-            return{success:false,error:"Failed to parse file"}
+            return{success:false,error:t("error.failedToParseFile")}
         }
     })
     handle("file:parseBatch",async(_event,{files}:{files:FileObj[]}):Promise<{success:boolean;results?:ParseBatchItem[];error?:string}>=>{
         try{
             if(!files||!Array.isArray(files)||files.length===0){
-                return{success:false,error:"Invalid files array"}
+                return{success:false,error:t("error.invalidFilesArray")}
             }
             if(files.length>50){
-                return{success:false,error:"Cannot process more than 50 files at once"}
+                return{success:false,error:t("error.tooManyFiles50")}
             }
             for(let f of files){
                 if(!f||!f.path||typeof f.path!=="string"){
-                    return{success:false,error:"Invalid file entry in batch"}
+                    return{success:false,error:t("error.invalidFileEntry")}
                 }
                 if(!isPathSafeForParse(f.path)){
-                    return{success:false,error:"Invalid or unsafe file path in batch"}
+                    return{success:false,error:t("error.invalidOrUnsafeFilePathInBatch")}
                 }
             }
             if(!fileParser){
@@ -945,7 +946,7 @@ function registerCriticalIpcHandlers():void{
             return{success:true,results}
         }
         catch(error){
-            return{success:false,error:"Failed to parse files"}
+            return{success:false,error:t("error.failedToParseFiles")}
         }
     })
     handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<OllamaStatus>=>{
@@ -973,17 +974,17 @@ function registerCriticalIpcHandlers():void{
         }
         catch(error){
             console.error("Ollama check failed:",(error as Error).message)
-            return{running:false,models:[],error:"Failed to connect to Ollama"}
+            return{running:false,models:[],error:t("error.failedToConnectToOllama")}
         }
     })
     handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
         let{model,prompt,options}=payload
         options=options??{}
         if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
-            return{success:false,error:"Invalid model name or prompt"}
+            return{success:false,error:t("error.invalidModelNameOrPrompt")}
         }
         if(prompt.length>500000){
-            return{success:false,error:"Prompt is too large"}
+            return{success:false,error:t("error.promptTooLarge")}
         }
         try{
             await axios.get("http://localhost:11434/api/show",{
@@ -1022,7 +1023,7 @@ function registerCriticalIpcHandlers():void{
                     }
                 )
                 if(!response.data||typeof response.data.response!=="string"){
-                    return{success:false,error:"Invalid response from Ollama"}
+                    return{success:false,error:t("error.invalidResponseFromOllama")}
                 }
                 return{success:true,response:response.data.response}
             }
@@ -1037,7 +1038,7 @@ function registerCriticalIpcHandlers():void{
                 }
             }
         }
-        return{success:false,error:"Failed to generate response from Ollama"}
+        return{success:false,error:t("error.failedToGenerateResponse")}
     })
     handle("ollama:generateStream",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions})=>handleOllamaGenerateStream(payload))
     handle("openai:generate",async(_event,payload:{
@@ -1050,10 +1051,10 @@ function registerCriticalIpcHandlers():void{
         let{apiKey,baseUrl,model,prompt,options}=payload
         options=options??{}
         if(!apiKey||!baseUrl||!model||!prompt){
-            return{success:false,error:"Missing required parameters"}
+            return{success:false,error:t("error.missingRequiredParameters")}
         }
         if(!isValidOpenAIBaseUrl(baseUrl)){
-            return{success:false,error:"Invalid or unsafe OpenAI base URL"}
+            return{success:false,error:t("error.invalidOrUnsafeOpenAIBaseUrl")}
         }
         try{
             let cleanBaseUrl=baseUrl.replace(/\/+$/,"")
@@ -1062,7 +1063,7 @@ function registerCriticalIpcHandlers():void{
                 {
                     model,
                     messages:[
-                        {role:"system",content:"You are a helpful assistant for generating training data."},
+                        {role:"system",content:t("prompt.systemAssistant")},
                         {role:"user",content:prompt}
                     ],
                     temperature:options.temperature??0.7,
@@ -1088,9 +1089,9 @@ function registerCriticalIpcHandlers():void{
         }
         catch(error:any){
             if(error.response){
-                return{success:false,error:`API error ${error.response.status}: ${JSON.stringify(error.response.data)}`}
+                return{success:false,error:t("error.apiError",undefined,{status:String(error.response.status),data:JSON.stringify(error.response.data)})}
             }
-            return{success:false,error:error.message||"Failed to call OpenAI API"}
+            return{success:false,error:error.message||t("error.failedToCallOpenAI")}
         }
     })
     handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
@@ -1113,7 +1114,7 @@ function registerCriticalIpcHandlers():void{
                 }
             }
             if(!guidePath){
-                return{success:false,error:"User guide not found"}
+                return{success:false,error:t("error.userGuideNotFound")}
             }
             let error=await shell.openPath(guidePath)
             if(error){
@@ -1271,23 +1272,23 @@ function registerDeferredIpcHandlers():void{
     handle("export-logs",async(_event,{data}:{data:string}):Promise<{success:boolean;error?:string}>=>{
         try{
             if(!data||typeof data!=="string"){
-                return{success:false,error:"Invalid log data"}
+                return{success:false,error:t("error.invalidLogData")}
             }
             let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
-                defaultPath:"logs.jsonl",
+                defaultPath:t("dialog.exportLogs.defaultFilename"),
                 filters:[
-                    {name:"JSONL Files",extensions:["jsonl"]},
-                    {name:"All Files",extensions:["*"]}
+                    {name:t("dialog.exportLogs.jsonl"),extensions:["jsonl"]},
+                    {name:t("dialog.exportLogs.allFiles"),extensions:["*"]}
                 ]
             })
             if(result.canceled||!result.filePath){
-                return{success:false,error:"Export cancelled"}
+                return{success:false,error:t("error.exportCancelled")}
             }
             await fsp.writeFile(result.filePath,data,"utf-8")
             return{success:true}
         }
         catch(error){
-            return{success:false,error:"Failed to export logs"}
+            return{success:false,error:t("error.failedToExportLogs")}
         }
     })
 }
