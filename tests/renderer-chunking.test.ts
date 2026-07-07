@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import{describe,test,it,expect,beforeEach}from "vitest"
 
-// We need to test chunkText which is a method of TrainGeneratorApp
-// Since the class depends on DOM, we'll test the logic by extracting it
+// We need to test chunkText which is provided by the chunker module.
+// The function is pure text logic, so we exercise it directly without a DOM dependency.
 
 function chunkText(text:string,chunkSize:number,overlap:number):string[]{
     let chunks:string[]=[]
