@@ -7,7 +7,7 @@ This document describes the high-level architecture of Training Generator, an El
 Training Generator follows Electron's recommended multi-process architecture:
 
 - **Main process** (`src/main.ts`) runs Node.js and is the entry point of the application. It creates the renderer window, manages native OS interactions, and performs filesystem and network operations.
-- **Renderer process** (`src/renderer/app.ts` and supporting modules) runs the user interface inside a Chromium sandbox. It handles all DOM interactions, user events, and orchestration of the training-data pipeline.
+- **Renderer process** (`src/renderer/App.tsx` and supporting modules) runs the user interface inside a Chromium sandbox. It is built with SolidJS and handles all DOM interactions, user events, and orchestration of the training-data pipeline.
 - **Preload script** (`src/preload.ts`) bridges the two processes through Electron's `contextBridge`. It exposes a tightly controlled `window.electronAPI` surface to the renderer so the UI can invoke main-process capabilities without full Node.js access.
 
 Context isolation is enabled, node integration is disabled in the renderer, and the main window uses a preload script for secure IPC.
@@ -29,11 +29,11 @@ The main process validates all paths before reading or writing to prevent direct
 
 ### File Management
 
-`src/renderer/fileManager.ts` owns the file list in the UI. It handles drag-and-drop, the file input dialog, validation of supported formats (PDF, DOCX, DOC, RTF, TXT, MD, HTML), size limits, and per-file status tracking. Files are represented as `SelectedFile` objects that may contain either a browser `File` blob or a filesystem path.
+`src/renderer/stores/fileStore.ts` owns the file list in the SolidJS UI. It handles drag-and-drop, the file input dialog, validation of supported formats (PDF, DOCX, DOC, RTF, TXT, MD, HTML), size limits, and per-file status tracking. Files are represented as `SelectedFile` objects that may contain either a browser `File` blob or a filesystem path.
 
 ### File Parsing
 
-The main process parses documents through `FileParserLazy` (`src/core/fileParserLazy.ts`). The renderer can call `parseFile` for a single file or `parseFilesBatch` for multiple files. PDFs dropped into the browser may first be processed by a browser-side fallback in `app.ts` if the main-process parser fails or no path is available.
+The main process parses documents through `FileParserLazy` (`src/core/fileParserLazy.ts`). The renderer can call `parseFile` for a single file or `parseFilesBatch` for multiple files. PDFs dropped into the browser may first be processed by a browser-side fallback in `src/renderer/processing/orchestrator.ts` if the main-process parser fails or no path is available.
 
 ### Chunking
 
@@ -64,7 +64,7 @@ The actual generation is delegated to a provider object created by `src/renderer
 
 ### Output Management
 
-`src/renderer/outputManager.ts` converts LLM responses into structured training items. It parses question/answer pairs and conversation turns, then formats items according to the selected output format:
+`src/renderer/stores/outputStore.ts` converts LLM responses into structured training items. It parses question/answer pairs and conversation turns, then formats items according to the selected output format:
 
 - Alpaca-style (`instruction`, `input`, `output`)
 - ChatML (`messages` array)
@@ -78,10 +78,10 @@ It also handles exporting to JSONL, JSON, CSV, or TXT and splits large outputs i
 The following steps describe the journey from file selection to exported training data:
 
 1. **Selection**  
-   The user selects files through drag-and-drop or the file dialog. `FileManager` validates format and size, then adds the files to `selectedFiles` and renders the list.
+   The user selects files through drag-and-drop or the file dialog. `fileStore` validates format and size, then adds the files to `selectedFiles` and renders the list.
 
 2. **Pre-loading and parsing**  
-   When processing starts, `app.ts` reads each file in parallel. Filesystem paths are sent to the main process via `parseFile`, while browser `File` objects are read directly in the renderer. PDFs fall back to browser extraction if main-process parsing is unavailable.
+   When processing starts, `App.tsx` orchestrates reading each file in parallel through `src/renderer/processing/orchestrator.ts`. Filesystem paths are sent to the main process via `parseFile`, while browser `File` objects are read directly in the renderer. PDFs fall back to browser extraction if main-process parsing is unavailable.
 
 3. **Chunking**  
    Each file's extracted text is split into chunks. The default is semantic chunking with a configurable target size; if semantic chunking returns no chunks, simple chunking is used. This step may run in a web worker.
@@ -90,7 +90,7 @@ The following steps describe the journey from file selection to exported trainin
    `Processor.processChunks` sends each chunk to the active provider. Prompts are generated from templates loaded by `PromptManager` in the user's selected language. Results are cached and tagged with provenance.
 
 5. **Parsing and formatting**  
-   LLM responses are parsed into Q&A pairs or conversation turns by `OutputManager.createTrainingItem`, then normalized into the user's chosen output format.
+   LLM responses are parsed into Q&A pairs or conversation turns by `outputStore.createTrainingItem`, then normalized into the user's chosen output format.
 
 6. **Deduplication**  
    Items from each file are deduplicated using `dedupInWorker` (or `deduplicate` directly), merging provenance for removed duplicates.
@@ -98,4 +98,4 @@ The following steps describe the journey from file selection to exported trainin
 7. **Preview and export**  
    The aggregated results are displayed in the UI preview. The user can copy the output to the clipboard or export it through a save dialog back to the main process.
 
-Throughout the pipeline, `Logger` and `AuditTrail` record events, `Dashboard` shows live progress, and periodic checkpoints allow recovery if processing is interrupted. All user-facing strings are centralized in `src/renderer/i18n.ts` and translated into eight languages; the `t()` helper is used by renderer modules, Vue components, exporters, and the splash screen so that no hardcoded English text remains in the UI.
+Throughout the pipeline, `Logger` and `AuditTrail` record events, `Dashboard` shows live progress, and periodic checkpoints allow recovery if processing is interrupted. All user-facing strings are centralized in `src/renderer/i18n.ts` and translated into eight languages; the `t()` helper is used by renderer modules, SolidJS components, exporters, and the splash screen so that no hardcoded English text remains in the UI.
