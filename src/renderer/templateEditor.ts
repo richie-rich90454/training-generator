@@ -1,6 +1,6 @@
-import { showToast } from "./toast.js"
-import { renderIcon } from "./icons.js"
-
+import{showToast}from"./toast.js"
+import{renderIcon}from"./icons.js"
+import{t}from"./i18n.js"
 export class TemplateEditor{
     private overlay:HTMLDivElement
     private modal:HTMLDivElement
@@ -9,7 +9,6 @@ export class TemplateEditor{
     private livePreview:HTMLPreElement
     private focusTrapHandler:((e:KeyboardEvent)=>void)|null=null
     private lastFocusedElement:HTMLElement|null=null
-
     constructor(){
         this.overlay=document.createElement("div")
         this.modal=document.createElement("div")
@@ -19,13 +18,11 @@ export class TemplateEditor{
         this.createDOM()
         this.bindEvents()
     }
-
     private escapeHtml(text:string):string{
         let div=document.createElement("div")
         div.textContent=text
         return div.innerHTML
     }
-
     private highlightVariables(text:string):string{
         let escaped=this.escapeHtml(text)
         escaped=escaped.replace(/\{text\}/g,'<span class="tpl-var tpl-var-text">{text}</span>')
@@ -33,106 +30,86 @@ export class TemplateEditor{
         escaped=escaped.replace(/\{prompt_type\}/g,'<span class="tpl-var tpl-var-prompt">{prompt_type}</span>')
         return escaped
     }
-
     private renderWithSample(text:string):string{
         return text
-            .replace(/\{text\}/g,"[Sample source text would appear here...]")
-            .replace(/\{language\}/g,"English")
-            .replace(/\{prompt_type\}/g,"instruction")
+            .replace(/\{text\}/g,t("templateEditor.sampleText"))
+            .replace(/\{language\}/g,t("templateEditor.sampleLanguage"))
+            .replace(/\{prompt_type\}/g,t("templateEditor.samplePromptType"))
     }
-
     private createDOM():void{
         this.overlay.className="template-editor-overlay"
         this.overlay.setAttribute("role","dialog")
         this.overlay.setAttribute("aria-modal","true")
-        this.overlay.setAttribute("aria-label","Edit Prompt Template")
-
+        this.overlay.setAttribute("aria-label",t("templateEditor.title"))
         this.modal.className="template-editor-modal"
-
         let header=document.createElement("div")
         header.className="template-editor-header"
-        header.innerHTML=`<h2>${renderIcon("fa-edit", 20)} Edit Prompt Template</h2>`
+        header.innerHTML=`<h2>${renderIcon("fa-edit", 20)} ${t("templateEditor.title")}</h2>`
         let closeBtn=document.createElement("button")
         closeBtn.className="template-editor-close"
         closeBtn.innerHTML="&times;"
-        closeBtn.setAttribute("aria-label","Close template editor")
+        closeBtn.setAttribute("aria-label",t("templateEditor.closeAria"))
         closeBtn.addEventListener("click",()=>this.hide())
         header.appendChild(closeBtn)
-
         let body=document.createElement("div")
         body.className="template-editor-body"
-
         let textareaLabel=document.createElement("label")
-        textareaLabel.innerHTML=`${renderIcon("fa-code")} Template:`
+        textareaLabel.innerHTML=`${renderIcon("fa-code")} ${t("templateEditor.templateLabel")}`
         this.textarea.className="template-editor-textarea"
-        this.textarea.setAttribute("aria-label","Prompt template content")
-        this.textarea.placeholder="Enter your prompt template with {text}, {language}, {prompt_type} variables..."
+        this.textarea.setAttribute("aria-label",t("templateEditor.contentAria"))
+        this.textarea.placeholder=t("templateEditor.placeholder")
         this.textarea.spellcheck=false
-
         let previewLabel=document.createElement("label")
-        previewLabel.innerHTML=`${renderIcon("fa-highlighter")} Highlighted Variables:`
+        previewLabel.innerHTML=`${renderIcon("fa-highlighter")} ${t("templateEditor.highlightedLabel")}`
         this.highlightedPreview.className="template-editor-preview"
-
         let liveLabel=document.createElement("label")
-        liveLabel.innerHTML=`${renderIcon("fa-eye")} Live Preview (with sample values):`
+        liveLabel.innerHTML=`${renderIcon("fa-eye")} ${t("templateEditor.previewLabel")}`
         this.livePreview.className="template-editor-preview"
-
         body.appendChild(textareaLabel)
         body.appendChild(this.textarea)
         body.appendChild(previewLabel)
         body.appendChild(this.highlightedPreview)
         body.appendChild(liveLabel)
         body.appendChild(this.livePreview)
-
         let footer=document.createElement("div")
         footer.className="template-editor-footer"
-
         let loadBtn=document.createElement("button")
         loadBtn.className="btn btn-secondary"
-        loadBtn.innerHTML=`${renderIcon("fa-folder-open")} Load Template`
-        loadBtn.setAttribute("aria-label","Load template from file")
+        loadBtn.innerHTML=`${renderIcon("fa-folder-open")} ${t("templateEditor.load")}`
+        loadBtn.setAttribute("aria-label",t("templateEditor.loadAria"))
         loadBtn.addEventListener("click",()=>this.handleLoad())
-
         let saveBtn=document.createElement("button")
         saveBtn.className="btn btn-primary"
-        saveBtn.innerHTML=`${renderIcon("fa-save")} Save Template`
-        saveBtn.setAttribute("aria-label","Save template to file")
+        saveBtn.innerHTML=`${renderIcon("fa-save")} ${t("templateEditor.save")}`
+        saveBtn.setAttribute("aria-label",t("templateEditor.saveAria"))
         saveBtn.addEventListener("click",()=>this.handleSave())
-
         let closeFooterBtn=document.createElement("button")
         closeFooterBtn.className="btn btn-secondary"
-        closeFooterBtn.innerHTML=`${renderIcon("fa-times")} Close`
-        closeFooterBtn.setAttribute("aria-label","Close template editor")
+        closeFooterBtn.innerHTML=`${renderIcon("fa-times")} ${t("templateEditor.close")}`
+        closeFooterBtn.setAttribute("aria-label",t("templateEditor.closeAria"))
         closeFooterBtn.addEventListener("click",()=>this.hide())
-
         footer.appendChild(loadBtn)
         footer.appendChild(saveBtn)
         footer.appendChild(closeFooterBtn)
-
         this.modal.appendChild(header)
         this.modal.appendChild(body)
         this.modal.appendChild(footer)
-
         this.overlay.appendChild(this.modal)
         this.overlay.addEventListener("click",(e:Event)=>{
             if(e.target===this.overlay)this.hide()
         })
-
         document.body.appendChild(this.overlay)
     }
-
     private bindEvents():void{
         this.textarea.addEventListener("input",()=>this.updatePreviews())
         document.addEventListener("keydown",this.handleKeydown)
     }
-
     private handleKeydown=(e:KeyboardEvent):void=>{
         if(e.key!=="Escape"||this.overlay.style.display!=="flex")return
         if(this.hasHigherZIndexModal())return
         e.preventDefault()
         this.hide()
     }
-
     private hasHigherZIndexModal():boolean{
         let activeModals=document.querySelectorAll(".modal.active,[role='dialog'].active")
         let overlayZ=parseInt(getComputedStyle(this.overlay).zIndex||"10000",10)
@@ -144,14 +121,12 @@ export class TemplateEditor{
         }
         return false
     }
-
     private updatePreviews():void{
         let content=this.textarea.value
-        this.highlightedPreview.innerHTML=this.highlightVariables(content)||"<span style=\"color:var(--text-muted,#999)\">(empty template)</span>"
+        this.highlightedPreview.innerHTML=this.highlightVariables(content)||`<span style="color:var(--text-muted,#999)">${t("templateEditor.emptyTemplate")}</span>`
         let rendered=this.renderWithSample(content)
-        this.livePreview.textContent=rendered||"(empty template)"
+        this.livePreview.textContent=rendered||t("templateEditor.emptyTemplate")
     }
-
     show():void{
         this.lastFocusedElement=document.activeElement as HTMLElement
         this.overlay.style.display="flex"
@@ -165,7 +140,6 @@ export class TemplateEditor{
             this.textarea.focus()
         }
     }
-
     hide():void{
         this.overlay.style.display="none"
         this.removeFocusTrap()
@@ -174,16 +148,13 @@ export class TemplateEditor{
             this.lastFocusedElement=null
         }
     }
-
     loadTemplate(content:string):void{
         this.textarea.value=content
         this.updatePreviews()
     }
-
     getTemplate():string{
         return this.textarea.value
     }
-
     private trapFocus():void{
         if(this.focusTrapHandler)return
         let selector='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
@@ -204,14 +175,12 @@ export class TemplateEditor{
         }
         document.addEventListener("keydown",this.focusTrapHandler)
     }
-
     private removeFocusTrap():void{
         if(this.focusTrapHandler){
             document.removeEventListener("keydown",this.focusTrapHandler)
             this.focusTrapHandler=null
         }
     }
-
     private handleLoad():void{
         let input=document.createElement("input")
         input.type="file"
@@ -231,31 +200,29 @@ export class TemplateEditor{
             }
             reader.onerror=()=>{
                 console.error("Failed to read template file")
-                showToast("Failed to read template file","error")
+                showToast(t("toast.templateLoadFailed"),"error")
                 input.remove()
             }
             reader.readAsText(file)
         })
         input.click()
     }
-
     private handleSave():void{
         let content=this.textarea.value
         if(!content.trim()){
-            showToast("Cannot save an empty template","warning")
+            showToast(t("toast.templateEmpty"),"warning")
             return
         }
         let blob=new Blob([content],{type:"text/plain"})
         let url=URL.createObjectURL(blob)
         let a=document.createElement("a")
         a.href=url
-        a.download="prompt_template.txt"
+        a.download=`${t("templateEditor.downloadFilename")}.txt`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
         setTimeout(()=>URL.revokeObjectURL(url),1000)
     }
-
     dispose():void{
         document.removeEventListener("keydown",this.handleKeydown)
         this.removeFocusTrap()
