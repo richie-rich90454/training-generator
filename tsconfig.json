@@ -8,6 +8,8 @@
         "forceConsistentCasingInFileNames":true,
         "resolveJsonModule":true,
         "isolatedModules":true,
+        "jsx":"preserve",
+        "jsxImportSource":"solid-js",
         "noEmit":true,
         "allowImportingTsExtensions":true,
         "types":["vitest/globals","node"],
@@ -15,7 +17,9 @@
     },
     "include":[
         "src/**/*.ts",
+        "src/**/*.tsx",
         "tests/**/*.ts",
+        "tests/**/*.tsx",
         "vitest.config.ts",
         "vite.config.ts"
     ],
