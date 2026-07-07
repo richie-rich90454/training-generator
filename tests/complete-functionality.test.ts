@@ -65,11 +65,11 @@ describe("Electron main process",()=>{
 })
 
 describe("Renderer process",()=>{
-    test("renderer file exists and has TrainGeneratorApp class",async()=>{
-        let rendererPath:string="./src/renderer/app.ts"
+    test("renderer file exists and exports App root component",async()=>{
+        let rendererPath:string="./src/renderer/App.tsx"
         await expect(fsp.access(rendererPath)).resolves.toBeUndefined()
         let rendererContent:string=await fsp.readFile(rendererPath,"utf-8")
-        expect(rendererContent).toContain("class TrainGeneratorApp")
+        expect(rendererContent).toContain("export function App")
     })
 })
 
