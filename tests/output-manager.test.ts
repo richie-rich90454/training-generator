@@ -1,135 +1,124 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import OutputManager from "../src/renderer/outputManager.js"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { createOutputStore, type OutputStore, type ExportFormat } from "../src/renderer/stores/outputStore.js"
 import type { TrainingItem } from "../src/types/index.js"
-function makeApp(outputFormat: string="jsonl", exportFormat?: string): any {
-    return {
-        uiManager: {
-            outputFormat: { value: outputFormat },
-            exportFormat: exportFormat ? { value: exportFormat } : undefined,
-        },
-        addLog: vi.fn(),
-    }
+function setOutputData(store: OutputStore, items: TrainingItem[]): void {
+    store.clearOutput()
+    store.appendOutput(items)
 }
-describe("OutputManager createTrainingItem", () => {
+describe("OutputStore createTrainingItem", () => {
     let formats=["jsonl", "json", "csv", "text", "chatml"]
     let processingTypes=["instruction", "conversation", "chunking"]
     formats.forEach(format=>{
         processingTypes.forEach(type=>{
             it(`creates item for ${format}/${type}`, () => {
-                let app=makeApp(format)
-                let manager=new OutputManager(app)
-                let items=manager.createTrainingItem("input text", "output text", type)
+                let store: OutputStore=createOutputStore()
+                let items=store.createTrainingItem("input text", "output text", type, format)
                 expect(items.length).toBeGreaterThan(0)
             })
         })
     })
     it("creates chatml from instruction q/a pairs", () => {
-        let app=makeApp("chatml")
-        let manager=new OutputManager(app)
+        let store: OutputStore=createOutputStore()
         let output="Question: What is 2+2?\nAnswer: 4"
-        let items=manager.createTrainingItem("input", output, "instruction")
+        let items=store.createTrainingItem("input", output, "instruction", "chatml")
         expect(items[0].messages).toBeDefined()
     })
     it("creates csv from instruction q/a pairs", () => {
-        let app=makeApp("csv")
-        let manager=new OutputManager(app)
+        let store: OutputStore=createOutputStore()
         let output="Question: What is 2+2?\nAnswer: 4"
-        let items=manager.createTrainingItem("input", output, "instruction")
+        let items=store.createTrainingItem("input", output, "instruction", "csv")
         expect(items[0].input).toBe("What is 2+2?")
         expect(items[0].output).toBe("4")
     })
     it("creates text from conversation turns", () => {
-        let app=makeApp("text")
-        let manager=new OutputManager(app)
+        let store: OutputStore=createOutputStore()
         let output="User: Hello\nAssistant: Hi there"
-        let items=manager.createTrainingItem("input", output, "conversation")
+        let items=store.createTrainingItem("input", output, "conversation", "text")
         expect(items[0].text).toBe("Hi there")
     })
     it("creates chatml conversation as single message array", () => {
-        let app=makeApp("chatml")
-        let manager=new OutputManager(app)
+        let store: OutputStore=createOutputStore()
         let output="User: Hello\nAssistant: Hi"
-        let items=manager.createTrainingItem("input", output, "conversation")
+        let items=store.createTrainingItem("input", output, "conversation", "chatml")
         expect(items[0].messages!.length).toBe(2)
     })
     it("falls back to direct input/output when no pairs parsed", () => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        let items=manager.createTrainingItem("in", "out", "instruction")
+        let store: OutputStore=createOutputStore()
+        let items=store.createTrainingItem("in", "out", "instruction", "jsonl")
         expect(items[0].instruction).toBeDefined()
         expect(items[0].input).toBe("in")
         expect(items[0].output).toBe("out")
     })
 })
-describe("OutputManager parseQuestionAnswerPairs", () => {
-    let manager: OutputManager
+describe("OutputStore parseQuestionAnswerPairs", () => {
+    let store: OutputStore
     beforeEach(()=>{
-        manager=new OutputManager(makeApp())
+        store=createOutputStore()
     })
     it("parses Question/Answer format", () => {
         let text="Question: What is 2+2?\nAnswer: 4"
-        let pairs=manager.parseQuestionAnswerPairs(text)
+        let pairs=store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(1)
         expect(pairs[0].question).toBe("What is 2+2?")
         expect(pairs[0].answer).toBe("4")
     })
     it("parses Q: A: format", () => {
         let text="Q: What is 2+2?\nA: 4"
-        let pairs=manager.parseQuestionAnswerPairs(text)
+        let pairs=store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(1)
     })
     it("parses multiple pairs", () => {
         let text="Question: Q1\nAnswer: A1\nQuestion: Q2\nAnswer: A2"
-        let pairs=manager.parseQuestionAnswerPairs(text)
+        let pairs=store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(2)
     })
     it("returns empty for non-string", () => {
-        let pairs=manager.parseQuestionAnswerPairs(null as any)
+        let pairs=store.parseQuestionAnswerPairs(null as unknown as string)
         expect(pairs).toEqual([])
     })
     it("returns empty for unmatched text", () => {
-        let pairs=manager.parseQuestionAnswerPairs("just some text")
+        let pairs=store.parseQuestionAnswerPairs("just some text")
         expect(pairs).toEqual([])
     })
     it("handles long text without regex fallback", () => {
         let text="Question: Q\nAnswer: A"+"x".repeat(200000)
-        let pairs=manager.parseQuestionAnswerPairs(text)
+        let pairs=store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(1)
     })
 })
-describe("OutputManager parseConversationTurns", () => {
-    let manager: OutputManager
+describe("OutputStore parseConversationTurns", () => {
+    let store: OutputStore
     beforeEach(()=>{
-        manager=new OutputManager(makeApp())
+        store=createOutputStore()
     })
     it("parses User/Assistant format", () => {
         let text="User: Hello\nAssistant: Hi"
-        let turns=manager.parseConversationTurns(text)
+        let turns=store.parseConversationTurns(text)
         expect(turns.length).toBe(1)
         expect(turns[0].user).toBe("Hello")
         expect(turns[0].assistant).toBe("Hi")
     })
     it("parses Human/Assistant format", () => {
         let text="Human: Hello\nAssistant: Hi"
-        let turns=manager.parseConversationTurns(text)
+        let turns=store.parseConversationTurns(text)
         expect(turns.length).toBe(1)
     })
     it("parses multiple turns", () => {
         let text="User: Hi\nAssistant: Hello\nUser: Bye\nAssistant: Goodbye"
-        let turns=manager.parseConversationTurns(text)
+        let turns=store.parseConversationTurns(text)
         expect(turns.length).toBe(2)
     })
     it("returns empty for non-string", () => {
-        let turns=manager.parseConversationTurns(null as any)
+        let turns=store.parseConversationTurns(null as unknown as string)
         expect(turns).toEqual([])
     })
     it("returns empty for unmatched text", () => {
-        let turns=manager.parseConversationTurns("no turns here")
+        let turns=store.parseConversationTurns("no turns here")
         expect(turns).toEqual([])
     })
 })
-describe("OutputManager exportOutput", () => {
+describe("OutputStore exportOutput", () => {
     beforeEach(()=>{
         vi.stubGlobal("window", {
             electronAPI: {
@@ -138,38 +127,36 @@ describe("OutputManager exportOutput", () => {
             },
         })
     })
-    it("warns when no data", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        await manager.exportOutput("jsonl")
-        expect(app.addLog).toHaveBeenCalledWith("No data to export", "warning")
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
+    it("returns early when no data", async() => {
+        let store: OutputStore=createOutputStore()
+        await store.exportOutput("jsonl")
+        expect(window.electronAPI!.saveFile).not.toHaveBeenCalled()
     })
     it("exports jsonl", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.exportOutput("jsonl")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports json", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.exportOutput("json")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.exportOutput("json")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports csv", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.exportOutput("csv")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.exportOutput("csv")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports text", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "text", text: "hello" }]
-        await manager.exportOutput("text")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "text", text: "hello" }])
+        await store.exportOutput("text")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("cancels when no save path", async() => {
@@ -179,24 +166,22 @@ describe("OutputManager exportOutput", () => {
                 saveFile: vi.fn(),
             },
         })
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "text", text: "hello" }]
-        await manager.exportOutput("text")
-        expect(app.addLog).toHaveBeenCalledWith("Export cancelled", "info")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "text", text: "hello" }])
+        await store.exportOutput("text")
+        expect(window.electronAPI!.saveFile).not.toHaveBeenCalled()
     })
-    it("logs error on save failure", async() => {
+    it("handles save failure result", async() => {
         vi.stubGlobal("window", {
             electronAPI: {
                 saveFileDialog: vi.fn(async(name: string)=>`/path/${name}`),
                 saveFile: vi.fn(async()=>({ success: false, error: "disk full" })),
             },
         })
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "text", text: "hello" }]
-        await manager.exportOutput("text")
-        expect(app.addLog).toHaveBeenCalledWith(expect.stringContaining("disk full"), "error")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, [{ format: "text", text: "hello" }])
+        await expect(store.exportOutput("text")).resolves.not.toThrow()
+        expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("splits large output", async() => {
         vi.stubGlobal("window", {
@@ -205,67 +190,67 @@ describe("OutputManager exportOutput", () => {
                 saveFile: vi.fn(async()=>({ success: true })),
             },
         })
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=Array.from({ length: 100001 }, (_, i)=>({ format: "text", text: `item ${i}` }))
-        await manager.exportOutput("jsonl")
+        let store: OutputStore=createOutputStore()
+        setOutputData(store, Array.from({ length: 100001 }, (_, i)=>({ format: "text" as const, text: `item ${i}` })))
+        await store.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).toHaveBeenCalledTimes(2)
     })
 })
-describe("OutputManager copyOutput", () => {
-    let clipboard: any
+describe("OutputStore copyOutput", () => {
+    let clipboard: { text: string }
     beforeEach(()=>{
-        clipboard={ format: "text", text: "" }
+        clipboard={ text: "" }
         vi.stubGlobal("navigator", {
             clipboard: {
                 writeText: vi.fn(async(t: string)=>{ clipboard.text=t }),
             },
         })
     })
-    it("warns when no data", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        await manager.copyOutput()
-        expect(app.addLog).toHaveBeenCalledWith("No data to copy", "warning")
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
+    it("returns early when no data", async() => {
+        let store: OutputStore=createOutputStore()
+        await store.copyOutput()
+        expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
     })
     it("copies jsonl", async() => {
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.copyOutput()
+        let store: OutputStore=createOutputStore()
+        store.setExportFormat("jsonl")
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.copyOutput()
         expect(clipboard.text).toContain("instruction")
     })
     it("copies json", async() => {
-        let app=makeApp("jsonl", "json")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.copyOutput()
+        let store: OutputStore=createOutputStore()
+        store.setExportFormat("json")
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.copyOutput()
         expect(JSON.parse(clipboard.text)[0].input).toBe("in")
     })
     it("copies csv", async() => {
-        let app=makeApp("jsonl", "csv")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "instruction", instruction: "test", input: "in", output: "out" }]
-        await manager.copyOutput()
+        let store: OutputStore=createOutputStore()
+        store.setExportFormat("csv")
+        setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
+        await store.copyOutput()
         expect(clipboard.text).toContain("instruction,input,output")
     })
     it("copies text", async() => {
-        let app=makeApp("jsonl", "text")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "text", text: "hello" }]
-        await manager.copyOutput()
+        let store: OutputStore=createOutputStore()
+        store.setExportFormat("text")
+        setOutputData(store, [{ format: "text", text: "hello" }])
+        await store.copyOutput()
         expect(clipboard.text).toBe("hello")
     })
-    it("logs error on clipboard failure", async() => {
+    it("rejects on clipboard failure", async() => {
         vi.stubGlobal("navigator", {
             clipboard: {
                 writeText: vi.fn(async()=>{ throw new Error("clipboard denied") }),
             },
         })
-        let app=makeApp("jsonl")
-        let manager=new OutputManager(app)
-        manager.outputData=[{ format: "text", text: "hello" }]
-        await manager.copyOutput()
-        expect(app.addLog).toHaveBeenCalledWith(expect.stringContaining("clipboard denied"), "error")
+        let store: OutputStore=createOutputStore()
+        store.setExportFormat("jsonl")
+        setOutputData(store, [{ format: "text", text: "hello" }])
+        await expect(store.copyOutput()).rejects.toThrow("clipboard denied")
     })
 })
