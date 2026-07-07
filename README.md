@@ -43,6 +43,7 @@
 ### Multi-Language
 - **8 Languages**: English, Chinese (Simplified), Chinese (Traditional), Spanish, French, German, Japanese, Korean
 - Full i18n framework with locale detection and dynamic UI translation
+- **Complete UI coverage**: every user-facing string is translatable, including command palette labels, prompt editor controls, dataset preview actions, analytics dashboard metrics, file parser errors, log messages, toast notifications, confirmation dialogs, exporter content, devtools units, and splash screen text
 
 ### Output & Export
 - **Multiple Formats**: JSONL (Alpaca), ChatML, CSV, JSON, Plain Text
@@ -81,6 +82,7 @@
 - **ARIA Accessibility**: Screen reader support and focus management
 - **Focus Trapping**: Modal dialog accessibility
 - **Confirmation Dialogs**: Critical action safeguards
+- **Native Tray Icon**: Background-less, platform-specific raster icons for Windows, macOS and Linux
 
 ### Developer Experience
 - **Headless CLI Mode**: Batch processing and automation via command line
@@ -91,7 +93,7 @@
 - **Lazy Loading**: On-demand module loading for settings and help
 
 ### Testing
-- **565+ Tests**: 30 test files covering unit, integration, and system tests
+- **3328+ Tests**: 139 test files covering unit, integration, and system tests
 - **TypeScript Strict Mode**: Full type safety with `tsc --noEmit`
 - **CI/CD**: Automated testing and release packaging via GitHub Actions
 
@@ -239,7 +241,7 @@ training-generator/
 │   │   └── modules.d.ts     # Module declaration types
 │   └── workers/
 │       └── pdfWorker.ts     # PDF parsing worker
-├── tests/                   # 30 test files, 565+ tests
+├── tests/                   # 139 test files, 3328+ tests
 ├── assets/                  # Icons, fonts, favicons
 ├── native-splash/           # Native C++/WinAPI splash screen (Windows)
 ├── examples/                # Sample documents for testing
@@ -342,7 +344,7 @@ For detailed information about using and developing Training Generator, see the 
 - Semantic chunking with context preservation
 - Simhash deduplication
 - SQLite caching with persistence
-- 8-language i18n framework
+- 8-language i18n framework with full UI string coverage
 - AES-256-GCM API key encryption
 - Structured JSON logging
 - Auto-save checkpointing (30s)
@@ -353,7 +355,8 @@ For detailed information about using and developing Training Generator, see the 
 - Toast notifications
 - ARIA accessibility
 - Service Worker offline caching
-- 565+ test suite
+- Transparent, background-less tray icon
+- 3328+ test suite
 
 ### Planned
 - Plugin system for extensible processing pipelines
