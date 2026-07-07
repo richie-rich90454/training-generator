@@ -1,5 +1,6 @@
 import type { TrainingItem } from "../../types/index.js"
 import { Exporter, ExportOptions } from "../exportFormats.js"
+import { t } from "../i18n.js"
 export function escapeHtml(text: string): string{
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 }
@@ -7,12 +8,12 @@ export function escapeMarkdown(text: string): string{
     return text.replace(/\\/g, "\\\\").replace(/\*/g, "\\*").replace(/_/g, "\\_").replace(/`/g, "\\`").replace(/~/g, "\\~").replace(/#/g, "\\#").replace(/>/g, "\\>")
 }
 export function itemToMarkdown(item: TrainingItem, index: number): string{
-    let heading=`## Item ${index+1}\n\n`
+    let heading=`## ${t("export.markdown.itemHeading", undefined, { index: String(index+1) })}\n\n`
     if(item.instruction!=null||item.input!=null||item.output!=null){
         let instruction=item.instruction!=null?escapeMarkdown(String(item.instruction)):""
         let input=item.input!=null?escapeMarkdown(String(item.input)):""
         let output=item.output!=null?escapeMarkdown(String(item.output)):""
-        return heading+`**Instruction:** ${instruction}\n\n**Input:** ${input}\n\n**Output:** ${output}\n`
+        return heading+`**${t("export.markdown.instruction")}:** ${instruction}\n\n**${t("export.markdown.input")}:** ${input}\n\n**${t("export.markdown.output")}:** ${output}\n`
     }
     if(item.messages!=null&&Array.isArray(item.messages)&&item.messages.length>0){
         let parts: string[]=[]
@@ -29,12 +30,12 @@ export function itemToMarkdown(item: TrainingItem, index: number): string{
     return heading+"\n"
 }
 export function itemToHtml(item: TrainingItem, index: number): string{
-    let section=`<section><h2>Item ${index+1}</h2>`
+    let section=`<section><h2>${t("export.html.itemHeading", undefined, { index: String(index+1) })}</h2>`
     if(item.instruction!=null||item.input!=null||item.output!=null){
         let instruction=item.instruction!=null?escapeHtml(String(item.instruction)):""
         let input=item.input!=null?escapeHtml(String(item.input)):""
         let output=item.output!=null?escapeHtml(String(item.output)):""
-        section+=`<p><strong>Instruction:</strong> ${instruction}</p><p><strong>Input:</strong> ${input}</p><p><strong>Output:</strong> ${output}</p>`
+        section+=`<p><strong>${t("export.html.instruction")}:</strong> ${instruction}</p><p><strong>${t("export.html.input")}:</strong> ${input}</p><p><strong>${t("export.html.output")}:</strong> ${output}</p>`
     }
     else if(item.messages!=null&&Array.isArray(item.messages)&&item.messages.length>0){
         section+="<div>"
@@ -72,7 +73,7 @@ export class HtmlExporter implements Exporter{
         for(let i=0;i<items.length;i++){
             body+=itemToHtml(items[i], i)
         }
-        return `<html><head><meta charset="UTF-8"><title>Training Data</title></head><body>${body}</body></html>`
+        return `<html><head><meta charset="UTF-8"><title>${t("export.html.documentTitle")}</title></head><body>${body}</body></html>`
     }
 }
 async function loadPdfLibrary(): Promise<any>{
@@ -96,7 +97,7 @@ async function loadPdfLibrary(): Promise<any>{
     catch{
         // fall through
     }
-    throw new Error("PDF library not installed")
+    throw new Error(t("error.pdfLibraryNotInstalled"))
 }
 export class PdfExporter implements Exporter{
     name="pdf"
