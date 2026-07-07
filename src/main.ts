@@ -1,4 +1,4 @@
-import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage,Tray,Menu,nativeImage}from "electron"
+import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage,Tray,Menu,nativeImage,protocol}from "electron"
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
@@ -13,7 +13,93 @@ import{SmartCache}from "./core/smartCache.ts"
 import{handle,registerWindowControlHandlers}from "./ipcMain.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 import{t}from "./renderer/i18n.ts"
-
+const APP_SCHEME="app"
+const MIME_TYPES:Record<string,string>={
+    ".html":"text/html",
+    ".js":"application/javascript",
+    ".mjs":"application/javascript",
+    ".css":"text/css",
+    ".json":"application/json",
+    ".png":"image/png",
+    ".jpg":"image/jpeg",
+    ".jpeg":"image/jpeg",
+    ".gif":"image/gif",
+    ".svg":"image/svg+xml",
+    ".ico":"image/x-icon",
+    ".icns":"image/icns",
+    ".woff":"font/woff",
+    ".woff2":"font/woff2",
+    ".ttf":"font/ttf",
+    ".otf":"font/otf",
+    ".eot":"application/vnd.ms-fontobject",
+    ".wasm":"application/wasm"
+}
+function getDistDir():string{
+    return path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..","dist")
+}
+function registerAppScheme():void{
+    // Must be called before app.ready so the privileged scheme is honored.
+    try{
+        protocol.registerSchemesAsPrivileged([
+            {
+                scheme:APP_SCHEME,
+                privileges:{
+                    standard:true,
+                    secure:true,
+                    supportFetchAPI:true,
+                    corsEnabled:true
+                }
+            }
+        ])
+    }
+    catch(error){
+        console.error("Failed to register app scheme:",error)
+    }
+}
+function registerAppProtocolHandler():void{
+    // protocol.handle needs the default session, which is only available after app.ready.
+    try{
+        let distDir:string=getDistDir()
+        let resolvedDist:string=path.resolve(distDir)
+        protocol.handle(APP_SCHEME,async(request:Request):Promise<Response>=>{
+            let url:URL=new URL(request.url)
+            let relativePath:string=decodeURIComponent(url.pathname)
+            if(relativePath.startsWith("/")){
+                relativePath=relativePath.slice(1)
+            }
+            if(!relativePath){
+                relativePath="index.html"
+            }
+            let filePath:string=path.normalize(path.join(distDir,relativePath))
+            console.log(`[app-protocol] ${request.url} -> ${filePath}`)
+            if(!filePath.startsWith(resolvedDist+path.sep)&&filePath!==resolvedDist){
+                console.warn(`[app-protocol] forbidden: ${filePath}`)
+                return new Response("Forbidden",{status:403,headers:{"Content-Type":"text/plain"}})
+            }
+            try{
+                let data:Buffer=await fsp.readFile(filePath)
+                let ext:string=path.extname(filePath).toLowerCase()
+                let contentType:string=MIME_TYPES[ext]||"application/octet-stream"
+                console.log(`[app-protocol] serving ${filePath} as ${contentType} (${data.length} bytes)`)
+                return new Response(new Uint8Array(data),{
+                    status:200,
+                    headers:{
+                        "Content-Type":contentType,
+                        "Access-Control-Allow-Origin":"*"
+                    }
+                })
+            }
+            catch(error){
+                console.warn(`[app-protocol] not found: ${filePath}`,error)
+                return new Response("Not found",{status:404,headers:{"Content-Type":"text/plain"}})
+            }
+        })
+    }
+    catch(error){
+        console.error("Failed to register app protocol handler:",error)
+    }
+}
+registerAppScheme()
 let httpAgent=new http.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 let httpsAgent=new https.Agent({keepAlive:true,keepAliveMsecs:30000,maxSockets:10,maxFreeSockets:5})
 
@@ -448,7 +534,9 @@ function createMainWindow(){
         mainWindow.webContents.openDevTools({mode:"detach"})
     }
     else{
-        mainWindow.loadFile(path.join(path.dirname(fileURLToPath(import.meta.url)),"../dist/index.html"))
+        mainWindow.loadURL(`${APP_SCHEME}://rsrc/index.html`).catch((error)=>{
+            console.error("Failed to load app URL:",error)
+        })
     }
     mainWindow.webContents.setWindowOpenHandler(({url})=>{
         try{
@@ -1293,6 +1381,7 @@ function registerDeferredIpcHandlers():void{
     })
 }
 app.whenReady().then(()=>{
+    registerAppProtocolHandler()
     startSplash()
     registerCriticalIpcHandlers()
     createMainWindow()
