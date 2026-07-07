@@ -1,5 +1,6 @@
 import type{SelectedFile}from"../types/index.js"
 import{renderIcon}from"./icons.js"
+import{t}from"./i18n.js"
 
 class FileManager{
     app:any
@@ -63,11 +64,11 @@ class FileManager{
         let maxFiles=100
         let remainingSlots=maxFiles-this.selectedFiles.length
         if(remainingSlots<=0){
-            this.app.addLog(`Maximum of ${maxFiles} files already selected`,"warning")
+            this.app.addLog(t("log.maxFilesReached",undefined,{maxFiles:String(maxFiles)}),"warning")
             return
         }
         if(files.length>remainingSlots){
-            this.app.addLog(`Only ${remainingSlots} more file(s) can be added (max ${maxFiles})`,"warning")
+            this.app.addLog(t("log.remainingFiles",undefined,{remaining:String(remainingSlots),maxFiles:String(maxFiles)}),"warning")
             files=files.slice(0,remainingSlots)
         }
         let validFiles=files.filter(file=>{
@@ -76,7 +77,7 @@ class FileManager{
             return ["pdf","docx","doc","rtf","txt","md","html"].includes(ext)
         })
         if(validFiles.length==0){
-            this.app.addLog("No valid files selected. Supported formats: PDF, DOCX, DOC, RTF, TXT, MD, HTML","warning")
+            this.app.addLog(t("toast.noValidFiles"),"warning")
             return
         }
         let addedCount=0
@@ -84,12 +85,12 @@ class FileManager{
         for(let file of validFiles){
             let maxSize=100*1024*1024
             if(file.size>maxSize){
-                this.app.addLog(`File too large: ${file.name} (${this.formatFileSize(file.size)}). Maximum size is 100MB.`,"warning")
+                this.app.addLog(t("toast.fileTooLarge",undefined,{name:file.name,size:this.formatFileSize(file.size)}),"warning")
                 skippedCount++
                 continue
             }
             if(file.name.toLowerCase().endsWith(".pdf") && file.size>20*1024*1024){
-                this.app.addLog(`Large PDF detected: ${file.name} (${this.formatFileSize(file.size)}). Processing may take longer.`,"info")
+                this.app.addLog(t("log.largePdf",undefined,{name:file.name,size:this.formatFileSize(file.size)}),"info")
             }
             let fileObj:SelectedFile={
                 file:file,
@@ -105,10 +106,10 @@ class FileManager{
         }
         this.updateProcessButton()
         if(addedCount>0){
-            this.app.addLog(`Added ${addedCount} file(s)`,"success")
+            this.app.addLog(t("log.filesAdded",undefined,{count:String(addedCount)}),"success")
         }
         if(skippedCount>0){
-            this.app.addLog(`Skipped ${skippedCount} file(s) due to size limits`,"warning")
+            this.app.addLog(t("log.filesSkippedSize",undefined,{count:String(skippedCount)}),"warning")
         }
     }
     addFileToList(fileObj:SelectedFile):void{
@@ -125,8 +126,8 @@ class FileManager{
                     <div class="file-size">${this.formatFileSize(fileObj.size)}</div>
                 </div>
             </div>
-            <span class="file-status" aria-label="Status: waiting"></span>
-            <button class="file-remove" data-id="${fileId}" aria-label="Remove ${escapedName}">
+            <span class="file-status" data-i18n-aria-label="file.status.waitingAria"></span>
+            <button class="file-remove" data-id="${fileId}" data-i18n-aria-label="file.removeAria" data-i18n-params-name="${escapedName}">
                 ${renderIcon("fa-times")}
             </button>
         `
@@ -146,13 +147,13 @@ class FileManager{
         this.fileStatuses.delete(fileName)
         this.updateFileList()
         this.updateProcessButton()
-        this.app.addLog(`Removed file: ${fileName}`,"info")
+        this.app.addLog(t("log.fileRemoved",undefined,{name:fileName}),"info")
     }
     updateFileList():void{
         this.fileList.innerHTML=""
         this.fileStatuses.clear()
         if(this.selectedFiles.length==0){
-            this.fileList.innerHTML="<p class=\"empty-state\">No files selected</p>"
+            this.fileList.innerHTML=`<p class="empty-state" data-i18n="files.empty">${t("files.empty")}</p>`
             return
         }
         this.selectedFiles.forEach(file=>{
@@ -181,10 +182,10 @@ class FileManager{
             failed:renderIcon("fa-times-circle")
         }
         let labelMap:Record<string,string>={
-            waiting:"Waiting",
-            processing:"Processing",
-            completed:"Completed",
-            failed:"Failed"
+            waiting:t("file.status.waiting"),
+            processing:t("file.status.processing"),
+            completed:t("file.status.completed"),
+            failed:t("file.status.failed")
         }
         let colorMap:Record<string,string>={
             waiting:"#A19F9D",
@@ -192,10 +193,10 @@ class FileManager{
             completed:"#107C10",
             failed:"#D13438"
         }
-        let label=labelMap[status]||"Waiting"
+        let label=labelMap[status]||t("file.status.waiting")
         let iconSvg=iconMap[status]||renderIcon("fa-clock")
         let iconColor=colorMap[status]||"#A19F9D"
-        statusEl.setAttribute("aria-label","Status: "+label)
+        statusEl.setAttribute("aria-label",t("file.status.aria",undefined,{label}))
         statusEl.innerHTML='<span style="color:'+iconColor+'" aria-hidden="true">'+iconSvg+'</span><span class="file-status-label">'+label+"</span>"
     }
     updateProcessButton():void{
@@ -203,10 +204,10 @@ class FileManager{
         let demoActive=this.app.processor?.demoMode??false
         this.processBtn.disabled=this.selectedFiles.length==0||(!ollamaReady&&!demoActive)
         if(!ollamaReady&&!demoActive){
-            this.processBtn.title="Ollama is not running"
+            this.processBtn.title=t("processBtn.tooltip.ollamaOffline")
         }
         else if(demoActive){
-            this.processBtn.title="Demo mode active"
+            this.processBtn.title=t("processBtn.tooltip.demoActive")
         }
         else{
             this.processBtn.title=""
@@ -225,13 +226,15 @@ class FileManager{
         return icons[fileType]||"file"
     }
     formatFileSize(bytes:number):string{
-        if(bytes===0)return "0 Bytes"
+        if(bytes===0)return "0 "+t("fileSize.bytes")
         let k=1024
-        let singular=["Byte","KB","MB","GB"]
-        let plural=["Bytes","KB","MB","GB"]
         let i=Math.floor(Math.log(bytes)/Math.log(k))
         let value=parseFloat((bytes/Math.pow(k,i)).toFixed(2))
-        let label=value===1?singular[i]:plural[i]
+        let label=t("fileSize.bytes")
+        if(i===0)label=value===1?t("fileSize.byte"):t("fileSize.bytes")
+        else if(i===1)label=t("fileSize.kb")
+        else if(i===2)label=t("fileSize.mb")
+        else if(i>=3)label=t("fileSize.gb")
         return value+" "+label
     }
 }
