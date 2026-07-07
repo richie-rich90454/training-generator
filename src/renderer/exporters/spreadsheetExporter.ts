@@ -1,5 +1,6 @@
 import type { TrainingItem } from "../../types/index.js"
 import { Exporter, ExportOptions, csvEscape } from "../exportFormats.js"
+import { t } from "../i18n.js"
 export interface SpreadsheetRow{
     [key: string]: string
 }
@@ -102,15 +103,15 @@ export class XlsxExporter implements Exporter{
             mod=await import(specifier)
         }
         catch{
-            throw new Error("xlsx not installed")
+            throw new Error(t("error.xlsxNotInstalled"))
         }
         if(mod==null){
-            throw new Error("xlsx not installed")
+            throw new Error(t("error.xlsxNotInstalled"))
         }
         let utils=mod.utils
         let write=mod.write
         if(utils==null||write==null){
-            throw new Error("xlsx not installed")
+            throw new Error(t("error.xlsxNotInstalled"))
         }
         let wb=utils.book_new()
         let sheets=options?.sheets
