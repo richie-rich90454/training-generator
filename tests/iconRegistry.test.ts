@@ -5,13 +5,22 @@ import path from "path";
 import { iconRegistry, renderIcon } from "../src/renderer/icons.js";
 let auditedFiles: string[]=[
     "index.html",
-    "src/renderer/app.ts",
+    "src/renderer/App.tsx",
     "src/renderer/confirm.ts",
     "src/renderer/dashboard.ts",
-    "src/renderer/fileManager.ts",
-    "src/renderer/helpContent.ts",
     "src/renderer/templateEditor.ts",
-    "src/renderer/uiManager.ts"
+    "src/renderer/stores/fileStore.ts",
+    "src/renderer/components/ProcessingCard.tsx",
+    "src/renderer/components/Dashboard.tsx",
+    "src/renderer/components/TemplateEditor.tsx",
+    "src/renderer/components/SettingsModal.tsx",
+    "src/renderer/components/ConfigPanel.tsx",
+    "src/renderer/components/TitleBar.tsx",
+    "src/renderer/components/OutputCard.tsx",
+    "src/renderer/components/Footer.tsx",
+    "src/renderer/components/StatusPanel.tsx",
+    "src/renderer/components/UploadCard.tsx",
+    "src/renderer/components/ToastContainer.tsx"
 ];
 describe("icon registry completeness", ()=>{
     test("every renderIcon name referenced in source files has a registry entry", ()=>{
