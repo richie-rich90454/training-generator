@@ -3,6 +3,7 @@ import path from "path"
 import crypto from "crypto"
 import{Worker}from "worker_threads"
 import{fileURLToPath}from "url"
+import{t}from "../renderer/i18n.ts"
 import type{ParseBatchItem}from "../types/index.ts"
 
 class FileParserLazy{
@@ -60,7 +61,7 @@ class FileParserLazy{
             case "htmlToText":
                 return (await import("html-to-text")).htmlToText
             default:
-                throw new Error(`Unknown dependency: ${name}`)
+                throw new Error(t("error.unknownDependency", undefined, { name }))
         }
     }
     async parseFile(filePath:string,fileType:string):Promise<string>{
@@ -93,7 +94,7 @@ class FileParserLazy{
                 let buffer=await fs.promises.readFile(filePath);
                 return await this.parseFileBuffer(buffer, fileType);
             default:
-                throw new Error(`Unsupported file format for large files: ${fileType}`);
+                throw new Error(t("error.unsupportedLargeFileFormat", undefined, { format: fileType }));
         }
     }
     async streamTextFile(filePath:string):Promise<string>{
@@ -111,7 +112,7 @@ class FileParserLazy{
                 content+=chunk as string
                 if(content.length>maxSize){
                     readStream.destroy()
-                    settle(()=>reject(new Error("Text file too large to process")))
+                    settle(()=>reject(new Error(t("error.textFileTooLarge"))))
                 }
             });
             readStream.on("end", ()=>{
@@ -148,7 +149,7 @@ class FileParserLazy{
             case "html":
                 return await this.parseHTML(buffer);
             default:
-                throw new Error(`Unsupported file format: ${fileType}`);
+                throw new Error(t("error.unsupportedFileFormat", undefined, { format: fileType }));
         }
     }
     async parsePDF(buffer:Buffer):Promise<string>{
@@ -184,8 +185,8 @@ class FileParserLazy{
             }
             let timeout=setTimeout(()=>{
                 cleanup();
-                reject(new Error("PDF parsing timeout (30 seconds)"));
-            }, 30000);
+                reject(new Error(t("error.pdfParsingTimeout")));
+        }, 30000);
             worker.on("message", (result)=>{
                 if (result.id===id){
                     cleanup();
@@ -203,7 +204,7 @@ class FileParserLazy{
             });
             worker.on("exit", (code)=>{
                 cleanup();
-                reject(new Error(`Worker stopped with exit code ${code}`));
+                reject(new Error(t("error.workerStopped", undefined, { code: String(code) })));
             });
             let messageBuffer=transfer?Buffer.from(buffer):buffer
             let transferList=transfer&&messageBuffer.buffer?[messageBuffer.buffer]:[]
@@ -293,7 +294,7 @@ class FileParserLazy{
             ext="html";
         }
         if (!this.supportedFormats.includes(ext)){
-            throw new Error(`Unsupported file format: ${ext}`);
+            throw new Error(t("error.unsupportedFileFormat", undefined, { format: ext }));
         }
 
         return await this.parseFile(filePath, ext);
