@@ -19,6 +19,7 @@ vi.mock("@mongodb-js/zstd", ()=>{
 });
 describe("SmartCache", ()=>{
     beforeEach(async()=>{
+        vi.useRealTimers();
         vi.mocked(zstdModule).compress.mockClear();
         vi.mocked(zstdModule).decompress.mockClear();
     });
