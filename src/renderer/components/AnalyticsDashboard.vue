@@ -2,60 +2,60 @@
     <div class="analytics-dashboard" data-testid="analytics-dashboard">
         <div class="metrics-cards">
             <div class="metric-card" data-testid="total-items-card">
-                <h3 class="metric-label">Total Items</h3>
+                <h3 class="metric-label">{{ t('analytics.totalItems') }}</h3>
                 <p class="metric-value" data-testid="total-items-value">{{ totalItems }}</p>
             </div>
             <div class="metric-card" data-testid="quality-score-card">
-                <h3 class="metric-label">Quality Score</h3>
+                <h3 class="metric-label">{{ t('analytics.qualityScore') }}</h3>
                 <p class="metric-value" data-testid="quality-score-value">{{ qualityScore.toFixed(1) }}%</p>
             </div>
             <div class="metric-card" data-testid="total-runs-card">
-                <h3 class="metric-label">Total Runs</h3>
+                <h3 class="metric-label">{{ t('analytics.totalRuns') }}</h3>
                 <p class="metric-value" data-testid="total-runs-value">{{ totalRuns }}</p>
             </div>
             <div class="metric-card" data-testid="avg-output-length-card">
-                <h3 class="metric-label">Avg Output Length</h3>
+                <h3 class="metric-label">{{ t('analytics.avgOutputLength') }}</h3>
                 <p class="metric-value" data-testid="avg-output-length-value">{{ avgOutputLength.toFixed(0) }}</p>
             </div>
         </div>
         <div class="distribution-section" data-testid="format-distribution">
-            <h3 class="section-title">Format Distribution</h3>
+            <h3 class="section-title">{{ t('analytics.formatDistribution') }}</h3>
             <div class="format-list">
                 <div v-for="item in formatDistribution" :key="item.format" class="format-row" :data-testid="'format-row-'+item.format">
-                    <span class="format-label" :data-testid="'format-label-'+item.format">{{ item.label }}</span>
+                    <span class="format-label" :data-testid="'format-label-'+item.format">{{ t(`analytics.format.${item.format}`) }}</span>
                     <span class="format-count" :data-testid="'format-count-'+item.format">{{ item.count }}</span>
                 </div>
             </div>
         </div>
         <div class="run-status-section" data-testid="run-status-breakdown">
-            <h3 class="section-title">Run Status</h3>
+            <h3 class="section-title">{{ t('analytics.runStatus') }}</h3>
             <div class="status-list">
                 <div class="status-row" data-testid="status-completed">
-                    <span class="status-label">Completed</span>
+                    <span class="status-label">{{ t('analytics.status.completed') }}</span>
                     <span class="status-value" data-testid="status-completed-value">{{ completedRuns }}</span>
                 </div>
                 <div class="status-row" data-testid="status-failed">
-                    <span class="status-label">Failed</span>
+                    <span class="status-label">{{ t('analytics.status.failed') }}</span>
                     <span class="status-value" data-testid="status-failed-value">{{ failedRuns }}</span>
                 </div>
                 <div class="status-row" data-testid="status-running">
-                    <span class="status-label">Running</span>
+                    <span class="status-label">{{ t('analytics.status.running') }}</span>
                     <span class="status-value" data-testid="status-running-value">{{ runningRuns }}</span>
                 </div>
                 <div class="status-row" data-testid="status-queued">
-                    <span class="status-label">Queued</span>
+                    <span class="status-label">{{ t('analytics.status.queued') }}</span>
                     <span class="status-value" data-testid="status-queued-value">{{ queuedRuns }}</span>
                 </div>
             </div>
         </div>
         <div class="validator-section" data-testid="validator-reports-table">
-            <h3 class="section-title">Validator Reports</h3>
+            <h3 class="section-title">{{ t('analytics.validatorReports') }}</h3>
             <table class="validator-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Pass Rate</th>
-                        <th>Flagged</th>
+                        <th>{{ t('analytics.column.name') }}</th>
+                        <th>{{ t('analytics.column.passRate') }}</th>
+                        <th>{{ t('analytics.column.flagged') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,19 +68,20 @@
             </table>
         </div>
         <div class="top-issues-section" data-testid="top-issues-list">
-            <h3 class="section-title">Top Issues</h3>
+            <h3 class="section-title">{{ t('analytics.topIssues') }}</h3>
             <ul v-if="topIssues.length>0" class="issues-list">
                 <li v-for="issue in topIssues" :key="issue.name" class="issue-item" :data-testid="'issue-'+issue.name">
                     <span class="issue-name" :data-testid="'issue-name-'+issue.name">{{ issue.name }}</span>
                     <span class="issue-count" :data-testid="'issue-count-'+issue.name">{{ issue.flaggedCount }}</span>
                 </li>
             </ul>
-            <div v-else class="issues-empty" data-testid="issues-empty">No issues</div>
+            <div v-else class="issues-empty" data-testid="issues-empty">{{ t('analytics.noIssues') }}</div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { computed } from "vue"
+import { t } from "../i18n.js"
 import type { TrainingItem } from "../../types/interfaces.js"
 import type { RunRecord } from "../../core/runHistoryManager.js"
 export interface ValidatorReport{
