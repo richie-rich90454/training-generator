@@ -1,12 +1,12 @@
 <template>
     <div class="dataset-preview" data-testid="dataset-preview">
         <div class="preview-toolbar">
-            <button class="nav-button" type="button" :disabled="currentIndex<=0" @click="prevItem" data-testid="prev-button">Prev</button>
+            <button class="nav-button" type="button" :disabled="currentIndex<=0" @click="prevItem" data-testid="prev-button">{{ t('datasetPreview.prev') }}</button>
             <span class="index-display" data-testid="index-display">{{ currentIndex+1 }} / {{ total }}</span>
-            <button class="nav-button" type="button" :disabled="currentIndex>=total-1" @click="nextItem" data-testid="next-button">Next</button>
-            <button class="view-toggle" type="button" @click="toggleJson" data-testid="json-toggle">{{ showJson?"Formatted":"JSON" }}</button>
-            <button class="action-button" type="button" @click="emitEdit" data-testid="edit-button">Edit</button>
-            <button class="action-button" type="button" @click="emitDelete" data-testid="delete-button">Delete</button>
+            <button class="nav-button" type="button" :disabled="currentIndex>=total-1" @click="nextItem" data-testid="next-button">{{ t('datasetPreview.next') }}</button>
+            <button class="view-toggle" type="button" @click="toggleJson" data-testid="json-toggle">{{ showJson?t('datasetPreview.formatted'):t('datasetPreview.json') }}</button>
+            <button class="action-button" type="button" @click="emitEdit" data-testid="edit-button">{{ t('datasetPreview.edit') }}</button>
+            <button class="action-button" type="button" @click="emitDelete" data-testid="delete-button">{{ t('datasetPreview.delete') }}</button>
         </div>
         <div v-if="showJson" class="json-view" data-testid="json-view">
             <pre data-testid="json-content">{{ jsonText }}</pre>
@@ -14,7 +14,7 @@
         <div v-else class="preview-content">
             <div v-if="showOriginal && hasOriginal" class="split-view" data-testid="split-view">
                 <div class="original-panel" :style="{ flex: splitRatio }" data-testid="original-panel">
-                    <h3 class="panel-title">Original</h3>
+                    <h3 class="panel-title">{{ t('datasetPreview.original') }}</h3>
                     <pre class="original-text" data-testid="original-text">{{ originalSource }}</pre>
                 </div>
                 <div class="generated-panel" :style="{ flex: 1-splitRatio }" data-testid="generated-panel">
@@ -29,6 +29,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, h } from "vue"
+import { t } from "../i18n.js"
 import type { TrainingItem, ChatMessage } from "../../types/interfaces.js"
 interface Props{
     items: TrainingItem[]
@@ -129,14 +130,14 @@ function GeneratedView(props: { item: FormattedView }){
         if (view.input.length>0){
             children.push(
                 h("div", { class: "card", "data-testid": "input-card" }, [
-                    h("h4", { class: "card-title" }, "Input"),
+                    h("h4", { class: "card-title" }, t('datasetPreview.inputLabel')),
                     h("p", { "data-testid": "input-text" }, view.input)
                 ])
             )
         }
         children.push(
             h("div", { class: "card", "data-testid": "output-card" }, [
-                h("h4", { class: "card-title" }, "Output"),
+                h("h4", { class: "card-title" }, t('datasetPreview.outputLabel')),
                 h("p", { "data-testid": "output-text" }, view.output)
             ])
         )
