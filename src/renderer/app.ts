@@ -8,6 +8,7 @@ import{createProvider}from"./provider.js"
 import type{ProviderManager}from"./provider.js"
 import{semanticChunk,simpleChunk}from"./chunker.js"
 import{deduplicate}from"./deduplicator.js"
+import{t}from"./i18n.js"
 import{showToast}from"./toast.js"
 import{Logger,LogLevel}from"./logger.js"
 import{chunkInWorker,dedupInWorker}from"./workers/workerPool.js"
@@ -101,7 +102,7 @@ class TrainGeneratorApp{
             document.documentElement.setAttribute("data-platform",platform)
         }
         catch(error){
-            this.logger.error("app","Failed to detect platform",{error:(error as Error).message})
+            this.logger.error("app",t("log.detectPlatformFailed"),{error:(error as Error).message})
             document.documentElement.setAttribute("data-platform","unknown")
         }
     }
@@ -112,11 +113,11 @@ class TrainGeneratorApp{
         await this.detectPlatform()
         initWindowControls()
         window.addEventListener("unhandledrejection",(event)=>{
-            this.logger.error("app","Unhandled promise rejection",{reason:String(event.reason)})
-            showToast("An unexpected error occurred","error")
+            this.logger.error("app",t("log.unhandledRejection"),{reason:String(event.reason)})
+            showToast(t("toast.unexpectedError"),"error")
         })
         window.addEventListener("error",(event)=>{
-            this.logger.error("app","Unhandled error",{message:event.message,filename:event.filename,lineno:event.lineno})
+            this.logger.error("app",t("log.unhandledError"),{message:event.message,filename:event.filename,lineno:event.lineno})
         })
         await this.checkForProgress()
         await this.loadCheckpointState()
@@ -146,7 +147,7 @@ class TrainGeneratorApp{
             window.setTimeout(()=>tour.start(), 500)
         }
         catch(error){
-            this.logger.error("app","Failed to start onboarding tour",{error:(error as Error).message})
+            this.logger.error("app",t("log.tourStartFailed"),{error:(error as Error).message})
         }
     }
     bindEvents():void{
@@ -213,16 +214,16 @@ class TrainGeneratorApp{
         this.addEventListener(this.uiManager.demoBtn,"click",()=>{
             if(this.processor.demoMode){
                 this.processor.disableDemoMode()
-                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} Demo`
+                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} ${t("processing.demo")}`
                 this.uiManager.demoBtn.classList.remove("active")
-                this.logger.info("app","Demo mode disabled")
+                this.logger.info("app",t("log.demoModeDisabled"))
                 this.fileManager.updateProcessButton()
             }
             else{
                 this.processor.enableDemoMode()
-                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} Demo (Active)`
+                this.uiManager.demoBtn.innerHTML=`${renderIcon("fa-magic")} ${t("processing.demoActive")}`
                 this.uiManager.demoBtn.classList.add("active")
-                this.logger.info("app","Demo mode enabled - processing without Ollama")
+                this.logger.info("app",t("log.demoModeEnabled"))
                 this.fileManager.updateProcessButton()
             }
         })
@@ -306,7 +307,7 @@ class TrainGeneratorApp{
             this.checkpointInterval=null
         }
         this.fileManager.processBtn.disabled=false
-        this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")} Process Files`
+        this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")} ${t("processing.start")}`
         this.fileManager.clearBtn.disabled=false
         this.fileManager.browseBtn.removeAttribute("disabled")
         this.fileManager.fileInput.disabled=false
@@ -314,25 +315,25 @@ class TrainGeneratorApp{
             this.uiManager.exportBtn.disabled=false
             this.uiManager.copyBtn.disabled=false
         }
-        this.setProgress(0,"Processing stopped")
+        this.setProgress(0,t("processing.stopped"))
         let progressSection=this.uiManager.progressFill.closest(".progress-section")
         if(progressSection)progressSection.classList.add("stopped")
-        this.logger.warn("app","Processing stopped by user")
+        this.logger.warn("app",t("log.processingStopped"))
         this.audit.record("processing_stopped",{})
     }
     showShortcutsHelp():void{
         let shortcuts=[
-            ["Ctrl+O","Select files"],
-            ["Ctrl+Enter","Start/Stop processing"],
-            ["Ctrl+E","Export output"],
-            ["Ctrl+Shift+C","Copy output to clipboard"],
-            ["Ctrl+Shift+D","Toggle devtools panel"],
-            ["Ctrl+K","Show this help"],
-            ["Escape","Close modal / Stop processing"],
-            ["Tab / Shift+Tab","Navigate between elements"],
-            ["Space","Toggle checkbox / Activate button"],
+            ["Ctrl+O",t("shortcuts.selectFiles")],
+            ["Ctrl+Enter",t("shortcuts.startStop")],
+            ["Ctrl+E",t("shortcuts.export")],
+            ["Ctrl+Shift+C",t("shortcuts.copy")],
+            ["Ctrl+Shift+D",t("shortcuts.devtools")],
+            ["Ctrl+K",t("shortcuts.help")],
+            ["Escape",t("shortcuts.close")],
+            ["Tab / Shift+Tab",t("shortcuts.navigate")],
+            ["Space",t("shortcuts.toggle")],
         ]
-        let html='<div class="shortcuts-help"><h3>Keyboard Shortcuts</h3><table>'
+        let html=`<div class="shortcuts-help"><h3>${t("shortcuts.title")}</h3><table>`
         for(let[key,desc]of shortcuts){
             html+=`<tr><td><kbd>${key}</kbd></td><td>${desc}</td></tr>`
         }
@@ -344,18 +345,18 @@ class TrainGeneratorApp{
             if(window.electronAPI&&window.electronAPI.openUserGuide){
                 let result=await window.electronAPI.openUserGuide()
                 if(!result.success){
-                    this.addLog(`Failed to open user guide: ${result.error}`,"error")
+                    this.addLog(t("log.openUserGuideFailed",undefined,{error:result.error||""}),"error")
                 }
                 else{
-                    this.addLog("Opened user guide","success")
+                    this.addLog(t("log.openedUserGuide"),"success")
                 }
             }
             else{
-                this.addLog("User guide opening is only available in the Electron app","warning")
+                this.addLog(t("log.userGuideElectronOnly"),"warning")
             }
         }
         catch(error){
-            this.addLog(`Failed to open user guide: ${(error as Error).message}`,"error")
+            this.addLog(t("log.openUserGuideFailed",undefined,{error:(error as Error).message}),"error")
         }
     }
     initProvider():void{
@@ -369,25 +370,25 @@ class TrainGeneratorApp{
             this.providerManager=createProvider(type,config)
             this.processor.provider=this.providerManager
             this.providerManager.startHealthChecks(60000)
-            this.logger.info("app",`Provider set to ${type}`)
+            this.logger.info("app",t("log.providerSet",undefined,{type}))
         }
         catch(error){
-            this.logger.error("app","Failed to initialize provider",{error:(error as Error).message})
+            this.logger.error("app",t("log.providerInitFailed",undefined,{error:(error as Error).message}))
         }
     }
 
     async processFiles():Promise<void>{
         if(this.isProcessing){
-            this.logger.warn("app","Processing already in progress")
+            this.logger.warn("app",t("log.processingAlreadyInProgress"))
             return
         }
         if(this.fileManager.selectedFiles.length==0){
-            this.logger.warn("app","No files to process")
+            this.logger.warn("app",t("log.noFilesToProcess"))
             return
         }
         if(!this.uiManager.ollamaStatus.running && !this.processor.demoMode){
-            this.logger.error("app","Cannot process:Ollama is not running")
-            showToast("Ollama is not running","error")
+            this.logger.error("app",t("log.cannotProcessOllamaOffline"))
+            showToast(t("toast.ollamaNotRunning"),"error")
             return
         }
         this.isProcessing=true
@@ -421,15 +422,15 @@ class TrainGeneratorApp{
             this.fileManager.setFileStatus(file.name,"waiting")
         }
         this.fileManager.processBtn.disabled=true
-        this.fileManager.processBtn.innerHTML=`<span class="tg-spinner">${renderIcon("fa-spinner")}</span>Processing...`
+        this.fileManager.processBtn.innerHTML=`<span class="tg-spinner">${renderIcon("fa-spinner")}</span>${t("processing.running")}`
         this.fileManager.clearBtn.disabled=true
         this.uiManager.exportBtn.disabled=true
         this.uiManager.copyBtn.disabled=true
         this.fileManager.browseBtn.setAttribute("disabled","")
         this.fileManager.fileInput.disabled=true
-        this.setProgress(0,"Starting processing...")
-        this.logger.info("app",`Starting processing of ${this.fileManager.selectedFiles.length}file(s)`)
-        this.logger.info("app","This may take several minutes depending on file sizes and Ollama performance")
+        this.setProgress(0,t("processing.starting"))
+        this.logger.info("app",t("log.startingProcessing",undefined,{count:String(this.fileManager.selectedFiles.length)}))
+        this.logger.info("app",t("log.processingTimeEstimate"))
         this.audit.record("processing_started",{
             fileCount:this.fileManager.selectedFiles.length,
             model:this.uiManager.modelSelect.value,
@@ -444,8 +445,8 @@ class TrainGeneratorApp{
             let processedChunks=0
 
             // --- Pre-fetching pipeline ---
-            this.setProgress(0,"Pre-loading files...")
-            this.logger.info("app",`Pre-loading ${this.processingQueue.length} file(s) in parallel`)
+            this.setProgress(0,t("processing.preloading"))
+            this.logger.info("app",t("processing.preloadingDetail",undefined,{count:String(this.processingQueue.length)}))
 
             type PreloadedEntry={file:SelectedFile;chunks:string[]}
             let preloadedData:PreloadedEntry[]=[]
@@ -458,7 +459,7 @@ class TrainGeneratorApp{
                         if(file.path){
                             let result=await window.electronAPI!.parseFile(file.path,"pdf")
                             if(!result.success){
-                                this.logger.warn("app",`Main process PDF parse failed for ${file.name}, falling back to browser extraction`)
+                                this.logger.warn("app",t("log.pdfParseFallback",undefined,{name:file.name}))
                                 let arrayBuffer=await this.readFileAsArrayBuffer(file.file)
                                 textContent=await this.extractTextFromPDFBuffer(arrayBuffer)
                             }else{
@@ -478,20 +479,20 @@ class TrainGeneratorApp{
                     }
                     textContent=result.content!
                 }else{
-                    throw new Error("No file path or file object available")
+                    throw new Error(t("error.noFileOrPath"))
                 }
                 return{file,textContent}
             })
 
             let readResults=await Promise.all(readPromises)
-            this.setProgress(0,"Chunking files... 0/"+this.processingQueue.length)
-            this.logger.info("app","Pre-loading complete, chunking all files")
+            this.setProgress(0,t("processing.chunking",undefined,{current:"0",total:String(this.processingQueue.length)}))
+            this.logger.info("app",t("log.preloadComplete"))
 
             // Step 2: Pre-chunk all files
             let chunkSize=Math.min(10000,Math.max(500,parseInt(this.uiManager.chunkSize.value)||8000))
             for(let i=0;i<readResults.length;i++){
                 let{file,textContent}=readResults[i]
-                this.setProgress(0,`Chunking files... ${i+1}/${this.processingQueue.length}`)
+                this.setProgress(0,t("processing.chunking",undefined,{current:String(i+1),total:String(this.processingQueue.length)}))
                 if(!textContent||textContent.trim().length==0){
                     preloadedData.push({file,chunks:[]})
                 }else{
@@ -504,8 +505,8 @@ class TrainGeneratorApp{
                 }
             }
 
-            this.setProgress(0,"Pre-chunking complete, starting processing...")
-            this.logger.info("app","Pre-chunking complete, starting processing pipeline")
+            this.setProgress(0,t("processing.prechunkingComplete"))
+            this.logger.info("app",t("log.prechunkingComplete"))
 
             let fileChunkMap=new Map<typeof preloadedData[0],number>()
             for(let entry of preloadedData){
@@ -552,11 +553,11 @@ class TrainGeneratorApp{
                         let fileIndex=completedFiles
                         running++
                         this.fileManager.setFileStatus(file.name,"processing")
-                        this.logger.info("app",`Processing file ${fileIndex+1}/${this.processingQueue.length}: ${file.name}`)
+                        this.logger.info("app",t("log.processingFile",undefined,{index:String(fileIndex+1),total:String(this.processingQueue.length),name:file.name}))
                         this.processFile(file,(chunksProcessed:number,totalChunksInFile:number)=>{
                             this.setProgress(
                                 ((processedChunks+(chunksProcessed/totalChunksInFile)*fileChunks)/totalChunks)*100,
-                                `Processing ${file.name}(chunk ${chunksProcessed}/${totalChunksInFile})`
+                                t("processing.fileChunk",undefined,{name:file.name,current:String(chunksProcessed),total:String(totalChunksInFile)})
                             )
                             this.dashboard.update({
                                 chunksDone:processedChunks+Math.floor((chunksProcessed/totalChunksInFile)*fileChunks),
@@ -575,16 +576,16 @@ class TrainGeneratorApp{
                                 this.outputManager.outputData.push(...result.data!)
                                 totalItemsGenerated+=result.data!.length
                                 successfulFiles++
-                                this.logger.info("app",`✅ Successfully processed ${file.name}(${result.data!.length}items)`)
+                                this.logger.info("app",t("log.fileProcessedSuccess",undefined,{name:file.name,count:String(result.data!.length)}))
                             }
                             else{
                                 this.fileManager.setFileStatus(file.name,"failed")
                                 failedFiles++
-                                this.logger.error("app",`Failed to process ${file.name}: ${result.error}`)
+                                this.logger.error("app",t("log.fileProcessedError",undefined,{name:file.name,error:result.error||""}))
                             }
                             this.setProgress(
                                 Math.min(99,(processedChunks/totalChunks)*100),
-                                `Processed ${completedFiles}/${this.processingQueue.length}files`
+                                t("processing.filesProgress",undefined,{completed:String(completedFiles),total:String(this.processingQueue.length)})
                             )
                             this.dashboard.update({
                                 chunksDone:processedChunks,
@@ -601,17 +602,14 @@ class TrainGeneratorApp{
                 processNext()
             })
 
-            this.setProgress(100,"Processing complete!")
-            let summaryMessage=`Processing complete. `
-            if(successfulFiles>0){
-                summaryMessage+=`Successfully processed ${successfulFiles}file(s)and generated ${totalItemsGenerated}training items. `
-            }
-            if(failedFiles>0){
-                summaryMessage+=`${failedFiles}file(s)failed to process.`
-            }
+            this.setProgress(100,t("processing.complete"))
+            let summaryMessage=successfulFiles>0
+                ?t("toast.processingSummarySuccess",undefined,{successful:String(successfulFiles),total:String(this.processingQueue.length),count:String(totalItemsGenerated)})
+                :t("toast.processingSummaryWarning",undefined,{successful:String(successfulFiles),total:String(this.processingQueue.length),failed:String(failedFiles),count:String(totalItemsGenerated)})
             if(successfulFiles>0){
                 this.logger.info("app",summaryMessage)
-            }else{
+            }
+            else{
                 this.logger.warn("app",summaryMessage)
             }
             showToast(summaryMessage,successfulFiles>0?"success":"warning")
@@ -621,16 +619,16 @@ class TrainGeneratorApp{
             if(this.outputManager.outputData.length>0){
                 this.uiManager.exportBtn.disabled=false
                 this.uiManager.copyBtn.disabled=false
-                this.logger.info("app",`Output ready. You can now export ${this.outputManager.outputData.length}training items.`)
+                this.logger.info("app",t("log.outputReady",undefined,{count:String(this.outputManager.outputData.length)}))
             }
             this.fileManager.filesCountEl.textContent=String(this.fileManager.selectedFiles.length)
             this.fileManager.lastProcessedEl.textContent=new Date().toLocaleTimeString()
         }
         catch(error){
-            this.logger.error("app","Processing failed",{error:(error as Error).message})
-            showToast("Processing failed due to an unexpected error","error")
-            this.setProgress(0,"Processing failed")
-            this.logger.warn("app","Please check your Ollama connection and try again.")
+            this.logger.error("app",t("processing.failed"),{error:(error as Error).message})
+            showToast(t("toast.processingFailed"),"error")
+            this.setProgress(0,t("processing.failed"))
+            this.logger.warn("app",t("log.checkOllamaConnection"))
         }
         finally{
             this.isProcessing=false
@@ -640,7 +638,7 @@ class TrainGeneratorApp{
                 this.checkpointInterval=null
             }
             this.fileManager.processBtn.disabled=false
-            this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")}Process Files`
+            this.fileManager.processBtn.innerHTML=`${renderIcon("fa-play")}${t("processing.start")}`
             this.fileManager.clearBtn.disabled=false
             this.fileManager.browseBtn.removeAttribute("disabled")
             this.fileManager.fileInput.disabled=false
@@ -665,53 +663,56 @@ class TrainGeneratorApp{
         let hitRate=cs.totalRequests>0?Math.round((cs.hits/cs.totalRequests)*100):0
         let as=this.audit.getSummary()
         let auditOpsHtml=""
+        let labelSuffix=t("common.labelSuffix")
         for(let op in as.operations){
-            auditOpsHtml+=`<tr><td>${op}:</td><td>${as.operations[op]}</td></tr>`
+            let opLabel=t(`audit.${op}`)
+            if(opLabel===`audit.${op}`)opLabel=op
+            auditOpsHtml+=`<tr><td>${opLabel}${labelSuffix}</td><td>${as.operations[op]}</td></tr>`
         }
         let qrHtml=""
         if(this.qualityReport){
             qrHtml=`<div class="settings-actions">
-                <button id="quality-report-btn" class="btn btn-secondary" aria-label="View quality report">
-                    ${renderIcon("fa-clipboard-check")} Quality Report (${this.qualityReport.passRate}% pass, ${this.qualityReport.flaggedItems} flagged)
+                <button id="quality-report-btn" class="btn btn-secondary" aria-label="${t("qualityReport.viewAria")}">
+                    ${renderIcon("fa-clipboard-check")} ${t("qualityReport.buttonLabel",undefined,{rate:String(this.qualityReport.passRate),count:String(this.qualityReport.flaggedItems)})}
                 </button>
             </div>`
         }
         let html=`<div class="stats-panel">
-            <h3>Processing Statistics</h3>
+            <h3>${t("stats.title")}</h3>
             <table>
-                <tr><td>Total Chunks:</td><td>${r.totalChunks}</td></tr>
-                <tr><td>Successful:</td><td>${r.successfulChunks}</td></tr>
-                <tr><td>Failed:</td><td>${r.failedChunks}</td></tr>
-                <tr><td>Success Rate:</td><td>${r.successRate}%</td></tr>
-                <tr><td>Prompt Tokens:</td><td>${r.promptTokens.toLocaleString()}</td></tr>
-                <tr><td>Response Tokens:</td><td>${r.totalTokens.toLocaleString()}</td></tr>
-                <tr><td>Time Elapsed:</td><td>${r.elapsedFormatted}</td></tr>
-                <tr><td>Tokens/Second:</td><td>${r.tokensPerSecond.toLocaleString()}</td></tr>
-                <tr><td>Duplicates Removed:</td><td>${r.deduplicatedCount}</td></tr>
+                <tr><td>${t("stats.totalChunks")}${labelSuffix}</td><td>${r.totalChunks}</td></tr>
+                <tr><td>${t("stats.successful")}${labelSuffix}</td><td>${r.successfulChunks}</td></tr>
+                <tr><td>${t("stats.failed")}${labelSuffix}</td><td>${r.failedChunks}</td></tr>
+                <tr><td>${t("stats.successRate")}${labelSuffix}</td><td>${r.successRate}${t("common.percent")}</td></tr>
+                <tr><td>${t("stats.promptTokens")}${labelSuffix}</td><td>${r.promptTokens.toLocaleString()}</td></tr>
+                <tr><td>${t("stats.responseTokens")}${labelSuffix}</td><td>${r.totalTokens.toLocaleString()}</td></tr>
+                <tr><td>${t("stats.timeElapsed")}${labelSuffix}</td><td>${r.elapsedFormatted}</td></tr>
+                <tr><td>${t("stats.tokensPerSecond")}${labelSuffix}</td><td>${r.tokensPerSecond.toLocaleString()}</td></tr>
+                <tr><td>${t("stats.duplicatesRemoved")}${labelSuffix}</td><td>${r.deduplicatedCount}</td></tr>
             </table>
-            <h3>Cache Statistics</h3>
+            <h3>${t("stats.cacheTitle")}</h3>
             <table>
-                <tr><td>Cache Hits:</td><td>${cs.hits}</td></tr>
-                <tr><td>Cache Misses:</td><td>${cs.misses}</td></tr>
-                <tr><td>Total Requests:</td><td>${cs.totalRequests}</td></tr>
-                <tr><td>Hit Rate:</td><td>${hitRate}%</td></tr>
-                <tr><td>Tokens Saved (Cache):</td><td>${cs.estimatedTokensSaved.toLocaleString()}</td></tr>
-                <tr><td>Est. Cost Saved:</td><td>$${cs.estimatedCostSaved.toFixed(4)}</td></tr>
+                <tr><td>${t("stats.cache.hits")}${labelSuffix}</td><td>${cs.hits}</td></tr>
+                <tr><td>${t("stats.cache.misses")}${labelSuffix}</td><td>${cs.misses}</td></tr>
+                <tr><td>${t("stats.cache.totalRequests")}${labelSuffix}</td><td>${cs.totalRequests}</td></tr>
+                <tr><td>${t("stats.cache.hitRate")}${labelSuffix}</td><td>${hitRate}${t("common.percent")}</td></tr>
+                <tr><td>${t("stats.cache.tokensSaved")}${labelSuffix}</td><td>${cs.estimatedTokensSaved.toLocaleString()}</td></tr>
+                <tr><td>${t("stats.cache.costSaved")}${labelSuffix}</td><td>${t("devtools.cache.currencyPrefix")}${cs.estimatedCostSaved.toFixed(4)}</td></tr>
             </table>
-            <h3>Audit Trail</h3>
+            <h3>${t("stats.auditTitle")}</h3>
             <table>
-                <tr><td>Total Operations:</td><td>${as.totalOperations}</td></tr>
+                <tr><td>${t("stats.audit.totalOperations")}${labelSuffix}</td><td>${as.totalOperations}</td></tr>
                 ${auditOpsHtml}
             </table>
             <div class="settings-actions">
-                <button id="warm-cache-btn" class="btn btn-secondary" aria-label="Import from previous output to warm cache">
-                    ${renderIcon("fa-database")} Import from previous output
+                <button id="warm-cache-btn" class="btn btn-secondary" aria-label="${t("stats.warmCacheAria")}">
+                    ${renderIcon("fa-database")} ${t("stats.warmCache")}
                 </button>
             </div>
             ${qrHtml}
             ${warningsHtml}
         </div>`
-        this.logger.info("app",`Processing complete: ${r.successfulChunks}/${r.totalChunks} chunks (${r.successRate}%), ${r.totalTokens.toLocaleString()} tokens, ${r.elapsedFormatted}`)
+        this.logger.info("app",t("stats.processingComplete",undefined,{successful:String(r.successfulChunks),total:String(r.totalChunks),rate:String(r.successRate),tokens:r.totalTokens.toLocaleString(),time:r.elapsedFormatted}))
         this.uiManager.showCustomModal(html)
         // Wire up the warm cache button after DOM is inserted
         setTimeout(()=>{
@@ -728,28 +729,36 @@ class TrainGeneratorApp{
     showQualityReport():void{
         if(!this.qualityReport)return
         let r=this.qualityReport
+        let labelSuffix=t("common.labelSuffix")
         let breakdownHtml=""
         for(let reason in r.breakdown){
-            breakdownHtml+=`<tr><td>${reason}:</td><td>${r.breakdown[reason]}</td></tr>`
+            let reasonLabel=t(`qualityReport.reason.${reason}`)
+            if(reasonLabel===`qualityReport.reason.${reason}`)reasonLabel=reason
+            breakdownHtml+=`<tr><td>${reasonLabel}${labelSuffix}</td><td>${r.breakdown[reason]}</td></tr>`
         }
         let flagsHtml=""
         let maxFlags=20
         for(let i=0;i<Math.min(r.flags.length,maxFlags);i++){
             let f=r.flags[i]
             let preview=this.escapeHtml((f.item.instruction||f.item.input||f.item.messages?.map(m=>m.content).join(" ")||"").substring(0,100))
-            flagsHtml+=`<tr><td>#${f.itemIndex+1}</td><td class="flag-reasons">${f.reasons.join(", ")}</td><td class="flag-preview">${preview}...</td></tr>`
+            let reasons=f.reasons.map(reason=>{
+                let reasonLabel=t(`qualityReport.reason.${reason}`)
+                if(reasonLabel===`qualityReport.reason.${reason}`)return reason
+                return reasonLabel
+            }).join(", ")
+            flagsHtml+=`<tr><td>#${f.itemIndex+1}</td><td class="flag-reasons">${reasons}</td><td class="flag-preview">${preview}${t("common.ellipsis")}</td></tr>`
         }
-        let moreHtml=r.flags.length>maxFlags?`<p>...and ${r.flags.length-maxFlags} more flagged items</p>`:""
+        let moreHtml=r.flags.length>maxFlags?t("qualityReport.moreFlagged",undefined,{count:String(r.flags.length-maxFlags)}):""
         let html=`<div class="quality-report">
-            <h3>Quality Report</h3>
+            <h3>${t("qualityReport.title")}</h3>
             <table>
-                <tr><td>Total Items:</td><td>${r.totalItems}</td></tr>
-                <tr><td>Flagged Items:</td><td>${r.flaggedItems}</td></tr>
-                <tr><td>Pass Rate:</td><td>${r.passRate}%</td></tr>
+                <tr><td>${t("qualityReport.totalItems")}${labelSuffix}</td><td>${r.totalItems}</td></tr>
+                <tr><td>${t("qualityReport.flaggedItems")}${labelSuffix}</td><td>${r.flaggedItems}</td></tr>
+                <tr><td>${t("qualityReport.passRate")}${labelSuffix}</td><td>${r.passRate}${t("common.percent")}</td></tr>
             </table>
-            <h4>Breakdown</h4>
-            <table>${breakdownHtml||"<tr><td colspan='2'>No issues found</td></tr>"}</table>
-            ${r.flags.length>0?`<h4>Flagged Items (showing first ${Math.min(r.flags.length,maxFlags)})</h4><table><tr><th>#</th><th>Reasons</th><th>Preview</th></tr>${flagsHtml}</table>${moreHtml}`:""}
+            <h4>${t("qualityReport.breakdown")}</h4>
+            <table>${breakdownHtml||`<tr><td colspan='2'>${t("qualityReport.noIssues")}</td></tr>`}</table>
+            ${r.flags.length>0?`<h4>${t("qualityReport.flaggedItemsTitle",undefined,{count:String(Math.min(r.flags.length,maxFlags))})}</h4><table><tr><th>${t("qualityReport.column.index")}</th><th>${t("qualityReport.column.reasons")}</th><th>${t("qualityReport.column.preview")}</th></tr>${flagsHtml}</table>${moreHtml}`:""}
         </div>`
         this.uiManager.showCustomModal(html)
     }
@@ -777,24 +786,24 @@ class TrainGeneratorApp{
                         }
                     }
                     if(items.length===0){
-                        showToast("No valid items found in the file","error")
+                        showToast(t("toast.noValidItems"),"error")
                         return
                     }
                     let model=this.uiManager.modelSelect.value
                     let language=this.uiManager.languageSelect.value||"en"
                     let prompt=await this.promptManager.getPromptWithFallback(language,this.uiManager.processingType.value)||""
                     let warmed=await warmCache(items,model,prompt)
-                    showToast(`Cache warmed with ${warmed} items from ${items.length} total entries`,"success")
-                    this.addLog(`Cache warmed: ${warmed} items imported from previous output`,"success")
+                    showToast(t("toast.cacheWarmed",undefined,{warmed:String(warmed),total:String(items.length)}),"success")
+                    this.addLog(t("log.cacheWarmed",undefined,{warmed:String(warmed)}),"success")
                 }
                 catch(err){
-                    showToast("Failed to read file: "+(err as Error).message,"error")
+                    showToast(t("toast.readFileFailed",undefined,{error:(err as Error).message}),"error")
                 }
             })
             fileInput.click()
         }
         catch(err){
-            showToast("Failed to warm cache: "+(err as Error).message,"error")
+            showToast(t("toast.warmCacheFailed",undefined,{error:(err as Error).message}),"error")
         }
     }
     async processFile(fileObj:SelectedFile,progressCallback?:(chunksProcessed:number,totalChunks:number)=>void,preloadedChunks?:string[]):Promise<ProcessFileResult>{
@@ -809,7 +818,7 @@ class TrainGeneratorApp{
                         if(fileObj.path){
                             let result=await window.electronAPI!.parseFile(fileObj.path,"pdf")
                             if(!result.success){
-                                this.logger.warn("app",`Main process PDF parse failed for ${fileObj.name}, falling back to browser extraction`)
+                                this.logger.warn("app",t("log.pdfParseFallback",undefined,{name:fileObj.name}))
                                 let arrayBuffer=await this.readFileAsArrayBuffer(fileObj.file)
                                 textContent=await this.extractTextFromPDFBuffer(arrayBuffer)
                             }
@@ -834,10 +843,10 @@ class TrainGeneratorApp{
                     textContent=result.content!
                 }
                 else{
-                    throw new Error("No file path or file object available")
+                    throw new Error(t("error.noFileOrPath"))
                 }
                 if(!textContent||textContent.trim().length==0){
-                    throw new Error("No text content extracted from file")
+                    throw new Error(t("error.noTextContent"))
                 }
                 let chunkSize=Math.min(10000,Math.max(500,parseInt(this.uiManager.chunkSize.value)||8000))
                 let smartSizing=this.uiManager.smartSizingCheckbox?.checked??false
@@ -848,7 +857,7 @@ class TrainGeneratorApp{
                 textContent=(null as any) // Allow GC of text content
             }
             if(chunks.length==0){
-                throw new Error("No text chunks created from file content")
+                throw new Error(t("error.noChunksCreated"))
             }
             let processedChunks:TrainingItem[]=[]
             let model=this.uiManager.modelSelect.value
@@ -872,17 +881,17 @@ class TrainGeneratorApp{
                         progressCallback(index+1,total)
                     }
                     let chunkProgress=((index+1)/total)*100
-                    this.logger.info("app",`Processed chunk ${index+1}/${total}(${Math.round(chunkProgress)}%)-generated ${items.length}items`)
+                    this.logger.info("app",t("log.chunkProcessed",undefined,{index:String(index+1),total:String(total),percent:String(Math.round(chunkProgress)),count:String(items.length)}))
                     this.updateOutputPreview()
                 },
                 (index:number,error:string)=>{
-                    this.logger.warn("app",`Failed to process chunk ${index+1}: ${error}`)
+                    this.logger.warn("app",t("log.chunkFailed",undefined,{index:String(index+1),error}))
                 },
                 provenanceBase
             )
             let{items:dedupedItems,removed}=await dedupInWorker(processedChunks)
             if(removed>0){
-                this.logger.info("app",`Removed ${removed} duplicate items from output`)
+                this.logger.info("app",t("log.duplicatesRemoved",undefined,{removed:String(removed)}))
             }
             this.processor.stats.deduplicatedCount=removed
             processedChunks=[] // Release pre-dedup array
@@ -892,10 +901,10 @@ class TrainGeneratorApp{
             }
         }
         catch(error){
-            this.logger.error("app",`Error processing file ${fileObj.name}`,{error:(error as Error).message})
+            this.logger.error("app",t("log.errorProcessingFile",undefined,{name:fileObj.name}),{error:(error as Error).message})
             return{
                 success:false,
-                error:(error as Error).message||"Failed to process file"
+                error:(error as Error).message||t("error.failedToProcessFile")
             }
         }
     }
@@ -903,7 +912,7 @@ class TrainGeneratorApp{
         return new Promise((resolve,reject)=>{
             let reader=new FileReader()
             reader.onload=(e)=>resolve(e.target!.result as ArrayBuffer)
-            reader.onerror=(e)=>reject(new Error("Failed to read file as ArrayBuffer"))
+            reader.onerror=(e)=>reject(new Error(t("error.failedToReadFileAsArrayBuffer")))
             reader.readAsArrayBuffer(file)
         })
     }
@@ -956,20 +965,20 @@ class TrainGeneratorApp{
             }
             extractedText=extractedText.replace(/\s+/g," ").trim()
             if(extractedText.length==0){
-                throw new Error("No text could be extracted from PDF. The PDF might be scanned or image-based. For better PDF extraction,use the file dialog instead of drag & drop.")
+                throw new Error(t("error.pdfNoText"))
             }
-            console.log(`Extracted ${extractedText.length}characters from PDF(browser context-limited extraction)`)
+            console.log(t("log.pdfExtracted",undefined,{length:String(extractedText.length)}))
             return extractedText
         }
         catch(error){
             console.error("PDF text extraction error:",error)
-            throw new Error(`Failed to extract text from PDF: ${(error as Error).message}. For better PDF support,use the file dialog or convert PDFs to text format first.`)
+            throw new Error(t("error.pdfExtractFailed",undefined,{error:(error as Error).message}))
         }
     }
     async readFileContent(file:File):Promise<string>{
         return new Promise((resolve,reject)=>{
             let reader=new FileReader()
-            reader.onerror=(e)=>reject(new Error("Failed to read file"))
+            reader.onerror=(e)=>reject(new Error(t("error.failedToReadFile")))
             if(file.type=="application/pdf"){
                 reader.onload=async(e)=>{
                     try{
@@ -996,62 +1005,21 @@ class TrainGeneratorApp{
         this.uiManager.selectedLanguage=language
         let loadedPrompt=await this.promptManager.getPromptWithFallback(language,processingType)
         if(loadedPrompt){
-            this.logger.info("app",`Using ${language}prompt for ${processingType}`)
+            this.logger.info("app",t("log.usingPrompt",undefined,{language,processingType}))
             return loadedPrompt.replace("{{text}}",text)
         }
-        this.logger.warn("app",`Using hardcoded fallback prompt for ${language}`)
+        this.logger.warn("app",t("log.usingFallbackPrompt",undefined,{language}))
         return this.getFallbackPrompt(text,processingType,language)
     }
     // Fallback system prompts (compact, token-efficient). If distinguishing system vs user
     // prompts is needed, use {prompt_type} marker: replace with "system" or "user" at runtime.
     getFallbackPrompt(text:string,processingType:string,language:string="en"):string{
-        let fallbackPrompts:Record<string,string>={
-            instruction:`Extract EVERY fact, concept, relationship, example, statistic, definition, argument, and nuance from the text below. Leave nothing behind. Generate as many high-quality Q&A pairs as possible — there is no upper limit. Each item must contain complete, detailed answers. Prefer depth over breadth: if the text is thin, fewer but richer items are better than many shallow ones. Cover ALL information exhaustively.
-
-TEXT:
-${text}
-
-RULES:
-- Same language as source text.
-- One Q&A per important point; for lists/procedures, one question per item.
-- Answers based exclusively on the text.
-- Each answer must be thorough and complete.
-OUTPUT (blank line between pairs):
-Question: [question]
-Answer: [answer]`,
-            conversation:`Generate a comprehensive User-Assistant conversation covering ALL information in the text below. Every fact, concept, statistic, relationship, and detail must appear in at least one exchange. Generate as many exchanges as the content warrants — no upper limit. Each exchange should be thorough and detailed.
-
-TEXT:
-${text}
-
-RULES:
-- Same language as source; answers based exclusively on the text.
-- Cover every main topic and key detail in separate exchanges.
-- Each response should be detailed and complete.
-OUTPUT (blank line between exchanges):
-User: [message]
-Assistant: [response]`,
-            chunking:`Comprehensively summarize the text below. Preserve ALL key points, arguments, data, examples, conclusions, and nuances. Do not omit any information. The summary should be as detailed as the content warrants — no arbitrary length limit. Maintain logical flow and all important relationships.
-
-TEXT:
-${text}
-
-RULES:
-- No information absent from the original text.
-- Preserve logical flow and all important relationships.
-OUTPUT: summary text only.`,
-            custom:`Exhaustively extract ALL structured information from the text below. Extract: every key concept, theme, fact, data point, statistic, argument, evidence, example, definition, relationship, conclusion, and implication. For procedures: every step. For comparisons: every difference and similarity. For lists: every item with full description. Generate as many structured items as the content warrants — no upper limit.
-
-TEXT:
-${text}
-
-RULES:
-Extract: key concepts, themes, facts, data, statistics, arguments, evidence, examples,
-definitions, relationships, conclusions, implications. For procedures: all steps.
-For comparisons: key differences/similarities. For lists: all items with descriptions.
-OUTPUT: structured analysis covering everything important.`
+        let key:`prompt.system.${string}`=`prompt.system.${processingType}` as `prompt.system.${string}`
+        let prompt=t(key,language)
+        if(prompt===key){
+            prompt=t("prompt.system.instruction",language)
         }
-        return fallbackPrompts[processingType]||fallbackPrompts.instruction
+        return prompt.replace("{{text}}",text)
     }
     async saveProgress():Promise<void>{
         try{
@@ -1064,7 +1032,7 @@ OUTPUT: structured analysis covering everything important.`
             await window.electronAPI.saveProgress(data)
         }
         catch(error){
-            this.logger.error("app","Failed to save progress",{error:(error as Error).message})
+            this.logger.error("app",t("log.saveProgressFailed"),{error:(error as Error).message})
         }
     }
     async checkForProgress():Promise<void>{
@@ -1072,18 +1040,18 @@ OUTPUT: structured analysis covering everything important.`
             if(!window.electronAPI?.loadProgress)return
             let result=await window.electronAPI.loadProgress()
             if(result.success&&result.data&&result.data.outputData?.length>0){
-                this.logger.info("app","Found saved progress from previous session")
+                this.logger.info("app",t("log.foundSavedProgress"))
             }
         }
         catch(error){
-            this.logger.error("app","Failed to check for progress",{error:(error as Error).message})
+            this.logger.error("app",t("log.checkProgressFailed"),{error:(error as Error).message})
         }
     }
     async loadCheckpointState():Promise<void>{
         try{
             let checkpoint=await loadCheckpoint()
             if(checkpoint && checkpoint.outputData && checkpoint.outputData.length>0){
-                let confirmed=await showConfirm(`Processing was interrupted. Resume from checkpoint? (${checkpoint.outputData.length} items generated)`)
+                let confirmed=await showConfirm(t("confirm.resumeCheckpoint",undefined,{count:String(checkpoint.outputData.length)}))
                 if(confirmed){
                     this.fileManager.selectedFiles=checkpoint.files
                     this.outputManager.outputData=checkpoint.outputData
@@ -1091,8 +1059,8 @@ OUTPUT: structured analysis covering everything important.`
                     this.uiManager.updateOutputPreview()
                     this.uiManager.exportBtn.disabled=false
                     this.uiManager.copyBtn.disabled=false
-                    this.logger.info("app",`Restored state from checkpoint: ${checkpoint.outputData.length} items, ${checkpoint.files.length} files`)
-                    showToast("State restored from checkpoint","success")
+                    this.logger.info("app",t("log.checkpointRestored",undefined,{items:String(checkpoint.outputData.length),files:String(checkpoint.files.length)}))
+                    showToast(t("toast.stateRestored"),"success")
                 }
                 else{
                     await clearCheckpoint()
@@ -1100,14 +1068,14 @@ OUTPUT: structured analysis covering everything important.`
             }
         }
         catch(error){
-            this.logger.error("app","Failed to load checkpoint state",{error:(error as Error).message})
+            this.logger.error("app",t("log.loadCheckpointFailed"),{error:(error as Error).message})
         }
     }
     clearAll():void{
         let hasFiles=this.fileManager.selectedFiles.length>0
         let hasOutput=this.outputManager.outputData.length>0
         if(hasFiles||hasOutput){
-            showConfirm("Are you sure you want to clear all files and output?").then(confirmed=>{
+            showConfirm(t("confirm.clearAll")).then(confirmed=>{
                 if(confirmed){
                     this.fileManager.selectedFiles=[]
                     this.fileManager.fileStatuses.clear()
@@ -1117,10 +1085,10 @@ OUTPUT: structured analysis covering everything important.`
                     this.updateOutputPreview()
                     this.uiManager.exportBtn.disabled=true
                     this.uiManager.copyBtn.disabled=true
-                    this.setProgress(0,"Ready to process")
+                    this.setProgress(0,t("processing.ready"))
                     this.audit.record("clear_all",{})
-                    this.logger.info("app","Cleared all files and output")
-                    showToast("All files and output cleared","success")
+                    this.logger.info("app",t("log.clearedAll"))
+                    showToast(t("toast.allCleared"),"success")
                 }
             })
             return
@@ -1133,9 +1101,9 @@ OUTPUT: structured analysis covering everything important.`
         this.updateOutputPreview()
         this.uiManager.exportBtn.disabled=true
         this.uiManager.copyBtn.disabled=true
-        this.setProgress(0,"Ready to process")
+        this.setProgress(0,t("processing.ready"))
         this.audit.record("clear_all",{})
-        this.logger.info("app","Cleared all files and output")
+        this.logger.info("app",t("log.clearedAll"))
     }
     addEventListener(element:HTMLElement|Window|Document,event:string,handler:EventListener):void{
         element.addEventListener(event,handler)
@@ -1167,7 +1135,7 @@ OUTPUT: structured analysis covering everything important.`
             }
         }
         catch(error){
-            console.error("Failed to export logs:",error)
+            console.error(t("log.exportLogsConsole"),error)
         }
     }
     dispose():void{
