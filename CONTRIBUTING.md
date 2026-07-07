@@ -98,6 +98,7 @@ Before requesting a review:
 - [ ] README or docs updated if public behavior changes
 - [ ] PR description explains *why* and *how* to test
 - [ ] No sensitive data in commits
+- [ ] Any new or changed user-facing string is added to `src/renderer/i18n.ts` for all supported languages
 
 Labels and "good first issue"
 - We welcome new contributors. Issues labeled `good first issue` are intended to be approachable starting points.
