@@ -136,7 +136,7 @@ Open the settings modal from the header (gear icon) to manage appearance, config
 - **Control**: `ui-language-select` dropdown
 - **Options**: `en`, `zh-Hans`, `zh-Hant`, `ja`, `ko`, `es`, `fr`, `de`
 - **Default**: `en`
-- **Description**: Changes the language of the application interface labels and messages.
+- **Description**: Changes the language of the entire application interface. All user-facing strings — including menus, buttons, status messages, tooltips, error dialogs, analytics labels, exporter content, file parser errors, log messages, and splash screen text — are translated through `src/renderer/i18n.ts`.
 
 ### Configuration Profiles
 
