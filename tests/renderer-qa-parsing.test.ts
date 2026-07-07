@@ -156,7 +156,7 @@ describe("parseConversationTurns",()=>{
     })
 })
 
-// OutputManager-style parse functions matching the real OutputManager return types
+// OutputStore-style parse functions matching the real outputStore.createTrainingItem return types
 function parseQAPairs(text:string):Array<{question:string;answer:string}>{
     let pairs:Array<{question:string;answer:string}>=[]
     let qaMatches=text.match(/Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)/gis)
