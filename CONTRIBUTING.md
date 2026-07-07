@@ -44,7 +44,7 @@ Proposing changes (PR flow)
 
 Development setup
 Prerequisites
-- Node.js 16+ and npm (or compatible Yarn)
+- Node.js 18+ and npm (or compatible Yarn)
 - (Optional) [Ollama](https://ollama.com) running locally if you want to exercise model-related flows
 
 Quick start
@@ -54,8 +54,14 @@ git clone https://github.com/richie-rich90454/training-generator.git
 cd training-generator
 npm install
 
-# start the app in development (Electron)
-npm run start
+# start the app in development (Electron + Vite + SolidJS HMR)
+npm run dev
+```
+
+To smoke-test the production renderer without packaging:
+
+```bash
+npm start
 ```
 
 If you rely on Ollama locally:
@@ -64,16 +70,18 @@ If you rely on Ollama locally:
   - ollama pull <model-name>
 
 Tests & CI
-- We use Jest (or add/update accordingly). Run tests with:
+- We use Vitest for all tests, including renderer components with `@solidjs/testing-library`. Run tests with:
   - npm test
-- If a test runner is not yet configured, please add tests and update package.json `test` script.
-- CI runs on push/PR and will run install, lint, tests, and an optional headless build.
+- TypeScript strict mode is enforced. Run the type checker with:
+  - npm run typecheck
+- CI runs on push/PR and will run install, typecheck, lint, tests, and an optional headless build.
 
 Linting & formatting
 - The project uses ESLint and Prettier (if configured). Run:
   - npm run lint
   - npm run format
-- Please run linters and formatters before opening a PR.
+  - npm run typecheck
+- Please run linters, formatters, and the type checker before opening a PR.
 - If a pre-commit hook is in place (husky), it will run lint/format automatically — keep changes small and focused.
 
 Commit messages & branch naming
@@ -94,10 +102,13 @@ Pull request checklist
 Before requesting a review:
 - [ ] The change is small and focused
 - [ ] Tests added or updated for new behavior
+- [ ] `npm run typecheck` passes locally
 - [ ] Linting passes locally
 - [ ] README or docs updated if public behavior changes
 - [ ] PR description explains *why* and *how* to test
 - [ ] No sensitive data in commits
+- [ ] Any new or changed user-facing string is added to `src/renderer/i18n.ts` for all supported languages
+- [ ] SolidJS components use signals/stores/effects instead of React/Vue patterns; CSS classes in JSX match the existing design tokens
 
 Labels and "good first issue"
 - We welcome new contributors. Issues labeled `good first issue` are intended to be approachable starting points.
@@ -110,13 +121,23 @@ Code of conduct & reporting security issues
 
 File structure & where to add things
 - /src - core app code
+  - /src/renderer - SolidJS UI, stores, and framework-agnostic processing modules
+  - /src/main.ts - Electron main process (kept untouched unless you are intentionally changing native behavior)
+  - /src/core - shared business logic (parsers, types, utilities)
 - /cli - command-line helpers (if used)
 - /tests or /__tests__ - test suites
-- /assets - images, demo GIFs
+- /assets - images, demo GIFs, icons
 - /examples - sample input files + generated outputs (see issue #1)
+
+Frontend architecture notes
+- The renderer is built with SolidJS and fine-grained reactivity.
+- UI state lives in Solid stores under `src/renderer/stores/`.
+- Components import plain vanilla CSS Modules (`*.module.css`) scoped with global class names so the rendered DOM stays identical to the original design.
+- Business logic that does not need reactivity is kept in framework-agnostic modules such as `src/renderer/processing/orchestrator.ts`.
 
 Adding examples, tests, or docs
 - Add tests for parsers (PDF/DOCX/MD) in `tests/`.
+- Add renderer component tests with `@solidjs/testing-library` in `tests/`.
 - Add sample fixtures under `tests/fixtures/` or `/examples/` and include attribution if not created by you.
 - Update README with usage examples or new flags.
 
@@ -126,9 +147,3 @@ Maintainers & reviewers
 
 Thanks!
 Thanks for taking the time to improve Training Generator. Contributions of all kinds — code, docs, tests, discussion — are appreciated.
-
-If you'd like, I can:
-- Create this file on a new branch and open a PR for you, or
-- Directly commit it to a branch you choose (I will ask for confirmation first).
-
-Please tell me which option you prefer.
