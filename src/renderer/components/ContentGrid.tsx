@@ -1,0 +1,130 @@
+import type { JSX } from "solid-js"
+import { createSignal, onMount, onCleanup } from "solid-js"
+import type { AppStore } from "../stores/appStore.js"
+import { UploadCard } from "./UploadCard.js"
+import { ProcessingCard } from "./ProcessingCard.js"
+import { OutputCard } from "./OutputCard.js"
+import { ConfigPanel } from "./ConfigPanel.js"
+import { StatusPanel } from "./StatusPanel.js"
+import { t } from "../i18n.js"
+import appStyles from "./styles/App.module.css"
+const styles = { ...appStyles }
+export interface ContentGridProps {
+    appStore: AppStore
+}
+const SPLITTER_KEY = "tg-splitter-left-width"
+const MIN_LEFT_WIDTH = 320
+const MIN_RIGHT_WIDTH = 280
+export function ContentGrid(props: ContentGridProps): JSX.Element {
+    const [isDragging, setIsDragging] = createSignal(false)
+    let gridRef: HTMLDivElement | undefined
+    function getSavedWidth(): number | null {
+        try {
+            const raw = localStorage.getItem(SPLITTER_KEY)
+            if (raw) {
+                return parseInt(raw, 10)
+            }
+        }
+        catch {
+            // ignore storage errors
+        }
+        return null
+    }
+    function saveWidth(width: number): void {
+        try {
+            localStorage.setItem(SPLITTER_KEY, String(width))
+        }
+        catch {
+            // ignore storage errors
+        }
+    }
+    function applyWidth(width: number): void {
+        if (!gridRef) {
+            return
+        }
+        const total = gridRef.clientWidth
+        const rightWidth = Math.max(MIN_RIGHT_WIDTH, total - width - 4)
+        const leftWidth = total - rightWidth - 4
+        gridRef.style.gridTemplateColumns = `${Math.max(MIN_LEFT_WIDTH, leftWidth)}px 4px ${rightWidth}px`
+    }
+    function resetToDefault(): void {
+        if (!gridRef) {
+            return
+        }
+        gridRef.style.gridTemplateColumns = ""
+    }
+    function handleMouseMove(e: MouseEvent): void {
+        if (!isDragging() || !gridRef) {
+            return
+        }
+        const rect = gridRef.getBoundingClientRect()
+        let width = e.clientX - rect.left
+        const total = rect.width
+        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, total - MIN_RIGHT_WIDTH - 4))
+        applyWidth(width)
+        saveWidth(width)
+    }
+    function handleMouseUp(): void {
+        if (isDragging()) {
+            setIsDragging(false)
+        }
+    }
+    function handleKeydown(e: KeyboardEvent): void {
+        if (!gridRef || e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
+            return
+        }
+        const rect = gridRef.getBoundingClientRect()
+        const computed = window.getComputedStyle(gridRef)
+        const cols = computed.gridTemplateColumns.split(" ")
+        let left = cols[0] ? parseInt(cols[0], 10) : rect.width * 0.6
+        if (isNaN(left)) {
+            left = rect.width * 0.6
+        }
+        const step = e.shiftKey ? 20 : 5
+        const next = e.key === "ArrowLeft" ? left - step : left + step
+        const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, rect.width - MIN_RIGHT_WIDTH - 4))
+        applyWidth(clamped)
+        saveWidth(clamped)
+        e.preventDefault()
+    }
+    onMount(() => {
+        const saved = getSavedWidth()
+        if (saved != null && gridRef) {
+            applyWidth(saved)
+        }
+        document.addEventListener("mousemove", handleMouseMove)
+        document.addEventListener("mouseup", handleMouseUp)
+    })
+    onCleanup(() => {
+        document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleMouseUp)
+    })
+    return (
+        <div
+            ref={gridRef}
+            class={styles["content-grid"]}
+            classList={{ [styles["splitter-active"]]: isDragging() }}
+            style={getSavedWidth() != null ? undefined : undefined}
+        >
+            <div class={styles["left-column"]}>
+                <UploadCard appStore={props.appStore} />
+                <ProcessingCard appStore={props.appStore} />
+                <OutputCard appStore={props.appStore} />
+            </div>
+            <div
+                class={styles["splitter-bar"]}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label={t("splitter.resizeAria")}
+                tabindex="0"
+                onMouseDown={() => setIsDragging(true)}
+                onKeyDown={handleKeydown}
+                classList={{ [styles["splitter-active"]]: isDragging() }}
+            />
+            <div class={styles["right-column"]}>
+                <ConfigPanel appStore={props.appStore} />
+                <StatusPanel appStore={props.appStore} />
+            </div>
+        </div>
+    )
+}
