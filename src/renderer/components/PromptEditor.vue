@@ -1,17 +1,17 @@
 <template>
     <div class="prompt-editor" data-testid="prompt-editor">
         <div class="editor-toolbar">
-            <input class="version-name-input" type="text" v-model="versionName" placeholder="Version name" data-testid="version-name-input" />
-            <button class="toolbar-button" type="button" @click="togglePreview" data-testid="toggle-preview-button">{{ showPreview?"Hide Preview":"Show Preview" }}</button>
-            <button class="toolbar-button" type="button" @click="toggleHistory" data-testid="toggle-history-button">{{ showHistory?"Hide History":"Show History" }}</button>
-            <button class="toolbar-button" type="button" @click="runPreview" data-testid="run-button">Run</button>
-            <button class="toolbar-button" type="button" @click="saveVersion('')" data-testid="save-button">Save</button>
+            <input class="version-name-input" type="text" v-model="versionName" :placeholder="t('promptEditor.versionNamePlaceholder')" data-testid="version-name-input" />
+            <button class="toolbar-button" type="button" @click="togglePreview" data-testid="toggle-preview-button">{{ showPreview?t('promptEditor.hidePreview'):t('promptEditor.showPreview') }}</button>
+            <button class="toolbar-button" type="button" @click="toggleHistory" data-testid="toggle-history-button">{{ showHistory?t('promptEditor.hideHistory'):t('promptEditor.showHistory') }}</button>
+            <button class="toolbar-button" type="button" @click="runPreview" data-testid="run-button">{{ t('promptEditor.run') }}</button>
+            <button class="toolbar-button" type="button" @click="saveVersion('')" data-testid="save-button">{{ t('promptEditor.save') }}</button>
         </div>
         <div class="editor-main">
             <div class="editor-panel">
                 <textarea class="prompt-textarea" :placeholder="placeholder" v-model="localContent" @input="onInput" data-testid="prompt-textarea"></textarea>
                 <div v-if="hasVariables" class="variable-panel" data-testid="variable-panel">
-                    <h4 class="panel-title">Variables</h4>
+                    <h4 class="panel-title">{{ t('promptEditor.variablesTitle') }}</h4>
                     <div v-for="variable in extractedVariables" :key="variable" class="variable-row" data-testid="variable-row">
                         <label class="variable-label" :data-testid="'variable-label-'+variable">{{ variable }}</label>
                         <input class="variable-input" type="text" :value="variableValues[variable]||''" @input="handleVariableInput(variable, $event)" :data-testid="'variable-input-'+variable" />
@@ -19,24 +19,25 @@
                 </div>
             </div>
             <div v-if="showPreview" class="preview-panel" data-testid="preview-panel">
-                <h4 class="panel-title">Preview</h4>
+                <h4 class="panel-title">{{ t('promptEditor.previewTitle') }}</h4>
                 <pre class="preview-text" data-testid="preview-text">{{ previewText }}</pre>
             </div>
             <div v-if="showHistory" class="history-panel" data-testid="history-panel">
-                <h4 class="panel-title">History</h4>
+                <h4 class="panel-title">{{ t('promptEditor.historyTitle') }}</h4>
                 <div v-if="history&&history.length>0" class="history-list" data-testid="history-list">
                     <div v-for="version in history" :key="version.id" class="history-item" :class="{selected:selectedVersionId===version.id}" @click="loadVersion(version)" :data-testid="'history-item-'+version.id">
                         <span class="history-name">{{ version.name }}</span>
                         <span class="history-date">{{ formatDate(version.createdAt) }}</span>
                     </div>
                 </div>
-                <div v-else class="history-empty" data-testid="history-empty">No saved versions</div>
+                <div v-else class="history-empty" data-testid="history-empty">{{ t('promptEditor.noSavedVersions') }}</div>
             </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { t } from "../i18n.js"
 export interface PromptVersion{
     id: string
     name: string
@@ -122,7 +123,7 @@ function generateId():string{
     return Math.random().toString(36).substring(2)+Date.now().toString(36)
 }
 function saveVersion(name: string):void{
-    let finalName=name||versionName.value||"Version "+new Date().toLocaleString()
+    let finalName=name||versionName.value||t('promptEditor.defaultVersionPrefix')+new Date().toLocaleString()
     let version: PromptVersion={
         id: generateId(),
         name: finalName,
