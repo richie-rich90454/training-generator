@@ -5,7 +5,7 @@ import { exportJSONL, exportJSONArray, exportCSV } from "../exportFormats.js"
 import { t } from "../i18n.js"
 const SPLIT_THRESHOLD = 100000
 const MAX_CLIPBOARD_SIZE = 5 * 1024 * 1024
-export type ExportFormat = "jsonl" | "json" | "csv" | "text"
+export type ExportFormat = "jsonl" | "json" | "chatml" | "csv" | "text"
 export interface OutputStore {
     outputData: TrainingItem[]
     exportFormat: () => ExportFormat
@@ -84,16 +84,14 @@ export function createOutputStore(): OutputStore {
         }
         flushPair()
         if (pairs.length === 0 && text.length < 100000) {
-            const qaMatches = text.match(/^Q:\s*(.*?)\s*^A:\s*(.*?)(?=^Q:|$)/gims)
-            if (qaMatches) {
-                for (const match of qaMatches) {
-                    const qMatch = match.match(/^Q:\s*(.*?)\s*^A:\s*(.*)/ims)
-                    if (qMatch && (qMatch[1] || qMatch[2])) {
-                        pairs.push({
-                            question: qMatch[1].trim(),
-                            answer: qMatch[2].trim()
-                        })
-                    }
+            const qaRegex = /Q:\s*([\s\S]*?)\s*A:\s*([\s\S]*?)(?=Q:|$)/gi
+            let qaMatch: RegExpExecArray | null
+            while ((qaMatch = qaRegex.exec(text)) !== null) {
+                if (qaMatch[1] || qaMatch[2]) {
+                    pairs.push({
+                        question: qaMatch[1].trim(),
+                        answer: qaMatch[2].trim()
+                    })
                 }
             }
         }
@@ -145,16 +143,14 @@ export function createOutputStore(): OutputStore {
             })
         }
         if (turns.length === 0 && text.length < 100000) {
-            const convMatches = text.match(/^Human:\s*(.*?)\s*^Assistant:\s*(.*?)(?=^Human:|$)/gims)
-            if (convMatches) {
-                for (const match of convMatches) {
-                    const hMatch = match.match(/^Human:\s*(.*?)\s*^Assistant:\s*(.*)/ims)
-                    if (hMatch && hMatch[1] && hMatch[2]) {
-                        turns.push({
-                            user: hMatch[1].trim(),
-                            assistant: hMatch[2].trim()
-                        })
-                    }
+            const convRegex = /(Human|User):\s*([\s\S]*?)\s*(Assistant|AI):\s*([\s\S]*?)(?=(?:Human|User):|$)/gi
+            let convMatch: RegExpExecArray | null
+            while ((convMatch = convRegex.exec(text)) !== null) {
+                if (convMatch[2] && convMatch[4]) {
+                    turns.push({
+                        user: convMatch[2].trim(),
+                        assistant: convMatch[4].trim()
+                    })
                 }
             }
         }
@@ -262,6 +258,7 @@ export function createOutputStore(): OutputStore {
     function formatData(data: TrainingItem[], format: string): string {
         if (format === "jsonl") return exportJSONL(data)
         else if (format === "json") return exportJSONArray(data)
+        else if (format === "chatml") return exportJSONArray(data.filter(item => item.format === "chatml").length > 0 ? data.filter(item => item.format === "chatml") : data)
         else if (format === "csv") return exportCSV(data)
         else if (format === "text") return data.map(item => getItemText(item)).join("\n\n")
         return data.map(item => JSON.stringify(item)).join("\n")
@@ -269,6 +266,7 @@ export function createOutputStore(): OutputStore {
     function extensionForFormat(format: string): string {
         if (format === "jsonl") return ".jsonl"
         if (format === "json") return ".json"
+        if (format === "chatml") return ".json"
         if (format === "csv") return ".csv"
         if (format === "text") return ".txt"
         return ".jsonl"
@@ -311,6 +309,7 @@ export function createOutputStore(): OutputStore {
         let content = ""
         if (format === "jsonl") content = exportJSONL(outputData)
         else if (format === "json") content = exportJSONArray(outputData)
+        else if (format === "chatml") content = exportJSONArray(outputData.filter(item => item.format === "chatml").length > 0 ? outputData.filter(item => item.format === "chatml") : outputData)
         else if (format === "csv") content = exportCSV(outputData)
         else if (format === "text") content = outputData.map(item => getItemText(item)).join("\n\n")
         if (content.length > MAX_CLIPBOARD_SIZE) return
