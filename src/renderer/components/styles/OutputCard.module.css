@@ -20,3 +20,31 @@
     width:auto;
     margin-inline-end:var(--spacing-sm);
 }
+.output-progress-section{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    margin-bottom:var(--spacing-md);
+}
+.output-progress-bar{
+    flex:1;
+    height:6px;
+    background:var(--surface-variant);
+    border-radius:var(--radius-full);
+    overflow:hidden;
+    border:1px solid var(--border-color);
+}
+.output-progress-fill{
+    height:100%;
+    background:var(--primary-color);
+    border-radius:var(--radius-full);
+    transition:width var(--transition-slow);
+    width:0%;
+}
+.output-progress-text{
+    font-size:.75rem;
+    font-variant-numeric:tabular-nums;
+    color:var(--text-secondary);
+    min-width:36px;
+    text-align:right;
+}
