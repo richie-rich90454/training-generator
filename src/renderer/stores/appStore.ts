@@ -1,7 +1,7 @@
 // Application orchestration store.
 // Composes fine-grained Solid stores (file, output, settings, UI) with framework-agnostic
 // business logic (processor, provider, orchestrator) to drive the SolidJS component tree.
-import { createSignal } from "solid-js"
+import { createSignal, untrack } from "solid-js"
 import { createStore } from "solid-js/store"
 import type { SelectedFile, TrainingItem, OllamaStatus } from "../../types/index.js"
 import { createFileStore, type FileStore } from "./fileStore.js"
@@ -83,6 +83,11 @@ export function createAppStore(): AppStore {
     const logger = new Logger()
     const audit = new AuditTrail()
     const [providerManager, setProviderManager] = createSignal<ProviderManager | null>(null)
+    function applyExportFormatFromSettings(): void {
+        const format = settingsStore.settings.outputFormat || "jsonl"
+        const validExportFormat: import("./outputStore.js").ExportFormat = format === "jsonl" || format === "json" || format === "chatml" || format === "csv" || format === "text" ? format : "jsonl"
+        outputStore.setExportFormat(validExportFormat)
+    }
     const [isProcessing, setIsProcessing] = createSignal<boolean>(false)
     const [qualityReport, setQualityReport] = createSignal<QualityReport | null>(null)
     const [processingQueue, setProcessingQueue] = createStore<SelectedFile[]>([])
@@ -125,7 +130,7 @@ export function createAppStore(): AppStore {
     }
     function initProvider(): void {
         try {
-            providerManager()?.stopHealthChecks()
+            untrack(providerManager)?.stopHealthChecks()
             const type = settingsStore.settings.provider || "ollama"
             const config = {
                 apiKey: settingsStore.apiKeyPlain(),
@@ -201,7 +206,8 @@ export function createAppStore(): AppStore {
             outputFormat: settingsStore.settings.outputFormat || "jsonl",
             language: settingsStore.settings.language || "en",
             chunkSize: settingsStore.settings.chunkSize || 8000,
-            smartSizing: settingsStore.appSettings.smartSizing ?? false
+            smartSizing: settingsStore.appSettings.smartSizing ?? false,
+            customPrompt: settingsStore.settings.customPrompt || ""
         }
     }
     async function processFiles(): Promise<void> {
@@ -381,6 +387,8 @@ export function createAppStore(): AppStore {
     }
     async function savePreset(): Promise<void> {
         await settingsStore.savePreset()
+        applyExportFormatFromSettings()
+        initProvider()
         addLog(t("log.settingsSaved", undefined, { language: settingsStore.settings.language || "en", promptPreview: "" }), "success")
     }
     function showSettings(): void {
@@ -573,8 +581,10 @@ export function createAppStore(): AppStore {
             window.electronAPI?.writeLog?.(entry)
         })
         await settingsStore.loadSettings()
+        applyExportFormatFromSettings()
         initProvider()
         processor.concurrency = settingsStore.settings.concurrency || 3
+        addLog(t("processing.welcome"), "info")
         await checkOllamaStatus()
         startOllamaMonitor()
         maybeStartTour()
