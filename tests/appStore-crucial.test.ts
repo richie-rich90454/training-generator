@@ -1,7 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAppStore, type AppStore } from "../src/renderer/stores/appStore.js"
-import { createFile } from "./file-manager.test.js"
 vi.mock("../src/renderer/confirm.js", () => ({
     showConfirm: vi.fn(async() => true),
     closeConfirm: vi.fn()
