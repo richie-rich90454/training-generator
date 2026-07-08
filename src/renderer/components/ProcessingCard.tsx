@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { For } from "solid-js"
+import { For, createEffect, onMount } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -14,6 +14,7 @@ export interface ProcessingCardProps {
 export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
     const { appStore } = props
     const { uiStore, fileStore } = appStore
+    let logRef: HTMLDivElement | undefined
     function handleProcess(): void {
         if (appStore.isProcessing()) {
             appStore.stopProcessing()
@@ -28,6 +29,18 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
     function handleDashboard(): void {
         appStore.uiStore.toggleDashboard()
     }
+    function scrollLogToBottom(): void {
+        if (logRef) {
+            logRef.scrollTop = logRef.scrollHeight
+        }
+    }
+    onMount(() => {
+        scrollLogToBottom()
+    })
+    createEffect(() => {
+        uiStore.logs
+        scrollLogToBottom()
+    })
     return (
         <div class={styles["card"]}>
             <div class={styles["card-header"]}>
@@ -53,7 +66,7 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                     </button>
                     <button
                         id="demo-btn"
-                        class={"btn btn-secondary" + (fileStore.demoActive() ? " active" : "")}
+                        class={`${styles["btn"]} ${styles["btn-secondary"]}`+(fileStore.demoActive()?" active":"")}
                         title={t("processing.demoTitle")}
                         aria-label={t("processing.demoAria")}
                         data-i18n-title="processing.demoTitle"
@@ -97,6 +110,7 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                 </div>
             </div>
             <div
+                ref={logRef}
                 id="processing-log"
                 class={styles["processing-log"]}
                 role="log"
@@ -106,7 +120,7 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
             >
                 <For each={uiStore.logs}>
                     {(entry) => (
-                        <div class={"log-entry " + entry.type}>
+                        <div class={styles["log-entry"]} classList={{ [styles.info]: entry.type === "info", [styles.success]: entry.type === "success", [styles.warning]: entry.type === "warning", [styles.error]: entry.type === "error" }}>
                             <Icon html={renderIcon(uiStore.getLogIcon(entry.type))} />
                             <span>{entry.message}</span>
                         </div>
