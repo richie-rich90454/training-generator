@@ -20,12 +20,15 @@ function baseItem(overrides: Partial<TrainingItem> = {}): TrainingItem {
         ...overrides
     }
 }
+function prov(item: TrainingItem): ProvenanceData {
+    return item._provenance as ProvenanceData
+}
 describe("tagItem", () => {
     it("adds provenance to an item", () => {
         let item = baseItem()
-        let prov = baseProv()
-        let tagged = tagItem(item, prov)
-        expect(tagged._provenance).toEqual(prov)
+        let p = baseProv()
+        let tagged = tagItem(item, p)
+        expect(prov(tagged)).toEqual(p)
     })
     it("preserves original item fields", () => {
         let item = baseItem()
@@ -36,7 +39,7 @@ describe("tagItem", () => {
     it("returns same item when provenance already exists", () => {
         let item = baseItem({ _provenance: baseProv() })
         let tagged = tagItem(item, baseProv({ sourceFile: "other.txt" }))
-        expect(tagged._provenance!.sourceFile).toBe("doc.txt")
+        expect(prov(tagged).sourceFile).toBe("doc.txt")
     })
     it("does not mutate the input item", () => {
         let item = baseItem()
@@ -46,24 +49,24 @@ describe("tagItem", () => {
     it("adds provenance to text format items", () => {
         let item: TrainingItem = { format: "text", text: "Hello world" }
         let tagged = tagItem(item, baseProv())
-        expect(tagged._provenance).toBeDefined()
+        expect(prov(tagged)).toBeDefined()
     })
     it("adds provenance to message format items", () => {
         let item: TrainingItem = { format: "chatml", messages: [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hello" }] }
         let tagged = tagItem(item, baseProv())
-        expect(tagged._provenance).toBeDefined()
+        expect(prov(tagged)).toBeDefined()
     })
     it("stores chunk index in provenance", () => {
         let tagged = tagItem(baseItem(), baseProv({ chunkIndex: 5 }))
-        expect(tagged._provenance!.chunkIndex).toBe(5)
+        expect(prov(tagged).chunkIndex).toBe(5)
     })
     it("stores model name in provenance", () => {
         let tagged = tagItem(baseItem(), baseProv({ model: "mistral" }))
-        expect(tagged._provenance!.model).toBe("mistral")
+        expect(prov(tagged).model).toBe("mistral")
     })
     it("stores prompt type in provenance", () => {
         let tagged = tagItem(baseItem(), baseProv({ promptType: "conversation" }))
-        expect(tagged._provenance!.promptType).toBe("conversation")
+        expect(prov(tagged).promptType).toBe("conversation")
     })
 })
 describe("mergeProvenance", () => {
@@ -71,65 +74,65 @@ describe("mergeProvenance", () => {
         let surviving = baseItem({ _provenance: baseProv() })
         let removed = baseItem()
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance).toEqual(surviving._provenance)
+        expect(prov(merged)).toEqual(prov(surviving))
         expect(merged).not.toBe(surviving)
     })
     it("copies removed provenance when surviving has none", () => {
         let surviving = baseItem()
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "removed.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!.sourceFile).toBe("removed.txt")
+        expect(prov(merged).sourceFile).toBe("removed.txt")
     })
     it("uses survivingSource when provided", () => {
         let surviving = baseItem()
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "removed.txt" }) })
         let merged = mergeProvenance(surviving, removed, "surviving.txt")
-        expect(merged._provenance!.sourceFile).toBe("surviving.txt")
+        expect(prov(merged).sourceFile).toBe("surviving.txt")
     })
     it("appends removed source to mergedFrom list", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "keep.txt" }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "gone.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!._mergedFrom).toContain("gone.txt")
+        expect(prov(merged)._mergedFrom).toContain("gone.txt")
     })
     it("preserves existing mergedFrom entries", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "keep.txt", _mergedFrom: ["old.txt"] }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "gone.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!._mergedFrom).toContain("old.txt")
-        expect(merged._provenance!._mergedFrom).toContain("gone.txt")
+        expect(prov(merged)._mergedFrom).toContain("old.txt")
+        expect(prov(merged)._mergedFrom).toContain("gone.txt")
     })
     it("deduplicates mergedFrom entries", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "keep.txt", _mergedFrom: ["dup.txt"] }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "dup.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        let count = merged._provenance!._mergedFrom!.filter(f => f === "dup.txt").length
+        let count = prov(merged)._mergedFrom!.filter((f: string) => f === "dup.txt").length
         expect(count).toBe(1)
     })
     it("keeps surviving provenance timestamp", () => {
         let surviving = baseItem({ _provenance: baseProv({ timestamp: "2024-01-02T00:00:00Z" }) })
         let removed = baseItem({ _provenance: baseProv({ timestamp: "2024-01-03T00:00:00Z" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!.timestamp).toBe("2024-01-02T00:00:00Z")
+        expect(prov(merged).timestamp).toBe("2024-01-02T00:00:00Z")
     })
     it("keeps surviving model and promptType", () => {
         let surviving = baseItem({ _provenance: baseProv({ model: "keep-model", promptType: "custom" }) })
         let removed = baseItem({ _provenance: baseProv({ model: "removed-model", promptType: "instruction" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!.model).toBe("keep-model")
-        expect(merged._provenance!.promptType).toBe("custom")
+        expect(prov(merged).model).toBe("keep-model")
+        expect(prov(merged).promptType).toBe("custom")
     })
     it("does not mutate surviving item", () => {
         let surviving = baseItem({ _provenance: baseProv() })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "other.txt" }) })
         mergeProvenance(surviving, removed)
-        expect(surviving._provenance!._mergedFrom).toBeUndefined()
+        expect(prov(surviving)._mergedFrom).toBeUndefined()
     })
     it("does not mutate removed item", () => {
         let surviving = baseItem({ _provenance: baseProv() })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "other.txt" }) })
         mergeProvenance(surviving, removed)
-        expect(removed._provenance!._mergedFrom).toBeUndefined()
+        expect(prov(removed)._mergedFrom).toBeUndefined()
     })
     it("handles multiple merges sequentially", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "a.txt" }) })
@@ -137,14 +140,14 @@ describe("mergeProvenance", () => {
         let removed2 = baseItem({ _provenance: baseProv({ sourceFile: "c.txt" }) })
         let first = mergeProvenance(surviving, removed1)
         let second = mergeProvenance(first, removed2)
-        expect(second._provenance!._mergedFrom).toContain("b.txt")
-        expect(second._provenance!._mergedFrom).toContain("c.txt")
+        expect(prov(second)._mergedFrom).toContain("b.txt")
+        expect(prov(second)._mergedFrom).toContain("c.txt")
     })
     it("sets mergedFrom when both have provenance", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "s.txt" }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "r.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!._mergedFrom).toEqual(["r.txt"])
+        expect(prov(merged)._mergedFrom).toEqual(["r.txt"])
     })
     it("preserves other training item fields during merge", () => {
         let surviving: TrainingItem = { format: "text", text: "keep this" }
@@ -157,13 +160,13 @@ describe("mergeProvenance", () => {
         let surviving = baseItem()
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "removed.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!.sourceFile).toBe("removed.txt")
+        expect(prov(merged).sourceFile).toBe("removed.txt")
     })
     it("keeps surviving chunkIndex", () => {
         let surviving = baseItem({ _provenance: baseProv({ chunkIndex: 7 }) })
         let removed = baseItem({ _provenance: baseProv({ chunkIndex: 3 }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!.chunkIndex).toBe(7)
+        expect(prov(merged).chunkIndex).toBe(7)
     })
     it("creates new object for merged result", () => {
         let surviving = baseItem({ _provenance: baseProv() })
@@ -176,13 +179,13 @@ describe("mergeProvenance", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "s.txt", _mergedFrom: [] }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "r.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!._mergedFrom).toContain("r.txt")
+        expect(prov(merged)._mergedFrom).toContain("r.txt")
     })
     it("does not add undefined to mergedFrom", () => {
         let surviving = baseItem({ _provenance: baseProv({ sourceFile: "s.txt" }) })
         let removed = baseItem({ _provenance: baseProv({ sourceFile: "r.txt" }) })
         let merged = mergeProvenance(surviving, removed)
-        expect(merged._provenance!._mergedFrom!.every(f => typeof f === "string")).toBe(true)
+        expect(prov(merged)._mergedFrom!.every((f: string) => typeof f === "string")).toBe(true)
     })
 })
 describe("provenance integration", () => {
@@ -190,13 +193,13 @@ describe("provenance integration", () => {
         let item1 = tagItem(baseItem(), baseProv({ sourceFile: "a.txt", chunkIndex: 0 }))
         let item2 = tagItem(baseItem(), baseProv({ sourceFile: "b.txt", chunkIndex: 1 }))
         let merged = mergeProvenance(item1, item2)
-        expect(merged._provenance!.sourceFile).toBe("a.txt")
-        expect(merged._provenance!._mergedFrom).toContain("b.txt")
+        expect(prov(merged).sourceFile).toBe("a.txt")
+        expect(prov(merged)._mergedFrom).toContain("b.txt")
     })
     it("does not retag already tagged items", () => {
         let item = tagItem(baseItem(), baseProv({ sourceFile: "first.txt" }))
         let retagged = tagItem(item, baseProv({ sourceFile: "second.txt" }))
-        expect(retagged._provenance!.sourceFile).toBe("first.txt")
+        expect(prov(retagged).sourceFile).toBe("first.txt")
     })
     it("maintains provenance through merge chain", () => {
         let a = tagItem(baseItem(), baseProv({ sourceFile: "a.txt" }))
@@ -204,7 +207,7 @@ describe("provenance integration", () => {
         let c = tagItem(baseItem(), baseProv({ sourceFile: "c.txt" }))
         let ab = mergeProvenance(a, b)
         let abc = mergeProvenance(ab, c)
-        expect(abc._provenance!._mergedFrom).toContain("b.txt")
-        expect(abc._provenance!._mergedFrom).toContain("c.txt")
+        expect(prov(abc)._mergedFrom).toContain("b.txt")
+        expect(prov(abc)._mergedFrom).toContain("c.txt")
     })
 })
