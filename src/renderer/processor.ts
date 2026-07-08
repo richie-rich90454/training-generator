@@ -146,7 +146,7 @@ class Processor{
         let allItems:TrainingItem[]=[]
         let total=chunks.length
         let selfProvider=this.provider
-        let batchingEnabled=selfProvider!==null&&selfProvider.name!=="ollama"
+        let batchingEnabled=!this.demoMode&&selfProvider!==null&&selfProvider.name!=="ollama"
         let queue:{chunk:string;index:number}[]=[]
         if(batchingEnabled){
             let smallChunks:{chunk:string;index:number}[]=[]
