@@ -64,7 +64,10 @@ describe("renderIcon", ()=>{
         expect(svg).toContain('width="16"');
         expect(svg).toContain('height="16"');
     });
-    test("renderIcon throws on unknown name", ()=>{
-        expect(()=>renderIcon("fa-nonexistent")).toThrow();
+    test("renderIcon returns fallback on unknown name", ()=>{
+        let svg: string=renderIcon("fa-nonexistent");
+        expect(svg).toContain('viewBox="0 0 24 24"');
+        expect(svg).toContain('width="16"');
+        expect(svg).toContain('height="16"');
     });
 });
