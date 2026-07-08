@@ -133,10 +133,13 @@ export function createUIStore(): UIStore {
             type,
             timestamp: Date.now()
         }
-        setLogs(logs.length, entry)
-        if (logs.length > MAX_LOGS) {
-            setLogs(logs.slice(1))
-        }
+        setLogs((prev) => {
+            const next = [...prev, entry]
+            if (next.length > MAX_LOGS) {
+                next.shift()
+            }
+            return next
+        })
     }
     function clearLogs(): void {
         setLogs([])
@@ -272,12 +275,12 @@ export function createUIStore(): UIStore {
     }
     function getLogIcon(type: LogType): string {
         const icons: Record<LogType, string> = {
-            info: "info-circle",
-            success: "check-circle",
-            warning: "exclamation-triangle",
-            error: "times-circle"
+            info: "fa-info-circle",
+            success: "fa-check-circle",
+            warning: "fa-exclamation-triangle",
+            error: "fa-times-circle"
         }
-        return icons[type] || "info-circle"
+        return icons[type] || "fa-info-circle"
     }
     return {
         progressPercent,
