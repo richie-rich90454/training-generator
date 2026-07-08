@@ -11,7 +11,7 @@ function makeCommands():Command[]{
 }
 function renderComponent(props: { commands: Command[]; visible: boolean; onClose?: ()=>void }){
     let onClose=props.onClose||vi.fn()
-    return render(()=><CommandPalette commands={props.commands} visible={props.visible} onClose={onClose} />)
+    return render(()=><CommandPalette commands={props.commands} visible={()=>props.visible} onClose={onClose} />)
 }
 function getSelectedId():string|null{
     let items=screen.queryAllByTestId(/^command-item-/)
