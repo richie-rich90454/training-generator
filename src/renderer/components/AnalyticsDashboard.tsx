@@ -1,10 +1,15 @@
 import type { JSX } from "solid-js"
-import { createMemo, For, Show } from "solid-js"
+import { createMemo, For, Show, onMount, onCleanup } from "solid-js"
+import { Portal } from "solid-js/web"
 import { t } from "../i18n.js"
 import type { TrainingItem } from "../../types/index.js"
 import type { RunRecord } from "../../core/runHistoryManager.js"
+import type { AppStore } from "../stores/appStore.js"
+import { Icon } from "./Icon.js"
+import { renderIcon } from "../icons.js"
 import analyticsDashboardStyles from "./styles/AnalyticsDashboard.module.css"
-const styles = { ...analyticsDashboardStyles }
+import modalStyles from "./styles/Modal.module.css"
+const styles = { ...analyticsDashboardStyles, ...modalStyles }
 export interface ValidatorReport{
     name: string
     passRate: number
@@ -14,11 +19,37 @@ export interface AnalyticsDashboardProps{
     items: TrainingItem[]
     runs?: RunRecord[]
     validatorReports?: ValidatorReport[]
+    appStore?: AppStore
 }
 export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
+    let overlayRef: HTMLDivElement|undefined
     let items=()=>props.items
     let runs=()=>props.runs||[]
     let reports=()=>props.validatorReports||[]
+    function handleClose():void{
+        props.appStore?.uiStore.closeAnalytics()
+    }
+    function handleBackdropClick(e: MouseEvent):void{
+        if (e.target===overlayRef){
+            handleClose()
+        }
+    }
+    function handleKeydown(e: KeyboardEvent):void{
+        if (e.key==="Escape"){
+            e.preventDefault()
+            handleClose()
+        }
+    }
+    onMount(()=>{
+        if (props.appStore){
+            document.addEventListener("keydown",handleKeydown)
+        }
+    })
+    onCleanup(()=>{
+        if (props.appStore){
+            document.removeEventListener("keydown",handleKeydown)
+        }
+    })
     let totalItems=createMemo(()=>{
         return items().length
     })
@@ -131,112 +162,151 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
         let reportsList=reports()
         return [...reportsList].sort((a, b)=>b.flaggedCount-a.flaggedCount)
     })
+    function dashboardBody(): JSX.Element{
+        return (
+            <div class={styles["analytics-dashboard"]} data-testid="analytics-dashboard">
+                <div style={{ display: "none" }} data-testid="format-distribution-data">{JSON.stringify(formatDistribution())}</div>
+                <div style={{ display: "none" }} data-testid="avg-output-length-data">{avgOutputLength()}</div>
+                <div style={{ display: "none" }} data-testid="avg-instruction-length-data">{avgInstructionLength()}</div>
+                <div style={{ display: "none" }} data-testid="quality-score-data">{qualityScore()}</div>
+                <div style={{ display: "none" }} data-testid="top-issues-data">{JSON.stringify(topIssues())}</div>
+                <div style={{ display: "none" }} data-testid="total-items-data">{totalItems()}</div>
+                <div style={{ display: "none" }} data-testid="avg-duration-ms-data">{avgDurationMs()}</div>
+                <div class={styles["metrics-cards"]}>
+                    <div class={styles["metric-card"]} data-testid="total-items-card">
+                        <h3 class={styles["metric-label"]}>{t("analytics.totalItems")}</h3>
+                        <p class={styles["metric-value"]} data-testid="total-items-value">{totalItems()}</p>
+                    </div>
+                    <div class={styles["metric-card"]} data-testid="quality-score-card">
+                        <h3 class={styles["metric-label"]}>{t("analytics.qualityScore")}</h3>
+                        <p class={styles["metric-value"]} data-testid="quality-score-value">{qualityScore().toFixed(1)}%</p>
+                    </div>
+                    <div class={styles["metric-card"]} data-testid="total-runs-card">
+                        <h3 class={styles["metric-label"]}>{t("analytics.totalRuns")}</h3>
+                        <p class={styles["metric-value"]} data-testid="total-runs-value">{totalRuns()}</p>
+                    </div>
+                    <div class={styles["metric-card"]} data-testid="avg-output-length-card">
+                        <h3 class={styles["metric-label"]}>{t("analytics.avgOutputLength")}</h3>
+                        <p class={styles["metric-value"]} data-testid="avg-output-length-value">{avgOutputLength().toFixed(0)}</p>
+                    </div>
+                </div>
+                <div class={`distribution-section`} data-testid="format-distribution">
+                    <h3 class={styles["section-title"]}>{t("analytics.formatDistribution")}</h3>
+                    <div class={styles["format-list"]}>
+                        <For each={formatDistribution()}>
+                            {(item)=>{
+                                let testId="format-row-"+item.format
+                                return (
+                                    <div class={styles["format-row"]} data-testid={testId}>
+                                        <span class={`format-label`} data-testid={"format-label-"+item.format}>{t("analytics.format."+item.format)}</span>
+                                        <span class={`format-count`} data-testid={"format-count-"+item.format}>{item.count}</span>
+                                    </div>
+                                )
+                            }}
+                        </For>
+                    </div>
+                </div>
+                <div class={`run-status-section`} data-testid="run-status-breakdown">
+                    <h3 class={styles["section-title"]}>{t("analytics.runStatus")}</h3>
+                    <div class={styles["status-list"]}>
+                        <div class={styles["status-row"]} data-testid="status-completed">
+                            <span class={`status-label`}>{t("analytics.status.completed")}</span>
+                            <span class={`status-value`} data-testid="status-completed-value">{completedRuns()}</span>
+                        </div>
+                        <div class={styles["status-row"]} data-testid="status-failed">
+                            <span class={`status-label`}>{t("analytics.status.failed")}</span>
+                            <span class={`status-value`} data-testid="status-failed-value">{failedRuns()}</span>
+                        </div>
+                        <div class={styles["status-row"]} data-testid="status-running">
+                            <span class={`status-label`}>{t("analytics.status.running")}</span>
+                            <span class={`status-value`} data-testid="status-running-value">{runningRuns()}</span>
+                        </div>
+                        <div class={styles["status-row"]} data-testid="status-queued">
+                            <span class={`status-label`}>{t("analytics.status.queued")}</span>
+                            <span class={`status-value`} data-testid="status-queued-value">{queuedRuns()}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class={`validator-section`} data-testid="validator-reports-table">
+                    <h3 class={styles["section-title"]}>{t("analytics.validatorReports")}</h3>
+                    <table class={styles["validator-table"]}>
+                        <thead>
+                            <tr>
+                                <th>{t("analytics.column.name")}</th>
+                                <th>{t("analytics.column.passRate")}</th>
+                                <th>{t("analytics.column.flagged")}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <For each={reports()}>
+                                {(report)=>{
+                                    return (
+                                        <tr class={`validator-row`} data-testid={"validator-row-"+report.name}>
+                                            <td data-testid={"validator-name-"+report.name}>{report.name}</td>
+                                            <td data-testid={"validator-rate-"+report.name}>{report.passRate.toFixed(1)}%</td>
+                                            <td data-testid={"validator-flagged-"+report.name}>{report.flaggedCount}</td>
+                                        </tr>
+                                    )
+                                }}
+                            </For>
+                        </tbody>
+                    </table>
+                </div>
+                <div class={`top-issues-section`} data-testid="top-issues-list">
+                    <h3 class={styles["section-title"]}>{t("analytics.topIssues")}</h3>
+                    <Show when={topIssues().length>0} fallback={<div class={styles["issues-empty"]} data-testid="issues-empty">{t("analytics.noIssues")}</div>}>
+                        <ul class={styles["issues-list"]}>
+                            <For each={topIssues()}>
+                                {(issue)=>{
+                                    return (
+                                        <li class={styles["issue-item"]} data-testid={"issue-"+issue.name}>
+                                            <span class={`issue-name`} data-testid={"issue-name-"+issue.name}>{issue.name}</span>
+                                            <span class={`issue-count`} data-testid={"issue-count-"+issue.name}>{issue.flaggedCount}</span>
+                                        </li>
+                                    )
+                                }}
+                            </For>
+                        </ul>
+                    </Show>
+                </div>
+            </div>
+        )
+    }
+    if (!props.appStore){
+        return dashboardBody()
+    }
     return (
-        <div class={styles["analytics-dashboard"]} data-testid="analytics-dashboard">
-            <div style={{ display: "none" }} data-testid="format-distribution-data">{JSON.stringify(formatDistribution())}</div>
-            <div style={{ display: "none" }} data-testid="avg-output-length-data">{avgOutputLength()}</div>
-            <div style={{ display: "none" }} data-testid="avg-instruction-length-data">{avgInstructionLength()}</div>
-            <div style={{ display: "none" }} data-testid="quality-score-data">{qualityScore()}</div>
-            <div style={{ display: "none" }} data-testid="top-issues-data">{JSON.stringify(topIssues())}</div>
-            <div style={{ display: "none" }} data-testid="total-items-data">{totalItems()}</div>
-            <div style={{ display: "none" }} data-testid="avg-duration-ms-data">{avgDurationMs()}</div>
-            <div class={styles["metrics-cards"]}>
-                <div class={styles["metric-card"]} data-testid="total-items-card">
-                    <h3 class={styles["metric-label"]}>{t("analytics.totalItems")}</h3>
-                    <p class={styles["metric-value"]} data-testid="total-items-value">{totalItems()}</p>
-                </div>
-                <div class={styles["metric-card"]} data-testid="quality-score-card">
-                    <h3 class={styles["metric-label"]}>{t("analytics.qualityScore")}</h3>
-                    <p class={styles["metric-value"]} data-testid="quality-score-value">{qualityScore().toFixed(1)}%</p>
-                </div>
-                <div class={styles["metric-card"]} data-testid="total-runs-card">
-                    <h3 class={styles["metric-label"]}>{t("analytics.totalRuns")}</h3>
-                    <p class={styles["metric-value"]} data-testid="total-runs-value">{totalRuns()}</p>
-                </div>
-                <div class={styles["metric-card"]} data-testid="avg-output-length-card">
-                    <h3 class={styles["metric-label"]}>{t("analytics.avgOutputLength")}</h3>
-                    <p class={styles["metric-value"]} data-testid="avg-output-length-value">{avgOutputLength().toFixed(0)}</p>
-                </div>
-            </div>
-            <div class={`distribution-section`} data-testid="format-distribution">
-                <h3 class={styles["section-title"]}>{t("analytics.formatDistribution")}</h3>
-                <div class={styles["format-list"]}>
-                    <For each={formatDistribution()}>
-                        {(item)=>{
-                            let testId="format-row-"+item.format
-                            return (
-                                <div class={styles["format-row"]} data-testid={testId}>
-                                    <span class={`format-label`} data-testid={"format-label-"+item.format}>{t("analytics.format."+item.format)}</span>
-                                    <span class={`format-count`} data-testid={"format-count-"+item.format}>{item.count}</span>
-                                </div>
-                            )
-                        }}
-                    </For>
-                </div>
-            </div>
-            <div class={`run-status-section`} data-testid="run-status-breakdown">
-                <h3 class={styles["section-title"]}>{t("analytics.runStatus")}</h3>
-                <div class={styles["status-list"]}>
-                    <div class={styles["status-row"]} data-testid="status-completed">
-                        <span class={`status-label`}>{t("analytics.status.completed")}</span>
-                        <span class={`status-value`} data-testid="status-completed-value">{completedRuns()}</span>
-                    </div>
-                    <div class={styles["status-row"]} data-testid="status-failed">
-                        <span class={`status-label`}>{t("analytics.status.failed")}</span>
-                        <span class={`status-value`} data-testid="status-failed-value">{failedRuns()}</span>
-                    </div>
-                    <div class={styles["status-row"]} data-testid="status-running">
-                        <span class={`status-label`}>{t("analytics.status.running")}</span>
-                        <span class={`status-value`} data-testid="status-running-value">{runningRuns()}</span>
-                    </div>
-                    <div class={styles["status-row"]} data-testid="status-queued">
-                        <span class={`status-label`}>{t("analytics.status.queued")}</span>
-                        <span class={`status-value`} data-testid="status-queued-value">{queuedRuns()}</span>
+        <Show when={props.appStore.uiStore.analyticsOpen()}>
+            <Portal mount={document.body}>
+                <div
+                    ref={overlayRef}
+                    class={`${styles["modal"]} ${styles["active"]}`}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t("analytics.title")}
+                    onClick={handleBackdropClick}
+                >
+                    <div class={styles["modal-content"]} style={{ "max-width": "900px", width: "85%", "max-height": "85vh", padding: "0", overflow: "hidden" }}>
+                        <div class={styles["modal-header"]} style={{ "flex-shrink": "0" }}>
+                            <h2>
+                                <Icon html={renderIcon("fa-chart-bar")} />
+                                <span data-i18n="analytics.title">{t("analytics.title")}</span>
+                            </h2>
+                            <button
+                                class={styles["modal-close"]}
+                                aria-label={t("analytics.closeAria")}
+                                data-i18n-aria-label="analytics.closeAria"
+                                onClick={handleClose}
+                            >
+                                <Icon html={renderIcon("fa-times")} />
+                            </button>
+                        </div>
+                        <div style={{ "overflow-y": "auto", "max-height": "calc(85vh - 60px)", padding: "var(--spacing-lg)" }}>
+                            {dashboardBody()}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class={`validator-section`} data-testid="validator-reports-table">
-                <h3 class={styles["section-title"]}>{t("analytics.validatorReports")}</h3>
-                <table class={styles["validator-table"]}>
-                    <thead>
-                        <tr>
-                            <th>{t("analytics.column.name")}</th>
-                            <th>{t("analytics.column.passRate")}</th>
-                            <th>{t("analytics.column.flagged")}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <For each={reports()}>
-                            {(report)=>{
-                                return (
-                                    <tr class={`validator-row`} data-testid={"validator-row-"+report.name}>
-                                        <td data-testid={"validator-name-"+report.name}>{report.name}</td>
-                                        <td data-testid={"validator-rate-"+report.name}>{report.passRate.toFixed(1)}%</td>
-                                        <td data-testid={"validator-flagged-"+report.name}>{report.flaggedCount}</td>
-                                    </tr>
-                                )
-                            }}
-                        </For>
-                    </tbody>
-                </table>
-            </div>
-            <div class={`top-issues-section`} data-testid="top-issues-list">
-                <h3 class={styles["section-title"]}>{t("analytics.topIssues")}</h3>
-                <Show when={topIssues().length>0} fallback={<div class={styles["issues-empty"]} data-testid="issues-empty">{t("analytics.noIssues")}</div>}>
-                    <ul class={styles["issues-list"]}>
-                        <For each={topIssues()}>
-                            {(issue)=>{
-                                return (
-                                    <li class={styles["issue-item"]} data-testid={"issue-"+issue.name}>
-                                        <span class={`issue-name`} data-testid={"issue-name-"+issue.name}>{issue.name}</span>
-                                        <span class={`issue-count`} data-testid={"issue-count-"+issue.name}>{issue.flaggedCount}</span>
-                                    </li>
-                                )
-                            }}
-                        </For>
-                    </ul>
-                </Show>
-            </div>
-        </div>
+            </Portal>
+        </Show>
     )
 }
