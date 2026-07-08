@@ -12,7 +12,7 @@ export interface Command{
 }
 export interface CommandPaletteProps{
     commands: Command[]
-    visible: boolean
+    visible: ()=>boolean
     onClose: ()=>void
 }
 export function CommandPalette(props: CommandPaletteProps): JSX.Element{
@@ -33,7 +33,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
         setSelectedIndex(0)
     })
     createEffect(()=>{
-        if (props.visible){
+        if (props.visible()){
             setQuery("")
             setSelectedIndex(0)
             inputRef?.focus()
@@ -73,7 +73,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
         }
     }
     return (
-        <Show when={props.visible}>
+        <Show when={props.visible()}>
             <div class={styles["command-palette-overlay"]} data-testid="command-palette-overlay" onClick={onBackdropClick}>
                 <div class={styles["command-palette"]} data-testid="command-palette" onKeyDown={onKeydown}>
                     <input
