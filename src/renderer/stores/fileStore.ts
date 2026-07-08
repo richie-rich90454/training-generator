@@ -93,7 +93,7 @@ export function createFileStore(): FileStore {
     }
     function clearFiles(): void {
         setSelectedFiles([])
-        setFileStatuses({})
+        setFileStatuses(reconcile({}))
     }
     function setFileStatus(fileName: string, status: string): void {
         if (selectedFiles.some(f => f.name === fileName)) {
