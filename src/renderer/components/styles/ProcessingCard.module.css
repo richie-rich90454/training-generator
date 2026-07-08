@@ -39,6 +39,8 @@
     font-family:'Noto Sans', sans-serif;
     font-size:.875rem;
     line-height:1.5;
+    max-height:200px;
+    overflow-y:auto;
 }
 .log-entry{
     padding:var(--spacing-sm) var(--spacing-md);
