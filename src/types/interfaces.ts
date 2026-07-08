@@ -130,6 +130,7 @@ export interface AppSettings{
     apiKey?:string
     baseUrl?:string
     temperature?:number
+    customPrompt?:string
     providers?:ProviderConfig[]
     failoverPriority?:string[]
     ensembleModels?:string[]
