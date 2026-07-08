@@ -31,11 +31,11 @@ describe("UIStore helpers", () => {
     })
     it("getLogIcon returns correct icons", () => {
         let ui: UIStore=createUIStore()
-        expect(ui.getLogIcon("info")).toBe("info-circle")
-        expect(ui.getLogIcon("success")).toBe("check-circle")
-        expect(ui.getLogIcon("warning")).toBe("exclamation-triangle")
-        expect(ui.getLogIcon("error")).toBe("times-circle")
-        expect(ui.getLogIcon("unknown" as any)).toBe("info-circle")
+        expect(ui.getLogIcon("info")).toBe("fa-info-circle")
+        expect(ui.getLogIcon("success")).toBe("fa-check-circle")
+        expect(ui.getLogIcon("warning")).toBe("fa-exclamation-triangle")
+        expect(ui.getLogIcon("error")).toBe("fa-times-circle")
+        expect(ui.getLogIcon("unknown" as any)).toBe("fa-info-circle")
     })
     it("setProgress clamps values", () => {
         let ui: UIStore=createUIStore()
