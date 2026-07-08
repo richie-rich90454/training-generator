@@ -14,6 +14,7 @@ export interface OrchestratorSettings {
     language: string
     chunkSize: number
     smartSizing: boolean
+    customPrompt?: string
 }
 export interface OrchestratorDeps {
     processor: Processor
@@ -104,7 +105,10 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             }
         })
     }
-    async function generatePrompt(text: string, processingType: string, language: string): Promise<string> {
+    async function generatePrompt(text: string, processingType: string, language: string, customPrompt?: string): Promise<string> {
+        if (customPrompt && customPrompt.trim().length > 0) {
+            return customPrompt.replace(/\{\{text\}\}/g, text)
+        }
         const loadedPrompt = await promptManager.getPromptWithFallback(language, processingType)
         if (loadedPrompt) {
             return loadedPrompt.replace("{{text}}", text)
@@ -149,7 +153,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 chunks,
                 model,
                 processingType,
-                (text: string, type: string) => generatePrompt(text, type, settings.language || "en"),
+                (text: string, type: string) => generatePrompt(text, type, settings.language || "en", settings.customPrompt),
                 (input: string, output: string, type: string) => createTrainingItem(input, output, type, settings.outputFormat || "jsonl"),
                 (index: number, total: number, items: TrainingItem[]) => {
                     callbacks?.onChunkProcessed?.(index, total, items)
