@@ -130,6 +130,34 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         </For>
                     </select>
                 </div>
+                <Show when={settingsStore.settings.processingType === "custom"}>
+                    <div class={styles["config-field"]}>
+                        <label class={styles["config-field__label"]} for="config-custom-prompt">
+                            <Icon html={renderIcon("fa-terminal")} />
+                            <span data-i18n="config.customPrompt">{t("config.customPrompt")}</span>
+                        </label>
+                        <textarea
+                            id="config-custom-prompt"
+                            class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                            rows={4}
+                            value={settingsStore.settings.customPrompt}
+                            placeholder={t("config.customPrompt.placeholder")}
+                            data-i18n-placeholder="config.customPrompt.placeholder"
+                            onInput={(e) => settingsStore.setCustomPrompt(e.currentTarget.value)}
+                        />
+                        <button
+                            type="button"
+                            class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                            style={{ "margin-top": "var(--spacing-sm)" }}
+                            aria-label={t("config.openPromptEditorAria")}
+                            data-i18n-aria-label="config.openPromptEditorAria"
+                            onClick={() => props.appStore.uiStore.openPromptEditor()}
+                        >
+                            <Icon html={renderIcon("fa-expand")} />
+                            <span data-i18n="config.openPromptEditor">{t("config.openPromptEditor")}</span>
+                        </button>
+                    </div>
+                </Show>
                 <div class={styles["config-field"]}>
                     <label class={styles["config-field__label"]} for="config-output-format">
                         <Icon html={renderIcon("fa-file-export")} />
