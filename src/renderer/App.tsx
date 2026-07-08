@@ -104,16 +104,18 @@ export function App(): JSX.Element {
     return (
         <div class="app-container fade-in">
             <TitleBar appStore={appStore} />
-            <ToastContainer appStore={appStore} />
-            <ContentGrid appStore={appStore} />
-            <Footer appStore={appStore} />
+            <div class="main-scroll">
+                <ToastContainer appStore={appStore} />
+                <ContentGrid appStore={appStore} />
+                <Footer appStore={appStore} />
+            </div>
             <SettingsModal appStore={appStore} />
-            <CommandPalette commands={commands} visible={appStore.uiStore.commandPaletteOpen()} onClose={appStore.uiStore.closeCommandPalette} />
+            <CommandPalette commands={commands} visible={appStore.uiStore.commandPaletteOpen} onClose={appStore.uiStore.closeCommandPalette} />
             <Dashboard appStore={appStore} />
             <Devtools appStore={appStore} />
             <TemplateEditor appStore={appStore} />
-            <AnalyticsDashboard items={appStore.outputStore.outputData} />
-            <PromptEditor modelValue="" />
+            <AnalyticsDashboard items={appStore.outputStore.outputData} appStore={appStore} />
+            <PromptEditor modelValue={appStore.settingsStore.settings.customPrompt || ""} onChange={(value)=>appStore.settingsStore.setCustomPrompt(value)} appStore={appStore} />
         </div>
     )
 }
