@@ -29,6 +29,7 @@ export interface SettingsStore {
     setApiKey: (key: string) => void
     setBaseUrl: (url: string) => void
     setTemperature: (temp: number) => void
+    setCustomPrompt: (prompt: string) => void
     setTheme: (theme: string) => void
     setFontSize: (size: string) => void
     setAutoSave: (value: boolean) => void
@@ -66,7 +67,8 @@ export function createSettingsStore(): SettingsStore {
         provider: "ollama",
         apiKey: "",
         baseUrl: "",
-        temperature: 0.7
+        temperature: 0.7,
+        customPrompt: ""
     })
     const [appSettings, setAppSettings] = createStore<FullAppSettings>({
         theme: "auto",
@@ -164,6 +166,7 @@ export function createSettingsStore(): SettingsStore {
                 const n = Number(saved.temperature)
                 if (Number.isFinite(n) && n >= 0 && n <= 1) setSettings("temperature", n)
             }
+            if (saved.customPrompt && typeof saved.customPrompt === "string") setSettings("customPrompt", saved.customPrompt)
             if (saved.apiKey) {
                 const decrypted = await decryptKey(saved.apiKey)
                 if (decrypted != null) {
@@ -364,6 +367,7 @@ export function createSettingsStore(): SettingsStore {
         },
         setBaseUrl: (url: string) => setSettings("baseUrl", url),
         setTemperature: (temp: number) => setSettings("temperature", temp),
+        setCustomPrompt: (prompt: string) => setSettings("customPrompt", prompt),
         setTheme: (theme: string) => setAppSettings("theme", theme),
         setFontSize: (size: string) => setAppSettings("fontSize", size),
         setAutoSave: (value: boolean) => setAppSettings("autoSave", value),
