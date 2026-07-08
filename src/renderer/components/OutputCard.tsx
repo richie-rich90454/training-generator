@@ -34,12 +34,27 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
                         aria-label={t("output.exportFormatAria")}
                         data-i18n-aria-label="output.exportFormatAria"
                         value={outputStore.exportFormat()}
-                        onChange={(e) => outputStore.setExportFormat(e.currentTarget.value as "jsonl" | "json" | "csv" | "text")}
+                        onChange={(e) => outputStore.setExportFormat(e.currentTarget.value as import("../stores/outputStore.js").ExportFormat)}
                     >
                         <option value="jsonl" data-i18n="output.exportFormat.jsonl">{t("output.exportFormat.jsonl")}</option>
                         <option value="json" data-i18n="output.exportFormat.json">{t("output.exportFormat.json")}</option>
+                        <option value="chatml" data-i18n="output.exportFormat.chatml">{t("output.exportFormat.chatml")}</option>
                         <option value="csv" data-i18n="output.exportFormat.csv">{t("output.exportFormat.csv")}</option>
+                        <option value="text" data-i18n="output.exportFormat.text">{t("output.exportFormat.text")}</option>
                     </select>
+                    <button
+                        id="analytics-btn"
+                        class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                        title={t("output.analyticsTitle")}
+                        aria-label={t("output.analyticsAria")}
+                        data-i18n-title="output.analyticsTitle"
+                        data-i18n-aria-label="output.analyticsAria"
+                        onClick={() => appStore.uiStore.openAnalytics()}
+                        disabled={!outputStore.hasOutput()}
+                    >
+                        <Icon html={renderIcon("fa-chart-bar")} />
+                        <span data-i18n="output.analytics">{t("output.analytics")}</span>
+                    </button>
                     <button
                         id="export-btn"
                         class={`${styles["btn"]} ${styles["btn--export"]}`}
@@ -68,15 +83,29 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
                     </button>
                 </div>
             </div>
+            <div class={styles["output-progress-section"]}>
+                <div
+                    class={styles["output-progress-bar"]}
+                    role="progressbar"
+                    aria-valuenow={uiStore.progressPercent()}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={t("processing.progressAria")}
+                    data-i18n-aria-label="processing.progressAria"
+                >
+                    <div class={styles["output-progress-fill"]} style={{ width: uiStore.progressPercent() + "%" }} />
+                </div>
+                <span class={styles["output-progress-text"]}>{uiStore.progressPercent() + t("common.percent")}</span>
+            </div>
             <div
                 class={styles["output-preview"]}
                 role="region"
                 aria-label={t("output.previewAria")}
                 data-i18n-aria-label="output.previewAria"
-                aria-busy={uiStore.outputPreviewLoading()}
+                aria-busy={appStore.isProcessing() && outputStore.itemCount() === 0}
             >
-                <Show when={!uiStore.outputPreviewLoading()} fallback={<pre>{t("common.loading")}</pre>}>
-                    <pre>{uiStore.outputPreview()}</pre>
+                <Show when={!(appStore.isProcessing() && outputStore.itemCount() === 0)} fallback={<pre>{t("common.loading")}</pre>}>
+                    <pre>{outputStore.previewText()}</pre>
                 </Show>
             </div>
         </div>
