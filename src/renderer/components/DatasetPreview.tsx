@@ -34,7 +34,7 @@ function GeneratedView(props: { item: FormattedView }): JSX.Element{
         return (
             <div class={`instruction-view`} data-testid="instruction-view">
                 <div class={styles["card"]} data-testid="instruction-card">
-                    <h4 class={`card-title`}>Instruction</h4>
+                    <h4 class={`card-title`}>{t("datasetPreview.instructionLabel")}</h4>
                     <p data-testid="instruction-text">{view.instruction}</p>
                 </div>
                 <Show when={view.input.length>0}>
