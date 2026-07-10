@@ -248,9 +248,8 @@ export function createOutputStore(): OutputStore {
         return items
     }
     function appendOutput(items: TrainingItem[]): void {
-        for (const item of items) {
-            setOutputData(outputData.length, item)
-        }
+        if (items.length === 0) return
+        setOutputData(outputData => [...outputData, ...items])
     }
     function clearOutput(): void {
         setOutputData([])
