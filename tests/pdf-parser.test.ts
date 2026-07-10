@@ -1,4 +1,4 @@
-import{describe,test,expect}from "vitest"
+import{describe,test,expect,vi,beforeEach,afterEach}from "vitest"
 import path from "path"
 import{fileURLToPath}from "url"
 import FileParser from "../src/core/fileParser.js"
@@ -6,6 +6,13 @@ import FileParser from "../src/core/fileParser.js"
 let __dirname=path.dirname(fileURLToPath(import.meta.url))
 
 describe("PDF text extraction",()=>{
+    beforeEach(()=>{
+        vi.spyOn(console,"error").mockImplementation(()=>{})
+        vi.spyOn(console,"warn").mockImplementation(()=>{})
+    })
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
     test("extracts expected text from sample PDF",async()=>{
         let parser:FileParser=new FileParser()
         let pdfPath:string=path.join(__dirname,"fixtures","sample.pdf")
