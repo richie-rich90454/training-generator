@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe, test, expect, beforeEach, afterEach}from "vitest"
+import{describe, test, expect, beforeEach, afterEach, vi}from "vitest"
 import{OnboardingTour, calculatePlacement, buildTourTooltip, STORAGE_KEY, DEFAULT_TOUR_STEPS, TourStep}from "../src/core/onboardingTour.js"
 function createMemoryStorage(): {getItem: (key: string)=>string|null, setItem: (key: string, value: string)=>void, data: Record<string, string>}{
     let data: Record<string, string>={};
@@ -8,6 +8,12 @@ function createMemoryStorage(): {getItem: (key: string)=>string|null, setItem: (
         setItem: (key: string, value: string)=>{data[key]=value},
         data
     };
+}
+function nextFrame(): Promise<void>{
+    return new Promise(resolve=>{
+        let raf=typeof requestAnimationFrame!=="undefined" ? requestAnimationFrame : (cb: FrameRequestCallback)=>setTimeout(cb, 0);
+        raf(()=>resolve());
+    });
 }
 const testSteps: TourStep[]=[
     {id: "step1", target: "#target1", title: "First", content: "First step content", placement: "bottom"},
@@ -115,11 +121,16 @@ describe("OnboardingTour", ()=>{
         expect(overlay).toBeInstanceOf(HTMLElement);
         expect(overlay.className).toBe("tg-onboarding-overlay");
     });
+    test("renderOverlay creates spotlight elements", ()=>{
+        let overlay=tour.renderOverlay();
+        expect(overlay.querySelectorAll(".tg-onboarding-spotlight").length).toBe(4);
+    });
     test("positionTooltip returns centered position when target is missing", ()=>{
         tour.start();
         let pos=tour.positionTooltip(testSteps[0]);
         expect(typeof pos.top).toBe("number");
         expect(typeof pos.left).toBe("number");
+        expect(typeof pos.placement).toBe("string");
     });
     test("positionTooltip calculates bottom placement relative to target", ()=>{
         let target=document.createElement("div");
@@ -139,6 +150,63 @@ describe("OnboardingTour", ()=>{
         let pos=tour.positionTooltip(testSteps[1]);
         expect(pos.top).toBe(200-160-8);
     });
+    test("positionTooltip keeps tooltip within viewport bounds", ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(400, 700, 50, 50);
+        document.body.appendChild(target);
+        tour.start();
+        let pos=tour.positionTooltip(testSteps[0]);
+        let viewWidth=window.innerWidth ?? 800;
+        let viewHeight=window.innerHeight ?? 600;
+        expect(pos.left).toBeGreaterThanOrEqual(8);
+        expect(pos.top).toBeGreaterThanOrEqual(8);
+        expect(pos.left+240).toBeLessThanOrEqual(viewWidth-8);
+        expect(pos.top+160).toBeLessThanOrEqual(viewHeight-8);
+    });
+    test("positionTooltip flips placement when preferred placement does not fit", ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(400, 700, 50, 50);
+        document.body.appendChild(target);
+        tour.start();
+        let pos=tour.positionTooltip(testSteps[0]);
+        expect(pos.placement).toBe("top");
+    });
+    test("render scrolls target into view before positioning", async ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(100, 100, 50, 50);
+        let scrollIntoView=vi.fn();
+        target.scrollIntoView=scrollIntoView;
+        document.body.appendChild(target);
+        tour.start();
+        expect(scrollIntoView).toHaveBeenCalledWith({behavior: "smooth", block: "center", inline: "center"});
+        await nextFrame();
+        expect(document.querySelector(".tg-onboarding-tooltip")).not.toBeNull();
+    });
+    test("render creates spotlight overlay around target", async ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(100, 100, 50, 50);
+        document.body.appendChild(target);
+        tour.start();
+        await nextFrame();
+        let overlay=document.querySelector(".tg-onboarding-overlay");
+        expect(overlay).not.toBeNull();
+        expect(overlay?.querySelectorAll(".tg-onboarding-spotlight").length).toBe(4);
+    });
+    test("render sets tooltip data-placement attribute", async ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(100, 100, 50, 50);
+        document.body.appendChild(target);
+        tour.start();
+        await nextFrame();
+        let tooltip=document.querySelector(".tg-onboarding-tooltip");
+        expect(tooltip).not.toBeNull();
+        expect(tooltip?.getAttribute("data-placement")).toMatch(/^(top|bottom|left|right)$/);
+    });
     test("buildTourTooltip creates element with title and content", ()=>{
         let tooltip=buildTourTooltip(testSteps[0]);
         expect(tooltip.className).toBe("tg-onboarding-tooltip");
@@ -154,6 +222,10 @@ describe("OnboardingTour", ()=>{
         expect(tooltip.querySelector(".tg-tour-next")).not.toBeNull();
         expect(tooltip.querySelector(".tg-tour-prev")).not.toBeNull();
         expect(tooltip.querySelector(".tg-tour-skip")).not.toBeNull();
+    });
+    test("buildTourTooltip includes arrow element", ()=>{
+        let tooltip=buildTourTooltip(testSteps[0]);
+        expect(tooltip.querySelector(".tg-tour-arrow")).not.toBeNull();
     });
     test("DEFAULT_TOUR_STEPS contains at least one step", ()=>{
         expect(DEFAULT_TOUR_STEPS.length).toBeGreaterThan(0);
