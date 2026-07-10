@@ -41,6 +41,7 @@ export interface SettingsStore {
     setMaxOutputItems: (count: number) => void
     setMaxChunks: (count: number) => void
     setMaxParallelFiles: (count: number) => void
+    setEnableThinking: (value: boolean) => void
     loadSettings: () => Promise<void>
     savePreset: () => Promise<void>
     loadAppSettings: () => void
@@ -81,7 +82,8 @@ export function createSettingsStore(): SettingsStore {
         maxFileSize: 100,
         maxOutputItems: 100000,
         maxChunks: 500,
-        maxParallelFiles: 1
+        maxParallelFiles: 1,
+        enableThinking: true
     })
     const [profiles, setProfiles] = createStore<ConfigProfile[]>([])
     const [selectedProfile, setSelectedProfile] = createSignal<string>("")
@@ -228,7 +230,7 @@ export function createSettingsStore(): SettingsStore {
                 setAppSettings("fontSize", saved.fontSize)
                 applyFontSize(saved.fontSize)
             }
-            const boolKeys: Array<keyof FullAppSettings> = ["autoSave", "autoCheckOllama", "startMaximized", "rememberWindowSize", "smartSizing"]
+            const boolKeys: Array<keyof FullAppSettings> = ["autoSave", "autoCheckOllama", "startMaximized", "rememberWindowSize", "smartSizing", "enableThinking"]
             for (const key of boolKeys) {
                 if (saved[key] !== undefined) {
                     setAppSettings(key, saved[key] as boolean)
@@ -282,7 +284,8 @@ export function createSettingsStore(): SettingsStore {
             maxFileSize: 100,
             maxOutputItems: 100000,
             maxChunks: 500,
-            maxParallelFiles: 1
+            maxParallelFiles: 1,
+            enableThinking: true
         })
         saveAppSettings()
         applyTheme("auto")
@@ -379,6 +382,7 @@ export function createSettingsStore(): SettingsStore {
         setMaxOutputItems: (count: number) => setAppSettings("maxOutputItems", count),
         setMaxChunks: (count: number) => setAppSettings("maxChunks", count),
         setMaxParallelFiles: (count: number) => setAppSettings("maxParallelFiles", count),
+        setEnableThinking: (value: boolean) => setAppSettings("enableThinking", value),
         loadSettings,
         savePreset,
         loadAppSettings,
