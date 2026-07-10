@@ -100,7 +100,7 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         document.removeEventListener("mouseup", handleMouseUp)
     })
     return (
-        <div
+        <main
             ref={gridRef}
             class={styles["content-grid"]}
             classList={{ [styles["splitter-active"]]: isDragging() }}
@@ -125,6 +125,6 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
                 <ConfigPanel appStore={props.appStore} />
                 <StatusPanel appStore={props.appStore} />
             </div>
-        </div>
+        </main>
     )
 }
