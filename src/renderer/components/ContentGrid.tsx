@@ -104,7 +104,6 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             ref={gridRef}
             class={styles["content-grid"]}
             classList={{ [styles["splitter-active"]]: isDragging() }}
-            style={getSavedWidth() != null ? undefined : undefined}
         >
             <div class={styles["left-column"]}>
                 <UploadCard appStore={props.appStore} />
