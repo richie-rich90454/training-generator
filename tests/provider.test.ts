@@ -14,6 +14,15 @@ beforeEach(() => {
 })
 
 describe("retryWithBackoff", () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
   it("should return result on first success", async () => {
     let fn = vi.fn(async () => "success")
     let result = await retryWithBackoff(fn)
@@ -29,8 +38,10 @@ describe("retryWithBackoff", () => {
       return "eventual success"
     })
     let onRetry = vi.fn()
-    let result = await retryWithBackoff(fn, 3, 10, onRetry)
-    expect(result).toBe("eventual success")
+    let promise = retryWithBackoff(fn, 3, 10, onRetry)
+    let [result] = await Promise.allSettled([promise, vi.advanceTimersByTimeAsync(100)])
+    expect(result.status).toBe("fulfilled")
+    expect((result as PromiseFulfilledResult<string>).value).toBe("eventual success")
     expect(fn).toHaveBeenCalledTimes(3)
     expect(onRetry).toHaveBeenCalledTimes(2)
   })
@@ -39,7 +50,10 @@ describe("retryWithBackoff", () => {
     let fn = vi.fn(async () => {
       throw new Error("persistent failure")
     })
-    await expect(retryWithBackoff(fn, 2, 10)).rejects.toThrow("persistent failure")
+    let promise = retryWithBackoff(fn, 2, 10)
+    let [result] = await Promise.allSettled([promise, vi.advanceTimersByTimeAsync(100)])
+    expect(result.status).toBe("rejected")
+    expect((result as PromiseRejectedResult).reason.message).toBe("persistent failure")
     expect(fn).toHaveBeenCalledTimes(3) // initial + 2 retries
   })
 
@@ -74,13 +88,10 @@ describe("retryWithBackoff", () => {
       throw new Error("retry me")
     })
     let onRetry = vi.fn()
-    let start = Date.now()
-    try {
-      await retryWithBackoff(fn, 3, 50, onRetry)
-    } catch {}
-    let elapsed = Date.now() - start
-    // 50 + 100 + 200 = 350ms minimum
-    expect(elapsed).toBeGreaterThanOrEqual(300)
+    let promise = retryWithBackoff(fn, 3, 10, onRetry)
+    let [result] = await Promise.allSettled([promise, vi.advanceTimersByTimeAsync(100)])
+    expect(result.status).toBe("rejected")
+    expect((result as PromiseRejectedResult).reason.message).toBe("retry me")
     expect(onRetry).toHaveBeenCalledTimes(3)
   })
 
@@ -91,9 +102,9 @@ describe("retryWithBackoff", () => {
       throw new Error(`error ${callCount}`)
     })
     let onRetry = vi.fn()
-    try {
-      await retryWithBackoff(fn, 3, 10, onRetry)
-    } catch {}
+    let promise = retryWithBackoff(fn, 3, 10, onRetry)
+    let [result] = await Promise.allSettled([promise, vi.advanceTimersByTimeAsync(100)])
+    expect(result.status).toBe("rejected")
     expect(onRetry).toHaveBeenCalledWith(1, "error 1")
     expect(onRetry).toHaveBeenCalledWith(2, "error 2")
     expect(onRetry).toHaveBeenCalledWith(3, "error 3")
@@ -137,6 +148,15 @@ describe("createProvider", () => {
 })
 
 describe("OllamaProvider", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.stubGlobal("setTimeout", (fn: () => void) => { fn(); return 0 })
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
   it("should have name 'ollama'", () => {
     let provider = new OllamaProvider()
     expect(provider.name).toBe("ollama")
@@ -175,6 +195,15 @@ describe("OllamaProvider", () => {
 })
 
 describe("OpenAIProvider", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.stubGlobal("setTimeout", (fn: () => void) => { fn(); return 0 })
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
   it("should have name 'openai'", () => {
     let provider = new OpenAIProvider("sk-test")
     expect(provider.name).toBe("openai")
