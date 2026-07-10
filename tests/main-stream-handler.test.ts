@@ -22,7 +22,34 @@ vi.mock("electron",()=>{
             getVersion:vi.fn(()=>"1.0.0"),
             quit:vi.fn()
         },
-        BrowserWindow:vi.fn(),
+        BrowserWindow:vi.fn(function(){
+            return{
+                loadFile:vi.fn(()=>Promise.resolve()),
+                loadURL:vi.fn(()=>Promise.resolve()),
+                on:vi.fn(),
+                once:vi.fn(),
+                show:vi.fn(),
+                hide:vi.fn(),
+                focus:vi.fn(),
+                close:vi.fn(),
+                center:vi.fn(),
+                restore:vi.fn(),
+                setMenu:vi.fn(),
+                setBackgroundMaterial:vi.fn(),
+                isDestroyed:vi.fn(()=>false),
+                isMinimized:vi.fn(()=>false),
+                isVisible:vi.fn(()=>true),
+                isFocused:vi.fn(()=>true),
+                webContents:{
+                    executeJavaScript:vi.fn(()=>Promise.resolve()),
+                    openDevTools:vi.fn(),
+                    setWindowOpenHandler:vi.fn(),
+                    on:vi.fn(),
+                    once:vi.fn(),
+                    send:vi.fn()
+                }
+            }
+        }),
         ipcMain:{
             handle:vi.fn()
         },
@@ -30,6 +57,27 @@ vi.mock("electron",()=>{
             showOpenDialog:vi.fn(),
             showSaveDialog:vi.fn(),
             showErrorBox:vi.fn()
+        },
+        protocol:{
+            registerSchemesAsPrivileged:vi.fn(),
+            handle:vi.fn()
+        },
+        nativeImage:{
+            createFromPath:vi.fn(()=>({isEmpty:vi.fn(()=>false)}))
+        },
+        Tray:vi.fn(function(){
+            return{
+                setToolTip:vi.fn(),
+                setContextMenu:vi.fn(),
+                on:vi.fn(),
+                setImage:vi.fn()
+            }
+        }),
+        Menu:{
+            buildFromTemplate:vi.fn(()=>({
+                on:vi.fn(),
+                popup:vi.fn()
+            }))
         }
     }
 })
