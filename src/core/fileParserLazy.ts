@@ -206,7 +206,9 @@ class FileParserLazy{
                 cleanup();
                 reject(new Error(t("error.workerStopped", undefined, { code: String(code) })));
             });
-            let messageBuffer=transfer?Buffer.from(buffer):buffer
+            let messageBuffer=transfer
+                ?Buffer.from(buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength))
+                :buffer
             let transferList=transfer&&messageBuffer.buffer?[messageBuffer.buffer]:[]
             worker.postMessage({ id, buffer: messageBuffer }, transferList as import("worker_threads").TransferListItem[]);
         });
