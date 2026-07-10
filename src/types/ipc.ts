@@ -9,6 +9,10 @@ export interface IpcChannels{
         request:{filePath:string;fileType:string}
         response:{success:boolean;content?:string;error?:string}
     }
+    'file:parseBuffer':{
+        request:{buffer:ArrayBuffer;fileType:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
     'file:parseBatch':{
         request:{files:FileObj[]}
         response:{success:boolean;results?:ParseBatchItem[];error?:string}
