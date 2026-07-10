@@ -1381,8 +1381,8 @@ app.on("before-quit",async(event)=>{
         tray.destroy()
         tray=null
     }
-    httpAgent.destroy()
-    httpsAgent.destroy()
+    try{httpAgent.destroy()}catch{}
+    try{httpsAgent.destroy()}catch{}
     app.exit()
 })
 app.on("activate",()=>{
