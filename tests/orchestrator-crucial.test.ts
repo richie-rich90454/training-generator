@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import fs from "fs"
+import path from "path"
 import { createOrchestrator } from "../src/renderer/processing/orchestrator.js"
 import type { OrchestratorSettings, OrchestratorDeps } from "../src/renderer/processing/orchestrator.js"
 import Processor from "../src/renderer/processor.js"
@@ -46,6 +48,7 @@ function baseSettings(overrides: Partial<OrchestratorSettings> = {}): Orchestrat
         language: "en",
         chunkSize: 8000,
         smartSizing: false,
+        enableThinking: true,
         ...overrides
     }
 }
@@ -67,6 +70,8 @@ let deps: OrchestratorDeps
 
 beforeEach(async() => {
     dedupReturnValue = null
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.spyOn(console, "error").mockImplementation(() => {})
     vi.stubGlobal("window", {
         electronAPI: {
             generateWithOllamaStream: vi.fn(),
@@ -74,7 +79,15 @@ beforeEach(async() => {
             parseFile: vi.fn(),
             loadCache: vi.fn(async() => ({ success: true, data: {} })),
             saveCache: vi.fn(async() => ({ success: true })),
-            clearCache: vi.fn(async() => ({ success: true }))
+            clearCache: vi.fn(async() => ({ success: true })),
+            readFile: vi.fn(async(filePath: string) => {
+                const baseName = path.basename(filePath)
+                const candidate = path.resolve(process.cwd(), "src/prompts", baseName)
+                if(fs.existsSync(candidate)){
+                    return { success: true, content: fs.readFileSync(candidate, "utf-8") }
+                }
+                return { success: false, error: "not found" }
+            })
         }
     })
     await clearCache()
@@ -197,6 +210,17 @@ describe("Orchestrator generatePrompt", () => {
         vi.spyOn(promptManager, "getPromptWithFallback").mockResolvedValue("Managed: {{text}}")
         let prompt = await orchestrator.generatePrompt("source", "instruction", "en")
         expect(prompt).toBe("Managed: source")
+    })
+    it("strips internal verification instructions when thinking is disabled", async() => {
+        let orchestrator = createOrchestrator(deps)
+        vi.spyOn(promptManager, "getPromptWithFallback").mockImplementation(async(language, type) => {
+            return "Do work.\n18. Before producing the final output, internally verify that:\n   - no errors\nOUTPUT FORMAT:\nQuestion: {{text}}"
+        })
+        let prompt = await orchestrator.generatePrompt("source", "instruction", "en", undefined, false)
+        expect(prompt).toContain("source")
+        expect(prompt).toContain("OUTPUT FORMAT")
+        expect(prompt).not.toContain("Before producing")
+        expect(prompt).not.toContain("internally verify")
     })
 })
 
