@@ -185,7 +185,13 @@ export class CliRunner{
             return {};
         }
         let content=this.readFile(configPath);
-        let config=JSON.parse(content) as Record<string, unknown>;
+        let config: Record<string, unknown>;
+        try{
+            config=JSON.parse(content) as Record<string, unknown>;
+        }
+        catch{
+            return {};
+        }
         let profiles=config.profiles as Record<string, Partial<CliOptions>>|undefined;
         if (profiles&&profiles[name]){
             return profiles[name];
