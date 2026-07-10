@@ -194,8 +194,13 @@ describe("cache failures", () => {
         clearCache: vi.fn(async () => { throw new Error("clear failed") }),
       },
     })
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
     await clearCache()
     resetCacheStats()
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
   it("should return null when load fails", async () => {
     let r = await getCachedResult("chunk1", "model1", "prompt1")
