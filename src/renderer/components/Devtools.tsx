@@ -116,7 +116,7 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                         <Show when={activeTab() === "logs"}>
                             <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-logs">
                                 <div class={styles["devtools-log-controls"]}>
-                                    <select id="devtools-log-filter" value={logFilter()} onChange={(e) => setLogFilter(e.currentTarget.value)}>
+                                    <select id="devtools-log-filter" aria-label={t("devtools.logFilterAria")} data-i18n-aria-label="devtools.logFilterAria" value={logFilter()} onChange={(e) => setLogFilter(e.currentTarget.value)}>
                                         <option value="all">{t("devtools.logLevel.all")}</option>
                                         <option value="debug">{t("devtools.logLevel.debug")}</option>
                                         <option value="info">{t("devtools.logLevel.info")}</option>
