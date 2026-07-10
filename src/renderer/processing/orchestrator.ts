@@ -4,7 +4,6 @@
 import type { SelectedFile, TrainingItem, ProcessFileResult } from "../../types/index.js"
 import type Processor from "../processor.js"
 import type PromptManager from "../promptManager.js"
-import { simpleChunk } from "../chunker.js"
 import { chunkInWorker, dedupInWorker } from "../workers/workerPool.js"
 import { t } from "../i18n.js"
 export interface OrchestratorSettings {
@@ -14,7 +13,9 @@ export interface OrchestratorSettings {
     language: string
     chunkSize: number
     smartSizing: boolean
+    enableThinking: boolean
     customPrompt?: string
+    maxChunks?: number
 }
 export interface OrchestratorDeps {
     processor: Processor
@@ -90,7 +91,15 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
                 reader.onload = async (e) => {
                     try {
-                        const text = await extractTextFromPDFBuffer(e.target!.result as ArrayBuffer)
+                        const arrayBuffer = e.target!.result as ArrayBuffer
+                        if (window.electronAPI?.parseFileBuffer) {
+                            const result = await window.electronAPI.parseFileBuffer(arrayBuffer, "pdf")
+                            if (result.success) {
+                                resolve(result.content!)
+                                return
+                            }
+                        }
+                        const text = await extractTextFromPDFBuffer(arrayBuffer)
                         resolve(text)
                     }
                     catch (error) {
@@ -105,13 +114,21 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             }
         })
     }
-    async function generatePrompt(text: string, processingType: string, language: string, customPrompt?: string): Promise<string> {
+    function stripThinkingInstructions(prompt: string): string {
+        const thinkingHeader = /(^|\n)\s*(?:\d+\.\s*)?(?:Before producing|internally verify|internal verification|complete internal verification|内部校验|内部校驗|comprobación interna|vérification interne|interne Überprüfung|verifica interna|verificação interna|内部検証|남부 검증).*?(?=\n\s*(?:OUTPUT FORMAT|输出格式|Formato de salida|Format de sortie|Ausgabeformat|出力形式|출력 형식))/is
+        return prompt.replace(thinkingHeader, "\n")
+    }
+    async function generatePrompt(text: string, processingType: string, language: string, customPrompt?: string, enableThinking: boolean = true): Promise<string> {
         if (customPrompt && customPrompt.trim().length > 0) {
             return customPrompt.replace(/\{\{text\}\}/g, text)
         }
         const loadedPrompt = await promptManager.getPromptWithFallback(language, processingType)
         if (loadedPrompt) {
-            return loadedPrompt.replace("{{text}}", text)
+            let prompt = loadedPrompt
+            if (!enableThinking) {
+                prompt = stripThinkingInstructions(prompt)
+            }
+            return prompt.replace("{{text}}", text)
         }
         const key: `prompt.system.${string}` = `prompt.system.${processingType}` as `prompt.system.${string}`
         let prompt = t(key, language)
@@ -139,21 +156,42 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (!textContent || textContent.trim().length === 0) {
                 throw new Error(t("error.noTextContent"))
             }
+            const MAX_TEXT_CHARS = 10 * 1024 * 1024
+            if (textContent.length > MAX_TEXT_CHARS) {
+                console.warn(`Truncating file text from ${textContent.length} to ${MAX_TEXT_CHARS} characters`)
+                textContent = textContent.slice(0, MAX_TEXT_CHARS)
+            }
             const chunkSize = Math.min(10000, Math.max(500, settings.chunkSize || 8000))
-            let chunks = await chunkInWorker(textContent, chunkSize, 100, settings.smartSizing)
-            if (chunks.length === 0) {
+            let chunks: string[] = []
+            try {
+                chunks = await chunkInWorker(textContent, chunkSize, 100, settings.smartSizing)
+            }
+            catch (workerError) {
+                console.warn("Chunk worker failed, falling back to main thread:", (workerError as Error).message)
+                const { simpleChunk } = await import("../chunker.js")
                 chunks = simpleChunk(textContent, chunkSize)
+            }
+            if (chunks.length === 0) {
+                const { simpleChunk } = await import("../chunker.js")
+                chunks = simpleChunk(textContent, chunkSize)
+            }
+            if (settings.maxChunks != null && settings.maxChunks > 0 && chunks.length > settings.maxChunks) {
+                chunks.length = settings.maxChunks
+                callbacks?.onChunkFailed?.(chunks.length, t("log.maxChunksTruncated", undefined, { max: String(settings.maxChunks) }))
             }
             if (chunks.length === 0) {
                 throw new Error(t("error.noChunksCreated"))
             }
             const model = settings.model || ""
-            const processingType = settings.processingType || "instruction"
+            let processingType = settings.processingType || "instruction"
+            if (settings.enableThinking === false && (processingType === "cot" || processingType === "tot")) {
+                processingType = "instruction"
+            }
             const processedChunks = await processor.processChunks(
                 chunks,
                 model,
                 processingType,
-                (text: string, type: string) => generatePrompt(text, type, settings.language || "en", settings.customPrompt),
+                (text: string, type: string) => generatePrompt(text, type, settings.language || "en", settings.customPrompt, settings.enableThinking),
                 (input: string, output: string, type: string) => createTrainingItem(input, output, type, settings.outputFormat || "jsonl"),
                 (index: number, total: number, items: TrainingItem[]) => {
                     callbacks?.onChunkProcessed?.(index, total, items)
