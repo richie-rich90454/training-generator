@@ -28,7 +28,8 @@ export class PluginSandbox{
         this.allowedFsPaths=options.allowedFsPaths??[];
     }
     async execute(): Promise<void>{
-        let context=createSandboxContext(this.permissions, this.api, this.allowedFsPaths);
+        const timerTracker=createTimerTracker();
+        let context=createSandboxContext(this.permissions, this.api, this.allowedFsPaths, timerTracker);
         try{
             await vm.runInNewContext(this.pluginCode, context, {timeout: 5000});
         }
@@ -36,19 +37,53 @@ export class PluginSandbox{
             let message=err instanceof Error?err.message:String(err);
             throw new Error("Sandboxed plugin error: "+message);
         }
+        finally{
+            timerTracker.clearAll();
+        }
     }
 }
-export function createSandboxContext(permissions: PluginPermission[], api: PluginApi, allowedFsPaths: string[]): object{
+type TimerCallback=(...args: unknown[])=>void;
+type TimerId=ReturnType<typeof setTimeout>;
+function createTimerTracker(){
+    const timers:Set<TimerId>=new Set();
+    return {
+        setTimeout:(fn: TimerCallback, ms?: number, ...args: unknown[])=>{
+            const id=setTimeout(fn, ms, ...args);
+            timers.add(id);
+            return id;
+        },
+        setInterval:(fn: TimerCallback, ms?: number, ...args: unknown[])=>{
+            const id=setInterval(fn, ms, ...args);
+            timers.add(id);
+            return id;
+        },
+        clearTimeout:(id: TimerId)=>{
+            timers.delete(id);
+            clearTimeout(id);
+        },
+        clearInterval:(id: TimerId)=>{
+            timers.delete(id);
+            clearInterval(id);
+        },
+        clearAll:()=>{
+            timers.forEach((id)=>{
+                clearTimeout(id);
+            });
+            timers.clear();
+        }
+    };
+}
+export function createSandboxContext(permissions: PluginPermission[], api: PluginApi, allowedFsPaths: string[], timerTracker?: ReturnType<typeof createTimerTracker>): object{
     let sandbox: Record<string, unknown>={
         console: {
             log: (...args: unknown[])=>api.log(args.map((a)=>String(a)).join(" ")),
             error: (...args: unknown[])=>api.log("ERROR: "+args.map((a)=>String(a)).join(" ")),
             warn: (...args: unknown[])=>api.log("WARN: "+args.map((a)=>String(a)).join(" "))
         },
-        setTimeout: setTimeout,
-        setInterval: setInterval,
-        clearTimeout: clearTimeout,
-        clearInterval: clearInterval,
+        setTimeout: timerTracker?timerTracker.setTimeout:setTimeout,
+        setInterval: timerTracker?timerTracker.setInterval:setInterval,
+        clearTimeout: timerTracker?timerTracker.clearTimeout:clearTimeout,
+        clearInterval: timerTracker?timerTracker.clearInterval:clearInterval,
         Buffer: Buffer,
         pluginApi: createSandboxedApi(permissions, api, allowedFsPaths)
     };
