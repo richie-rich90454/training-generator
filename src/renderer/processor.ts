@@ -233,9 +233,16 @@ class Processor{
                 }
                 let response:string
                 if(demoMode){
-                    let demoPromise=new Promise(resolve=>setTimeout(resolve,500+Math.random()*1000))
                     freeSlot() // Free slot immediately — next chunk can start
-                    await demoPromise
+                    const delay=500+Math.floor(Math.random()*1000)
+                    await new Promise<void>(resolve=>{
+                        const timer=setTimeout(resolve,delay)
+                        sig.addEventListener("abort",()=>{
+                            clearTimeout(timer)
+                            resolve()
+                        },{once:true})
+                    })
+                    if(sig.aborted)return
                     response=getDemoResponse(chunk,processingType)
                 }
                 else{
