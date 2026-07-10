@@ -93,7 +93,12 @@ export class RunHistoryManager{
             this.history=[]
         }
         else{
-            this.history=JSON.parse(raw) as RunRecord[]
+            try{
+                this.history=JSON.parse(raw) as RunRecord[]
+            }
+            catch{
+                this.history=[]
+            }
         }
     }
     addRun(record: RunRecord): void{
@@ -136,7 +141,12 @@ export class RunHistoryManager{
         if (raw===null||raw===""){
             return undefined
         }
-        return JSON.parse(raw) as Record<string, unknown>
+        try{
+            return JSON.parse(raw) as Record<string, unknown>
+        }
+        catch{
+            return undefined
+        }
     }
     clearDraft(): void{
         this.storage.setItem(this.draftKey, "")
