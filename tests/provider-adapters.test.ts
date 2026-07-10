@@ -8,6 +8,9 @@ beforeEach(()=>{
         }
     })
     vi.stubGlobal("fetch",vi.fn())
+    vi.spyOn(console,"error").mockImplementation(()=>{})
+    vi.spyOn(console,"warn").mockImplementation(()=>{})
+    vi.spyOn(console,"log").mockImplementation(()=>{})
 })
 afterEach(()=>{
     vi.restoreAllMocks()
