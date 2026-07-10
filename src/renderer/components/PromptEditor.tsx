@@ -144,6 +144,8 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                         type="text"
                         value={versionName()}
                         placeholder={t("promptEditor.versionNamePlaceholder")}
+                        aria-label={t("promptEditor.versionNamePlaceholder")}
+                        data-i18n-aria-label="promptEditor.versionNamePlaceholder"
                         data-testid="version-name-input"
                         onInput={(e)=>setVersionName(e.currentTarget.value)}
                     />
@@ -157,6 +159,8 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                         <textarea
                             class={styles["prompt-textarea"]}
                             placeholder={props.placeholder||""}
+                            aria-label={t("promptEditor.contentAria")}
+                            data-i18n-aria-label="promptEditor.contentAria"
                             value={localContent()}
                             onInput={onInput}
                             data-testid="prompt-textarea"
@@ -200,7 +204,11 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                                                 <div
                                                     class={styles["history-item"]}
                                                     classList={{ selected: selectedVersionId()===version.id }}
+                                                    role="button"
+                                                    tabindex="0"
+                                                    aria-label={version.name}
                                                     onClick={()=>loadVersion(version)}
+                                                    onKeyDown={(e)=>{ if (e.key==="Enter" || e.key===" ") { e.preventDefault(); loadVersion(version) } }}
                                                     data-testid={"history-item-"+version.id}
                                                 >
                                                     <span class={styles["history-name"]}>{version.name}</span>
