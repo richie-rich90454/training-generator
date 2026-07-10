@@ -1,6 +1,22 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAppStore, type AppStore } from "../src/renderer/stores/appStore.js"
+import { withRoot } from "./setup.js"
+let disposes: Array<() => void> = []
+beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+})
+function makeAppStore(): AppStore {
+    return withRoot((dispose) => {
+        const app = createAppStore()
+        disposes.push(() => {
+            app.dispose()
+            dispose()
+        })
+        return app
+    })
+}
 vi.mock("../src/renderer/confirm.js", () => ({
     showConfirm: vi.fn(async() => true),
     closeConfirm: vi.fn()
@@ -11,7 +27,18 @@ function createTestFile(name: string, content: string): File {
 function wait(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
+afterEach(() => {
+    disposes.forEach(d => d())
+    disposes = []
+    vi.unstubAllGlobals()
+})
 function stubWindow(extra: Record<string, unknown> = {}): void {
+    let electronAPI = {
+        getPrompt: vi.fn(async () => ({ success: false })),
+        readFile: vi.fn(async () => ({ success: false })),
+        ...(extra.electronAPI as Record<string, unknown> || {})
+    }
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false })))
     vi.stubGlobal("window", {
         matchMedia: vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() })),
         addEventListener: vi.fn(),
@@ -20,7 +47,9 @@ function stubWindow(extra: Record<string, unknown> = {}): void {
         clearInterval: vi.fn(),
         setTimeout: vi.fn((fn: () => void) => { fn(); return 1 }),
         clearTimeout: vi.fn(),
-        ...extra
+        fetch: vi.fn(async () => ({ ok: false })),
+        ...extra,
+        electronAPI
     })
 }
 describe("AppStore initialization", () => {
@@ -40,7 +69,7 @@ describe("AppStore initialization", () => {
         vi.restoreAllMocks()
     })
     it("creates all sub-stores", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         expect(app.fileStore).toBeDefined()
         expect(app.outputStore).toBeDefined()
         expect(app.settingsStore).toBeDefined()
@@ -49,52 +78,52 @@ describe("AppStore initialization", () => {
         expect(app.promptManager).toBeDefined()
     })
     it("starts not processing", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         expect(app.isProcessing()).toBe(false)
     })
     it("initializes provider as ollama by default", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         expect(app.providerManager).not.toBeNull()
     })
     it("detects platform from electron", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.detectPlatform()
         expect(document.documentElement.getAttribute("data-platform")).toBe("windows")
     })
     it("falls back to user agent for platform", async() => {
         stubWindow({ electronAPI: undefined })
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.detectPlatform()
         expect(["windows", "macos", "linux", "unknown"]).toContain(document.documentElement.getAttribute("data-platform"))
     })
     it("starts ollama monitor on init", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         expect(app.uiStore.ollamaStatus().running).toBe(true)
         app.dispose()
     })
     it("loads settings on init", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ model: "test-model", provider: "ollama" }))
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         expect(app.settingsStore.settings.model).toBe("test-model")
         app.dispose()
     })
     it("applies output format from settings on init", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ outputFormat: "csv", provider: "ollama" }))
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         expect(app.outputStore.exportFormat()).toBe("csv")
         app.dispose()
     })
     it("disposes without throwing", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         expect(() => app.dispose()).not.toThrow()
     })
     it("stops ollama monitor on dispose", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.dispose()
         expect(() => app.stopOllamaMonitor()).not.toThrow()
@@ -117,20 +146,20 @@ describe("AppStore demo mode", () => {
         vi.restoreAllMocks()
     })
     it("toggles demo mode on", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.toggleDemoMode()
         expect(app.processor.demoMode).toBe(true)
         expect(app.fileStore.demoActive()).toBe(true)
     })
     it("toggles demo mode off", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.toggleDemoMode()
         app.toggleDemoMode()
         expect(app.processor.demoMode).toBe(false)
         expect(app.fileStore.demoActive()).toBe(false)
     })
     it("allows processing in demo mode without ollama", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.toggleDemoMode()
         app.fileStore.addFiles([createTestFile("demo.txt", "This is a demo file with enough text to produce a chunk. ".repeat(20))])
@@ -156,7 +185,7 @@ describe("AppStore processing guardrails", () => {
         vi.restoreAllMocks()
     })
     it("refuses to process without files", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         await app.processFiles()
         expect(app.isProcessing()).toBe(false)
@@ -164,7 +193,7 @@ describe("AppStore processing guardrails", () => {
         app.dispose()
     })
     it("refuses to process when ollama offline and not demo", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         stubWindow({
             electronAPI: {
@@ -181,7 +210,7 @@ describe("AppStore processing guardrails", () => {
         app.dispose()
     })
     it("prevents concurrent processing", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.fileStore.addFiles([createTestFile("a.txt", "content content content content content content content content content content")])
         let p1 = app.processFiles()
@@ -191,7 +220,7 @@ describe("AppStore processing guardrails", () => {
         app.dispose()
     })
     it("stops processing on demand", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.fileStore.addFiles([createTestFile("a.txt", "content content content content content content content content content content")])
         let promise = app.processFiles()
@@ -202,7 +231,7 @@ describe("AppStore processing guardrails", () => {
         app.dispose()
     })
     it("updates progress during processing", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
         let promise = app.processFiles()
@@ -231,7 +260,7 @@ describe("AppStore clear and export", () => {
         vi.restoreAllMocks()
     })
     it("clears files and output", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.fileStore.addFiles([createTestFile("a.txt", "content")])
         app.outputStore.appendOutput([{ format: "instruction", instruction: "test", input: "", output: "out" }])
@@ -242,7 +271,7 @@ describe("AppStore clear and export", () => {
         app.dispose()
     })
     it("exports output when data exists", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.outputStore.appendOutput([{ format: "instruction", instruction: "test", input: "", output: "out" }])
         await app.exportOutput("jsonl")
@@ -250,7 +279,7 @@ describe("AppStore clear and export", () => {
         app.dispose()
     })
     it("skips export when no data", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         await app.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).not.toHaveBeenCalled()
@@ -262,7 +291,7 @@ describe("AppStore clear and export", () => {
                 writeText: vi.fn(async() => {})
             }
         })
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.outputStore.appendOutput([{ format: "text", text: "hello" }])
         await app.copyOutput()
@@ -287,7 +316,7 @@ describe("AppStore settings integration", () => {
         vi.restoreAllMocks()
     })
     it("saves preset and reinitializes provider", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.init()
         app.settingsStore.setModel("new-model")
         await app.savePreset()
@@ -296,7 +325,7 @@ describe("AppStore settings integration", () => {
         app.dispose()
     })
     it("opens and closes settings modal", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.showSettings()
         expect(app.uiStore.settingsOpen()).toBe(true)
         app.hideSettings()
@@ -304,13 +333,13 @@ describe("AppStore settings integration", () => {
         app.dispose()
     })
     it("opens help modal", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.showHelp()
         expect(app.uiStore.helpOpen()).toBe(true)
         app.dispose()
     })
     it("opens shortcuts modal", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.showShortcutsHelp()
         expect(app.uiStore.shortcutsOpen()).toBe(true)
         app.dispose()
@@ -328,7 +357,7 @@ describe("AppStore logging", () => {
         vi.restoreAllMocks()
     })
     it("adds info log", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.addLog("test message", "info")
         expect(app.uiStore.logs.length).toBeGreaterThan(0)
         expect(app.uiStore.logs[0].message).toBe("test message")
@@ -336,13 +365,13 @@ describe("AppStore logging", () => {
         app.dispose()
     })
     it("adds error log", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.addLog("error message", "error")
         expect(app.uiStore.logs[0].type).toBe("error")
         app.dispose()
     })
     it("sets progress", () => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.setProgress(42, "working")
         expect(app.uiStore.progressPercent()).toBe(42)
         expect(app.uiStore.progressText()).toBe("working")
@@ -369,7 +398,7 @@ describe("AppStore checkpoint", () => {
         vi.restoreAllMocks()
     })
     it("saves progress through electron", async() => {
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         app.fileStore.addFiles([createTestFile("a.txt", "content")])
         app.outputStore.appendOutput([{ format: "text", text: "output" }])
         await app.saveProgress()
@@ -396,7 +425,7 @@ describe("AppStore checkpoint", () => {
                 writeLog: vi.fn()
             }
         })
-        let app: AppStore = createAppStore()
+        let app: AppStore = makeAppStore()
         await app.loadCheckpointState()
         expect(app.outputStore.itemCount()).toBe(1)
         app.dispose()
