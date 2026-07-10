@@ -24,10 +24,10 @@ export function ToastContainer(props: ToastContainerProps): JSX.Element {
         }
     }
     return (
-        <div class={styles["toast-container"]} role="region" aria-live="polite" aria-label={t("toast.dismissAria")}>
+        <div class={styles["toast-container"]} role="region" aria-live="polite" aria-atomic="false" aria-label={t("toast.dismissAria")}>
             <For each={uiStore.toasts}>
                 {(toast) => (
-                    <div class={"toast toast-" + toast.type + " toast-visible"}>
+                    <div class={"toast toast-" + toast.type + " toast-visible"} role="status" aria-live="polite">
                         <span class={styles["toast-icon"]}>
                             <Icon html={iconForType(toast.type)} />
                         </span>
