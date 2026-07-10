@@ -1,50 +1,66 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createOutputStore, type OutputStore, type ExportFormat } from "../src/renderer/stores/outputStore.js"
+import { withRoot } from "./setup.js"
 import type { TrainingItem } from "../src/types/index.js"
+let disposes: (() => void)[] = []
+function makeStore(): OutputStore {
+    return withRoot((dispose) => {
+        disposes.push(dispose)
+        return createOutputStore()
+    })
+}
 function setOutputData(store: OutputStore, items: TrainingItem[]): void {
     store.clearOutput()
     store.appendOutput(items)
 }
+beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+})
+afterEach(() => {
+    for (let dispose of disposes) dispose()
+    disposes = []
+    vi.restoreAllMocks()
+})
 describe("OutputStore createTrainingItem", () => {
     let formats=["jsonl", "json", "csv", "text", "chatml"]
     let processingTypes=["instruction", "conversation", "chunking"]
     formats.forEach(format=>{
         processingTypes.forEach(type=>{
             it(`creates item for ${format}/${type}`, () => {
-                let store: OutputStore=createOutputStore()
+                let store: OutputStore=makeStore()
                 let items=store.createTrainingItem("input text", "output text", type, format)
                 expect(items.length).toBeGreaterThan(0)
             })
         })
     })
     it("creates chatml from instruction q/a pairs", () => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         let output="Question: What is 2+2?\nAnswer: 4"
         let items=store.createTrainingItem("input", output, "instruction", "chatml")
         expect(items[0].messages).toBeDefined()
     })
     it("creates csv from instruction q/a pairs", () => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         let output="Question: What is 2+2?\nAnswer: 4"
         let items=store.createTrainingItem("input", output, "instruction", "csv")
         expect(items[0].input).toBe("What is 2+2?")
         expect(items[0].output).toBe("4")
     })
     it("creates text from conversation turns", () => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         let output="User: Hello\nAssistant: Hi there"
         let items=store.createTrainingItem("input", output, "conversation", "text")
         expect(items[0].text).toBe("Hi there")
     })
     it("creates chatml conversation as single message array", () => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         let output="User: Hello\nAssistant: Hi"
         let items=store.createTrainingItem("input", output, "conversation", "chatml")
         expect(items[0].messages!.length).toBe(2)
     })
     it("falls back to direct input/output when no pairs parsed", () => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         let items=store.createTrainingItem("in", "out", "instruction", "jsonl")
         expect(items[0].instruction).toBeDefined()
         expect(items[0].input).toBe("in")
@@ -54,7 +70,7 @@ describe("OutputStore createTrainingItem", () => {
 describe("OutputStore parseQuestionAnswerPairs", () => {
     let store: OutputStore
     beforeEach(()=>{
-        store=createOutputStore()
+        store=makeStore()
     })
     it("parses Question/Answer format", () => {
         let text="Question: What is 2+2?\nAnswer: 4"
@@ -90,7 +106,7 @@ describe("OutputStore parseQuestionAnswerPairs", () => {
 describe("OutputStore parseConversationTurns", () => {
     let store: OutputStore
     beforeEach(()=>{
-        store=createOutputStore()
+        store=makeStore()
     })
     it("parses User/Assistant format", () => {
         let text="User: Hello\nAssistant: Hi"
@@ -131,30 +147,30 @@ describe("OutputStore exportOutput", () => {
         vi.restoreAllMocks()
     })
     it("returns early when no data", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         await store.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).not.toHaveBeenCalled()
     })
     it("exports jsonl", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports json", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.exportOutput("json")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports csv", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.exportOutput("csv")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
     })
     it("exports text", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "text", text: "hello" }])
         await store.exportOutput("text")
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
@@ -166,7 +182,7 @@ describe("OutputStore exportOutput", () => {
                 saveFile: vi.fn(),
             },
         })
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "text", text: "hello" }])
         await store.exportOutput("text")
         expect(window.electronAPI!.saveFile).not.toHaveBeenCalled()
@@ -178,7 +194,7 @@ describe("OutputStore exportOutput", () => {
                 saveFile: vi.fn(async()=>({ success: false, error: "disk full" })),
             },
         })
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, [{ format: "text", text: "hello" }])
         await expect(store.exportOutput("text")).resolves.not.toThrow()
         expect(window.electronAPI!.saveFile).toHaveBeenCalled()
@@ -190,7 +206,7 @@ describe("OutputStore exportOutput", () => {
                 saveFile: vi.fn(async()=>({ success: true })),
             },
         })
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         setOutputData(store, Array.from({ length: 100001 }, (_, i)=>({ format: "text" as const, text: `item ${i}` })))
         await store.exportOutput("jsonl")
         expect(window.electronAPI!.saveFile).toHaveBeenCalledTimes(2)
@@ -210,33 +226,33 @@ describe("OutputStore copyOutput", () => {
         vi.restoreAllMocks()
     })
     it("returns early when no data", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         await store.copyOutput()
         expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
     })
     it("copies jsonl", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         store.setExportFormat("jsonl")
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.copyOutput()
         expect(clipboard.text).toContain("instruction")
     })
     it("copies json", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         store.setExportFormat("json")
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.copyOutput()
         expect(JSON.parse(clipboard.text)[0].input).toBe("in")
     })
     it("copies csv", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         store.setExportFormat("csv")
         setOutputData(store, [{ format: "instruction", instruction: "test", input: "in", output: "out" }])
         await store.copyOutput()
         expect(clipboard.text).toContain("instruction,input,output")
     })
     it("copies text", async() => {
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         store.setExportFormat("text")
         setOutputData(store, [{ format: "text", text: "hello" }])
         await store.copyOutput()
@@ -248,7 +264,7 @@ describe("OutputStore copyOutput", () => {
                 writeText: vi.fn(async()=>{ throw new Error("clipboard denied") }),
             },
         })
-        let store: OutputStore=createOutputStore()
+        let store: OutputStore=makeStore()
         store.setExportFormat("jsonl")
         setOutputData(store, [{ format: "text", text: "hello" }])
         await expect(store.copyOutput()).rejects.toThrow("clipboard denied")
