@@ -284,6 +284,7 @@ export const translations: Record<string, TranslationDict> = {
     "log.settingsResetFailed": "Failed to reset settings",
     "log.processingStopped": "Processing stopped by user",
     "log.duplicatesRemoved": "Removed {{removed}} duplicate items from output",
+    "log.fileChunked": "{{name}} split into {{count}} chunks",
     "log.chunkProcessed": "Processed chunk {{index}}/{{total}} ({{percent}}%) - generated {{count}} items",
     "log.checkpointRestored": "Restored state from checkpoint: {{items}} items, {{files}} files",
     "log.clearedAll": "Cleared all files and output",
