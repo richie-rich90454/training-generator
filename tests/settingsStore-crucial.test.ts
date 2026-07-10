@@ -224,12 +224,12 @@ describe("SettingsStore loadSettings", () => {
     it("clamps chunk size below minimum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ chunkSize: 100 }))
         await store.loadSettings()
-        expect(store.settings.chunkSize).toBe(2000)
+        expect(store.settings.chunkSize).toBe(500)
     })
     it("clamps chunk size above maximum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ chunkSize: 20000 }))
         await store.loadSettings()
-        expect(store.settings.chunkSize).toBe(2000)
+        expect(store.settings.chunkSize).toBe(10000)
     })
     it("loads valid chunk size", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ chunkSize: 3000 }))
@@ -239,12 +239,12 @@ describe("SettingsStore loadSettings", () => {
     it("clamps concurrency below minimum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ concurrency: 0 }))
         await store.loadSettings()
-        expect(store.settings.concurrency).toBe(3)
+        expect(store.settings.concurrency).toBe(1)
     })
     it("clamps concurrency above maximum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ concurrency: 20 }))
         await store.loadSettings()
-        expect(store.settings.concurrency).toBe(3)
+        expect(store.settings.concurrency).toBe(10)
     })
     it("validates provider", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ provider: "cohere" }))
@@ -269,12 +269,12 @@ describe("SettingsStore loadSettings", () => {
     it("clamps temperature below minimum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ temperature: -1 }))
         await store.loadSettings()
-        expect(store.settings.temperature).toBe(0.7)
+        expect(store.settings.temperature).toBe(0)
     })
     it("clamps temperature above maximum", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ temperature: 2 }))
         await store.loadSettings()
-        expect(store.settings.temperature).toBe(0.7)
+        expect(store.settings.temperature).toBe(1)
     })
     it("loads valid temperature", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ temperature: 0.5 }))
