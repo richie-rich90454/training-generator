@@ -201,4 +201,24 @@ describe("translations", () => {
         expect(translations["en"]["prompt.system.instruction"].length).toBeGreaterThan(0)
         expect(translations["en"]["prompt.system.conversation"].length).toBeGreaterThan(0)
     })
+    it("every supported locale has the same keys as english", () => {
+        const enKeys = Object.keys(translations["en"]).sort()
+        const locales = Object.keys(translations).filter((l) => l !== "en")
+        for (const locale of locales) {
+            const missing = enKeys.filter((k) => !(k in translations[locale]))
+            expect(missing, `${locale} is missing ${missing.length} keys`).toEqual([])
+        }
+    })
+    it("returns a value for every english key in every locale", () => {
+        const enKeys = Object.keys(translations["en"])
+        const locales = Object.keys(translations).filter((l) => l !== "en")
+        for (const locale of locales) {
+            for (const key of enKeys) {
+                const value = t(key, locale)
+                expect(value).not.toBe(key)
+                expect(typeof value).toBe("string")
+                expect(value.length).toBeGreaterThan(0)
+            }
+        }
+    })
 })
