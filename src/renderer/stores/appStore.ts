@@ -270,26 +270,43 @@ export function createAppStore(): AppStore {
             const maxParallel = settingsStore.appSettings.maxParallelFiles || 1
             let completedFiles = 0
             let queueIndex = 0
+            let chunksCompleted = 0
+            let chunksTotal = 0
+            function getNextFile(): SelectedFile | undefined {
+                const idx = queueIndex++
+                return queue[idx]
+            }
             uiStore.startDashboard()
-            uiStore.setDashboardMetrics({ chunksTotal: queue.length, activeProvider: settingsStore.settings.provider || "--" })
+            uiStore.setDashboardMetrics({ chunksTotal: 0, activeProvider: settingsStore.settings.provider || "--" })
             async function processWorker(): Promise<void> {
                 while (!processor.isAborted) {
-                    const file = queue[queueIndex++]
+                    const file = getNextFile()
                     if (!file) {
                         return
                     }
+                    const fileIndex = ++completedFiles
                     fileStore.setFileStatus(file.name, "processing")
-                    addLog(t("log.processingFile", undefined, { index: String(completedFiles + 1), total: String(queue.length), name: file.name }), "info")
+                    addLog(t("log.processingFile", undefined, { index: String(fileIndex), total: String(queue.length), name: file.name }), "info")
                     const result = await orchestrator.processFile(file, getOrchestratorSettings(), {
+                        onFileStart: (chunkCount: number) => {
+                            chunksTotal += chunkCount
+                            addLog(t("log.fileChunked", undefined, { name: file.name, count: String(chunkCount) }), "info")
+                            uiStore.setDashboardMetrics({ chunksTotal, activeProvider: settingsStore.settings.provider || "--" })
+                        },
                         onChunkProcessed: (index: number, total: number, items: TrainingItem[]) => {
+                            chunksCompleted++
+                            outputStore.stageItems(items)
                             addLog(t("log.chunkProcessed", undefined, { index: String(index + 1), total: String(total), percent: String(Math.round(((index + 1) / total) * 100)), count: String(items.length) }), "info")
+                            uiStore.setDashboardMetrics({ chunksDone: chunksCompleted, totalTokens: processor.stats.totalTokens, activeProvider: settingsStore.settings.provider || "--" })
                             updateOutputPreview()
                         },
                         onChunkFailed: (index: number, error: string) => {
+                            chunksCompleted++
                             addLog(t("log.chunkFailed", undefined, { index: String(index + 1), error }), "warning")
+                            uiStore.setDashboardMetrics({ chunksDone: chunksCompleted, activeProvider: settingsStore.settings.provider || "--" })
                         }
                     })
-                    completedFiles++
+                    outputStore.clearStaging()
                     if (result.success && result.data) {
                         outputStore.appendOutput(result.data)
                         totalItemsGenerated += result.data.length
@@ -304,7 +321,6 @@ export function createAppStore(): AppStore {
                     }
                     const percent = Math.min(99, (completedFiles / queue.length) * 100)
                     setProgress(percent, t("processing.filesProgress", undefined, { completed: String(completedFiles), total: String(queue.length) }))
-                    uiStore.setDashboardMetrics({ chunksDone: completedFiles, activeProvider: settingsStore.settings.provider || "--" })
                     updateOutputPreview()
                 }
             }
