@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import{describe,it,expect,vi,beforeEach}from"vitest"
+import{describe,it,expect,vi,beforeEach,afterEach}from"vitest"
 import Processor from"../src/renderer/processor.js"
 import type{Provider,ProviderResult}from"../src/renderer/provider.js"
 import{clearCache}from"../src/renderer/cache.js"
@@ -35,6 +35,9 @@ beforeEach(async()=>{
     })
     processor=new Processor()
     processor.provider=mockProvider
+})
+afterEach(()=>{
+    vi.restoreAllMocks()
 })
 
 describe("Processor",()=>{
@@ -207,6 +210,9 @@ describe("Processor",()=>{
     })
 
     describe("onChunkError",()=>{
+        beforeEach(()=>{
+            vi.spyOn(console,"error").mockImplementation(()=>{})
+        })
         it("should call onChunkError when generatePrompt fails",async()=>{
             let failingGeneratePrompt=vi.fn(async()=>{
                 throw new Error("prompt generation failed")
