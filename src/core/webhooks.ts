@@ -47,6 +47,9 @@ export class WebhookOutput{
                     }
                 }
                 lastStatus=response.status
+                if (response.status>=400&&response.status<500){
+                    break
+                }
             }
             catch(error){
                 lastError=error instanceof Error?error:new Error(String(error))
@@ -149,7 +152,8 @@ export class WebhookInput{
         if (!this.token){
             return true
         }
-        let auth=req.headers["authorization"]??""
+        let rawAuth=req.headers["authorization"]??""
+        let auth=Array.isArray(rawAuth)?rawAuth.join(", "):rawAuth
         if (auth!=="Bearer "+this.token){
             this.sendJson(res, 401, {error: "unauthorized"})
             return false
@@ -166,6 +170,8 @@ export interface MultipartParseResult{
     files: Buffer[]
     metadata: Record<string, unknown>
 }
+const MAX_BODY_SIZE=50*1024*1024
+
 export async function parseMultipartBody(req: http.IncomingMessage): Promise<MultipartParseResult>{
     let contentType=req.headers["content-type"]??""
     let boundaryMatch=contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i)
@@ -174,7 +180,13 @@ export async function parseMultipartBody(req: http.IncomingMessage): Promise<Mul
     }
     let boundary=Buffer.from("--"+(boundaryMatch[1]??boundaryMatch[2]).trim())
     let chunks: Buffer[]=[]
+    let size=0
     for await (let chunk of req){
+        size+=(chunk as Buffer).length
+        if(size>MAX_BODY_SIZE){
+            req.destroy()
+            throw new Error("request body too large")
+        }
         chunks.push(chunk as Buffer)
     }
     let body=Buffer.concat(chunks)
