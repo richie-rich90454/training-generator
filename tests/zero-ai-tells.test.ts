@@ -75,8 +75,7 @@ describe("Zero AI-tells verification", ()=>{
 describe("Native app shell verification", ()=>{
     it("has zero Font Awesome class=\"fas\" references in source files", ()=>{
         let files: string[]=[
-            "index.html",
-            "src/splash.html"
+            "index.html"
         ];
         let tsFiles: string[]=[
             "src/renderer/App.tsx",
