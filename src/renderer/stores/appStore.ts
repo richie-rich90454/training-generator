@@ -267,7 +267,7 @@ export function createAppStore(): AppStore {
             let totalItemsGenerated = 0
             let successfulFiles = 0
             let failedFiles = 0
-            const maxParallel = settingsStore.appSettings.maxParallelFiles || 1
+            const maxParallel = Math.max(1, settingsStore.appSettings.maxParallelFiles || 1)
             let completedFiles = 0
             let queueIndex = 0
             let chunksCompleted = 0
@@ -306,7 +306,6 @@ export function createAppStore(): AppStore {
                             uiStore.setDashboardMetrics({ chunksDone: chunksCompleted, activeProvider: settingsStore.settings.provider || "--" })
                         }
                     })
-                    outputStore.clearStaging()
                     if (result.success && result.data) {
                         outputStore.appendOutput(result.data)
                         totalItemsGenerated += result.data.length
@@ -350,6 +349,7 @@ export function createAppStore(): AppStore {
             setIsProcessing(false)
             uiStore.stopDashboard()
             processor.abort()
+            outputStore.clearStaging()
             updateOutputPreview()
             if (outputStore.itemCount() > 0) {
                 setQualityReport(validateItems(outputStore.outputData))
