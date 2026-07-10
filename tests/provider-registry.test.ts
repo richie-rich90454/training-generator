@@ -1,5 +1,5 @@
 // @vitest-environment node
-import{describe, it, expect}from"vitest"
+import{describe, it, expect, vi, beforeEach, afterEach}from"vitest"
 import{ProviderRegistry}from"../src/renderer/provider.js"
 import type{Provider, ProviderResult}from"../src/renderer/provider.js"
 import type{ProviderConfig}from"../src/types/interfaces.js"
@@ -22,6 +22,12 @@ function makeConfig(id:string, priority:number, enabled:boolean=true):ProviderCo
     return{id, type:"ollama", name:id, priority, enabled}
 }
 describe("ProviderRegistry", ()=>{
+    beforeEach(()=>{
+        vi.spyOn(console, "warn").mockImplementation(()=>{})
+    })
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
     it("sorts configs by priority", ()=>{
         let configs=[makeConfig("c2", 2), makeConfig("c1", 1), makeConfig("c3", 3)]
         let providers=new Map<string, Provider>([
