@@ -74,6 +74,9 @@ describe("Processor splitBatchedResponse", () => {
     })
 })
 describe("Processor batching", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "error").mockImplementation(() => {})
+    })
     it("batches small chunks when provider is not ollama", async() => {
         processor.provider = createMockProvider("openai")
         processor.concurrency = 1
@@ -200,6 +203,9 @@ describe("Processor abort", () => {
     })
 })
 describe("Processor edge cases", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "error").mockImplementation(() => {})
+    })
     it("skips chunks with empty prompts", async() => {
         processor.provider = createMockProvider("ollama")
         processor.concurrency = 1
