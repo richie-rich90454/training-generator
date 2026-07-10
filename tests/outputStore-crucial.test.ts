@@ -1,13 +1,22 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import { createOutputStore, type OutputStore } from "../src/renderer/stores/outputStore.js"
+import { withRoot } from "./setup.js"
 import type { TrainingItem } from "../src/types/index.js"
 let store: OutputStore
+let dispose: () => void
 function item(props: Partial<TrainingItem> & { format: string }): TrainingItem {
     return props as TrainingItem
 }
 beforeEach(() => {
-    store = createOutputStore()
+    store = withRoot((d) => {
+        dispose = d
+        return createOutputStore()
+    })
+})
+afterEach(() => {
+    dispose()
+    vi.restoreAllMocks()
 })
 describe("OutputStore export format", () => {
     it("defaults to jsonl", () => {
@@ -75,6 +84,9 @@ describe("OutputStore previewText", () => {
     })
 })
 describe("OutputStore parseQuestionAnswerPairs", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "warn").mockImplementation(() => {})
+    })
     it("returns empty for non-string", () => {
         expect(store.parseQuestionAnswerPairs(null as unknown as string)).toEqual([])
         expect(store.parseQuestionAnswerPairs(123 as unknown as string)).toEqual([])
@@ -100,6 +112,9 @@ describe("OutputStore parseQuestionAnswerPairs", () => {
     })
 })
 describe("OutputStore parseConversationTurns", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "warn").mockImplementation(() => {})
+    })
     it("returns empty for non-string", () => {
         expect(store.parseConversationTurns(undefined as unknown as string)).toEqual([])
     })
