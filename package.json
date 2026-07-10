@@ -49,9 +49,7 @@
       "dist-main/**/*",
       "node_modules/**/*",
       "src/prompts/**/*",
-      "src/splash.html",
       "tsconfig.json",
-      "native-splash/**/*",
       "package.json",
       "!src/**/*.ts",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
@@ -73,10 +71,6 @@
         "to": "assets"
       },
       {
-        "from": "native-splash",
-        "to": "native-splash"
-      },
-      {
         "from": "docs",
         "to": "docs"
       }
@@ -85,7 +79,6 @@
     "asarUnpack": [
       "**/*.node",
       "node_modules/better-sqlite3/**",
-      "native-splash/**",
       "**/pdf-parse/**/*",
       "**/officeparser/**/*",
       "**/mammoth/**/*",
@@ -182,7 +175,6 @@
   },
   "dependencies": {
     "axios": "^1.18.1",
-    "compromise": "^14.15.1",
     "html-to-text": "^10.0.0",
     "mammoth": "^1.12.0",
     "officeparser": "^7.2.3",
