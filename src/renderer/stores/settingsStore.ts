@@ -12,6 +12,11 @@ const VALID_PROCESSING_TYPES = ["instruction", "conversation", "chunking", "cust
 const VALID_OUTPUT_FORMATS = ["jsonl", "chatml", "text", "csv"]
 const VALID_LANGUAGES = ["en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko"]
 const VALID_PROVIDERS = ["ollama", "openai", "anthropic", "gemini"]
+function clamp(n: number, min: number, max: number, def: number): number {
+    const value = Number(n)
+    if (!Number.isFinite(value)) return def
+    return Math.min(max, Math.max(min, value))
+}
 export interface SettingsStore {
     settings: AppSettings
     appSettings: FullAppSettings
@@ -155,18 +160,15 @@ export function createSettingsStore(): SettingsStore {
             if (saved.outputFormat && VALID_OUTPUT_FORMATS.includes(saved.outputFormat)) setSettings("outputFormat", saved.outputFormat)
             if (saved.language && VALID_LANGUAGES.includes(saved.language)) setSettings("language", saved.language)
             if (saved.chunkSize != null) {
-                const n = Number(saved.chunkSize)
-                if (Number.isFinite(n) && n >= 500 && n <= 10000) setSettings("chunkSize", n)
+                setSettings("chunkSize", clamp(saved.chunkSize, 500, 10000, 2000))
             }
             if (saved.concurrency != null) {
-                const n = Number(saved.concurrency)
-                if (Number.isFinite(n) && n >= 1 && n <= 10) setSettings("concurrency", n)
+                setSettings("concurrency", clamp(saved.concurrency, 1, 10, 3))
             }
             if (saved.provider && VALID_PROVIDERS.includes(saved.provider)) setSettings("provider", saved.provider)
             if (saved.baseUrl && typeof saved.baseUrl === "string" && /^https?:\/\//.test(saved.baseUrl)) setSettings("baseUrl", saved.baseUrl)
             if (saved.temperature != null) {
-                const n = Number(saved.temperature)
-                if (Number.isFinite(n) && n >= 0 && n <= 1) setSettings("temperature", n)
+                setSettings("temperature", clamp(saved.temperature, 0, 1, 0.7))
             }
             if (saved.customPrompt && typeof saved.customPrompt === "string") setSettings("customPrompt", saved.customPrompt)
             if (saved.apiKey) {
@@ -304,8 +306,8 @@ export function createSettingsStore(): SettingsStore {
             processingType: profile.processingType || "instruction",
             outputFormat: profile.outputFormat || "jsonl",
             language: profile.language || "en",
-            chunkSize: parseInt(profile.chunkSize) || 2000,
-            concurrency: parseInt(profile.concurrency) || 3,
+            chunkSize: clamp(parseInt(profile.chunkSize), 500, 10000, 2000),
+            concurrency: clamp(parseInt(profile.concurrency), 1, 10, 3),
             provider: profile.provider || "ollama",
             baseUrl: profile.baseUrl || "",
             temperature: settings.temperature,
@@ -361,15 +363,15 @@ export function createSettingsStore(): SettingsStore {
         setProcessingType: (type: string) => setSettings("processingType", type),
         setOutputFormat: (format: string) => setSettings("outputFormat", format),
         setLanguage: (lang: string) => setSettings("language", lang),
-        setChunkSize: (size: number) => setSettings("chunkSize", size),
-        setConcurrency: (concurrency: number) => setSettings("concurrency", concurrency),
+        setChunkSize: (size: number) => setSettings("chunkSize", clamp(size, 500, 10000, 2000)),
+        setConcurrency: (concurrency: number) => setSettings("concurrency", clamp(concurrency, 1, 10, 3)),
         setProvider: (provider: string) => setSettings("provider", provider),
         setApiKey: (key: string) => {
             setApiKeyPlain(key)
             if (!key) setSettings("apiKey", "")
         },
         setBaseUrl: (url: string) => setSettings("baseUrl", url),
-        setTemperature: (temp: number) => setSettings("temperature", temp),
+        setTemperature: (temp: number) => setSettings("temperature", clamp(temp, 0, 1, 0.7)),
         setCustomPrompt: (prompt: string) => setSettings("customPrompt", prompt),
         setTheme: (theme: string) => setAppSettings("theme", theme),
         setFontSize: (size: string) => setAppSettings("fontSize", size),
@@ -378,10 +380,10 @@ export function createSettingsStore(): SettingsStore {
         setStartMaximized: (value: boolean) => setAppSettings("startMaximized", value),
         setRememberWindowSize: (value: boolean) => setAppSettings("rememberWindowSize", value),
         setSmartSizing: (value: boolean) => setAppSettings("smartSizing", value),
-        setMaxFileSize: (size: number) => setAppSettings("maxFileSize", size),
-        setMaxOutputItems: (count: number) => setAppSettings("maxOutputItems", count),
-        setMaxChunks: (count: number) => setAppSettings("maxChunks", count),
-        setMaxParallelFiles: (count: number) => setAppSettings("maxParallelFiles", count),
+        setMaxFileSize: (size: number) => setAppSettings("maxFileSize", clamp(size, 10, 1000, 100)),
+        setMaxOutputItems: (count: number) => setAppSettings("maxOutputItems", clamp(count, 1000, 1000000, 100000)),
+        setMaxChunks: (count: number) => setAppSettings("maxChunks", clamp(count, 10, 5000, 500)),
+        setMaxParallelFiles: (count: number) => setAppSettings("maxParallelFiles", clamp(count, 1, 10, 1)),
         setEnableThinking: (value: boolean) => setAppSettings("enableThinking", value),
         loadSettings,
         savePreset,
