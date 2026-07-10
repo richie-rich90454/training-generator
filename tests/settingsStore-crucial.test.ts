@@ -1,6 +1,15 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import { createSettingsStore, type SettingsStore } from "../src/renderer/stores/settingsStore.js"
+import { withRoot } from "./setup.js"
+let disposes: Array<() => void> = []
+function makeSettingsStore(): SettingsStore {
+    return withRoot((dispose) => {
+        const store = createSettingsStore()
+        disposes.push(dispose)
+        return store
+    })
+}
 function stubMatchMedia(matches: boolean): void {
     vi.stubGlobal("window", {
         ...window,
@@ -14,17 +23,21 @@ function stubMatchMedia(matches: boolean): void {
 }
 let store: SettingsStore
 beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
     localStorage.clear()
     document.body.className = ""
     document.documentElement.lang = "en"
     stubMatchMedia(false)
 })
 afterEach(() => {
+    disposes.forEach(d => d())
+    disposes = []
     vi.restoreAllMocks()
 })
 describe("SettingsStore initial state", () => {
     it("has default settings", () => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
         expect(store.settings.model).toBe("")
         expect(store.settings.processingType).toBe("instruction")
         expect(store.settings.outputFormat).toBe("jsonl")
@@ -38,7 +51,7 @@ describe("SettingsStore initial state", () => {
         expect(store.settings.customPrompt).toBe("")
     })
     it("has default app settings", () => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
         expect(store.appSettings.theme).toBe("auto")
         expect(store.appSettings.fontSize).toBe("medium")
         expect(store.appSettings.autoSave).toBe(true)
@@ -50,24 +63,25 @@ describe("SettingsStore initial state", () => {
         expect(store.appSettings.maxOutputItems).toBe(100000)
         expect(store.appSettings.maxChunks).toBe(500)
         expect(store.appSettings.maxParallelFiles).toBe(1)
+        expect(store.appSettings.enableThinking).toBe(true)
     })
     it("starts with empty profile selection", () => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
         expect(store.selectedProfile()).toBe("")
         expect(store.profiles.length).toBe(0)
     })
     it("starts with empty api key", () => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
         expect(store.apiKeyPlain()).toBe("")
     })
     it("detects ollama as non-cloud provider", () => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
         expect(store.isCloudProvider()).toBe(false)
     })
 })
 describe("SettingsStore setters", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("sets model", () => {
         store.setModel("llama3")
@@ -147,6 +161,10 @@ describe("SettingsStore setters", () => {
         store.setSmartSizing(false)
         expect(store.appSettings.smartSizing).toBe(false)
     })
+    it("toggles enable thinking", () => {
+        store.setEnableThinking(false)
+        expect(store.appSettings.enableThinking).toBe(false)
+    })
     it("sets max file size", () => {
         store.setMaxFileSize(200)
         expect(store.appSettings.maxFileSize).toBe(200)
@@ -166,7 +184,7 @@ describe("SettingsStore setters", () => {
 })
 describe("SettingsStore loadSettings", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("loads model", async() => {
         localStorage.setItem("train-generator-settings", JSON.stringify({ model: "test-model" }))
@@ -284,7 +302,7 @@ describe("SettingsStore savePreset", () => {
             electronAPI: { setSecureKey: vi.fn(async() => true), getSecureKey: vi.fn(async() => null) },
             matchMedia: vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() }))
         })
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("saves model", async() => {
         store.setModel("model-x")
@@ -343,7 +361,7 @@ describe("SettingsStore savePreset", () => {
 })
 describe("SettingsStore app settings persistence", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("loads theme", () => {
         localStorage.setItem("training-generator-app-settings", JSON.stringify({ theme: "dark" }))
@@ -403,7 +421,7 @@ describe("SettingsStore app settings persistence", () => {
 })
 describe("SettingsStore appearance", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("applies light theme", () => {
         store.applyTheme("light")
@@ -437,7 +455,7 @@ describe("SettingsStore language", () => {
     beforeEach(() => {
         document.body.innerHTML = `<span data-i18n="app.title"></span>`
         document.documentElement.lang = "en"
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("applies language", () => {
         store.applyLanguage("es")
@@ -450,7 +468,7 @@ describe("SettingsStore language", () => {
 })
 describe("SettingsStore temperature display", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("calculates display for zero", () => {
         let result = store.updateTemperatureDisplay(0)
@@ -484,7 +502,7 @@ describe("SettingsStore temperature display", () => {
 })
 describe("SettingsStore profiles", () => {
     beforeEach(() => {
-        store = createSettingsStore()
+        store = makeSettingsStore()
     })
     it("lists profiles", async() => {
         await store.saveCurrentProfile("p1")
