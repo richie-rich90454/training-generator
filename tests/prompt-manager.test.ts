@@ -5,13 +5,20 @@ let mockGetPrompt:any
 let mockReadFile:any
 beforeEach(()=>{
     mockGetPrompt=vi.fn()
-    mockReadFile=vi.fn()
+    mockReadFile=vi.fn().mockResolvedValue({success:false})
     vi.stubGlobal("window",{
         electronAPI:{
             getPrompt:mockGetPrompt,
             readFile:mockReadFile
         }
     })
+    vi.stubGlobal("fetch",vi.fn(async()=>({ok:false})))
+    vi.spyOn(console,"error").mockImplementation(()=>{})
+    vi.spyOn(console,"warn").mockImplementation(()=>{})
+})
+afterEach(()=>{
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
 })
 describe("PromptManager",()=>{
     let pm:PromptManager
