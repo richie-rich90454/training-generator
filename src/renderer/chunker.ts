@@ -1,4 +1,13 @@
-import nlp from "compromise"
+// Fast, heuristic sentence splitter used by both the worker and the CLI.
+// It intentionally avoids heavy NLP libraries (which can exhaust the renderer
+// heap on large markdown files) while still handling common abbreviations and
+// CJK punctuation.
+
+// Hard limits to prevent pathological inputs from hanging or exhausting memory.
+const MAX_INPUT_CHARS = 10 * 1024 * 1024 // 10 MB of text
+const MAX_CHUNKS = 100_000
+const MAX_SENTENCES = 1_000_000
+const MAX_CHUNK_ITERATIONS = Math.max(MAX_SENTENCES, MAX_CHUNKS) * 2
 
 // --- Exported helper functions ---
 
@@ -21,6 +30,9 @@ export function findPreviousSentenceBoundary(text: string, position: number): nu
             if (/\s/.test(next) || i + 1 >= text.length) {
                 return i + 1
             }
+        }
+        if (c === "\n" || c === "\r") {
+            return i + 1
         }
     }
     return -1
@@ -218,13 +230,13 @@ function splitUnitAtRowBoundary(unitText: string, unitType: string): string[] {
 
 // --- Main chunking functions ---
 
-export function estimateTextDensity(text: string): number {
+export function estimateTextDensity(text: string, sentences?: string[]): number {
     if (!text || text.length === 0) return 0.5
     let words = text.split(/\s+/).length
     let chars = text.length
-    let sentences = splitSentences(text).length
-    if (sentences === 0 || words === 0) return 0.5
-    let avgSentenceLen = chars / sentences
+    let sentenceCount = (sentences ?? splitSentences(text)).length
+    if (sentenceCount === 0 || words === 0) return 0.5
+    let avgSentenceLen = chars / sentenceCount
     let density = Math.min(1, (words / chars) * avgSentenceLen / 50)
     return density
 }
@@ -248,28 +260,45 @@ function buildPrefix(previousChunkText: string, overlap: number): string {
     return buildContextPrefix(previousChunkText)
 }
 
-export function semanticChunk(text: string, chunkSize: number = 2000, overlap: number = 100, smartSizing: boolean = false): string[] {
+export function semanticChunk(text: string, chunkSize: number = 2000, overlap: number = 100, smartSizing: boolean = false, sentences?: string[]): string[] {
+    if (!text || text.trim().length === 0) return []
+    if (text.length > MAX_INPUT_CHARS) {
+        text = text.slice(0, MAX_INPUT_CHARS)
+    }
+    chunkSize = Math.min(Math.max(chunkSize, 1), 50000)
+    overlap = Math.min(Math.max(overlap, 0), Math.floor(chunkSize / 2))
+
     if (smartSizing) {
-        let density = estimateTextDensity(text)
+        let density = estimateTextDensity(text, sentences)
         if (density < 0.3) {
             chunkSize = chunkSize * 2
         } else if (density < 0.6) {
             chunkSize = Math.floor(chunkSize * 1.5)
         }
     }
-    if (!text || text.trim().length === 0) return []
     if (text.length <= chunkSize) return [text]
 
-    let sentences = splitSentences(text)
-    let sentenceRanges = getSentenceRanges(text, sentences)
+    let effectiveSentences = sentences ?? splitSentences(text)
+    let sentenceRanges = getSentenceRanges(text, effectiveSentences)
     let semanticUnits = detectSemanticUnits(text)
     let chunks: string[] = []
     let currentChunk = ""
     let previousChunkText = ""
     let i = 0
+    let iterations = 0
 
-    while (i < sentences.length) {
-        let sentence = sentences[i]
+    while (i < effectiveSentences.length) {
+        iterations++
+        if (iterations > MAX_CHUNK_ITERATIONS) {
+            console.warn(`semanticChunk: exceeded ${MAX_CHUNK_ITERATIONS} iterations; stopping early`)
+            break
+        }
+        if (chunks.length >= MAX_CHUNKS) {
+            console.warn(`semanticChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
+            break
+        }
+
+        let sentence = effectiveSentences[i]
         let range = sentenceRanges[i]
         if (!range) {
             i++
@@ -295,10 +324,14 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
                     currentChunk += (currentChunk ? " " : "") + unitText
                 }
 
-                // Skip all sentences inside this unit
-                while (i < sentences.length) {
+                // Skip all sentences inside this unit. Always advance at least one
+                // sentence to guarantee progress and avoid an infinite loop if a
+                // sentence range somehow extends past the unit boundary.
+                let startIndex = i
+                while (i < effectiveSentences.length) {
                     let r = sentenceRanges[i]
-                    if (!r || r.end > unit.end) break
+                    if (!r) break
+                    if (i > startIndex && r.end > unit.end) break
                     i++
                 }
                 continue
@@ -322,10 +355,13 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
                     }
                 }
 
-                // Skip all sentences inside this unit
-                while (i < sentences.length) {
+                // Skip all sentences inside this unit. Always advance at least one
+                // sentence to guarantee progress.
+                let startIndex = i
+                while (i < effectiveSentences.length) {
                     let r = sentenceRanges[i]
-                    if (!r || r.end > unit.end) break
+                    if (!r) break
+                    if (i > startIndex && r.end > unit.end) break
                     i++
                 }
                 continue
@@ -362,6 +398,10 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
 
 export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
     if (!text || text.trim().length === 0) return []
+    if (text.length > MAX_INPUT_CHARS) {
+        text = text.slice(0, MAX_INPUT_CHARS)
+    }
+    chunkSize = Math.min(Math.max(chunkSize, 1), 50000)
     if (text.length <= chunkSize) return [text]
 
     let semanticUnits = detectSemanticUnits(text)
@@ -369,6 +409,10 @@ export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
     let start = 0
 
     while (start < text.length) {
+        if (chunks.length >= MAX_CHUNKS) {
+            console.warn(`simpleChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
+            break
+        }
         let end = start + chunkSize
         if (end < text.length) {
             // Find word boundary
@@ -420,40 +464,80 @@ function isAbbreviationBoundary(text: string, position: number): boolean {
     return ABBREVIATIONS.has(word)
 }
 
-export function splitSentences(text: string): string[] {
-    let hasCjkPunctuation = /[\u3002\uFF01\uFF1F]/.test(text)
-    if (!hasCjkPunctuation) {
-        try {
-            let doc = nlp(text)
-            let sentences = doc.sentences().out("array") as string[]
-            if (sentences && sentences.length > 0) return sentences
-        }
-        catch { }
+function pushNewlineSentence(result: string[], current: string): string {
+    let trimmed = current.trim()
+    if (trimmed.length > 0) {
+        result.push(trimmed)
     }
-    let result: string[] = []
-    let current = ""
-    for (let i = 0; i < text.length; i++) {
-        current += text[i]
-        let c = text[i]
-        let next = text[i + 1] || ""
-        if (/[。！？]/.test(c)) {
-            result.push(current.trim())
-            current = ""
-        }
-        else if (c === "." || c === "!" || c === "?") {
-            if (next === " " || next === "\n" || next === "\r" || i === text.length - 1) {
-                if (!isAbbreviationBoundary(text, i)) {
-                    result.push(current.trim())
-                    current = ""
+    return ""
+}
+
+export function splitSentences(text: string): string[] {
+    if (!text || text.length === 0) return []
+    if (text.length > MAX_INPUT_CHARS) {
+        // Truncate to a safe size; the caller is responsible for warning the user.
+        text = text.slice(0, MAX_INPUT_CHARS)
+    }
+    // CJK texts use full-width punctuation and do not need abbreviation handling.
+    if (/[\u3002\uFF01\uFF1F]/.test(text)) {
+        const result: string[] = []
+        let current = ""
+        for (let i = 0; i < text.length; i++) {
+            if (result.length >= MAX_SENTENCES) break
+            current += text[i]
+            if (/[\u3002\uFF01\uFF1F]/.test(text[i])) {
+                result.push(current.trim())
+                current = ""
+            }
+            else if (text[i] === "\n" || text[i] === "\r") {
+                current = pushNewlineSentence(result, current)
+                if (text[i] === "\r" && i + 1 < text.length && text[i + 1] === "\n") {
+                    i++
                 }
             }
         }
-        else if (c === "\n" && current.trim().length > 0) {
+        if (current.trim().length > 0 && result.length < MAX_SENTENCES) {
             result.push(current.trim())
-            current = ""
         }
+        return result.length > 0 ? result : [text]
     }
-    if (current.trim().length > 0) {
+
+    const result: string[] = []
+    let current = ""
+    for (let i = 0; i < text.length; i++) {
+        if (result.length >= MAX_SENTENCES) break
+        current += text[i]
+        const c = text[i]
+
+        if (c === "\n" || c === "\r") {
+            current = pushNewlineSentence(result, current)
+            if (c === "\r" && i + 1 < text.length && text[i + 1] === "\n") {
+                i++
+            }
+            continue
+        }
+
+        if (c !== "." && c !== "!" && c !== "?") continue
+
+        const next = text[i + 1] || ""
+        // Sentence punctuation must be followed by whitespace, a quote, or EOF.
+        if (
+            next !== "" &&
+            !/\s/.test(next) &&
+            next !== '"' && next !== "'" && next !== "”" && next !== "»"
+        ) {
+            continue
+        }
+
+        // Skip abbreviations (Dr., Mr., etc.) and decimal numbers (1.0).
+        const prevWord = wordBeforePosition(text, i)
+        if (ABBREVIATIONS.has(prevWord)) continue
+        if (/\d$/.test(prevWord)) continue
+
+        result.push(current.trim())
+        current = ""
+    }
+    if (current.trim().length > 0 && result.length < MAX_SENTENCES) {
         result.push(current.trim())
     }
     return result.length > 0 ? result : [text]
