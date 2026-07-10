@@ -162,6 +162,7 @@ export interface FullAppSettings{
     maxChunks?:number
     smartSizing?:boolean
     maxParallelFiles?:number
+    enableThinking?:boolean
     providers?:ProviderConfig[]
     failoverPriority?:string[]
     ensembleModels?:string[]
