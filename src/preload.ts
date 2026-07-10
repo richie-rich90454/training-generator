@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI",{
     readFile:(filePath:string)=>invoke("file:read",{filePath}),
     getPrompt:(language:string,processingType:string)=>invoke("prompt:get",{language,processingType}),
     parseFile:(filePath:string,fileType:string)=>invoke("file:parse",{filePath,fileType}),
+    parseFileBuffer:(buffer:ArrayBuffer,fileType:string)=>invoke("file:parseBuffer",{buffer,fileType}),
     parseFilesBatch:(files:FileObj[])=>invoke("file:parseBatch",{files}),
     saveFile:(filePath:string,content:string)=>invoke("file:save",{filePath,content}),
     saveFileDialog:(defaultFilename?:string)=>invoke("dialog:saveFile",{defaultFilename}),
