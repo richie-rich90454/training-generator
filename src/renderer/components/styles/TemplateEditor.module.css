@@ -90,8 +90,9 @@
     line-height:1.5;
     tab-size:2;
 }
-.template-editor-textarea:focus{
-    outline:none;
+.template-editor-textarea:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
     border-color:var(--primary-color);
     box-shadow:0 0 0 3px rgba(0,120,212,.15);
 }
