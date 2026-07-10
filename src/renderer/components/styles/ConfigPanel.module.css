@@ -170,6 +170,13 @@
     user-select:none;
     pointer-events:none;
 }
+.model-combobox{position:relative;display:flex;align-items:stretch;gap:var(--spacing-xs)}
+.model-combobox__input{flex:1;border-top-right-radius:0;border-bottom-right-radius:0}
+.model-combobox__toggle{width:40px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--surface-color);color:var(--text-secondary);border:1px solid var(--text-disabled);border-left:none;border-top-right-radius:var(--radius-medium);border-bottom-right-radius:var(--radius-medium);cursor:pointer}
+.model-combobox__toggle:disabled{background:var(--surface-variant);color:var(--text-disabled);cursor:not-allowed;opacity:.5}
+.model-combobox__listbox{position:absolute;top:calc(100% + 2px);left:0;right:0;max-height:200px;overflow:auto;z-index:100;margin:0;padding:var(--spacing-xs) 0;list-style:none;background:var(--surface-color);border:1px solid var(--border-color);border-radius:var(--radius-medium);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.model-combobox__option{padding:var(--spacing-sm) var(--spacing-md);cursor:pointer;color:var(--text-primary)}
+.model-combobox__option:hover,.model-combobox__option--selected{background:var(--surface-variant)}
 .range-value-pill{
     min-width:48px;
     height:30px;
