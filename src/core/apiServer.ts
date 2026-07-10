@@ -1,5 +1,7 @@
 import http from "http"
 import { TrainingItem } from "../types/interfaces.js"
+
+const MAX_BODY_SIZE=10*1024*1024
 export interface ProcessRequest{
     source: string
     options?: Record<string, unknown>
@@ -200,7 +202,16 @@ export class ApiServer{
     private readBody(req: http.IncomingMessage): Promise<string>{
         return new Promise((resolve, reject)=>{
             let chunks: Buffer[]=[]
-            req.on("data", (chunk)=>chunks.push(chunk as Buffer))
+            let size=0
+            req.on("data", (chunk)=>{
+                size+=(chunk as Buffer).length
+                if(size>MAX_BODY_SIZE){
+                    req.destroy()
+                    reject(new Error("request body too large"))
+                    return
+                }
+                chunks.push(chunk as Buffer)
+            })
             req.on("end", ()=>resolve(Buffer.concat(chunks).toString("utf-8")))
             req.on("error", reject)
         })
