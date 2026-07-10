@@ -126,7 +126,12 @@ export class AuditLog{
             this.entries=[]
         }
         else{
-            this.entries=JSON.parse(raw) as AuditEntry[]
+            try{
+                this.entries=JSON.parse(raw) as AuditEntry[]
+            }
+            catch{
+                this.entries=[]
+            }
         }
     }
     save(): void{
