@@ -1,4 +1,4 @@
-import{describe,test,expect,beforeEach,afterEach}from "vitest"
+import{describe,test,expect,beforeEach,afterEach,vi}from "vitest"
 import fs from "fs"
 import path from "path"
 import{fileURLToPath}from "url"
@@ -11,6 +11,7 @@ describe("FileParser",()=>{
     let parser:FileParser
 
     beforeEach(()=>{
+        vi.spyOn(console,"error").mockImplementation(()=>{})
         parser=new FileParser()
         if(!fs.existsSync(testDir)){
             fs.mkdirSync(testDir,{recursive:true})
@@ -18,6 +19,7 @@ describe("FileParser",()=>{
     })
 
     afterEach(()=>{
+        vi.restoreAllMocks()
         if(fs.existsSync(testDir)){
             fs.rmSync(testDir,{recursive:true,force:true})
         }
