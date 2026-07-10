@@ -371,7 +371,7 @@ export class ProviderRegistry{
         return results
     }
     async generateWithFailover(prompt:string, model:string, options?:ProviderOptions):Promise<ProviderResult>{
-        let lastError:Error
+        let lastError:Error=new Error("No provider available")
         let scopeMissing=false
         for(let config of this.configs){
             let h=this.health.get(config.id)
