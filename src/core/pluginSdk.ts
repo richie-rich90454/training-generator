@@ -97,7 +97,13 @@ export class PluginLoader{
     }
     load(manifestPath: string): LoadedPlugin{
         let content=this.readFile(manifestPath);
-        let parsed=JSON.parse(content);
+        let parsed: unknown;
+        try{
+            parsed=JSON.parse(content);
+        }
+        catch(error){
+            throw new Error(`Invalid plugin manifest JSON at ${manifestPath}: ${(error as Error).message}`);
+        }
         let manifest=this.validateManifest(parsed);
         let dir=this.dirname(manifestPath);
         let mainPath=this.resolvePath(dir, manifest.main);
