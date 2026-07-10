@@ -57,12 +57,14 @@ export class ConfigManager{
         if (raw===null){
             loaded=createDefaultConfig()
         }
-        else if (this.encryptionKey){
-            let decrypted=this.decrypt(raw, this.encryptionKey)
-            loaded=JSON.parse(decrypted) as AppConfig
-        }
         else{
-            loaded=JSON.parse(raw) as AppConfig
+            try{
+                let data=this.encryptionKey?this.decrypt(raw, this.encryptionKey):raw
+                loaded=JSON.parse(data) as AppConfig
+            }
+            catch{
+                loaded=createDefaultConfig()
+            }
         }
         this.config=loaded
         return loaded
