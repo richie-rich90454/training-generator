@@ -81,18 +81,28 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
                         class={styles["command-palette-input"]}
                         type="text"
                         placeholder={t("commandPalette.placeholder")}
+                        aria-label={t("commandPalette.inputAria")}
+                        data-i18n-aria-label="commandPalette.inputAria"
+                        aria-autocomplete="list"
+                        aria-controls="command-palette-listbox"
+                        aria-expanded={filteredCommands().length > 0}
+                        aria-activedescendant={filteredCommands().length > 0 ? `command-item-${filteredCommands()[selectedIndex()]?.id}` : undefined}
+                        role="combobox"
                         data-testid="command-palette-input"
                         value={query()}
                         onInput={(e)=>setQuery(e.currentTarget.value)}
                     />
                     <Show when={filteredCommands().length>0} fallback={<div class={styles["command-empty"]} data-testid="command-empty">{t("commandPalette.noCommands")}</div>}>
-                        <ul class={styles["command-list"]} data-testid="command-list">
+                        <ul id="command-palette-listbox" class={styles["command-list"]} role="listbox" data-testid="command-list">
                             <For each={filteredCommands()}>
                                 {(command, index)=>{
                                     return (
                                         <li
+                                            id={`command-item-${command.id}`}
                                             class={styles["command-item"]}
                                             classList={{ selected: index()===selectedIndex() }}
+                                            role="option"
+                                            aria-selected={index()===selectedIndex()}
                                             data-testid={"command-item-"+command.id}
                                             onClick={()=>executeCommand(command)}
                                         >
