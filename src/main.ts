@@ -1370,6 +1370,7 @@ app.on("window-all-closed",()=>{
     if(!isMac)app.quit()
 })
 app.on("before-quit",async(event)=>{
+    if(isAppQuitting)return
     event.preventDefault()
     isAppQuitting=true
     if(fileParser){
