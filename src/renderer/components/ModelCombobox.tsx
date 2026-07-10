@@ -37,6 +37,9 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
         const index = options.findIndex((option) => option === value)
         setSelectedIndex(index >= 0 ? index : 0)
     })
+    onCleanup(() => {
+        clearBlurTimeout()
+    })
     function clearBlurTimeout(): void {
         if (blurTimeout !== null) {
             window.clearTimeout(blurTimeout)
