@@ -1,7 +1,9 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach } from "vitest"
+import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { createFileStore, type FileStore } from "../src/renderer/stores/fileStore.js"
+import { withRoot } from "./setup.js"
 let store: FileStore
+let dispose: () => void
 function createFile(name: string, size: number = 1024, type: string = "text/plain"): File {
     let contentSize = Math.min(size, 1000)
     let file = new File(["x".repeat(contentSize)], name, { type })
@@ -11,7 +13,13 @@ function createFile(name: string, size: number = 1024, type: string = "text/plai
     return file
 }
 beforeEach(() => {
-    store = createFileStore()
+    store = withRoot((d) => {
+        dispose = d
+        return createFileStore()
+    })
+})
+afterEach(() => {
+    dispose()
 })
 describe("FileStore initial state", () => {
     it("starts empty", () => {
