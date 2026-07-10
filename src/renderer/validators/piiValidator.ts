@@ -48,7 +48,12 @@ export function decryptRedactionLog(encrypted: string, key: string): RedactionLo
     let decipher=crypto.createDecipheriv("aes-256-gcm", Buffer.from(key, "hex"), iv)
     decipher.setAuthTag(authTag)
     let decrypted=Buffer.concat([decipher.update(encryptedHex, "hex"), decipher.final()])
-    return JSON.parse(decrypted.toString("utf8")) as RedactionLog[]
+    try{
+        return JSON.parse(decrypted.toString("utf8")) as RedactionLog[]
+    }
+    catch{
+        return []
+    }
 }
 export class PiiValidator extends MutatingValidator{
     patterns: Record<PiiType, PatternEntry>
