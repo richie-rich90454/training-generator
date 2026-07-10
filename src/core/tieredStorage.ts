@@ -185,7 +185,12 @@ function defaultSerialize(value: unknown): Buffer{
     return Buffer.from(JSON.stringify(value), "utf-8");
 }
 function defaultDeserialize(buffer: Buffer): unknown{
-    return JSON.parse(buffer.toString("utf-8"));
+    try{
+        return JSON.parse(buffer.toString("utf-8"));
+    }
+    catch{
+        return null;
+    }
 }
 function gzipBuffer(buffer: Buffer): Promise<Buffer>{
     return new Promise((resolve, reject)=>{
