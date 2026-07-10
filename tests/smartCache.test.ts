@@ -138,14 +138,16 @@ describe("SmartCache", ()=>{
         vi.useRealTimers();
     });
     it("should compact entries by combined eviction score", async()=>{
+        vi.useFakeTimers();
         let cache=new SmartCache({maxEntries: 1});
         await cache.set("small", "a");
-        await new Promise(r=>setTimeout(r, 10));
+        vi.advanceTimersByTime(10);
         await cache.set("large", "this is a very large value with much higher size score");
         let small=await cache.get("small");
         let large=await cache.get("large");
         expect(small).toBe("a");
         expect(large).toBeUndefined();
+        vi.useRealTimers();
     });
     it("should track eviction count", async()=>{
         let cache=new SmartCache({maxEntries: 1});
