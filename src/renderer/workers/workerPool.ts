@@ -20,6 +20,12 @@ const chunkPending: Map<number, ChunkPending> = new Map()
 const dedupPending: Map<number, DedupPending> = new Map()
 
 const TIMEOUT_MS: number = 60000
+const MAX_WORKER_RESTARTS: number = 3
+const MAX_PENDING: number = 100
+const MAX_WORKER_PAYLOAD_CHARS: number = 10 * 1024 * 1024
+
+let chunkRestarts: number = 0
+let dedupRestarts: number = 0
 
 function supportsWorkers(): boolean {
   return typeof Worker !== "undefined"
@@ -41,6 +47,30 @@ function rejectAllDedupPending(error: Error): void {
   dedupPending.clear()
 }
 
+function recreateChunkWorker(worker: Worker | null): void {
+  if (chunkWorker !== worker || !worker) return
+  worker.terminate()
+  if (chunkRestarts < MAX_WORKER_RESTARTS) {
+    chunkRestarts++
+    chunkWorker = createChunkWorker()
+  } else {
+    chunkWorker = null
+    rejectAllChunkPending(new Error("Chunk worker failed permanently after maximum restart attempts"))
+  }
+}
+
+function recreateDedupWorker(worker: Worker | null): void {
+  if (dedupWorker !== worker || !worker) return
+  worker.terminate()
+  if (dedupRestarts < MAX_WORKER_RESTARTS) {
+    dedupRestarts++
+    dedupWorker = createDedupWorker()
+  } else {
+    dedupWorker = null
+    rejectAllDedupPending(new Error("Dedup worker failed permanently after maximum restart attempts"))
+  }
+}
+
 function createChunkWorker(): Worker | null {
   try {
     const worker = new Worker(new URL("./chunk.worker.js", import.meta.url), { type: "module" })
@@ -52,22 +82,17 @@ function createChunkWorker(): Worker | null {
       if (e.data.error) {
         pending.reject(new Error(e.data.error))
       } else {
+        chunkRestarts = 0
         pending.resolve(e.data.chunks)
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
+      recreateChunkWorker(worker)
       rejectAllChunkPending(new Error(e.message || "Worker error"))
-      if (chunkWorker === worker) {
-        worker.terminate()
-        chunkWorker = createChunkWorker()
-      }
     })
     worker.addEventListener("messageerror", () => {
+      recreateChunkWorker(worker)
       rejectAllChunkPending(new Error("Failed to deserialize message"))
-      if (chunkWorker === worker) {
-        worker.terminate()
-        chunkWorker = createChunkWorker()
-      }
     })
     return worker
   } catch {
@@ -86,22 +111,17 @@ function createDedupWorker(): Worker | null {
       if (e.data.error) {
         pending.reject(new Error(e.data.error))
       } else {
+        dedupRestarts = 0
         pending.resolve(e.data)
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
+      recreateDedupWorker(worker)
       rejectAllDedupPending(new Error(e.message || "Worker error"))
-      if (dedupWorker === worker) {
-        worker.terminate()
-        dedupWorker = createDedupWorker()
-      }
     })
     worker.addEventListener("messageerror", () => {
+      recreateDedupWorker(worker)
       rejectAllDedupPending(new Error("Failed to deserialize message"))
-      if (dedupWorker === worker) {
-        worker.terminate()
-        dedupWorker = createDedupWorker()
-      }
     })
     return worker
   } catch {
@@ -111,6 +131,7 @@ function createDedupWorker(): Worker | null {
 
 function getChunkWorker(): Worker | null {
   if (!supportsWorkers()) return null
+  if (chunkRestarts >= MAX_WORKER_RESTARTS) return null
   if (!chunkWorker) {
     chunkWorker = createChunkWorker()
   }
@@ -119,36 +140,40 @@ function getChunkWorker(): Worker | null {
 
 function getDedupWorker(): Worker | null {
   if (!supportsWorkers()) return null
+  if (dedupRestarts >= MAX_WORKER_RESTARTS) return null
   if (!dedupWorker) {
     dedupWorker = createDedupWorker()
   }
   return dedupWorker
 }
 
-export function chunkInWorker(
+export async function chunkInWorker(
   text: string,
   chunkSize: number,
   overlap: number,
   smartSizing: boolean = false
 ): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    const worker = getChunkWorker()
-    if (!worker) {
-      // Fallback: import and run on main thread
-      import("../chunker.js").then(({ semanticChunk }) => {
-        resolve(semanticChunk(text, chunkSize, overlap, smartSizing))
-      }).catch(reject)
-      return
-    }
+  if (chunkPending.size >= MAX_PENDING) {
+    return Promise.reject(new Error("Too many pending worker requests"))
+  }
+  if (text.length > MAX_WORKER_PAYLOAD_CHARS) {
+    console.warn(`chunkInWorker: payload too large (${text.length} chars); truncating to ${MAX_WORKER_PAYLOAD_CHARS}`)
+    text = text.slice(0, MAX_WORKER_PAYLOAD_CHARS)
+  }
 
+  const worker = getChunkWorker()
+  if (!worker) {
+    // Fallback: import and run on main thread
+    const { semanticChunk } = await import("../chunker.js")
+    return semanticChunk(text, chunkSize, overlap, smartSizing)
+  }
+
+  return new Promise((resolve, reject) => {
     const id = ++requestCounter
     const timer = setTimeout(() => {
       chunkPending.delete(id)
       reject(new Error("Worker timeout"))
-      if (chunkWorker === worker) {
-        worker.terminate()
-        chunkWorker = createChunkWorker()
-      }
+      recreateChunkWorker(worker)
     }, TIMEOUT_MS)
 
     chunkPending.set(id, { resolve, reject, timer })
@@ -163,6 +188,11 @@ export function dedupInWorker(
   threshold: number = 0.9
 ): Promise<{ items: TrainingItem[]; removed: number }> {
   return new Promise((resolve, reject) => {
+    if (dedupPending.size >= MAX_PENDING) {
+      reject(new Error("Too many pending worker requests"))
+      return
+    }
+
     const worker = getDedupWorker()
     if (!worker) {
       // Fallback: import and run on main thread
@@ -176,10 +206,7 @@ export function dedupInWorker(
     const timer = setTimeout(() => {
       dedupPending.delete(id)
       reject(new Error("Worker timeout"))
-      if (dedupWorker === worker) {
-        worker.terminate()
-        dedupWorker = createDedupWorker()
-      }
+      recreateDedupWorker(worker)
     }, TIMEOUT_MS)
 
     dedupPending.set(id, { resolve, reject, timer })
@@ -190,6 +217,8 @@ export function dedupInWorker(
 }
 
 export function terminateWorkers(): void {
+  chunkRestarts = 0
+  dedupRestarts = 0
   rejectAllChunkPending(new Error("Workers terminated"))
   rejectAllDedupPending(new Error("Workers terminated"))
   if (chunkWorker) {
