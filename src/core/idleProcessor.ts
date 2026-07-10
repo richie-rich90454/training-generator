@@ -127,6 +127,9 @@ export class LazyModelLoader{
         let promise=this.fetchModels(provider).then((models)=>{
             this.cache.set(provider, models);
             return models;
+        }).catch((error)=>{
+            this.cache.delete(provider);
+            throw error;
         });
         this.cache.set(provider, promise);
         return promise;
