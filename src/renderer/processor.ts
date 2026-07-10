@@ -143,6 +143,7 @@ class Processor{
         let signal=this.abortController!.signal
         let allItems:TrainingItem[]=[]
         let total=chunks.length
+        let effectiveConcurrency=Math.max(1,Math.min(20,Number(this.concurrency)||3))
         const completeChunk=(index:number,_total:number,items:TrainingItem[])=>{
             allItems.push(...items)
             onChunkComplete(index,total,items)
@@ -304,7 +305,7 @@ class Processor{
                     resolve(allItems)
                 }
             }
-            let initial=Math.min(this.concurrency,queue.length)
+            let initial=Math.min(effectiveConcurrency,queue.length)
         for(let i=0;i<initial;i++){
                 let{chunk,index}=queue.shift()!
                 running++
