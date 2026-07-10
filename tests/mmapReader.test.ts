@@ -98,6 +98,7 @@ describe("MmapReader", ()=>{
         expect(fs.closeSync).toHaveBeenCalledWith(42);
     });
     test("read closes fd even when mmap throws", async()=>{
+        let warnSpy=vi.spyOn(console, "warn").mockImplementation(()=>{});
         (fs.promises.stat as any).mockResolvedValue({ size: 200*1024*1024 });
         mockState.mapShouldThrow=true;
         mockState.mapError=new Error("mmap failed");
@@ -108,6 +109,8 @@ describe("MmapReader", ()=>{
         let result=await reader.read();
         expect(result).toBe(fsBuffer);
         expect(fs.closeSync).toHaveBeenCalledWith(7);
+        expect(warnSpy).toHaveBeenCalled();
+        warnSpy.mockRestore();
     });
     test("read falls back to fs and logs warning when mmap-io fails", async()=>{
         let warnSpy=vi.spyOn(console, "warn").mockImplementation(()=>{});
