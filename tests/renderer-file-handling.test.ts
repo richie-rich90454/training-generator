@@ -1,6 +1,18 @@
 // @vitest-environment happy-dom
-import{describe,test,it,expect}from "vitest"
+import{describe,test,it,expect,afterEach}from "vitest"
 import{createFileStore}from "../src/renderer/stores/fileStore.js"
+import{withRoot}from "./setup.js"
+let disposes:Array<()=>void>=[]
+function makeFileStore(){
+    return withRoot((dispose)=>{
+        disposes.push(dispose)
+        return createFileStore()
+    })
+}
+afterEach(()=>{
+    disposes.forEach(d=>d())
+    disposes=[]
+})
 
 function isValidFileSize(size:number,maxSizeMB:number=100):boolean{
     return size>=0&&size<=maxSizeMB*1024*1024
@@ -148,28 +160,28 @@ describe("fileStore file status",()=>{
     }
 
     it("should set file status to processing",()=>{
-        let fileStore=createFileStore()
+        let fileStore=makeFileStore()
         fileStore.addFiles([makeFile("test.pdf")])
         fileStore.setFileStatus("test.pdf","processing")
         expect(fileStore.fileStatuses["test.pdf"]).toBe("processing")
     })
 
     it("should set file status to completed",()=>{
-        let fileStore=createFileStore()
+        let fileStore=makeFileStore()
         fileStore.addFiles([makeFile("test.pdf")])
         fileStore.setFileStatus("test.pdf","completed")
         expect(fileStore.fileStatuses["test.pdf"]).toBe("completed")
     })
 
     it("should set file status to failed",()=>{
-        let fileStore=createFileStore()
+        let fileStore=makeFileStore()
         fileStore.addFiles([makeFile("test.pdf")])
         fileStore.setFileStatus("test.pdf","failed")
         expect(fileStore.fileStatuses["test.pdf"]).toBe("failed")
     })
 
     it("should remove file status when file is removed",()=>{
-        let fileStore=createFileStore()
+        let fileStore=makeFileStore()
         fileStore.addFiles([makeFile("test.pdf")])
         fileStore.setFileStatus("test.pdf","waiting")
         expect(fileStore.fileStatuses["test.pdf"]).toBe("waiting")
