@@ -151,7 +151,7 @@ describe("handleOllamaGenerateStream",()=>{
         let promise=handleOllamaGenerateStream({model:"llama2",prompt:"test"})
         await tick()
         mockStream.emit("error",new Error("Connection error"))
-        await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama"})
+        await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama: Connection error"})
     })
 
     it("should handle empty stream end",async()=>{
@@ -160,7 +160,7 @@ describe("handleOllamaGenerateStream",()=>{
         let promise=handleOllamaGenerateStream({model:"llama2",prompt:"test"})
         await tick()
         mockStream.emit("end")
-        await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama"})
+        await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama: Stream ended without response"})
     })
 
     it("should use extended timeout for large prompts",async()=>{
@@ -170,7 +170,10 @@ describe("handleOllamaGenerateStream",()=>{
         let promise=handleOllamaGenerateStream({model:"llama2",prompt:mediumPrompt})
         expect(axios.post).toHaveBeenCalledWith(
             expect.any(String),
-            expect.objectContaining({prompt:mediumPrompt}),
+            expect.objectContaining({
+                prompt:mediumPrompt,
+                options:expect.objectContaining({num_predict:4096})
+            }),
             expect.objectContaining({timeout:450000})
         )
         await tick()
@@ -196,6 +199,6 @@ describe("handleOllamaGenerateStream",()=>{
         axios.post.mockRejectedValue(new Error("Network error"))
         let result=await handleOllamaGenerateStream({model:"llama2",prompt:"test"})
         expect(result.success).toBe(false)
-        expect(result.error).toBe("Failed to generate response from Ollama")
+        expect(result.error).toBe("Failed to generate response from Ollama: Network error")
     })
 })
