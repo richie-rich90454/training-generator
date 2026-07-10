@@ -175,16 +175,27 @@ export interface PushToHubOptions{
 }
 export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: string, success: boolean}>{
     let { token, repoId, jsonl, readme, parquet }=options
-    let createResponse=await axios.post("https://huggingface.co/api/repos/create", {
-        name: repoId,
-        type: "dataset",
-        private: false
-    }, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
+    let createResponse: any
+    try{
+        createResponse=await axios.post("https://huggingface.co/api/repos/create", {
+            name: repoId,
+            type: "dataset",
+            private: false
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        })
+    }
+    catch(error){
+        let errAny=error as any
+        let status=errAny?.response?.status
+        if(status){
+            throw new Error(t("error.huggingfaceCreateRepoFailed", undefined, { status: String(status) }))
         }
-    })
+        throw new Error("Hugging Face repo creation network error: "+(error instanceof Error?error.message:String(error)))
+    }
     if(createResponse.status<200||createResponse.status>=300){
         throw new Error(t("error.huggingfaceCreateRepoFailed", undefined, { status: String(createResponse.status) }))
     }
@@ -196,12 +207,23 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
         files.push({ name: "train.parquet", content: parquet })
     }
     for(let file of files){
-        let response=await axios.post(`https://huggingface.co/api/datasets/${repoId}/upload/main/${file.name}`, file.content, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/octet-stream"
+        let response: any
+        try{
+            response=await axios.post(`https://huggingface.co/api/datasets/${repoId}/upload/main/${file.name}`, file.content, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/octet-stream"
+                }
+            })
+        }
+        catch(error){
+            let errAny=error as any
+            let status=errAny?.response?.status
+            if(status){
+                throw new Error(t("error.huggingfaceUploadFailed", undefined, { name: file.name, status: String(status) }))
             }
-        })
+            throw new Error(`Hugging Face upload network error for ${file.name}: ${error instanceof Error?error.message:String(error)}`)
+        }
         if(response.status<200||response.status>=300){
             throw new Error(t("error.huggingfaceUploadFailed", undefined, { name: file.name, status: String(response.status) }))
         }
