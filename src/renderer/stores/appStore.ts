@@ -224,7 +224,8 @@ export function createAppStore(): AppStore {
             addLog(t("log.noFilesToProcess"), "warning")
             return
         }
-        if (!uiStore.ollamaStatus().running && !processor.demoMode) {
+        const isOllamaProvider = settingsStore.settings.provider === "ollama"
+        if (isOllamaProvider && !uiStore.ollamaStatus().running && !processor.demoMode) {
             addLog(t("log.cannotProcessOllamaOffline"), "error")
             uiStore.showToast(t("toast.ollamaNotRunning"), "error" as ToastType)
             return
