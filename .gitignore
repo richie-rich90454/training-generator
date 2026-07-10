@@ -148,3 +148,10 @@ dist-ts
 dist-main
 .trae
 AGENTS.md
+
+# Temporary scratch files and generated test artifacts
+tmp_*
+tmp_*/
+test-files/
+test-complete-files/
+scripts/i18n-missing.log
