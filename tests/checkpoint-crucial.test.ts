@@ -18,6 +18,8 @@ function makeCheckpoint(overrides: Partial<CheckpointData> = {}): CheckpointData
 describe("saveCheckpoint", () => {
     beforeEach(() => {
         vi.stubGlobal("window", { electronAPI: { saveCheckpoint: vi.fn(async() => ({ success: true })) } })
+        vi.spyOn(console, "error").mockImplementation(() => {})
+        vi.spyOn(console, "warn").mockImplementation(() => {})
     })
     afterEach(() => {
         vi.unstubAllGlobals()
@@ -52,6 +54,8 @@ describe("saveCheckpoint", () => {
 describe("loadCheckpoint", () => {
     beforeEach(() => {
         vi.stubGlobal("window", { electronAPI: { loadCheckpoint: vi.fn(async() => ({ success: true, data: makeCheckpoint() })) } })
+        vi.spyOn(console, "error").mockImplementation(() => {})
+        vi.spyOn(console, "warn").mockImplementation(() => {})
     })
     afterEach(() => {
         vi.unstubAllGlobals()
@@ -183,6 +187,8 @@ describe("loadCheckpoint", () => {
 describe("clearCheckpoint", () => {
     beforeEach(() => {
         vi.stubGlobal("window", { electronAPI: { clearCheckpoint: vi.fn(async() => ({ success: true })) } })
+        vi.spyOn(console, "error").mockImplementation(() => {})
+        vi.spyOn(console, "warn").mockImplementation(() => {})
     })
     afterEach(() => {
         vi.unstubAllGlobals()
