@@ -99,7 +99,12 @@ export class ThroughputStore{
                 this.samples=[]
             }
             else{
-                this.samples=JSON.parse(raw) as ThroughputSample[]
+                try{
+                    this.samples=JSON.parse(raw) as ThroughputSample[]
+                }
+                catch{
+                    this.samples=[]
+                }
             }
         }
     }
