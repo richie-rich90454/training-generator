@@ -12,6 +12,9 @@ export default defineConfig({
         testTimeout:30000,
         hookTimeout:30000,
         setupFiles:["./tests/setup.ts"],
+        pool:"forks",
+        // @ts-ignore Vitest 4 runtime supports singleFork but types omit it.
+        singleFork:true,
         coverage:{
             provider:"v8",
             include:["src/**/*.ts"],
