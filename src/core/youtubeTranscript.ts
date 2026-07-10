@@ -148,10 +148,16 @@ function extractPlayerResponse(html: string): any|null{
 }
 export async function listAvailableLanguages(videoId: string): Promise<string[]>{
     let url="https://www.youtube.com/watch?v="+videoId;
-    let response: any=await axios.get(url, {
-        headers: {"User-Agent": "Mozilla/5.0"},
-        responseType: "text"
-    });
+    let response: any;
+    try{
+        response=await axios.get(url, {
+            headers: {"User-Agent": "Mozilla/5.0"},
+            responseType: "text"
+        });
+    }
+    catch(error){
+        throw new Error("Failed to fetch YouTube page for "+videoId+": "+(error instanceof Error?error.message:String(error)));
+    }
     let html=response.data;
     let playerResponse=extractPlayerResponse(html);
     if(!playerResponse){
@@ -172,10 +178,16 @@ export async function listAvailableLanguages(videoId: string): Promise<string[]>
 export async function fetchTranscript(videoId: string, options?: {language?: string, format?: "json"|"xml"}): Promise<YouTubeTranscript>{
     let language=options?.language??"en";
     let url="https://www.youtube.com/watch?v="+videoId;
-    let response: any=await axios.get(url, {
-        headers: {"User-Agent": "Mozilla/5.0"},
-        responseType: "text"
-    });
+    let response: any;
+    try{
+        response=await axios.get(url, {
+            headers: {"User-Agent": "Mozilla/5.0"},
+            responseType: "text"
+        });
+    }
+    catch(error){
+        throw new Error("Failed to fetch YouTube page for "+videoId+": "+(error instanceof Error?error.message:String(error)));
+    }
     let html=response.data;
     let playerResponse=extractPlayerResponse(html);
     if(!playerResponse){
@@ -200,10 +212,16 @@ export async function fetchTranscript(videoId: string, options?: {language?: str
     if(!baseUrl){
         throw new Error("No captions available for video");
     }
-    let captionResponse: any=await axios.get(baseUrl, {
-        headers: {"User-Agent": "Mozilla/5.0"},
-        responseType: "text"
-    });
+    let captionResponse: any;
+    try{
+        captionResponse=await axios.get(baseUrl, {
+            headers: {"User-Agent": "Mozilla/5.0"},
+            responseType: "text"
+        });
+    }
+    catch(error){
+        throw new Error("Failed to fetch YouTube captions for "+videoId+": "+(error instanceof Error?error.message:String(error)));
+    }
     let xml=captionResponse.data;
     let segments=parseTranscriptXml(xml);
     return{
