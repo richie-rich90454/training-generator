@@ -2,7 +2,6 @@ import{app,BrowserWindow,ipcMain,dialog,shell,safeStorage,Tray,Menu,nativeImage,
 import path from "path"
 import fs from "fs"
 import{promises as fsp}from "fs"
-import{spawn}from "child_process"
 import{fileURLToPath}from "url"
 import http from "http"
 import https from "https"
@@ -107,8 +106,6 @@ let isWin:boolean=process.platform==="win32"
 let isMac:boolean=process.platform==="darwin"
 let mainWindow:BrowserWindow|null=null
 let tray:Tray|null=null
-let splashWindow:BrowserWindow|null=null
-let splashProcess:import("child_process").ChildProcess|null=null
 let fileParser:InstanceType<typeof FileParserLazy>|null=null
 let smartCache=new SmartCache({maxEntries:1000,maxSizeBytes:50*1024*1024,maxAgeMs:24*60*60*1000,compress:true})
 let deferredIpcRegistered=false
@@ -318,18 +315,46 @@ async function setSecureKey(key:string):Promise<boolean>{
         return false
     }
 }
-try{
-    if(!fs.existsSync(userDataPath)){
-        fs.mkdirSync(userDataPath,{recursive:true})
+function resolveWritableUserDataPath():string{
+    const preferred=path.join(app.getPath("documents"),"TrainingGenerator")
+    try{
+        fs.mkdirSync(preferred,{recursive:true})
+        const testFile=path.join(preferred,".write-test")
+        fs.writeFileSync(testFile,"")
+        fs.unlinkSync(testFile)
+        return preferred
     }
-    if(!fs.existsSync(cachePath)){
-        fs.mkdirSync(cachePath,{recursive:true})
+    catch{
+        const appDataFallback=path.join(app.getPath("userData"),"TrainingGenerator")
+        try{
+            fs.mkdirSync(appDataFallback,{recursive:true})
+            const testFile=path.join(appDataFallback,".write-test")
+            fs.writeFileSync(testFile,"")
+            fs.unlinkSync(testFile)
+            console.warn(`[main] Documents path not writable; using app data directory: ${appDataFallback}`)
+            return appDataFallback
+        }
+        catch{
+            // Last resort for restricted/sandboxed environments: use the temp directory.
+            const tempFallback=path.join(app.getPath("temp"),"TrainingGenerator")
+            try{
+                fs.mkdirSync(tempFallback,{recursive:true})
+            }
+            catch{
+                // Nothing else we can do; Electron will use this path and surface any error.
+            }
+            console.warn(`[main] App data path not writable; using temp directory: ${tempFallback}`)
+            return tempFallback
+        }
     }
 }
+userDataPath=resolveWritableUserDataPath()
+cachePath=path.join(userDataPath,"Cache")
+try{
+    fs.mkdirSync(cachePath,{recursive:true})
+}
 catch(error){
-    console.error("Failed to create directories:",error)
-    userDataPath=app.getPath("userData")
-    cachePath=app.getPath("cache")
+    console.error("Failed to create cache directory:",error)
 }
 app.setPath("userData",userDataPath)
 app.setPath("cache",cachePath)
@@ -339,12 +364,13 @@ app.commandLine.appendSwitch("disable-component-update")
 app.commandLine.appendSwitch("disable-sync")
 app.commandLine.appendSwitch("disable-default-apps")
 app.commandLine.appendSwitch("metrics-recording-only")
-app.commandLine.appendSwitch("enable-gpu-rasterization")
-app.commandLine.appendSwitch("enable-oop-rasterization")
-app.commandLine.appendSwitch("enable-zero-copy")
-app.commandLine.appendSwitch("enable-gpu")
-app.commandLine.appendSwitch("enable-accelerated-2d-canvas")
-app.commandLine.appendSwitch("enable-accelerated-video-decode")
+// Aggressive GPU switches have been removed. They can trigger renderer
+// process crashes (exit code -36861) on certain Windows GPU drivers, which
+// is especially problematic for a text-processing app. Chromium's defaults
+// are sufficient here.
+if(process.argv.includes("--disable-gpu")||process.env.TRAINING_GENERATOR_DISABLE_GPU==="true"){
+    app.disableHardwareAcceleration()
+}
 if(isWin){
     app.commandLine.appendSwitch("disable-hang-monitor")
     app.commandLine.appendSwitch("disable-prompt-on-repost")
@@ -366,111 +392,6 @@ if(typeof app.on==="function"){
             mainWindow.focus()
         }
     })
-}
-function startSplash(){
-    console.log("[splash] startSplash called, platform=win32:",isWin,"packaged:",app.isPackaged)
-    // Diagnosis: in dev mode process.resourcesPath points at Electron's own
-    // resources dir, while in packaged ASAR builds native-splash is unpacked
-    // to resources/native-splash via extraResources, so path priority must
-    // differ between the two modes.
-    if(isWin){
-        let metaDir=path.dirname(fileURLToPath(import.meta.url))
-        let exePaths:string[]=[]
-        if(app.isPackaged){
-            if(typeof process!=="undefined"&&process.resourcesPath){
-                exePaths.push(path.join(process.resourcesPath,"native-splash","splash.exe"))
-            }
-            exePaths.push(path.join(path.dirname(app.getPath("exe")),"resources","native-splash","splash.exe"))
-            exePaths.push(path.join(path.dirname(app.getAppPath()),"native-splash","splash.exe"))
-        }
-        else{
-            exePaths.push(path.join(metaDir,"..","native-splash","splash.exe"))
-            exePaths.push(path.join(metaDir,"..","..","native-splash","splash.exe"))
-            exePaths.push(path.join(path.resolve(app.getAppPath()),"..","native-splash","splash.exe"))
-            exePaths.push(path.join(process.cwd(),"native-splash","splash.exe"))
-        }
-        let exePath:string|null=null
-        for(let p of exePaths){
-            console.log("[splash] checking candidate:",p,"exists:",fs.existsSync(p))
-            if(fs.existsSync(p)){
-                exePath=p
-                break
-            }
-        }
-        if(exePath){
-            try{
-                let stats=fs.statSync(exePath)
-                console.log("[splash] found executable:",exePath,"size:",stats.size,"isFile:",stats.isFile())
-            }
-            catch{
-                console.error("[splash] failed to stat executable:",exePath)
-            }
-            console.log("[splash] spawning:",exePath)
-            splashProcess=spawn(exePath,[],{
-                detached:true,
-                stdio:"ignore"
-            })
-            splashProcess.on("error",(error:Error)=>{
-                console.error("[splash] process error:",error)
-            })
-            splashProcess.on("exit",()=>{
-                splashProcess=null
-            })
-            splashProcess.unref()
-            console.log("[splash] spawned with pid:",splashProcess.pid)
-        }
-        else{
-            console.error("[splash] splash.exe not found in any candidate path (mode:",(app.isPackaged?"packaged":"dev")+")")
-            console.error("[splash] tried:",exePaths.join("; "))
-        }
-        return
-    }
-    splashWindow=new BrowserWindow({
-        width:isMac?500:450,
-        height:isMac?400:350,
-        frame:false,
-        transparent:isMac,
-        resizable:false,
-        alwaysOnTop:true,
-        show:false,
-        backgroundColor:isMac?"#00000000":"#FFFFFF",
-        webPreferences:{
-            nodeIntegration:false,
-            contextIsolation:true,
-            sandbox:true
-        }
-    })
-    let splashHtmlCandidates=[
-        path.join(path.dirname(fileURLToPath(import.meta.url)),"splash.html"),
-        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","src","splash.html"),
-        path.join(path.dirname(fileURLToPath(import.meta.url)),"..","..","src","splash.html"),
-    ]
-    let splashHtmlPath=splashHtmlCandidates.find(p=>fs.existsSync(p))||splashHtmlCandidates[0]
-    splashWindow.loadFile(splashHtmlPath).then(()=>{
-        if(splashWindow&&!splashWindow.isDestroyed()){
-            splashWindow.webContents.executeJavaScript(`window.__appVersion=${JSON.stringify(app.getVersion())}`).catch(()=>{})
-            splashWindow.center()
-            splashWindow.show()
-        }
-    }).catch(console.error)
-}
-function stopSplash(){
-    console.log("[splash] stopSplash called, splashProcess:",splashProcess?splashProcess.pid:null,"splashWindow:",!!splashWindow)
-    if(!splashProcess&&!splashWindow){
-        console.log("[splash] already stopped")
-        return
-    }
-    if(isWin&&splashProcess){
-        console.log("[splash] killing splash process:",splashProcess.pid)
-        try{splashProcess.kill()}
-        catch{}
-        splashProcess=null
-    }
-    if(splashWindow&&!splashWindow.isDestroyed()){
-        console.log("[splash] closing splash window")
-        splashWindow.close()
-        splashWindow=null
-    }
 }
 function createMainWindow(){
     let isCompiled=import.meta.url.endsWith(".js")||import.meta.url.endsWith(".mjs")||import.meta.url.endsWith(".cjs")
@@ -513,19 +434,27 @@ function createMainWindow(){
             spellcheck:false,
             disableHtmlFullscreenWindowResize:true,
             sandbox:true,
-            webgl:true,
+            // WebGL is disabled. This is a text-processing app; WebGL is unnecessary
+            // and can trigger GPU-related renderer crashes on some Windows drivers.
+            webgl:false,
             backgroundThrottling:false,
-            enablePreferredSizeMode:true,
-            scrollBounce:true
+            // enablePreferredSizeMode and scrollBounce are disabled to avoid
+            // compositor paths that have been linked to renderer hangs/crashes.
+            enablePreferredSizeMode:false,
+            scrollBounce:false
         }
     })
     mainWindow.center()
+    // Mica/Acrylic background materials are disabled. On Windows they rely on the
+    // GPU compositor and have been observed to trigger renderer process crashes
+    // (exit code -36861 / Crashpad_NotConnectedToHandler) on certain drivers,
+    // especially inside frameless windows. A plain opaque background is safer.
     if(isWin&&typeof mainWindow.setBackgroundMaterial==="function"){
         try{
-            mainWindow.setBackgroundMaterial("mica")
+            mainWindow.setBackgroundMaterial("none")
         }
         catch{
-            // Mica not supported on this Windows version / Electron version — fall back silently
+            // Older Electron builds may not support "none"; the window still works.
         }
     }
     mainWindow.setMenu(null)
@@ -570,14 +499,10 @@ function createMainWindow(){
     })
     mainWindow.webContents.once("dom-ready",()=>{
         registerDeferredIpcHandlers()
-        stopSplash()
         if(mainWindow&&!mainWindow.isDestroyed()){
             mainWindow.show()
             mainWindow.focus()
         }
-    })
-    mainWindow.webContents.once("did-finish-load",()=>{
-        stopSplash()
     })
     mainWindow.webContents.on("did-fail-load",(event,errorCode,errorDescription,validatedURL,isMainFrame)=>{
         if(!isMainFrame)return
@@ -587,7 +512,6 @@ function createMainWindow(){
             t("dialog.loadingFailedTitle"),
             t("dialog.loadingFailedMessage",undefined,{errorDescription})
         )
-        stopSplash()
         if(mainWindow&&!mainWindow.isDestroyed()){
             mainWindow.close()
         }
@@ -598,13 +522,11 @@ function createMainWindow(){
             t("dialog.rendererCrashedTitle"),
             t("dialog.rendererCrashedMessage")
         )
-        stopSplash()
         if(mainWindow&&!mainWindow.isDestroyed()){
             mainWindow.close()
         }
     })
     mainWindow.on("closed",()=>{
-        stopSplash()
         mainWindow=null
     })
 }
@@ -1011,6 +933,34 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:t("error.failedToParseFile")}
         }
     })
+    handle("file:parseBuffer",async(_event,{buffer,fileType}:{buffer:ArrayBuffer;fileType:string}):Promise<{success:boolean;content?:string;error?:string}>=>{
+        try{
+            if(!buffer||!fileType||typeof fileType!=="string"){
+                return{success:false,error:t("error.invalidFilePathOrType")}
+            }
+            let nodeBuffer:Buffer
+            if(Buffer.isBuffer(buffer)){
+                nodeBuffer=buffer
+            }
+            else if(ArrayBuffer.isView(buffer)){
+                nodeBuffer=Buffer.from(buffer.buffer,buffer.byteOffset,buffer.byteLength)
+            }
+            else if(buffer instanceof ArrayBuffer){
+                nodeBuffer=Buffer.from(buffer)
+            }
+            else{
+                return{success:false,error:t("error.invalidFilePathOrType")}
+            }
+            if(!fileParser){
+                fileParser=new FileParserLazy()
+            }
+            let text=await fileParser.parseFileBuffer(nodeBuffer,fileType)
+            return{success:true,content:text}
+        }
+        catch(error){
+            return{success:false,error:t("error.failedToParseFile")}
+        }
+    })
     handle("file:parseBatch",async(_event,{files}:{files:FileObj[]}):Promise<{success:boolean;results?:ParseBatchItem[];error?:string}>=>{
         try{
             if(!files||!Array.isArray(files)||files.length===0){
@@ -1382,7 +1332,6 @@ function registerDeferredIpcHandlers():void{
 }
 app.whenReady().then(()=>{
     registerAppProtocolHandler()
-    startSplash()
     registerCriticalIpcHandlers()
     createMainWindow()
     registerWindowControlHandlers(()=>mainWindow)
@@ -1399,15 +1348,6 @@ app.on("window-all-closed",()=>{
 app.on("before-quit",async(event)=>{
     event.preventDefault()
     isAppQuitting=true
-    try{stopSplash()}catch{}
-    if(splashProcess){
-        try{splashProcess.kill()}catch{}
-        splashProcess=null
-    }
-    if(splashWindow&&!splashWindow.isDestroyed()){
-        splashWindow.close()
-        splashWindow=null
-    }
     if(fileParser){
         try{await fileParser.dispose()}catch{}
         fileParser=null
