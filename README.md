@@ -196,7 +196,6 @@ training-generator/
 │   ├── preload.ts           # Secure context bridge APIs
 │   ├── bootstrap.ts         # Application bootstrap
 │   ├── sw.ts                # Service Worker (offline caching)
-│   ├── splash.html          # Native C++ splash screen
 │   ├── cli/
 │   │   ├── index.ts         # Headless CLI entry point
 │   │   └── provider.ts      # CLI provider configuration
@@ -273,7 +272,6 @@ training-generator/
 │       └── pdfWorker.ts     # PDF parsing worker
 ├── tests/                   # 139 test files, 3328+ tests
 ├── assets/                  # Icons, fonts, favicons
-├── native-splash/           # Native C++/WinAPI splash screen (Windows)
 ├── examples/                # Sample documents for testing
 ├── index.html              # Main application window
 ├── vite.config.ts          # Vite build configuration
