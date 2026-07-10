@@ -5,6 +5,7 @@ export interface ElectronAPI{
     readFile:(filePath:string)=>Promise<ReadFileResult>
     getPrompt:(language:string,processingType:string)=>Promise<{success:boolean;content?:string;error?:string}>
     parseFile:(filePath:string,fileType:string)=>Promise<ParseFileResult>
+    parseFileBuffer:(buffer:ArrayBuffer,fileType:string)=>Promise<ParseFileResult>
     parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
     saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>
     saveFileDialog:(defaultFilename?:string)=>Promise<string|null>
