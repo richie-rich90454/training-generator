@@ -4,6 +4,7 @@ import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
+import { ModelCombobox } from "./ModelCombobox.js"
 import cardsStyles from "./styles/Cards.module.css"
 import buttonsStyles from "./styles/Buttons.module.css"
 import formsStyles from "./styles/Forms.module.css"
@@ -49,14 +50,16 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         <Icon html={renderIcon("fa-brain")} />
                         <span data-i18n="config.model">{t("config.model")}</span>
                     </label>
-                    <input
-                        id="config-model"
-                        class={`${styles["form-control"]} ${styles["config-field__control"]}`}
-                        type="text"
-                        value={settingsStore.settings.model}
-                        placeholder={t("config.model")}
-                        onInput={(e) => settingsStore.setModel(e.currentTarget.value)}
-                    />
+                    <div class={styles["config-field__control"]}>
+                        <ModelCombobox
+                            value={settingsStore.settings.model || ""}
+                            options={props.appStore.uiStore.availableOllamaModels()}
+                            onChange={settingsStore.setModel}
+                            placeholder={t("config.model")}
+                            inputId="config-model"
+                            ariaLabel={t("config.model")}
+                        />
+                    </div>
                 </div>
                 <div class={styles["config-field"]}>
                     <label class={styles["config-field__label"]} for="config-provider">
