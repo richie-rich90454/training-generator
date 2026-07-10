@@ -130,7 +130,7 @@ export function createAppStore(): AppStore {
     }
     function initProvider(): void {
         try {
-            untrack(providerManager)?.stopHealthChecks()
+            untrack(providerManager)?.dispose()
             const type = settingsStore.settings.provider || "ollama"
             const config = {
                 apiKey: settingsStore.apiKeyPlain(),
@@ -613,7 +613,7 @@ export function createAppStore(): AppStore {
         stopOllamaMonitor()
         processor.abort()
         uiStore.stopDashboard()
-        providerManager()?.stopHealthChecks()
+        providerManager()?.dispose()
         setProviderManager(null)
         processor.provider = null
     }
