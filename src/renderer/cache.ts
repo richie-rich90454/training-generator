@@ -127,6 +127,11 @@ export async function setCachedResult(chunk:string,model:string,prompt:string,re
 export async function clearCache():Promise<void>{
     cacheMap.clear()
     cacheLoaded=false
+    loadPromise=null
+    if(saveTimeout){
+        clearTimeout(saveTimeout)
+        saveTimeout=null
+    }
     try{
         if(window.electronAPI?.clearCache){
             await window.electronAPI.clearCache()
