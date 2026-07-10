@@ -605,6 +605,12 @@ function createTray():void{
 export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options}=payload
     options=options??{}
+    if(options.num_predict==null){
+        options.num_predict=4096
+    }
+    else{
+        options.num_predict=Math.min(8192,Math.max(256,options.num_predict))
+    }
     if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
         return{success:false,error:t("error.invalidModelNameOrPrompt")}
     }
@@ -612,10 +618,12 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         return{success:false,error:t("error.promptTooLarge")}
     }
     let promptLength=prompt.length
-    let timeout=300000
-    if(promptLength>10000)timeout=600000
-    else if(promptLength>5000)timeout=450000
+    let initialTimeout=300000
+    if(promptLength>10000)initialTimeout=600000
+    else if(promptLength>5000)initialTimeout=450000
+    const interDataTimeout=120000
     try{
+        console.log(`[ollama] generating with ${model} (${promptLength} chars, initial timeout ${initialTimeout}ms)`)
         let response=await axios.post(
             "http://localhost:11434/api/generate",
             {
@@ -625,11 +633,12 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                 options:{
                     ...options,
                     temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9))
+                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                    num_predict:options.num_predict
                 }
             },
             {
-                timeout,
+                timeout:initialTimeout,
                 responseType:"stream",
                 headers:{
                     "Content-Type":"application/json",
@@ -640,16 +649,22 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         let fullResponse=""
         let stream=response.data
         let noDataTimer:ReturnType<typeof setTimeout>|null=null
+        let receivedAnyData=false
         return await new Promise<{success:boolean;response?:string;error?:string}>((resolve,reject)=>{
             let buffer=""
-            noDataTimer=setTimeout(()=>{
-                reject(new Error(t("error.streamTimedOut")))
-            },timeout)
-            stream.on("data",(chunk:Buffer)=>{
+            const resetNoDataTimer=()=>{
                 if(noDataTimer)clearTimeout(noDataTimer)
+                const ms=receivedAnyData?interDataTimeout:initialTimeout
                 noDataTimer=setTimeout(()=>{
                     reject(new Error(t("error.streamTimedOut")))
-                },timeout)
+                },ms)
+            }
+            noDataTimer=setTimeout(()=>{
+                reject(new Error(t("error.streamTimedOut")))
+            },initialTimeout)
+            stream.on("data",(chunk:Buffer)=>{
+                receivedAnyData=true
+                resetNoDataTimer()
                 buffer+=chunk.toString()
                 let lines=buffer.split("\n")
                 buffer=lines.pop() ?? ""
@@ -697,7 +712,16 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         })
     }
     catch(error){
-        return{success:false,error:t("error.failedToGenerateResponse")}
+        let err=error as any
+        let detail=err?.message||""
+        if(err?.response?.data){
+            const data=typeof err.response.data==="string"?err.response.data:JSON.stringify(err.response.data)
+            if(data)detail=`${detail} ${data}`.trim()
+        }
+        if(err?.code)detail=`${detail} (${err.code})`.trim()
+        const safeDetail=detail.slice(0,500)
+        console.error("[ollama] generate failed:",safeDetail)
+        return{success:false,error:`${t("error.failedToGenerateResponse")}${safeDetail?": "+safeDetail:""}`}
     }
 }
 const LOGS_DIR=path.join(userDataPath,"logs")
