@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import path from "path";
 import { iconRegistry, renderIcon } from "../src/renderer/icons.js";
@@ -53,8 +53,14 @@ describe("icon registry SVG shape", ()=>{
         }
     });
 });
-describe("renderIcon", ()=>{
-    test("renderIcon overrides width and height to the requested size", ()=>{
+describe("renderIcon",()=>{
+    beforeEach(()=>{
+        vi.spyOn(console,"warn").mockImplementation(()=>{})
+    })
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
+    test("renderIcon overrides width and height to the requested size",()=>{
         let svg: string=renderIcon("fa-cog", 20);
         expect(svg).toContain('width="20"');
         expect(svg).toContain('height="20"');
