@@ -36,9 +36,9 @@ class Processor{
         total:number,
         provider:Provider,
         provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
-    ):Promise<TrainingItem[]>{
-        let allItems:TrainingItem[]=[]
-        let MAX_CHARS_PER_BATCH=100000
+    ):Promise<void>{
+        let MAX_CHARS_PER_BATCH=32000
+        let MAX_CHUNKS_PER_BATCH=8
         let stats=this.stats
         let filtered=smallChunks.filter(item=>item.chunk&&item.chunk.trim().length>0)
         let batches:{chunk:string;index:number}[][]=[]
@@ -47,7 +47,7 @@ class Processor{
         let estimatedPromptMultiplier=3
         for(let item of filtered){
             let estimatedSize=item.chunk.length*estimatedPromptMultiplier+50
-            if(currentBatch.length>0&&currentBatchSize+estimatedSize>MAX_CHARS_PER_BATCH){
+            if(currentBatch.length>0&&(currentBatch.length>=MAX_CHUNKS_PER_BATCH||currentBatchSize+estimatedSize>MAX_CHARS_PER_BATCH)){
                 batches.push(currentBatch)
                 currentBatch=[]
                 currentBatchSize=0
@@ -81,7 +81,6 @@ class Processor{
                         let prov:ProvenanceData={...provenanceBase,chunkIndex:batch[j].index}
                         items=items.map(item=>tagItem(item,prov))
                     }
-                    allItems.push(...items)
                     let tokens=Math.ceil((responses[j]||"").length/4)
                     stats.recordChunkSuccess(tokens)
                     onChunkComplete(batch[j].index,total,items)
@@ -97,7 +96,6 @@ class Processor{
                 }
             }
         }
-        return allItems
     }
     abort():void{
         this.aborted=true
@@ -145,6 +143,10 @@ class Processor{
         let signal=this.abortController!.signal
         let allItems:TrainingItem[]=[]
         let total=chunks.length
+        const completeChunk=(index:number,_total:number,items:TrainingItem[])=>{
+            allItems.push(...items)
+            onChunkComplete(index,total,items)
+        }
         let selfProvider=this.provider
         let batchingEnabled=!this.demoMode&&selfProvider!==null&&selfProvider.name!=="ollama"
         let queue:{chunk:string;index:number}[]=[]
@@ -160,14 +162,14 @@ class Processor{
             }
             if(smallChunks.length>0&&!signal.aborted){
                 try{
-                    let batchedItems=await this.batchSmallChunks(
+                    await this.batchSmallChunks(
                         smallChunks,model,processingType,
                         generatePrompt,createTrainingItem,
-                        onChunkComplete,onChunkError,
+                        completeChunk,onChunkError,
                         signal,total,selfProvider!,
                         provenanceBase
                     )
-                    allItems.push(...batchedItems)
+                    smallChunks.length=0
                 }
                 catch(err){
                     if(!signal.aborted){
@@ -196,7 +198,6 @@ class Processor{
             sig:AbortSignal,
             demoMode:boolean,
             getDemoResponse:(chunk:string,processingType:string)=>string,
-            allItems:TrainingItem[],
             onSlotFree:()=>void,
             onDone:()=>void,
             provider:Provider|null,
@@ -224,7 +225,6 @@ class Processor{
                         let prov:ProvenanceData={...provenanceBase,chunkIndex:idx}
                         items=items.map(item=>tagItem(item,prov))
                     }
-                    allItems.push(...items)
                     onComplete(idx,total,items)
                     stats.recordChunkSuccess(cached.tokens)
                     chunksArr[idx]=(null as any) // Release chunk for GC
@@ -257,7 +257,6 @@ class Processor{
                     let prov:ProvenanceData={...provenanceBase,chunkIndex:idx}
                     items=items.map(item=>tagItem(item,prov))
                 }
-                allItems.push(...items)
                 onComplete(idx,total,items)
                 chunksArr[idx]=(null as any) // Release chunk for GC
             }
@@ -283,13 +282,14 @@ class Processor{
                     processOne(
                         chunk,index,model,processingType,
                         generatePrompt,createTrainingItem,
-                        onChunkComplete,onChunkError,signal,
+                        completeChunk,onChunkError,signal,
                         this.demoMode,this.getDemoResponse.bind(this),
-                        allItems,onSlotFree,onDone,selfProvider,chunks,
+                        onSlotFree,onDone,selfProvider,chunks,
                         provenanceBase
                     )
                 }
                 else if(pending===0&&running===0){
+                    chunks.length=0
                     stats.finish()
                     resolve(allItems)
                 }
@@ -297,25 +297,27 @@ class Processor{
             let onDone=()=>{
                 pending--
                 if(pending===0&&running===0){
+                    chunks.length=0
                     stats.finish()
                     resolve(allItems)
                 }
             }
             let initial=Math.min(this.concurrency,queue.length)
-            for(let i=0;i<initial;i++){
+        for(let i=0;i<initial;i++){
                 let{chunk,index}=queue.shift()!
                 running++
                 pending++
                 processOne(
                     chunk,index,model,processingType,
                     generatePrompt,createTrainingItem,
-                    onChunkComplete,onChunkError,signal,
+                    completeChunk,onChunkError,signal,
                     this.demoMode,this.getDemoResponse.bind(this),
-                    allItems,onSlotFree,onDone,selfProvider,chunks,
+                    onSlotFree,onDone,selfProvider,chunks,
                     provenanceBase
                 )
             }
             if(initial===0){
+                chunks.length=0
                 stats.finish()
                 resolve(allItems)
             }
