@@ -1,7 +1,9 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import { createUIStore, type UIStore } from "../src/renderer/stores/uiStore.js"
+import { withRoot } from "./setup.js"
 let store: UIStore
+let dispose: () => void
 let timeouts: Array<{ id: number; fn: () => void; ms: number }>
 let intervals: Array<{ id: number; fn: () => void; ms: number }>
 let nextTimerId: number
@@ -44,9 +46,13 @@ function fireTimeout(id: number): void {
 beforeEach(() => {
     vi.useFakeTimers()
     stubTimers()
-    store = createUIStore()
+    store = withRoot((d) => {
+        dispose = d
+        return createUIStore()
+    })
 })
 afterEach(() => {
+    dispose()
     vi.useRealTimers()
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
