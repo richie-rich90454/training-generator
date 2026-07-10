@@ -26,6 +26,7 @@ export interface OrchestratorDeps {
     onOutputUpdated?: () => void
 }
 export interface ProcessFileCallbacks {
+    onFileStart?: (chunkCount: number) => void
     onChunkProcessed?: (index: number, total: number, items: TrainingItem[]) => void
     onChunkFailed?: (index: number, error: string) => void
     onOutputUpdated?: () => void
@@ -182,6 +183,8 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (chunks.length === 0) {
                 throw new Error(t("error.noChunksCreated"))
             }
+            console.log(`[orchestrator] ${fileObj.name}: ${chunks.length} chunks, ${textContent.length} chars`)
+            callbacks?.onFileStart?.(chunks.length)
             const model = settings.model || ""
             let processingType = settings.processingType || "instruction"
             if (settings.enableThinking === false && (processingType === "cot" || processingType === "tot")) {
