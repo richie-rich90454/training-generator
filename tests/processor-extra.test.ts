@@ -237,6 +237,7 @@ describe("Processor batching", () => {
 describe("Processor error handling", () => {
     beforeEach(async()=>{
         vi.stubGlobal("window", { electronAPI: {} })
+        vi.spyOn(console, "error").mockImplementation(() => {})
         await clearCache()
     })
     afterEach(()=>{
