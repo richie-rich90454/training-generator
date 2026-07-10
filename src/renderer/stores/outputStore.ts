@@ -18,6 +18,8 @@ export interface OutputStore {
     parseConversationTurns: (text: string) => ConversationTurn[]
     appendOutput: (items: TrainingItem[]) => void
     clearOutput: () => void
+    stageItems: (items: TrainingItem[]) => void
+    clearStaging: () => void
     exportOutput: (exportFormat?: string) => Promise<void>
     copyOutput: () => Promise<void>
     formatData: (data: TrainingItem[], format: string) => string
@@ -25,14 +27,17 @@ export interface OutputStore {
 }
 export function createOutputStore(): OutputStore {
     const [outputData, setOutputData] = createStore<TrainingItem[]>([])
+    const [stagingData, setStagingData] = createStore<TrainingItem[]>([])
     const [exportFormat, setExportFormat] = createSignal<ExportFormat>("jsonl")
-    const hasOutput = createMemo(() => outputData.length > 0)
-    const itemCount = createMemo(() => outputData.length)
+    const hasOutput = createMemo(() => outputData.length + stagingData.length > 0)
+    const itemCount = createMemo(() => outputData.length + stagingData.length)
     const previewText = createMemo(() => {
-        if (outputData.length === 0) return t("output.empty")
-        const sample = outputData.slice(-3)
+        const total = outputData.length + stagingData.length
+        if (total === 0) return t("output.empty")
+        const combined = [...outputData, ...stagingData]
+        const sample = combined.slice(-3)
         const jsonStr = JSON.stringify(sample, null, 2)
-        return t("output.totalItems", undefined, { totalCount: String(outputData.length) }) + "\n" + jsonStr
+        return t("output.totalItems", undefined, { totalCount: String(total) }) + "\n" + jsonStr
     })
     function getItemText(item: TrainingItem): string {
         if (item.output) return item.output
@@ -251,8 +256,16 @@ export function createOutputStore(): OutputStore {
         if (items.length === 0) return
         setOutputData(outputData => [...outputData, ...items])
     }
+    function stageItems(items: TrainingItem[]): void {
+        if (items.length === 0) return
+        setStagingData(stagingData => [...stagingData, ...items])
+    }
+    function clearStaging(): void {
+        setStagingData([])
+    }
     function clearOutput(): void {
         setOutputData([])
+        setStagingData([])
     }
     function formatData(data: TrainingItem[], format: string): string {
         if (format === "jsonl") return exportJSONL(data)
@@ -326,6 +339,8 @@ export function createOutputStore(): OutputStore {
         parseConversationTurns,
         appendOutput,
         clearOutput,
+        stageItems,
+        clearStaging,
         exportOutput,
         copyOutput,
         formatData,
