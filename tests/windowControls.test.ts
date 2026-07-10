@@ -111,6 +111,7 @@ describe("renderer window controls",()=>{
     let mockOnWindowMaximizedChange:ReturnType<typeof vi.fn>
     let savedElectronAPI:unknown
     beforeEach(()=>{
+        vi.spyOn(console,"warn").mockImplementation(()=>{})
         savedElectronAPI=(window as any).electronAPI
         mockUnsubscribe=vi.fn()
         mockOnWindowMaximizedChange=vi.fn((cb:(isMaximized:boolean)=>void)=>{
