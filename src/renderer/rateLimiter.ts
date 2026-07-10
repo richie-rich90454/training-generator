@@ -33,6 +33,7 @@ export class RateLimiter {
       let wait = this.pausedUntil - now
       if (wait > this.maxWaitMs) wait = this.maxWaitMs
       await new Promise(resolve => setTimeout(resolve, wait))
+      if (signal?.aborted) throw new Error("Rate limit acquire aborted")
       now = Date.now()
     }
     let elapsed = now - this.lastRefill
