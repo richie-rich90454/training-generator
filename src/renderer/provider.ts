@@ -95,16 +95,20 @@ export class OllamaProvider implements Provider{
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
+        console.log(`[ollama-provider] request start: model=${model}, prompt=${prompt.length} chars`)
         try{
             let result=await retryWithBackoff(async()=>{
+                const maxTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
                 let r=await api.generateWithOllamaStream(model,prompt,{
                     temperature:options?.temperature??0.7,
-                    top_p:options?.top_p??0.9
+                    top_p:options?.top_p??0.9,
+                    num_predict:maxTokens
                 })
                 if(!r.success)throw new Error(r.error||"Ollama generation failed")
                 return r
             },3,1000)
             let text=result.response!
+            console.log(`[ollama-provider] request complete: ${text.length} chars response`)
             return{text,tokens:Math.ceil(text.length/4),provider:"ollama"}
         }
         catch(error){
