@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import Processor from "../src/renderer/processor.js"
 import { createOutputStore, type OutputStore, type ExportFormat } from "../src/renderer/stores/outputStore.js"
+import { withRoot } from "./setup.js"
 import { saveCheckpoint, loadCheckpoint, clearCheckpoint } from "../src/renderer/checkpoint.js"
 import { deduplicate } from "../src/renderer/deduplicator.js"
 import { validateItems } from "../src/renderer/qualityValidator.js"
@@ -9,11 +10,23 @@ import { semanticChunk, simpleChunk } from "../src/renderer/chunker.js"
 import { clearCache, resetCacheStats } from "../src/renderer/cache.js"
 import type { Provider, ProviderResult } from "../src/renderer/provider.js"
 import type { TrainingItem, SelectedFile } from "../src/types/index.js"
+let disposes: Array<() => void> = []
+beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.spyOn(console, "error").mockImplementation(() => {})
+})
 function makeMockApp(format: string="jsonl"): { format: string; outputStore: OutputStore } {
-    let outputStore=createOutputStore()
+    let outputStore = withRoot((dispose) => {
+        disposes.push(dispose)
+        return createOutputStore()
+    })
     outputStore.setExportFormat(format as ExportFormat)
     return { format, outputStore }
 }
+afterEach(() => {
+    disposes.forEach(d => d())
+    disposes = []
+})
 function makeMockProvider(responseText: string): Provider {
     return {
         name: "mock",
@@ -104,9 +117,10 @@ describe("integration: processor + output store", () => {
         processor.provider=makeMockProvider("Answer: cached response")
         processor.concurrency=1
         let app=makeMockApp("jsonl")
-        let chunks=["Same chunk content repeated for caching test."]
-        await processor.processChunks(
-            chunks,
+        let firstChunks=["Same chunk content repeated for caching test. ".repeat(30)]
+        let secondChunks=["Same chunk content repeated for caching test. ".repeat(30)]
+        let firstResults=await processor.processChunks(
+            firstChunks,
             "model",
             "instruction",
             generatePrompt,
@@ -115,7 +129,7 @@ describe("integration: processor + output store", () => {
             () => {}
         )
         let secondResults=await processor.processChunks(
-            chunks,
+            secondChunks,
             "model",
             "instruction",
             generatePrompt,
@@ -123,7 +137,9 @@ describe("integration: processor + output store", () => {
             () => {},
             () => {}
         )
+        expect(firstResults.length).toBeGreaterThan(0)
         expect(secondResults.length).toBeGreaterThan(0)
+        expect(vi.mocked(processor.provider.generate)).toHaveBeenCalledTimes(1)
     })
     it("processes conversation type output", async() => {
         let processor=new Processor()
