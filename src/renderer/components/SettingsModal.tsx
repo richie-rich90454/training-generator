@@ -269,6 +269,18 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                 </label>
                             </div>
                             <div class={styles["settings-field"]}>
+                                <label class={styles["settings-field__label"]} for="settings-enable-thinking">
+                                    <input
+                                        id="settings-enable-thinking"
+                                        class={styles["form-checkbox"]}
+                                        type="checkbox"
+                                        checked={settingsStore.appSettings.enableThinking}
+                                        onChange={(e) => settingsStore.setEnableThinking(e.currentTarget.checked)}
+                                    />
+                                    <span data-i18n="settings.enableThinking">{t("settings.enableThinking")}</span>
+                                </label>
+                            </div>
+                            <div class={styles["settings-field"]}>
                                 <label class={styles["settings-field__label"]} for="settings-max-file-size">
                                     <Icon html={renderIcon("fa-hdd")} />
                                     <span data-i18n="settings.maxFileSize">{t("settings.maxFileSize")}</span>
