@@ -52,6 +52,7 @@ export interface UIStore {
     outputPreviewLoading: () => boolean
     filesProcessed: () => number
     lastProcessed: () => string
+    availableOllamaModels: () => string[]
     setProgress: (percent: number, text: string) => void
     addLog: (message: string, type?: LogType) => void
     clearLogs: () => void
@@ -82,6 +83,7 @@ export interface UIStore {
     updateOutputPreviewDebounced: (text: string, loading?: boolean) => void
     setFilesProcessed: (count: number) => void
     setLastProcessed: (time: string) => void
+    setAvailableOllamaModels: (models: string[]) => void
     getLogIcon: (type: LogType) => string
 }
 const MAX_LOGS = 50
@@ -109,6 +111,7 @@ export function createUIStore(): UIStore {
     const [outputPreviewLoading, setOutputPreviewLoading] = createSignal<boolean>(false)
     const [filesProcessed, setFilesProcessed] = createSignal<number>(0)
     const [lastProcessed, setLastProcessed] = createSignal<string>(t("status.lastProcessedNever"))
+    const [availableOllamaModels, setAvailableOllamaModels] = createSignal<string[]>([])
     const settingsOpen = createMemo(() => modalOpen() === "settings")
     const helpOpen = createMemo(() => modalOpen() === "help")
     const shortcutsOpen = createMemo(() => modalOpen() === "shortcuts")
@@ -306,6 +309,7 @@ export function createUIStore(): UIStore {
         outputPreviewLoading,
         filesProcessed,
         lastProcessed,
+        availableOllamaModels,
         setProgress,
         addLog,
         clearLogs,
@@ -336,6 +340,7 @@ export function createUIStore(): UIStore {
         updateOutputPreviewDebounced,
         setFilesProcessed: (count: number) => setFilesProcessed(count),
         setLastProcessed: (time: string) => setLastProcessed(time),
+        setAvailableOllamaModels: (models: string[]) => setAvailableOllamaModels(models),
         getLogIcon
     }
 }
