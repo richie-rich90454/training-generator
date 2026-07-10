@@ -245,6 +245,10 @@ export class ProviderManager implements Provider{
         }
     }
 
+    dispose():void{
+        this.stopHealthChecks()
+    }
+
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let health=this.providers[this.currentIndex]
         try{
