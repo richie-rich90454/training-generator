@@ -153,12 +153,14 @@ export function createAppStore(): AppStore {
                 addLog(t("log.runningInBrowserMode"), "warning")
                 const browserStatus: OllamaStatus = { running: false, models: [], error: t("error.browserMode") }
                 uiStore.setOllamaStatus(browserStatus)
+                uiStore.setAvailableOllamaModels([])
                 fileStore.setOllamaReady(false)
                 return browserStatus
             }
             const status = await window.electronAPI.checkOllama()
             uiStore.setOllamaStatus(status)
             fileStore.setOllamaReady(status.running)
+            uiStore.setAvailableOllamaModels(status.running ? status.models.map(m => m.name) : [])
             if (status.running) {
                 addLog(t("log.ollamaRunning", undefined, { version: status.version || "", count: String(status.models.length) }), "success")
             }
@@ -171,6 +173,7 @@ export function createAppStore(): AppStore {
             logger.error("app", t("log.ollamaCheckFailed"), { error: (error as Error).message })
             const errorStatus: OllamaStatus = { running: false, models: [], error: (error as Error).message }
             uiStore.setOllamaStatus(errorStatus)
+            uiStore.setAvailableOllamaModels([])
             fileStore.setOllamaReady(false)
             return errorStatus
         }
@@ -207,7 +210,9 @@ export function createAppStore(): AppStore {
             language: settingsStore.settings.language || "en",
             chunkSize: settingsStore.settings.chunkSize || 8000,
             smartSizing: settingsStore.appSettings.smartSizing ?? false,
-            customPrompt: settingsStore.settings.customPrompt || ""
+            enableThinking: settingsStore.appSettings.enableThinking ?? true,
+            customPrompt: settingsStore.settings.customPrompt || "",
+            maxChunks: settingsStore.appSettings.maxChunks
         }
     }
     async function processFiles(): Promise<void> {
@@ -267,47 +272,45 @@ export function createAppStore(): AppStore {
             let queueIndex = 0
             uiStore.startDashboard()
             uiStore.setDashboardMetrics({ chunksTotal: queue.length, activeProvider: settingsStore.settings.provider || "--" })
-            async function processNext(): Promise<void> {
-                if (processor.isAborted) {
-                    return
-                }
-                const file = queue[queueIndex++]
-                if (!file) {
-                    return
-                }
-                fileStore.setFileStatus(file.name, "processing")
-                addLog(t("log.processingFile", undefined, { index: String(completedFiles + 1), total: String(queue.length), name: file.name }), "info")
-                const result = await orchestrator.processFile(file, getOrchestratorSettings(), {
-                    onChunkProcessed: (index: number, total: number, items: TrainingItem[]) => {
-                        addLog(t("log.chunkProcessed", undefined, { index: String(index + 1), total: String(total), percent: String(Math.round(((index + 1) / total) * 100)), count: String(items.length) }), "info")
-                        updateOutputPreview()
-                    },
-                    onChunkFailed: (index: number, error: string) => {
-                        addLog(t("log.chunkFailed", undefined, { index: String(index + 1), error }), "warning")
+            async function processWorker(): Promise<void> {
+                while (!processor.isAborted) {
+                    const file = queue[queueIndex++]
+                    if (!file) {
+                        return
                     }
-                })
-                completedFiles++
-                if (result.success && result.data) {
-                    outputStore.appendOutput(result.data)
-                    totalItemsGenerated += result.data.length
-                    successfulFiles++
-                    fileStore.setFileStatus(file.name, "completed")
-                    addLog(t("log.fileProcessedSuccess", undefined, { name: file.name, count: String(result.data.length) }), "success")
+                    fileStore.setFileStatus(file.name, "processing")
+                    addLog(t("log.processingFile", undefined, { index: String(completedFiles + 1), total: String(queue.length), name: file.name }), "info")
+                    const result = await orchestrator.processFile(file, getOrchestratorSettings(), {
+                        onChunkProcessed: (index: number, total: number, items: TrainingItem[]) => {
+                            addLog(t("log.chunkProcessed", undefined, { index: String(index + 1), total: String(total), percent: String(Math.round(((index + 1) / total) * 100)), count: String(items.length) }), "info")
+                            updateOutputPreview()
+                        },
+                        onChunkFailed: (index: number, error: string) => {
+                            addLog(t("log.chunkFailed", undefined, { index: String(index + 1), error }), "warning")
+                        }
+                    })
+                    completedFiles++
+                    if (result.success && result.data) {
+                        outputStore.appendOutput(result.data)
+                        totalItemsGenerated += result.data.length
+                        successfulFiles++
+                        fileStore.setFileStatus(file.name, "completed")
+                        addLog(t("log.fileProcessedSuccess", undefined, { name: file.name, count: String(result.data.length) }), "success")
+                    }
+                    else {
+                        failedFiles++
+                        fileStore.setFileStatus(file.name, "failed")
+                        addLog(t("log.fileProcessedError", undefined, { name: file.name, error: result.error || "" }), "error")
+                    }
+                    const percent = Math.min(99, (completedFiles / queue.length) * 100)
+                    setProgress(percent, t("processing.filesProgress", undefined, { completed: String(completedFiles), total: String(queue.length) }))
+                    uiStore.setDashboardMetrics({ chunksDone: completedFiles, activeProvider: settingsStore.settings.provider || "--" })
+                    updateOutputPreview()
                 }
-                else {
-                    failedFiles++
-                    fileStore.setFileStatus(file.name, "failed")
-                    addLog(t("log.fileProcessedError", undefined, { name: file.name, error: result.error || "" }), "error")
-                }
-                const percent = Math.min(99, (completedFiles / queue.length) * 100)
-                setProgress(percent, t("processing.filesProgress", undefined, { completed: String(completedFiles), total: String(queue.length) }))
-                uiStore.setDashboardMetrics({ chunksDone: completedFiles, activeProvider: settingsStore.settings.provider || "--" })
-                updateOutputPreview()
-                await processNext()
             }
             const workers: Promise<void>[] = []
             for (let i = 0; i < maxParallel; i++) {
-                workers.push(processNext())
+                workers.push(processWorker())
             }
             await Promise.all(workers)
             setProgress(100, t("processing.complete"))
