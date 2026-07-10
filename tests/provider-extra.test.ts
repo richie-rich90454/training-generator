@@ -2,6 +2,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { OllamaProvider, OpenAIProvider, ProviderManager, createProvider, retryWithBackoff } from "../src/renderer/provider.js"
 import { RateLimiter } from "../src/renderer/rateLimiter.js"
+
+beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.spyOn(console, "log").mockImplementation(() => {})
+})
+
+afterEach(() => {
+    vi.restoreAllMocks()
+})
+
 describe("OllamaProvider", () => {
     beforeEach(()=>{
         vi.stubGlobal("window", {
@@ -10,9 +21,10 @@ describe("OllamaProvider", () => {
                 generateWithOllamaStream: vi.fn(async(model: string, prompt: string, options: any)=>({ success: true, response: `response for ${model}` })),
             },
         })
+        vi.stubGlobal("setTimeout", (fn: () => void) => { fn(); return 0 })
     })
     afterEach(()=>{
-        vi.restoreAllMocks()
+        vi.unstubAllGlobals()
     })
     it("returns healthy when ollama is running", async() => {
         let provider=new OllamaProvider()
@@ -58,9 +70,10 @@ describe("OpenAIProvider", () => {
                 generateWithOpenAI: vi.fn(async(apiKey: string, baseUrl: string, model: string, prompt: string, options: any)=>({ success: true, response: `openai ${model}`, usage: { total_tokens: 10 } })),
             },
         })
+        vi.stubGlobal("setTimeout", (fn: () => void) => { fn(); return 0 })
     })
     afterEach(()=>{
-        vi.restoreAllMocks()
+        vi.unstubAllGlobals()
     })
     it("creates with default baseUrl", () => {
         let provider=new OpenAIProvider("key")
