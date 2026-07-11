@@ -63,7 +63,7 @@ describe("SettingsStore initial state", () => {
         expect(store.appSettings.maxOutputItems).toBe(100000)
         expect(store.appSettings.maxChunks).toBe(500)
         expect(store.appSettings.maxParallelFiles).toBe(1)
-        expect(store.appSettings.enableThinking).toBe(true)
+        expect(store.appSettings.enableThinking).toBe(false)
     })
     it("starts with empty profile selection", () => {
         store = makeSettingsStore()
