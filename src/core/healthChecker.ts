@@ -17,8 +17,8 @@ export interface ProviderPing{
 }
 function defaultGetFreeSpaceBytes(): number{
     let path=process.platform==="win32"?"C:\\":"/";
-    let stats=(fs as unknown as {statfsSync: (path: string)=>{available: number, bsize: number}}).statfsSync(path);
-    return stats.available*stats.bsize;
+    let stats=(fs as unknown as {statfsSync: (path: string)=>{bavail: number, bsize: number}}).statfsSync(path);
+    return stats.bavail*stats.bsize;
 }
 export class HealthChecker{
     private checks: Record<string, HealthCheckFunction>;
