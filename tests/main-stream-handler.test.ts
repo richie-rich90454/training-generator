@@ -101,6 +101,7 @@ let tick=()=>new Promise(r=>setTimeout(r,10))
 describe("handleOllamaGenerateStream",()=>{
     let axios:any
     let handleOllamaGenerateStream:any
+    let mockEvent:any
 
     beforeEach(async()=>{
         let axiosModule=await import("axios")
@@ -108,27 +109,32 @@ describe("handleOllamaGenerateStream",()=>{
         vi.clearAllMocks()
         let mainModule=await import("../src/main.js")
         handleOllamaGenerateStream=mainModule.handleOllamaGenerateStream
+        mockEvent={
+            sender:{
+                send:vi.fn()
+            }
+        }
     })
 
     it("should reject invalid model name(empty)",async()=>{
-        let result=await handleOllamaGenerateStream({model:"",prompt:"test"})
+        let result=await handleOllamaGenerateStream(mockEvent,{model:"",prompt:"test"})
         expect(result.success).toBe(false)
         expect(result.error).toBe("Invalid model name or prompt")
     })
 
     it("should reject invalid model name(number)",async()=>{
-        let result=await handleOllamaGenerateStream({model:123 as any,prompt:"test"})
+        let result=await handleOllamaGenerateStream(mockEvent,{model:123 as any,prompt:"test"})
         expect(result.success).toBe(false)
     })
 
     it("should reject invalid prompt",async()=>{
-        let result=await handleOllamaGenerateStream({model:"llama2",prompt:""})
+        let result=await handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:""})
         expect(result.success).toBe(false)
     })
 
     it("should reject prompt larger than 500000 chars",async()=>{
         let largePrompt="x".repeat(500001)
-        let result=await handleOllamaGenerateStream({model:"llama2",prompt:largePrompt})
+        let result=await handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:largePrompt})
         expect(result.success).toBe(false)
         expect(result.error).toBe("Prompt is too large")
     })
@@ -136,7 +142,7 @@ describe("handleOllamaGenerateStream",()=>{
     it("should handle successful streaming response",async()=>{
         let mockStream=new EventEmitter()
         axios.post.mockResolvedValue({data:mockStream})
-        let promise=handleOllamaGenerateStream({model:"llama2",prompt:"test"})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
         await tick()
         mockStream.emit("data",Buffer.from('{"response":"Hello","done":false}\n'))
         mockStream.emit("data",Buffer.from('{"response":" World","done":true}\n'))
@@ -148,7 +154,7 @@ describe("handleOllamaGenerateStream",()=>{
     it("should handle stream error",async()=>{
         let mockStream=new EventEmitter()
         axios.post.mockResolvedValue({data:mockStream})
-        let promise=handleOllamaGenerateStream({model:"llama2",prompt:"test"})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
         await tick()
         mockStream.emit("error",new Error("Connection error"))
         await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama: Connection error"})
@@ -157,7 +163,7 @@ describe("handleOllamaGenerateStream",()=>{
     it("should handle empty stream end",async()=>{
         let mockStream=new EventEmitter()
         axios.post.mockResolvedValue({data:mockStream})
-        let promise=handleOllamaGenerateStream({model:"llama2",prompt:"test"})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
         await tick()
         mockStream.emit("end")
         await expect(promise).resolves.toEqual({success:false,error:"Failed to generate response from Ollama: Stream ended without response"})
@@ -167,7 +173,7 @@ describe("handleOllamaGenerateStream",()=>{
         let mockStream=new EventEmitter()
         axios.post.mockResolvedValue({data:mockStream})
         let mediumPrompt="x".repeat(6000)
-        let promise=handleOllamaGenerateStream({model:"llama2",prompt:mediumPrompt})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:mediumPrompt})
         // Streaming handler no longer passes axios timeout — it uses per-data-packet timers
         expect(axios.post).toHaveBeenCalledWith(
             expect.any(String),
@@ -186,7 +192,7 @@ describe("handleOllamaGenerateStream",()=>{
     it("should sanitize model name by removing control characters",async()=>{
         let mockStream=new EventEmitter()
         axios.post.mockResolvedValue({data:mockStream})
-        let promise=handleOllamaGenerateStream({model:"llama\x002",prompt:"test"})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama\x002",prompt:"test"})
         expect(axios.post).toHaveBeenCalledWith(
             expect.any(String),
             expect.objectContaining({model:"llama2"}),
@@ -199,7 +205,7 @@ describe("handleOllamaGenerateStream",()=>{
 
     it("should handle axios post failure",async()=>{
         axios.post.mockRejectedValue(new Error("Network error"))
-        let result=await handleOllamaGenerateStream({model:"llama2",prompt:"test"})
+        let result=await handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
         expect(result.success).toBe(false)
         expect(result.error).toBe("Failed to generate response from Ollama: Network error")
     })
