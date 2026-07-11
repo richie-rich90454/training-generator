@@ -128,6 +128,7 @@ export class GenerationPipeline {
     })
 
     processor.reset()
+    processor.resetStats()
     const startTime = Date.now()
 
     events.onStart?.(files.length)

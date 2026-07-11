@@ -108,6 +108,9 @@ class Processor{
         this.aborted=false
         this.abortController=new AbortController()
     }
+    resetStats():void{
+        this.stats=new StatsTracker()
+    }
     enableDemoMode():void{
         this.demoMode=true
     }
