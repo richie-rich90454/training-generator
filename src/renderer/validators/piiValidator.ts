@@ -96,10 +96,6 @@ export class PiiValidator extends MutatingValidator{
                 result.push(match)
                 lastEnd=match.end
             }
-            else if (match.end>lastEnd){
-                result[result.length-1]=match
-                lastEnd=match.end
-            }
         }
         return result
     }
