@@ -618,10 +618,10 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         return{success:false,error:t("error.promptTooLarge")}
     }
     let promptLength=prompt.length
-    let initialTimeout=300000
-    if(promptLength>10000)initialTimeout=600000
-    else if(promptLength>5000)initialTimeout=450000
-    const interDataTimeout=120000
+    let initialTimeout=1800000
+    if(promptLength>10000)initialTimeout=3600000
+    else if(promptLength>5000)initialTimeout=2700000
+    const interDataTimeout=300000
     try{
         console.log(`[ollama] generating with ${model} (${promptLength} chars, initial timeout ${initialTimeout}ms)`)
         let response=await axios.post(
