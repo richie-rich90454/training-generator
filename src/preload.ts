@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld("electronAPI",{
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>)=>invoke("ollama:generate",{model,prompt,options}),
     generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>)=>invoke("ollama:generateStream",{model,prompt,options}),
     generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>invoke("openai:generate",{apiKey,baseUrl,model,prompt,options}),
+    generateWithAnthropic:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>invoke("anthropic:generate",{apiKey,model,prompt,options}),
+    generateWithGemini:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>invoke("gemini:generate",{apiKey,model,prompt,options}),
     getAppVersion:()=>invoke("app:getVersion"),
     getPlatform:()=>invoke("app:getPlatform"),
     getSecureKey:()=>invoke("secureKey:getKey"),
