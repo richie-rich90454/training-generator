@@ -105,9 +105,9 @@ export async function fetchUrl(options: FetchOptions): Promise<FetchResult>{
         });
     }
     catch(error){
-        let errAny=error as any;
-        if(errAny&&errAny.response&&errAny.response.status){
-            throw new Error("HTTP error "+errAny.response.status+" for "+options.url);
+        const err=error as {response?:{status?:number}}
+        if(err?.response?.status){
+            throw new Error("HTTP error "+err.response.status+" for "+options.url);
         }
         let message=error instanceof Error?error.message:String(error);
         throw new Error("Network error fetching "+options.url+": "+message);
