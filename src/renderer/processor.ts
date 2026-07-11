@@ -264,7 +264,8 @@ class Processor{
                     let responsePromise=provider.generate(prompt,model,{
                         temperature:0.7,
                         top_p:0.9,
-                        max_tokens:16384
+                        max_tokens:16384,
+                        onToken:streamChunk
                     })
                     setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
                     let result=await responsePromise
