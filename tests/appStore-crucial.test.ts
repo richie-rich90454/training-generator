@@ -213,10 +213,16 @@ describe("AppStore processing guardrails", () => {
         let app: AppStore = makeAppStore()
         await app.init()
         app.fileStore.addFiles([createTestFile("a.txt", "content content content content content content content content content content")])
+        app.settingsStore.setModel("llama2")
+        // Enable demo mode so processing doesn't need real API calls
+        app.toggleDemoMode()
         let p1 = app.processFiles()
+        // isProcessing should be true while p1 is running
+        expect(app.isProcessing()).toBe(true)
         let p2 = app.processFiles()
-        await Promise.all([p1, p2])
+        // p2 should be rejected because processing is already in progress
         expect(app.uiStore.logs.some(l => l.message.includes("already in progress"))).toBe(true)
+        await Promise.all([p1, p2])
         app.dispose()
     })
     it("stops processing on demand", async() => {
