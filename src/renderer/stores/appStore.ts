@@ -335,9 +335,15 @@ export function createAppStore(): AppStore {
       },
       onChunkFailed: (event) => {
         chunksDone++
+        const cs = getCacheStats()
+        const hitRate = cs.totalRequests > 0 ? Math.round((cs.hits / cs.totalRequests) * 100) : 0
         logger.error("app", t("log.chunkFailed", undefined, { index: String(event.chunkIndex + 1), error: event.error }))
         uiStore.setDashboardMetrics({
           chunksDone,
+          chunksTotal,
+          totalTokens: processor.stats.totalTokens,
+          cacheHitRate: hitRate,
+          providerLatency: processor.stats.averageLatencyMs,
           activeProvider: settingsStore.settings.provider || "--",
         })
         setProgress(
