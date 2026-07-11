@@ -742,7 +742,7 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         })
     }
     catch(error){
-        let err=error as any
+        const err=error as {message?:string;response?:{data?:unknown};code?:string}
         let detail=err?.message||""
         if(err?.response?.data){
             const data=typeof err.response.data==="string"?err.response.data:JSON.stringify(err.response.data)
@@ -1127,7 +1127,9 @@ function registerCriticalIpcHandlers():void{
                 return{success:true,response:response.data.response}
             }
             catch(error){
-                if((error as any).code==="ECONNABORTED"||(error as Error).message.includes("timeout")){
+                const errCode=(error as {code?:string}).code
+                const errMsg=error instanceof Error?error.message:""
+                if(errCode==="ECONNABORTED"||errMsg.includes("timeout")){
                     if(attempt<maxRetries){
                         await new Promise(r=>setTimeout(r,5000))
                     }
