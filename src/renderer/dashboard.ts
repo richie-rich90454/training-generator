@@ -57,7 +57,7 @@ export class Dashboard {
         </div>
       </div>
     `
-    el.querySelector(".dashboard-close")!.addEventListener("click", () => this.hide())
+    el.querySelector(".dashboard-close")?.addEventListener("click", () => this.hide())
     return el
   }
   show(): void {
