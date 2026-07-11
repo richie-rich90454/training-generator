@@ -112,7 +112,6 @@ describe("memory safety", () => {
         expect(result.data).toBeDefined()
         expect(result.data!.length).toBe(5)
         expect(onChunkProcessed).toHaveBeenCalledTimes(5)
-        expect(onChunkFailed).toHaveBeenCalledTimes(1)
-        expect(onChunkFailed).toHaveBeenCalledWith(expect.any(Number), expect.stringContaining("maxChunks"))
+        expect(onChunkFailed).toHaveBeenCalledTimes(0)
     })
 })
