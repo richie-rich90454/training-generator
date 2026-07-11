@@ -144,8 +144,10 @@ export class DiversityValidator extends BaseValidator{
         if (matchingCluster){
             clusterSize=matchingCluster.members.length+1
             if (clusterSize>=this.maxClusterSize){
-                passed=false
-                flags.push("cluster_too_large")
+                if (this.itemCount>this.maxItemsBeforeCheck){
+                    passed=false
+                    flags.push("cluster_too_large")
+                }
             }
             else{
                 matchingCluster.members.push(text)
