@@ -1064,9 +1064,9 @@ function registerCriticalIpcHandlers():void{
         }
         catch{}
         let promptLength=prompt.length
-        let timeout=300000
-        if(promptLength>10000)timeout=600000
-        else if(promptLength>5000)timeout=450000
+        let timeout=1800000
+        if(promptLength>10000)timeout=3600000
+        else if(promptLength>5000)timeout=2700000
         let maxRetries=2
         for(let attempt=0;attempt<=maxRetries;attempt++){
             try{
