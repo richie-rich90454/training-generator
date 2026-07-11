@@ -33,11 +33,14 @@ export function createOutputStore(): OutputStore {
     const hasOutput = createMemo(() => outputData.length + stagingData.length > 0)
     const itemCount = createMemo(() => outputData.length + stagingData.length)
     const previewText = createMemo(() => {
-        const total = outputData.length + stagingData.length
+        const stagingTotal = stagingData.length
+        // Prefer staging data during processing to avoid duplicates
+        // (items are staged per-chunk, then appended to output on file complete)
+        const data = stagingTotal > 0 ? stagingData : outputData
+        const total = data.length
         if (total === 0) return t("output.empty")
-        const combined = [...outputData, ...stagingData]
         const header = t("output.totalItems", undefined, { totalCount: String(total) }) + "\n"
-        const items = combined.map((item, i) => {
+        const items = data.map((item, i) => {
             const text = getItemText(item)
             return `[${i + 1}] ${text.slice(0, 200)}${text.length > 200 ? "..." : ""}`
         })
