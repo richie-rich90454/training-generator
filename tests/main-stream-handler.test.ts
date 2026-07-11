@@ -168,13 +168,15 @@ describe("handleOllamaGenerateStream",()=>{
         axios.post.mockResolvedValue({data:mockStream})
         let mediumPrompt="x".repeat(6000)
         let promise=handleOllamaGenerateStream({model:"llama2",prompt:mediumPrompt})
+        // Streaming handler no longer passes axios timeout — it uses per-data-packet timers
         expect(axios.post).toHaveBeenCalledWith(
             expect.any(String),
             expect.objectContaining({
                 prompt:mediumPrompt,
+                stream:true,
                 options:expect.objectContaining({num_predict:4096})
             }),
-            expect.objectContaining({timeout:450000})
+            expect.objectContaining({responseType:"stream"})
         )
         await tick()
         mockStream.emit("data",Buffer.from('{"response":"ok","done":true}\n'))
