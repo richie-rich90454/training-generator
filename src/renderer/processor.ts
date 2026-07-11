@@ -226,8 +226,8 @@ class Processor{
                         let prov:ProvenanceData={...provenanceBase,chunkIndex:idx}
                         items=items.map(item=>tagItem(item,prov))
                     }
-                    onComplete(idx,total,items)
                     stats.recordChunkSuccess(cached.tokens)
+                    onComplete(idx,total,items)
                     chunksArr[idx]=(null as any) // Release chunk for GC
                     return
                 }
