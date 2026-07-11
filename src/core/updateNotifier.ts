@@ -131,13 +131,14 @@ export class UpdateNotifier{
             return undefined;
         }
         let json: unknown;
+        let info: UpdateInfo;
         try{
             json=await response.json();
+            info=parseReleaseJson(json);
         }
         catch(error){
             return undefined;
         }
-        let info=parseReleaseJson(json);
         this.lastCheck=Date.now();
         this.storage.setItem(LAST_CHECK_KEY, String(this.lastCheck));
         if(this.isNewer(info.version)){
