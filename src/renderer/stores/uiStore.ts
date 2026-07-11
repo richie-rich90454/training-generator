@@ -242,9 +242,8 @@ export function createUIStore(): UIStore {
         setDashboardOpenState(false)
     }
     function tickDashboard(): void {
-        if (!dashboardOpen()) {
-            return
-        }
+        // Always compute metrics — the dashboard may be closed but the
+        // interval is still active and the UI needs accurate values.
         let metrics = dashboardMetrics()
         let elapsed = (Date.now() - dashboardStartTime) / 1000
         let chunksPerSecond = elapsed > 0 ? Math.round(metrics.chunksDone / elapsed) : 0
