@@ -35,7 +35,8 @@ class Processor{
         signal:AbortSignal,
         total:number,
         provider:Provider,
-        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
+        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>,
+        onStreamChunk?:(text:string)=>void
     ):Promise<void>{
         let MAX_CHARS_PER_BATCH=32000
         let MAX_CHUNKS_PER_BATCH=8
@@ -76,12 +77,14 @@ class Processor{
                 if(signal.aborted)continue
                 let responses=this.splitBatchedResponse(result.text,batch.length)
                 for(let j=0;j<batch.length;j++){
-                    let items=createTrainingItem(batch[j].chunk,responses[j]||"",processingType)
+                    let response=responses[j]||""
+                    onStreamChunk?.(`\n--- Batch Chunk ${batch[j].index+1}/${total} ---\n${response}\n`)
+                    let items=createTrainingItem(batch[j].chunk,response,processingType)
                     if(provenanceBase){
                         let prov:ProvenanceData={...provenanceBase,chunkIndex:batch[j].index}
                         items=items.map(item=>tagItem(item,prov))
                     }
-                    let tokens=Math.ceil((responses[j]||"").length/4)
+                    let tokens=Math.ceil(response.length/4)
                     stats.recordChunkSuccess(tokens)
                     onChunkComplete(batch[j].index,total,items)
                 }
@@ -138,7 +141,8 @@ class Processor{
         createTrainingItem:(input:string,output:string,processingType:string)=>TrainingItem[],
         onChunkComplete:(index:number,total:number,items:TrainingItem[])=>void,
         onChunkError:(index:number,error:string)=>void,
-        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
+        provenanceBase?:Omit<ProvenanceData,'chunkIndex'>,
+        onStreamChunk?:(text:string)=>void
     ):Promise<TrainingItem[]>{
         this.reset()
         // Only start stats if not already tracking — prevents parallel workers
@@ -175,7 +179,7 @@ class Processor{
                         generatePrompt,createTrainingItem,
                         completeChunk,onChunkError,
                         signal,total,selfProvider!,
-                        provenanceBase
+                        provenanceBase,onStreamChunk
                     )
                     smallChunks.length=0
                 }
@@ -210,7 +214,8 @@ class Processor{
             onDone:()=>void,
             provider:Provider|null,
             chunksArr:string[],
-            provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
+            provenanceBase?:Omit<ProvenanceData,'chunkIndex'>,
+            streamChunk?:(text:string)=>void
         ):Promise<void>{
             let slotFreed=false
             let freeSlot=()=>{
@@ -269,6 +274,7 @@ class Processor{
                     console.log(`[processor] chunk ${idx}/${total} completed (${response.length} chars response, ${latencyMs}ms)`)
                 }
                 if(sig.aborted)return
+                streamChunk?.(`\n--- Chunk ${idx+1}/${total} ---\n${response}\n`)
                 let tokens=Math.ceil(response.length/4)
                 stats.recordChunkSuccess(tokens)
                 await setCachedResult(chunk,model,prompt,response,tokens)
@@ -305,7 +311,7 @@ class Processor{
                         completeChunk,onChunkError,signal,
                         this.demoMode,this.getDemoResponse.bind(this),
                         onSlotFree,onDone,selfProvider,chunks,
-                        provenanceBase
+                        provenanceBase,onStreamChunk
                     )
                 }
                 else if(pending===0&&running===0){
