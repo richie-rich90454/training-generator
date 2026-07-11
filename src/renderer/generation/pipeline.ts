@@ -155,13 +155,10 @@ export class GenerationPipeline {
       maxChunks: settings.maxChunks,
     }
 
-    // Use a lock to prevent race conditions when multiple workers fetch files
-    let fileLock = false
+    // JavaScript is single-threaded (no preemption), so queueIndex++ is atomic.
+    // No lock is needed — the increment happens synchronously within one event-loop tick.
     function getNextFile(): SelectedFile | undefined {
-      if (fileLock) return undefined
-      fileLock = true
       const idx = queueIndex++
-      fileLock = false
       return files[idx]
     }
 
