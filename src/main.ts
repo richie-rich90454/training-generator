@@ -626,29 +626,40 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
     const interDataTimeout=promptLength>10000?600000:promptLength>5000?450000:300000
     try{
         console.log(`[ollama] generating with ${model} (${promptLength} chars, initial timeout ${initialTimeout}ms, inter-data ${interDataTimeout}ms)`)
-        let response=await axios.post(
-            "http://localhost:11434/api/generate",
-            {
-                model:model.replace(/[\x00-\x1F]/g,""),
-                prompt,
-                stream:true,
-                options:{
-                    ...options,
-                    temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                    num_predict:options.num_predict
+        // Connection timeout: abort the HTTP request if Ollama doesn't respond within
+        // the initial timeout window. Once headers arrive, the per-data-packet noDataTimer
+        // takes over.
+        const connectionController = new AbortController()
+        const connectionTimer = setTimeout(() => connectionController.abort(), initialTimeout)
+        let response
+        try {
+            response=await axios.post(
+                "http://localhost:11434/api/generate",
+                {
+                    model:model.replace(/[\x00-\x1F]/g,""),
+                    prompt,
+                    stream:true,
+                    options:{
+                        ...options,
+                        temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                        top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                        num_predict:options.num_predict
+                    }
+                },
+                {
+                    // No global timeout — rely on the per-data-packet noDataTimer below.
+                    // A fixed axios timeout kills the stream even when data is flowing.
+                    signal: connectionController.signal,
+                    responseType:"stream",
+                    headers:{
+                        "Content-Type":"application/json",
+                        "Accept":"application/json"
+                    }
                 }
-            },
-            {
-                // No global timeout — rely on the per-data-packet noDataTimer below.
-                // A fixed axios timeout kills the stream even when data is flowing.
-                responseType:"stream",
-                headers:{
-                    "Content-Type":"application/json",
-                    "Accept":"application/json"
-                }
-            }
-        )
+            )
+        } finally {
+            clearTimeout(connectionTimer)
+        }
         let fullResponse=""
         let stream=response.data
         let noDataTimer:ReturnType<typeof setTimeout>|null=null
