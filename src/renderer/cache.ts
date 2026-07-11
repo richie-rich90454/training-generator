@@ -92,7 +92,7 @@ async function persistCache():Promise<void>{
     if(window.electronAPI?.saveCache){
         let data:Record<string,CacheEntry>={}
         cacheMap.forEach((v,k)=>{data[k]=v})
-        await window.electronAPI.saveCache(data as any)
+        await window.electronAPI.saveCache(data as Record<string, unknown>)
     }
 }
 
@@ -172,7 +172,7 @@ export async function warmCache(outputItems:Array<{instruction?:string;input?:st
         if(window.electronAPI?.saveCache){
             let data:Record<string,CacheEntry>={}
             cacheMap.forEach((v,k)=>{data[k]=v})
-            await window.electronAPI.saveCache(data as any)
+            await window.electronAPI.saveCache(data as Record<string, unknown>)
         }
     }
     catch(error){
