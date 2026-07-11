@@ -20,6 +20,8 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
     function handleCopy(): void {
         appStore.copyOutput()
     }
+    const liveStream = () => uiStore.liveStreamText()
+    const hasLiveStream = () => liveStream().length > 0
     return (
         <div class={styles["card"]}>
             <div class={styles["card-header"]}>
@@ -108,6 +110,16 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
                     <pre>{outputStore.previewText()}</pre>
                 </Show>
             </div>
+            <Show when={hasLiveStream()}>
+                <div
+                    class={styles["output-preview"]}
+                    style={{ "max-height": "200px", "margin-top": "8px" }}
+                    role="region"
+                    aria-label={t("output.liveStreamAria")}
+                >
+                    <pre style={{ "white-space": "pre-wrap", "word-break": "break-all", "font-size": "11px", opacity: "0.85" }}>{liveStream()}</pre>
+                </div>
+            </Show>
         </div>
     )
 }
