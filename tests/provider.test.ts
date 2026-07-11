@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider, ProviderManager } from "../src/renderer/provider.js"
+import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider, AnthropicProvider, GeminiProvider, ProviderManager } from "../src/renderer/provider.js"
 import type { Provider, ProviderResult } from "../src/renderer/provider.js"
 
 // Mock window.electronAPI for provider tests
@@ -129,15 +129,15 @@ describe("createProvider", () => {
   it("should create ProviderManager for anthropic type", () => {
     let provider = createProvider("anthropic", { apiKey: "sk-test" })
     expect(provider).toBeInstanceOf(ProviderManager)
-    expect(provider.getCurrentProvider().name).toBe("openai")
-    expect(provider.getCurrentProvider()).toBeInstanceOf(OpenAIProvider)
+    expect(provider.getCurrentProvider().name).toBe("anthropic")
+    expect(provider.getCurrentProvider()).toBeInstanceOf(AnthropicProvider)
   })
 
   it("should create ProviderManager for gemini type", () => {
     let provider = createProvider("gemini", { apiKey: "sk-test" })
     expect(provider).toBeInstanceOf(ProviderManager)
-    expect(provider.getCurrentProvider().name).toBe("openai")
-    expect(provider.getCurrentProvider()).toBeInstanceOf(OpenAIProvider)
+    expect(provider.getCurrentProvider().name).toBe("gemini")
+    expect(provider.getCurrentProvider()).toBeInstanceOf(GeminiProvider)
   })
 
   it("should default to OllamaProvider for unknown type", () => {
