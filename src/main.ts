@@ -638,7 +638,8 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                 }
             },
             {
-                timeout:initialTimeout,
+                // No global timeout — rely on the per-data-packet noDataTimer below.
+                // A fixed axios timeout kills the stream even when data is flowing.
                 responseType:"stream",
                 headers:{
                     "Content-Type":"application/json",
@@ -694,6 +695,7 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                         }
                         if(parsed.done){
                             resolve({success:true,response:fullResponse})
+                            return
                         }
                     }
                     catch{}
