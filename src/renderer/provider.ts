@@ -250,7 +250,9 @@ export class ProviderManager implements Provider{
     }
 
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        if(this.providers.length===0)throw new Error("No providers configured")
         let health=this.providers[this.currentIndex]
+        if(!health)throw new Error("No healthy provider available")
         try{
             let result=await health.provider.generate(prompt,model,options)
             health.consecutiveFailures=0
@@ -272,14 +274,117 @@ export class ProviderManager implements Provider{
     }
 }
 
+export class AnthropicProvider implements Provider{
+    name="anthropic"
+    apiKey:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string){
+        this.apiKey=apiKey
+        this.rateLimiter=new RateLimiter(30,5)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch("https://api.anthropic.com/v1/messages",{
+                method:"POST",
+                headers:{
+                    "x-api-key":this.apiKey,
+                    "anthropic-version":"2023-06-01",
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({model:"claude-3-haiku-20240307",max_tokens:1,messages:[{role:"user",content:"ping"}]})
+            })
+            return response.ok||response.status===429
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        let api=window.electronAPI
+        if(!api)throw new Error("Electron API not available")
+        try{
+            await this.rateLimiter.acquire()
+            let result=await retryWithBackoff(async()=>{
+                let r=await api.generateWithAnthropic(
+                    this.apiKey,model,prompt,{
+                        temperature:options?.temperature??0.7,
+                        top_p:options?.top_p??0.9,
+                        max_tokens:options?.max_tokens??4096
+                    }
+                )
+                if(!r.success)throw new Error(r.error||"Anthropic generation failed")
+                return r
+            },3,1000,undefined,this.rateLimiter)
+            return{
+                text:result.response!,
+                tokens:result.usage?.total_tokens??Math.ceil((result.response||"").length/4),
+                provider:"anthropic"
+            }
+        }
+        catch(error){
+            console.error("AnthropicProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
+export class GeminiProvider implements Provider{
+    name="gemini"
+    apiKey:string
+    rateLimiter:RateLimiter
+    constructor(apiKey:string){
+        this.apiKey=apiKey
+        this.rateLimiter=new RateLimiter(30,5)
+        this.rateLimiter.enable()
+    }
+    async healthCheck():Promise<boolean>{
+        try{
+            let response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`)
+            return response.ok
+        }
+        catch{
+            return false
+        }
+    }
+    async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
+        let api=window.electronAPI
+        if(!api)throw new Error("Electron API not available")
+        try{
+            await this.rateLimiter.acquire()
+            let result=await retryWithBackoff(async()=>{
+                let r=await api.generateWithGemini(
+                    this.apiKey,model,prompt,{
+                        temperature:options?.temperature??0.7,
+                        top_p:options?.top_p??0.9,
+                        max_tokens:options?.max_tokens??4096
+                    }
+                )
+                if(!r.success)throw new Error(r.error||"Gemini generation failed")
+                return r
+            },3,1000,undefined,this.rateLimiter)
+            return{
+                text:result.response!,
+                tokens:result.usage?.total_tokens??Math.ceil((result.response||"").length/4),
+                provider:"gemini"
+            }
+        }
+        catch(error){
+            console.error("GeminiProvider.generate failed:",(error as Error).message)
+            throw error
+        }
+    }
+}
 export function createProvider(type:string,config?:{apiKey?:string;baseUrl?:string}):ProviderManager{
     let providers:Provider[]=[]
-    if(type==="openai"||type==="anthropic"||type==="gemini"){
-        let baseUrl=config?.baseUrl||
-            (type==="anthropic"?"https://api.anthropic.com":
-             type==="gemini"?"https://generativelanguage.googleapis.com":
-             "https://api.openai.com")
+    if(type==="openai"){
+        let baseUrl=config?.baseUrl||"https://api.openai.com"
         providers.push(new OpenAIProvider(config?.apiKey||"",baseUrl))
+    }
+    else if(type==="anthropic"){
+        providers.push(new AnthropicProvider(config?.apiKey||""))
+    }
+    else if(type==="gemini"){
+        providers.push(new GeminiProvider(config?.apiKey||""))
     }
     // Always add Ollama as fallback
     if(type!=="ollama"){
