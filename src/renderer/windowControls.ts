@@ -33,9 +33,9 @@ export function initWindowControls():void{
     if(!api){
         return
     }
-    handleWindowBtn(minBtn,()=>api!.windowMinimize(),"minimize")
-    handleWindowBtn(maxBtn,()=>api!.windowMaximizeToggle(),"maximize")
-    handleWindowBtn(closeBtn,()=>api!.windowClose(),"close")
+    handleWindowBtn(minBtn,()=>api.windowMinimize(),"minimize")
+    handleWindowBtn(maxBtn,()=>api.windowMaximizeToggle(),"maximize")
+    handleWindowBtn(closeBtn,()=>api.windowClose(),"close")
     if(api.onWindowMaximizedChange){
         unsubscribe=api.onWindowMaximizedChange((isMaximized:boolean)=>{
             if(maxBtn){
