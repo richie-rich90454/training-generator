@@ -333,8 +333,9 @@ export function createAppStore(): AppStore {
         )
         updateOutputPreview()
       },
-      onChunkFailed: (_event) => {
+      onChunkFailed: (event) => {
         chunksDone++
+        logger.error("app", t("log.chunkFailed", undefined, { index: String(event.chunkIndex + 1), error: event.error }))
         uiStore.setDashboardMetrics({
           chunksDone,
           activeProvider: settingsStore.settings.provider || "--",
