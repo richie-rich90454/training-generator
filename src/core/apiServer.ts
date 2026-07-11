@@ -113,7 +113,8 @@ export class ApiServer{
         }
         catch(error){
             let message=error instanceof Error?error.message:String(error)
-            this.sendJson(res, 500, {error: message})
+            let status=(error as {statusCode?: number})?.statusCode??500
+            this.sendJson(res, status, {error: message})
         }
     }
     private authorize(req: http.IncomingMessage, res: http.ServerResponse): boolean{
@@ -207,7 +208,9 @@ export class ApiServer{
                 size+=(chunk as Buffer).length
                 if(size>MAX_BODY_SIZE){
                     req.destroy()
-                    reject(new Error("request body too large"))
+                    let err=new Error("request body too large") as Error & {statusCode: number}
+                    err.statusCode=413
+                    reject(err)
                     return
                 }
                 chunks.push(chunk as Buffer)
