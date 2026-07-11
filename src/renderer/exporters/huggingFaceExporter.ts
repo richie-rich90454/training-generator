@@ -236,7 +236,7 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
 export class HuggingFaceExporter implements Exporter{
     name="huggingface"
     mimeType="application/json"
-    extension=".jsonl"
+    extension=".json"
     export(items: TrainingItem[], options?: ExportOptions): string{
         let jsonl=exportJSONL(items)
         let readme=generateDatasetCard(items, options as {name?: string, description?: string, license?: string, language?: string[], splits?: string[], stats?: Record<string, unknown>}|undefined)
