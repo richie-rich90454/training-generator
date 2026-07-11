@@ -120,7 +120,7 @@ export function createOutputStore(): OutputStore {
         for (const line of lines) {
             const trimmedLine = line.trim()
             if (trimmedLine.match(/^user:?\s*/i)) {
-                if (currentUser && currentAssistant) {
+                if (currentUser) {
                     turns.push({
                         user: currentUser.trim(),
                         assistant: currentAssistant.trim()
@@ -145,7 +145,7 @@ export function createOutputStore(): OutputStore {
                 }
             }
         }
-        if (currentUser && currentAssistant) {
+        if (currentUser) {
             turns.push({
                 user: currentUser.trim(),
                 assistant: currentAssistant.trim()
