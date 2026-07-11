@@ -613,8 +613,9 @@ export function buildOllamaBaseUrl(host?:string,port?:number):string{
     }
     return `${protocol}://${h}:${p}`
 }
-export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean}}={}):Promise<{success:boolean;response?:string;error?:string}>{
-    let{model,prompt,options}=payload
+export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean};ollamaHost?:string;ollamaPort?:number}={}):Promise<{success:boolean;response?:string;error?:string}>{
+    let{model,prompt,options,ollamaHost,ollamaPort}=payload
+    const baseUrl=buildOllamaBaseUrl(ollamaHost,ollamaPort)
     options=options??{}
     const requestId=options._requestId||""
     const think=options.think
@@ -663,7 +664,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                 requestBody.think=false
             }
             response=await axios.post(
-                "http://localhost:11434/api/generate",
+                `${baseUrl}/api/generate`,
                 requestBody,
                 {
                     // No global timeout — rely on the per-data-packet noDataTimer below.
@@ -1181,7 +1182,7 @@ function registerCriticalIpcHandlers():void{
         }
         return{success:false,error:t("error.failedToGenerateResponse")}
     })
-    handle("ollama:generateStream",async(event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean}})=>handleOllamaGenerateStream(event,payload))
+    handle("ollama:generateStream",async(event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean};ollamaHost?:string;ollamaPort?:number})=>handleOllamaGenerateStream(event,payload))
     handle("openai:generate",async(_event,payload:{
         apiKey?:string
         baseUrl?:string
