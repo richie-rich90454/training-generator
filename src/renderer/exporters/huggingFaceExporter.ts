@@ -189,8 +189,8 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
         })
     }
     catch(error){
-        let errAny=error as any
-        let status=errAny?.response?.status
+        const err=error as {response?:{status?:number}}
+        let status=err?.response?.status
         if(status){
             throw new Error(t("error.huggingfaceCreateRepoFailed", undefined, { status: String(status) }))
         }
@@ -217,8 +217,8 @@ export async function pushToHub(options: PushToHubOptions): Promise<{repoUrl: st
             })
         }
         catch(error){
-            let errAny=error as any
-            let status=errAny?.response?.status
+            const err=error as {response?:{status?:number}}
+            let status=err?.response?.status
             if(status){
                 throw new Error(t("error.huggingfaceUploadFailed", undefined, { name: file.name, status: String(status) }))
             }
