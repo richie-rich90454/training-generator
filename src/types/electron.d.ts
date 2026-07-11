@@ -13,6 +13,8 @@ export interface ElectronAPI{
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>)=>Promise<OllamaGenerateResult>
     generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>)=>Promise<OllamaGenerateResult>
     generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
+    generateWithAnthropic:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
+    generateWithGemini:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
     getAppVersion:()=>Promise<string>
     getPlatform:()=>Promise<string>
     getSecureKey:()=>Promise<string|null>
