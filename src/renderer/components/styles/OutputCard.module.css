@@ -6,6 +6,23 @@
     font-family:'Noto Sans',sans-serif;
     font-size:.875rem;
     line-height:1.6;
+    max-height:300px;
+    overflow-y:auto;
+    scroll-behavior:smooth;
+}
+.output-preview::-webkit-scrollbar{
+    width:6px;
+}
+.output-preview::-webkit-scrollbar-track{
+    background:var(--surface-variant);
+    border-radius:3px;
+}
+.output-preview::-webkit-scrollbar-thumb{
+    background:var(--border-color);
+    border-radius:3px;
+}
+.output-preview::-webkit-scrollbar-thumb:hover{
+    background:var(--text-secondary);
 }
 .output-preview pre{
     margin:0;
