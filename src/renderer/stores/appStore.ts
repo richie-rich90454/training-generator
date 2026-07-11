@@ -162,7 +162,10 @@ export function createAppStore(): AppStore {
         fileStore.setOllamaReady(false)
         return browserStatus
       }
-      const status = await window.electronAPI.checkOllama()
+      const status = await window.electronAPI.checkOllama(
+        settingsStore.settings.ollamaHost,
+        settingsStore.settings.ollamaPort
+      )
       uiStore.setOllamaStatus(status)
       fileStore.setOllamaReady(status.running)
       uiStore.setAvailableOllamaModels(status.running ? status.models.map((m) => m.name) : [])
