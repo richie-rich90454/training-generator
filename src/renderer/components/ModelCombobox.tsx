@@ -12,6 +12,7 @@ export interface ModelComboboxProps {
     disabled?: boolean
     inputId?: string
     ariaLabel?: string
+    onRefresh?: () => void
 }
 export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
     let inputRef: HTMLInputElement | undefined
@@ -143,6 +144,33 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
             />
+            <Show when={props.onRefresh}>
+                <button
+                    type="button"
+                    class={configPanelStyles["model-combobox__toggle"]}
+                    style={{
+                        display: "flex",
+                        "align-items": "center",
+                        "justify-content": "center",
+                        width: "36px",
+                        padding: 0,
+                        background: "var(--surface-color)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--text-disabled)",
+                        "border-left": "none",
+                        "border-radius": 0,
+                        cursor: props.disabled ? "not-allowed" : "pointer"
+                    }}
+                    aria-label={t("modelCombobox.refreshAria")}
+                    tabindex={-1}
+                    disabled={props.disabled}
+                    data-testid="model-combobox-refresh"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => props.onRefresh?.()}
+                >
+                    <span innerHTML={renderIcon("fa-sync-alt")} aria-hidden="true" />
+                </button>
+            </Show>
             <button
                 type="button"
                 class={configPanelStyles["model-combobox__toggle"]}
