@@ -302,12 +302,13 @@ export function createOutputStore(): OutputStore {
         return filePath.slice(0, sepIdx)
     }
     async function exportOutput(exportFormatParam?: string): Promise<void> {
+        if (!window.electronAPI) return
         const allData = [...outputData, ...stagingData]
         if (allData.length === 0) return
         const format = exportFormatParam || exportFormat()
         if (allData.length > SPLIT_THRESHOLD) {
             const partCount = Math.ceil(allData.length / SPLIT_THRESHOLD)
-            const firstPath = await window.electronAPI!.saveFileDialog(`${t("output.defaultFilename")}-1${extensionForFormat(format)}`)
+            const firstPath = await window.electronAPI.saveFileDialog(`${t("output.defaultFilename")}-1${extensionForFormat(format)}`)
             if (!firstPath) return
             const baseDir = dirname(firstPath)
             for (let i = 0; i < partCount; i++) {
@@ -318,15 +319,15 @@ export function createOutputStore(): OutputStore {
                 const partFilename = `${t("output.defaultFilename")}-${i + 1}${extensionForFormat(format)}`
                 const sep = firstPath.includes("\\") ? "\\" : "/"
                 const savePath = baseDir ? `${baseDir}${sep}${partFilename}` : partFilename
-                await window.electronAPI!.saveFile(savePath, content)
+                await window.electronAPI.saveFile(savePath, content)
             }
             return
         }
         const content = formatData(allData, format)
         const defaultFilename = `${t("output.defaultFilename")}${extensionForFormat(format)}`
-        const savePath = await window.electronAPI!.saveFileDialog(defaultFilename)
+        const savePath = await window.electronAPI.saveFileDialog(defaultFilename)
         if (!savePath) return
-        await window.electronAPI!.saveFile(savePath, content)
+        await window.electronAPI.saveFile(savePath, content)
     }
     async function copyOutput(): Promise<boolean> {
         const allData = [...outputData, ...stagingData]
