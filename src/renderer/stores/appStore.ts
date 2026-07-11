@@ -231,7 +231,7 @@ export function createAppStore(): AppStore {
       language: settingsStore.settings.language || "en",
       chunkSize: settingsStore.settings.chunkSize || 8000,
       smartSizing: settingsStore.appSettings.smartSizing ?? false,
-      enableThinking: settingsStore.appSettings.enableThinking ?? true,
+      enableThinking: settingsStore.appSettings.enableThinking ?? false,
       customPrompt: settingsStore.settings.customPrompt || "",
       maxChunks: settingsStore.appSettings.maxChunks,
       maxParallelFiles: settingsStore.appSettings.maxParallelFiles || 1,
