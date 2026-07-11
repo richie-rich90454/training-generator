@@ -13,12 +13,7 @@ const DOCS_URL = "https://github.com/richie-rich90454/training-generator#readme"
 const ISSUES_URL = "https://github.com/richie-rich90454/training-generator/issues"
 export function Footer(props: FooterProps): JSX.Element {
     function openLink(url: string): void {
-        if (window.electronAPI && (window.electronAPI as any).openExternal) {
-            (window.electronAPI as any).openExternal(url)
-        }
-        else {
-            window.open(url, "_blank")
-        }
+        window.open(url, "_blank")
     }
     return (
         <footer class={styles["app-footer"]}>
