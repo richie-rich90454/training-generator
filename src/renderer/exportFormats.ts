@@ -38,7 +38,8 @@ export class ExporterRegistry{
     }
 }
 export function exportJSONL(items: TrainingItem[]): string{
-    return items.map(item=>JSON.stringify(item)).join("\n")+"\n"
+    let lines=items.map(item=>JSON.stringify(item))
+    return lines.length>0?lines.join("\n")+"\n":""
 }
 export function exportJSONArray(items: TrainingItem[]): string{
     return JSON.stringify(items, null, 2)
