@@ -36,7 +36,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
     async function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
-            reader.onload = (e) => resolve(e.target!.result as ArrayBuffer)
+            reader.onload = (e) => resolve(e.target?.result as ArrayBuffer || new ArrayBuffer(0))
             reader.onerror = () => reject(new Error(t("error.failedToReadFileAsArrayBuffer")))
             reader.readAsArrayBuffer(file)
         })
@@ -92,11 +92,11 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
                 reader.onload = async (e) => {
                     try {
-                        const arrayBuffer = e.target!.result as ArrayBuffer
+                        const arrayBuffer = (e.target?.result as ArrayBuffer) || new ArrayBuffer(0)
                         if (window.electronAPI?.parseFileBuffer) {
                             const result = await window.electronAPI.parseFileBuffer(arrayBuffer, "pdf")
                             if (result.success) {
-                                resolve(result.content!)
+                                resolve(result.content || "")
                                 return
                             }
                         }
@@ -110,7 +110,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 reader.readAsArrayBuffer(file)
             }
             else {
-                reader.onload = (e) => resolve(e.target!.result as string)
+                reader.onload = (e) => resolve(e.target?.result as string || "")
                 reader.readAsText(file)
             }
         })
@@ -150,7 +150,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 if (!result.success) {
                     throw new Error(result.error || "")
                 }
-                textContent = result.content!
+                textContent = result.content || ""
             }
             else {
                 throw new Error(t("error.noFileOrPath"))
