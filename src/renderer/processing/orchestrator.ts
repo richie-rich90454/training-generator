@@ -145,7 +145,8 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 textContent = await readFileContent(fileObj.file)
             }
             else if (fileObj.path) {
-                const result = await window.electronAPI!.parseFile(fileObj.path, fileObj.type)
+                if (!window.electronAPI) throw new Error("Electron API not available")
+                const result = await window.electronAPI.parseFile(fileObj.path, fileObj.type)
                 if (!result.success) {
                     throw new Error(result.error || "")
                 }
