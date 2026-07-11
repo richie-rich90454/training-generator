@@ -166,9 +166,9 @@ export async function transcribeOpenAI(buffer: Buffer, filename: string, options
         });
     }
     catch(error){
-        let errAny=error as any;
-        if(errAny&&errAny.response){
-            throw new Error("OpenAI transcription failed: HTTP "+errAny.response.status);
+        const err=error as {response?:{status?:number}}
+        if(err?.response){
+            throw new Error("OpenAI transcription failed: HTTP "+err.response.status);
         }
         let message=error instanceof Error?error.message:String(error);
         throw new Error("OpenAI transcription network error: "+message);
