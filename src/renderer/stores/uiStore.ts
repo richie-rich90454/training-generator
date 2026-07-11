@@ -50,6 +50,9 @@ export interface UIStore {
     devtoolsOpen: () => boolean
     outputPreview: () => string
     outputPreviewLoading: () => boolean
+    liveStreamText: () => string
+    appendLiveStream: (text: string) => void
+    clearLiveStream: () => void
     filesProcessed: () => number
     lastProcessed: () => string
     availableOllamaModels: () => string[]
@@ -87,6 +90,7 @@ export interface UIStore {
     getLogIcon: (type: LogType) => string
 }
 const MAX_LOGS = 50
+const MAX_LIVE_STREAM_CHARS = 5000
 const DEFAULT_TOAST_DURATION = 4000
 let nextLogId = 1
 let nextToastId = 1
@@ -109,6 +113,7 @@ export function createUIStore(): UIStore {
     const [commandPaletteOpen, setCommandPaletteOpenState] = createSignal<boolean>(false)
     const [outputPreview, setOutputPreview] = createSignal<string>("")
     const [outputPreviewLoading, setOutputPreviewLoading] = createSignal<boolean>(false)
+    const [liveStreamText, setLiveStreamText] = createSignal<string>("")
     const [filesProcessed, setFilesProcessed] = createSignal<number>(0)
     const [lastProcessed, setLastProcessed] = createSignal<string>(t("status.lastProcessedNever"))
     const [availableOllamaModels, setAvailableOllamaModels] = createSignal<string[]>([])
@@ -265,6 +270,18 @@ export function createUIStore(): UIStore {
         setOutputPreview("")
         setOutputPreviewLoading(false)
     }
+    function appendLiveStream(text: string): void {
+        setLiveStreamText((prev) => {
+            const next = prev + text
+            if (next.length > MAX_LIVE_STREAM_CHARS) {
+                return next.slice(next.length - MAX_LIVE_STREAM_CHARS)
+            }
+            return next
+        })
+    }
+    function clearLiveStream(): void {
+        setLiveStreamText("")
+    }
     function updateOutputPreviewDebounced(text: string, loading: boolean = false): void {
         if (previewTimer) {
             clearTimeout(previewTimer)
@@ -306,6 +323,9 @@ export function createUIStore(): UIStore {
         devtoolsOpen,
         outputPreview,
         outputPreviewLoading,
+        liveStreamText,
+        appendLiveStream,
+        clearLiveStream,
         filesProcessed,
         lastProcessed,
         availableOllamaModels,
