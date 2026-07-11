@@ -28,6 +28,8 @@ export interface PipelineEvents {
   onAbort?: () => void
   /** Called for log messages during processing. */
   onLog?: (message: string, level: "info" | "success" | "warning" | "error") => void
+  /** Called when a streaming chunk of model output is received. */
+  onStreamChunk?: (text: string) => void
 }
 
 export interface ChunkProcessedEvent {
@@ -232,6 +234,9 @@ export class GenerationPipeline {
               t("log.chunkFailed", undefined, { index: String(index + 1), error }),
               "warning"
             )
+          },
+          onStreamChunk: (text: string) => {
+            events.onStreamChunk?.(text)
           },
         })
 

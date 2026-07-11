@@ -30,6 +30,7 @@ export interface ProcessFileCallbacks {
     onChunkProcessed?: (index: number, total: number, items: TrainingItem[]) => void
     onChunkFailed?: (index: number, error: string) => void
     onOutputUpdated?: () => void
+    onStreamChunk?: (text: string) => void
 }
 export function createOrchestrator(deps: OrchestratorDeps) {
     const { processor, promptManager, createTrainingItem } = deps
@@ -203,7 +204,9 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 },
                 (index: number, error: string) => {
                     callbacks?.onChunkFailed?.(index, error)
-                }
+                },
+                undefined,
+                callbacks?.onStreamChunk
             )
             const { items, removed } = await dedupInWorker(processedChunks)
             if (removed > 0) {
