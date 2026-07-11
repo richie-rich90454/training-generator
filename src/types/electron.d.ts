@@ -9,9 +9,9 @@ export interface ElectronAPI{
     parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
     saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>
     saveFileDialog:(defaultFilename?:string)=>Promise<string|null>
-    checkOllama:()=>Promise<OllamaStatus>
-    generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>)=>Promise<OllamaGenerateResult>
-    generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>)=>Promise<OllamaGenerateResult>
+    checkOllama:(ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaStatus>
+    generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
+    generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
     generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
     generateWithAnthropic:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
     generateWithGemini:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
