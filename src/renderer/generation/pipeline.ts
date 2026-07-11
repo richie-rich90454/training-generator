@@ -176,6 +176,8 @@ export class GenerationPipeline {
         const fileIndex = completedFiles
         fileItemsAccumulated = 0
 
+        let fileChunkCount = 0
+
         events.onLog?.(
           t("log.processingFile", undefined, { index: String(fileIndex), total: String(files.length), name: file.name }),
           "info"
@@ -183,6 +185,7 @@ export class GenerationPipeline {
 
         const result = await orchestrator.processFile(file, orchSettings, {
           onFileStart: (chunkCount: number) => {
+            fileChunkCount = chunkCount
             chunksTotal += chunkCount
             events.onLog?.(
               t("log.fileChunked", undefined, { name: file.name, count: String(chunkCount) }),
@@ -218,12 +221,13 @@ export class GenerationPipeline {
             )
           },
           onChunkFailed: (index: number, error: string) => {
+            chunksCompleted++
             events.onChunkFailed?.({
               fileName: file.name,
               fileIndex,
               fileTotal: files.length,
               chunkIndex: index,
-              chunkTotal: chunksTotal > 0 ? chunksTotal : 1,
+              chunkTotal: fileChunkCount > 0 ? fileChunkCount : 1,
               error,
             })
             events.onLog?.(
