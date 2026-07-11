@@ -7,6 +7,8 @@ export class StatsTracker {
   startTime: number = 0
   endTime: number = 0
   deduplicatedCount: number = 0
+  totalLatencyMs: number = 0
+  latencySampleCount: number = 0
 
   start(): void {
     this.startTime = Date.now()
@@ -17,6 +19,8 @@ export class StatsTracker {
     this.promptTokens = 0
     this.endTime = 0
     this.deduplicatedCount = 0
+    this.totalLatencyMs = 0
+    this.latencySampleCount = 0
   }
 
   finish(): void {
@@ -36,6 +40,16 @@ export class StatsTracker {
 
   recordPromptTokens(promptText: string): void {
     this.promptTokens += Math.ceil(promptText.length / 4)
+  }
+
+  recordLatency(ms: number): void {
+    this.totalLatencyMs += ms
+    this.latencySampleCount++
+  }
+
+  get averageLatencyMs(): number {
+    if (this.latencySampleCount === 0) return 0
+    return Math.round(this.totalLatencyMs / this.latencySampleCount)
   }
 
   checkWarnings(outputCount: number): string[] {
