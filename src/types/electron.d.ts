@@ -23,6 +23,7 @@ export interface ElectronAPI{
     loadCache:()=>Promise<{success:boolean;data?:Record<string,any>}>
     saveCache:(data:Record<string,any>)=>Promise<{success:boolean}>
     clearCache:()=>Promise<{success:boolean}>
+    compactCache:()=>Promise<{success:boolean}>
     saveProgress:(data:any)=>Promise<{success:boolean}>
     loadProgress:()=>Promise<{success:boolean;data?:any}>
     clearProgress:()=>Promise<{success:boolean}>
@@ -31,6 +32,11 @@ export interface ElectronAPI{
     clearCheckpoint:()=>Promise<{success:boolean}>
     writeLog:(entry:LogEntry)=>Promise<void>
     exportLogs:(data:string)=>Promise<{success:boolean;error?:string}>
+    windowMinimize:()=>Promise<void>
+    windowMaximizeToggle:()=>Promise<void>
+    windowClose:()=>Promise<void>
+    windowIsMaximized:()=>Promise<boolean>
+    onWindowMaximizedChange:(cb:(isMaximized:boolean)=>void)=>()=>void
 }
 
 declare global{
