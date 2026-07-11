@@ -131,6 +131,8 @@ export interface AppSettings{
     baseUrl?:string
     temperature?:number
     customPrompt?:string
+    ollamaHost?:string
+    ollamaPort?:number
     providers?:ProviderConfig[]
     failoverPriority?:string[]
     ensembleModels?:string[]

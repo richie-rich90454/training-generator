@@ -35,6 +35,8 @@ export interface SettingsStore {
     setBaseUrl: (url: string) => void
     setTemperature: (temp: number) => void
     setCustomPrompt: (prompt: string) => void
+    setOllamaHost: (host: string) => void
+    setOllamaPort: (port: number) => void
     setTheme: (theme: string) => void
     setFontSize: (size: string) => void
     setAutoSave: (value: boolean) => void
@@ -74,7 +76,9 @@ export function createSettingsStore(): SettingsStore {
         apiKey: "",
         baseUrl: "",
         temperature: 0.7,
-        customPrompt: ""
+        customPrompt: "",
+        ollamaHost: "localhost",
+        ollamaPort: 11434
     })
     const [appSettings, setAppSettings] = createStore<FullAppSettings>({
         theme: "auto",
@@ -171,6 +175,12 @@ export function createSettingsStore(): SettingsStore {
                 setSettings("temperature", clamp(saved.temperature, 0, 1, 0.7))
             }
             if (saved.customPrompt && typeof saved.customPrompt === "string") setSettings("customPrompt", saved.customPrompt)
+            if (saved.ollamaHost && typeof saved.ollamaHost === "string" && saved.ollamaHost.trim().length > 0) {
+                setSettings("ollamaHost", saved.ollamaHost.trim())
+            }
+            if (saved.ollamaPort != null) {
+                setSettings("ollamaPort", clamp(saved.ollamaPort, 1, 65535, 11434))
+            }
             if (saved.apiKey) {
                 const decrypted = await decryptKey(saved.apiKey)
                 if (decrypted != null) {
@@ -373,6 +383,8 @@ export function createSettingsStore(): SettingsStore {
         setBaseUrl: (url: string) => setSettings("baseUrl", url),
         setTemperature: (temp: number) => setSettings("temperature", clamp(temp, 0, 1, 0.7)),
         setCustomPrompt: (prompt: string) => setSettings("customPrompt", prompt),
+        setOllamaHost: (host: string) => setSettings("ollamaHost", host || "localhost"),
+        setOllamaPort: (port: number) => setSettings("ollamaPort", clamp(port, 1, 65535, 11434)),
         setTheme: (theme: string) => setAppSettings("theme", theme),
         setFontSize: (size: string) => setAppSettings("fontSize", size),
         setAutoSave: (value: boolean) => setAppSettings("autoSave", value),
