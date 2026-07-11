@@ -32,11 +32,6 @@ export interface ElectronAPI{
     clearCheckpoint:()=>Promise<{success:boolean}>
     writeLog:(entry:LogEntry)=>Promise<void>
     exportLogs:(data:string)=>Promise<{success:boolean;error?:string}>
-    windowMinimize:()=>Promise<void>
-    windowMaximizeToggle:()=>Promise<void>
-    windowClose:()=>Promise<void>
-    windowIsMaximized:()=>Promise<boolean>
-    onWindowMaximizedChange:(cb:(isMaximized:boolean)=>void)=>()=>void
 }
 
 declare global{
