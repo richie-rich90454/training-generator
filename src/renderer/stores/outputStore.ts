@@ -8,6 +8,7 @@ const MAX_CLIPBOARD_SIZE = 5 * 1024 * 1024
 export type ExportFormat = "jsonl" | "json" | "chatml" | "csv" | "text"
 export interface OutputStore {
     outputData: TrainingItem[]
+    stagingData: TrainingItem[]
     exportFormat: () => ExportFormat
     setExportFormat: (format: ExportFormat) => void
     hasOutput: () => boolean
@@ -21,7 +22,7 @@ export interface OutputStore {
     stageItems: (items: TrainingItem[]) => void
     clearStaging: () => void
     exportOutput: (exportFormat?: string) => Promise<void>
-    copyOutput: () => Promise<void>
+    copyOutput: () => Promise<boolean>
     formatData: (data: TrainingItem[], format: string) => string
     getItemText: (item: TrainingItem) => string
 }
@@ -35,9 +36,12 @@ export function createOutputStore(): OutputStore {
         const total = outputData.length + stagingData.length
         if (total === 0) return t("output.empty")
         const combined = [...outputData, ...stagingData]
-        const sample = combined.slice(-3)
-        const jsonStr = JSON.stringify(sample, null, 2)
-        return t("output.totalItems", undefined, { totalCount: String(total) }) + "\n" + jsonStr
+        const header = t("output.totalItems", undefined, { totalCount: String(total) }) + "\n"
+        const items = combined.map((item, i) => {
+            const text = getItemText(item)
+            return `[${i + 1}] ${text.slice(0, 200)}${text.length > 200 ? "..." : ""}`
+        })
+        return header + items.join("\n")
     })
     function getItemText(item: TrainingItem): string {
         if (item.output) return item.output
@@ -270,7 +274,10 @@ export function createOutputStore(): OutputStore {
     function formatData(data: TrainingItem[], format: string): string {
         if (format === "jsonl") return exportJSONL(data)
         else if (format === "json") return exportJSONArray(data)
-        else if (format === "chatml") return exportJSONArray(data.filter(item => item.format === "chatml").length > 0 ? data.filter(item => item.format === "chatml") : data)
+        else if (format === "chatml") {
+            const chatmlItems = data.filter(item => item.format === "chatml")
+            return exportJSONArray(chatmlItems.length > 0 ? chatmlItems : data)
+        }
         else if (format === "csv") return exportCSV(data)
         else if (format === "text") return data.map(item => getItemText(item)).join("\n\n")
         return data.map(item => JSON.stringify(item)).join("\n")
@@ -291,44 +298,44 @@ export function createOutputStore(): OutputStore {
         return filePath.slice(0, sepIdx)
     }
     async function exportOutput(exportFormatParam?: string): Promise<void> {
-        if (outputData.length === 0) return
+        const allData = [...outputData, ...stagingData]
+        if (allData.length === 0) return
         const format = exportFormatParam || exportFormat()
-        if (outputData.length > SPLIT_THRESHOLD) {
-            const partCount = Math.ceil(outputData.length / SPLIT_THRESHOLD)
+        if (allData.length > SPLIT_THRESHOLD) {
+            const partCount = Math.ceil(allData.length / SPLIT_THRESHOLD)
             const firstPath = await window.electronAPI!.saveFileDialog(`${t("output.defaultFilename")}-1${extensionForFormat(format)}`)
             if (!firstPath) return
             const baseDir = dirname(firstPath)
             for (let i = 0; i < partCount; i++) {
                 const start = i * SPLIT_THRESHOLD
-                const end = Math.min((i + 1) * SPLIT_THRESHOLD, outputData.length)
-                const partData = outputData.slice(start, end)
+                const end = Math.min((i + 1) * SPLIT_THRESHOLD, allData.length)
+                const partData = allData.slice(start, end)
                 const content = formatData(partData, format)
                 const partFilename = `${t("output.defaultFilename")}-${i + 1}${extensionForFormat(format)}`
-                const savePath = baseDir ? `${baseDir}/${partFilename}` : partFilename
+                const sep = firstPath.includes("\\") ? "\\" : "/"
+                const savePath = baseDir ? `${baseDir}${sep}${partFilename}` : partFilename
                 await window.electronAPI!.saveFile(savePath, content)
             }
             return
         }
-        const content = formatData(outputData, format)
+        const content = formatData(allData, format)
         const defaultFilename = `${t("output.defaultFilename")}${extensionForFormat(format)}`
         const savePath = await window.electronAPI!.saveFileDialog(defaultFilename)
         if (!savePath) return
         await window.electronAPI!.saveFile(savePath, content)
     }
-    async function copyOutput(): Promise<void> {
-        if (outputData.length === 0) return
+    async function copyOutput(): Promise<boolean> {
+        const allData = [...outputData, ...stagingData]
+        if (allData.length === 0) return false
         const format = exportFormat()
-        let content = ""
-        if (format === "jsonl") content = exportJSONL(outputData)
-        else if (format === "json") content = exportJSONArray(outputData)
-        else if (format === "chatml") content = exportJSONArray(outputData.filter(item => item.format === "chatml").length > 0 ? outputData.filter(item => item.format === "chatml") : outputData)
-        else if (format === "csv") content = exportCSV(outputData)
-        else if (format === "text") content = outputData.map(item => getItemText(item)).join("\n\n")
-        if (content.length > MAX_CLIPBOARD_SIZE) return
+        let content = formatData(allData, format)
+        if (content.length > MAX_CLIPBOARD_SIZE) return false
         await navigator.clipboard.writeText(content)
+        return true
     }
     return {
         get outputData() { return outputData },
+        get stagingData() { return stagingData },
         exportFormat,
         setExportFormat,
         hasOutput,
