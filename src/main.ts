@@ -621,9 +621,11 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
     let initialTimeout=1800000
     if(promptLength>10000)initialTimeout=3600000
     else if(promptLength>5000)initialTimeout=2700000
-    const interDataTimeout=300000
+    // Inter-data timeout: how long to wait between data packets before giving up.
+    // Scale with prompt length — larger prompts need more thinking time between tokens.
+    const interDataTimeout=promptLength>10000?600000:promptLength>5000?450000:300000
     try{
-        console.log(`[ollama] generating with ${model} (${promptLength} chars, initial timeout ${initialTimeout}ms)`)
+        console.log(`[ollama] generating with ${model} (${promptLength} chars, initial timeout ${initialTimeout}ms, inter-data ${interDataTimeout}ms)`)
         let response=await axios.post(
             "http://localhost:11434/api/generate",
             {
@@ -651,18 +653,32 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         let stream=response.data
         let noDataTimer:ReturnType<typeof setTimeout>|null=null
         let receivedAnyData=false
+        let settled=false
+        const clearTimer=()=>{
+            if(noDataTimer){clearTimeout(noDataTimer);noDataTimer=null}
+        }
         return await new Promise<{success:boolean;response?:string;error?:string}>((resolve,reject)=>{
             let buffer=""
+            const safeResolve=(value:{success:boolean;response?:string;error?:string})=>{
+                if(settled)return
+                settled=true
+                clearTimer()
+                resolve(value)
+            }
+            const safeReject=(error:Error)=>{
+                if(settled)return
+                settled=true
+                clearTimer()
+                reject(error)
+            }
             const resetNoDataTimer=()=>{
-                if(noDataTimer)clearTimeout(noDataTimer)
+                clearTimer()
                 const ms=receivedAnyData?interDataTimeout:initialTimeout
                 noDataTimer=setTimeout(()=>{
-                    reject(new Error(t("error.streamTimedOut")))
+                    safeReject(new Error(t("error.streamTimedOut")))
                 },ms)
             }
-            noDataTimer=setTimeout(()=>{
-                reject(new Error(t("error.streamTimedOut")))
-            },initialTimeout)
+            resetNoDataTimer()
             stream.on("data",(chunk:Buffer)=>{
                 receivedAnyData=true
                 resetNoDataTimer()
@@ -677,14 +693,15 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                             fullResponse+=parsed.response
                         }
                         if(parsed.done){
-                            resolve({success:true,response:fullResponse})
+                            safeResolve({success:true,response:fullResponse})
+                            return
                         }
                     }
                     catch{}
                 }
             })
             stream.on("error",(error:Error)=>{
-                reject(error)
+                safeReject(error)
             })
             stream.on("end",()=>{
                 if(buffer.trim()){
@@ -694,21 +711,21 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                             fullResponse+=parsed.response
                         }
                         if(parsed.done){
-                            resolve({success:true,response:fullResponse})
+                            safeResolve({success:true,response:fullResponse})
                             return
                         }
                     }
                     catch{}
                 }
                 if(!fullResponse){
-                    reject(new Error(t("error.streamEndedWithoutResponse")))
+                    safeReject(new Error(t("error.streamEndedWithoutResponse")))
                 }
                 else{
-                    resolve({success:true,response:fullResponse})
+                    safeResolve({success:true,response:fullResponse})
                 }
             })
         }).finally(()=>{
-            if(noDataTimer)clearTimeout(noDataTimer)
+            clearTimer()
             try{stream.destroy()}catch{}
             stream.removeAllListeners()
         })
