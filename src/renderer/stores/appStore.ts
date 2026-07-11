@@ -43,6 +43,7 @@ export interface AppStore {
   setProgress: (percent: number, text: string) => void
   initProvider: () => void
   checkOllamaStatus: () => Promise<OllamaStatus>
+  refreshOllamaModels: () => Promise<void>
   startOllamaMonitor: () => void
   stopOllamaMonitor: () => void
   toggleDemoMode: () => void
@@ -187,6 +188,15 @@ export function createAppStore(): AppStore {
     }
   }
 
+  async function refreshOllamaModels(): Promise<void> {
+    uiStore.setOllamaLoading(true)
+    try {
+      await checkOllamaStatus()
+    } finally {
+      uiStore.setOllamaLoading(false)
+    }
+  }
+
   function startOllamaMonitor(): void {
     stopOllamaMonitor()
     ollamaMonitorId = window.setInterval(() => {
@@ -271,6 +281,7 @@ export function createAppStore(): AppStore {
 
     outputStore.clearOutput()
     setQualityReport(null)
+    uiStore.clearLiveStream()
     const queue = [...fileStore.selectedFiles]
     setProcessingQueue(queue)
 
@@ -319,6 +330,7 @@ export function createAppStore(): AppStore {
         const hitRate = cs.totalRequests > 0 ? Math.round((cs.hits / cs.totalRequests) * 100) : 0
         uiStore.setDashboardMetrics({
           chunksDone,
+          chunksTotal,
           totalTokens: event.totalTokensSoFar,
           cacheHitRate: hitRate,
           providerLatency: event.latencyMs,
@@ -367,6 +379,9 @@ export function createAppStore(): AppStore {
       },
       onLog: (message: string, level: "info" | "success" | "warning" | "error") => {
         addLog(message, level)
+      },
+      onStreamChunk: (text: string) => {
+        uiStore.appendLiveStream(text)
       },
     }
 
@@ -810,6 +825,7 @@ export function createAppStore(): AppStore {
     setProgress,
     initProvider,
     checkOllamaStatus,
+    refreshOllamaModels,
     startOllamaMonitor,
     stopOllamaMonitor,
     toggleDemoMode,

@@ -58,6 +58,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                             placeholder={t("config.model")}
                             inputId="config-model"
                             ariaLabel={t("config.model")}
+                            onRefresh={() => props.appStore.refreshOllamaModels()}
                         />
                     </div>
                 </div>
