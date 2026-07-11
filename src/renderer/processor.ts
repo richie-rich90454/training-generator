@@ -248,6 +248,7 @@ class Processor{
                 else{
                     if(!provider)throw new Error(t("error.noProvider"))
                     console.log(`[processor] starting chunk ${idx}/${total} (${chunk.length} chars) with ${provider.name}`)
+                    let chunkStart = Date.now()
                     let responsePromise=provider.generate(prompt,model,{
                         temperature:0.7,
                         top_p:0.9,
@@ -256,7 +257,9 @@ class Processor{
                     setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
                     let result=await responsePromise
                     response=result.text
-                    console.log(`[processor] chunk ${idx}/${total} completed (${response.length} chars response)`)
+                    let latencyMs = Date.now() - chunkStart
+                    stats.recordLatency(latencyMs)
+                    console.log(`[processor] chunk ${idx}/${total} completed (${response.length} chars response, ${latencyMs}ms)`)
                 }
                 if(sig.aborted)return
                 let tokens=Math.ceil(response.length/4)
