@@ -340,7 +340,7 @@ class Processor{
                     completeChunk,onChunkError,signal,
                     this.demoMode,this.getDemoResponse.bind(this),
                     onSlotFree,onDone,selfProvider,chunks,
-                    provenanceBase
+                    provenanceBase,onStreamChunk
                 )
             }
             if(initial===0){

@@ -88,7 +88,7 @@ export function createSettingsStore(): SettingsStore {
         maxOutputItems: 100000,
         maxChunks: 500,
         maxParallelFiles: 1,
-        enableThinking: true
+        enableThinking: false
     })
     const [profiles, setProfiles] = createStore<ConfigProfile[]>([])
     const [selectedProfile, setSelectedProfile] = createSignal<string>("")
@@ -287,7 +287,7 @@ export function createSettingsStore(): SettingsStore {
             maxOutputItems: 100000,
             maxChunks: 500,
             maxParallelFiles: 1,
-            enableThinking: true
+            enableThinking: false
         })
         saveAppSettings()
         applyTheme("auto")
