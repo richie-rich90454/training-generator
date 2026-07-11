@@ -32,6 +32,7 @@ export interface ElectronAPI{
     clearCheckpoint:()=>Promise<{success:boolean}>
     writeLog:(entry:LogEntry)=>Promise<void>
     exportLogs:(data:string)=>Promise<{success:boolean;error?:string}>
+    onOllamaStreamToken:(requestId:string,callback:(token:string)=>void)=>()=>void
 }
 
 declare global{
