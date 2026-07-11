@@ -265,7 +265,7 @@ export class I18n{
             return key
         }
         message=pluralize(message, count)
-        message=interpolate(message, interpolations??{})
+        message=interpolate(message, {count, ...interpolations})
         return message
     }
     private resolveMessage(key: string): string|LocaleMessages{
