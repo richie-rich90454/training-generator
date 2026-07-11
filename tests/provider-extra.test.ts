@@ -203,11 +203,11 @@ describe("createProvider", () => {
     })
     it("creates anthropic provider", () => {
         let manager=createProvider("anthropic", { apiKey: "key" })
-        expect(manager.getCurrentProvider().name).toBe("openai")
+        expect(manager.getCurrentProvider().name).toBe("anthropic")
     })
     it("creates gemini provider", () => {
         let manager=createProvider("gemini", { apiKey: "key" })
-        expect(manager.getCurrentProvider().name).toBe("openai")
+        expect(manager.getCurrentProvider().name).toBe("gemini")
     })
     it("creates ollama provider", () => {
         let manager=createProvider("ollama")
