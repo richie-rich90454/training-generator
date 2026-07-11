@@ -679,7 +679,7 @@ export function createAppStore(): AppStore {
           const processingType = settingsStore.settings.processingType || "instruction"
           const prompt =
             (await promptManager.getPromptWithFallback(language, processingType)) || ""
-          const warmed = await warmCache(items as any, model, prompt)
+          const warmed = await warmCache(items, model, prompt)
           uiStore.showToast(
             t("toast.cacheWarmed", undefined, {
               warmed: String(warmed),
