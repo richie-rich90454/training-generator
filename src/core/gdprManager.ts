@@ -136,10 +136,26 @@ export async function createTarGz(files: string[], outputPath: string): Promise<
     let pack=tarModule.create({gzip: false}, files)
     pack.pipe(gzip).pipe(output)
     await new Promise<void>((resolve, reject) => {
-        output.on("finish", () => resolve())
-        output.on("error", (err: Error) => reject(err))
-        gzip.on("error", (err: Error) => reject(err))
-        pack.on("error", (err: Error) => reject(err))
+        let settled=false
+        let onDone=() => {
+            if (!settled){
+                settled=true
+                resolve()
+            }
+        }
+        let onError=(err: Error) => {
+            if (!settled){
+                settled=true
+                pack.destroy()
+                gzip.destroy()
+                output.destroy()
+                reject(err)
+            }
+        }
+        output.on("finish", onDone)
+        output.on("error", onError)
+        gzip.on("error", onError)
+        pack.on("error", onError)
     })
 }
 export async function secureDeleteFile(filePath: string): Promise<void>{
