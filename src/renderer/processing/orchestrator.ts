@@ -177,8 +177,9 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 chunks = simpleChunk(textContent, chunkSize)
             }
             if (settings.maxChunks != null && settings.maxChunks > 0 && chunks.length > settings.maxChunks) {
+                const truncatedCount = chunks.length - settings.maxChunks
                 chunks.length = settings.maxChunks
-                callbacks?.onChunkFailed?.(chunks.length, t("log.maxChunksTruncated", undefined, { max: String(settings.maxChunks) }))
+                console.warn(`[orchestrator] ${fileObj.name}: truncated ${truncatedCount} chunks (max: ${settings.maxChunks})`)
             }
             if (chunks.length === 0) {
                 throw new Error(t("error.noChunksCreated"))
