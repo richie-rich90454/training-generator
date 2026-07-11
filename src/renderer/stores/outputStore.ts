@@ -297,7 +297,8 @@ export function createOutputStore(): OutputStore {
         const idx = filePath.lastIndexOf("/")
         const idx2 = filePath.lastIndexOf("\\")
         const sepIdx = Math.max(idx, idx2)
-        if (sepIdx <= 0) return ""
+        if (sepIdx < 0) return ""
+        if (sepIdx === 0) return filePath.slice(0, 1)
         return filePath.slice(0, sepIdx)
     }
     async function exportOutput(exportFormatParam?: string): Promise<void> {
