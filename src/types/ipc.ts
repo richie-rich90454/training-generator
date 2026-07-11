@@ -57,6 +57,14 @@ export interface IpcChannels{
         request:{apiKey:string;baseUrl:string;model:string;prompt:string;options?:Record<string,unknown>}
         response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
     }
+    'anthropic:generate':{
+        request:{apiKey:string;model:string;prompt:string;options?:Record<string,unknown>}
+        response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
+    }
+    'gemini:generate':{
+        request:{apiKey:string;model:string;prompt:string;options?:Record<string,unknown>}
+        response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
+    }
     'app:getVersion':{
         request:void
         response:string
