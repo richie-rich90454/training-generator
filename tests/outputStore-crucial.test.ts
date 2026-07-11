@@ -71,7 +71,7 @@ describe("OutputStore previewText", () => {
         store.appendOutput([item({ format: "text", text: "a" })])
         expect(store.previewText()).toContain("Total items: 1")
     })
-    it("shows last 3 items", () => {
+    it("shows all items", () => {
         store.appendOutput([
             item({ format: "text", text: "1" }),
             item({ format: "text", text: "2" }),
@@ -80,7 +80,7 @@ describe("OutputStore previewText", () => {
         ])
         let preview = store.previewText()
         expect(preview).toContain("4")
-        expect(preview).not.toContain("1")
+        expect(preview).toContain("1")
     })
 })
 describe("OutputStore parseQuestionAnswerPairs", () => {
