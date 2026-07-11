@@ -1102,8 +1102,9 @@ function registerCriticalIpcHandlers():void{
             return{running:false,models:[],error:t("error.failedToConnectToOllama")}
         }
     })
-    handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {think?:boolean}}):Promise<{success:boolean;response?:string;error?:string}>=>{
-        let{model,prompt,options}=payload
+    handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {think?:boolean};ollamaHost?:string;ollamaPort?:number}):Promise<{success:boolean;response?:string;error?:string}>=>{
+        let{model,prompt,options,ollamaHost,ollamaPort}=payload
+        const baseUrl=buildOllamaBaseUrl(ollamaHost,ollamaPort)
         options=options??{}
         const think=options.think
         delete options.think
@@ -1120,7 +1121,7 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:t("error.promptTooLarge")}
         }
         try{
-            await axios.get("http://localhost:11434/api/show",{
+            await axios.get(`${baseUrl}/api/show`,{
                 params:{name:model},
                 timeout:10000
             }).catch(()=>{})
@@ -1148,7 +1149,7 @@ function registerCriticalIpcHandlers():void{
                     requestBody.think=false
                 }
                 let response=await axios.post(
-                    "http://localhost:11434/api/generate",
+                    `${baseUrl}/api/generate`,
                     requestBody,
                     {
                         timeout,
