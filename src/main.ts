@@ -602,9 +602,10 @@ function createTray():void{
         })
     }
 }
-export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}={}):Promise<{success:boolean;response?:string;error?:string}>{
+export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string}}={}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options}=payload
     options=options??{}
+    const requestId=options._requestId||""
     if(options.num_predict==null){
         options.num_predict=4096
     }
@@ -668,18 +669,25 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
         const clearTimer=()=>{
             if(noDataTimer){clearTimeout(noDataTimer);noDataTimer=null}
         }
+        const sender=event.sender
         return await new Promise<{success:boolean;response?:string;error?:string}>((resolve,reject)=>{
             let buffer=""
             const safeResolve=(value:{success:boolean;response?:string;error?:string})=>{
                 if(settled)return
                 settled=true
                 clearTimer()
+                if(requestId){
+                    try{sender.send("ollama:stream-done",{requestId})}catch{}
+                }
                 resolve(value)
             }
             const safeReject=(error:Error)=>{
                 if(settled)return
                 settled=true
                 clearTimer()
+                if(requestId){
+                    try{sender.send("ollama:stream-done",{requestId})}catch{}
+                }
                 reject(error)
             }
             const resetNoDataTimer=()=>{
@@ -702,6 +710,9 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                         let parsed=JSON.parse(line)
                         if(parsed.response){
                             fullResponse+=parsed.response
+                            if(requestId){
+                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}
+                            }
                         }
                         if(parsed.done){
                             safeResolve({success:true,response:fullResponse})
@@ -720,6 +731,9 @@ export async function handleOllamaGenerateStream(payload:{model?:string;prompt?:
                         let parsed=JSON.parse(buffer)
                         if(parsed.response){
                             fullResponse+=parsed.response
+                            if(requestId){
+                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}
+                            }
                         }
                         if(parsed.done){
                             safeResolve({success:true,response:fullResponse})
@@ -1141,7 +1155,7 @@ function registerCriticalIpcHandlers():void{
         }
         return{success:false,error:t("error.failedToGenerateResponse")}
     })
-    handle("ollama:generateStream",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions})=>handleOllamaGenerateStream(payload))
+    handle("ollama:generateStream",async(event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string}})=>handleOllamaGenerateStream(event,payload))
     handle("openai:generate",async(_event,payload:{
         apiKey?:string
         baseUrl?:string
