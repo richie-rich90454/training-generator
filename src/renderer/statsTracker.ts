@@ -11,6 +11,9 @@ export class StatsTracker {
   latencySampleCount: number = 0
 
   start(): void {
+    // Idempotent: only reset if not already tracking.
+    // Prevents parallel workers from zeroing out cumulative metrics.
+    if (this.startTime !== 0) return
     this.startTime = Date.now()
     this.totalChunks = 0
     this.successfulChunks = 0

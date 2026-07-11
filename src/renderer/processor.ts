@@ -138,7 +138,11 @@ class Processor{
         provenanceBase?:Omit<ProvenanceData,'chunkIndex'>
     ):Promise<TrainingItem[]>{
         this.reset()
-        this.stats.start()
+        // Only start stats if not already tracking — prevents parallel workers
+        // from zeroing out each other's cumulative metrics (totalTokens, latency, etc.)
+        if(this.stats.startTime===0){
+            this.stats.start()
+        }
         let stats=this.stats
         let signal=this.abortController!.signal
         let allItems:TrainingItem[]=[]
