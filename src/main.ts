@@ -602,10 +602,13 @@ function createTray():void{
         })
     }
 }
-export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string}}={}):Promise<{success:boolean;response?:string;error?:string}>{
+export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean}}={}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options}=payload
     options=options??{}
     const requestId=options._requestId||""
+    const think=options.think
+    delete options.think
+    delete options._requestId
     if(options.num_predict==null){
         options.num_predict=4096
     }
@@ -634,19 +637,23 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
         const connectionTimer = setTimeout(() => connectionController.abort(), initialTimeout)
         let response
         try {
+            const requestBody:Record<string,unknown>={
+                model:model.replace(/[\x00-\x1F]/g,""),
+                prompt,
+                stream:true,
+                options:{
+                    ...options,
+                    temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                    top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                    num_predict:options.num_predict
+                }
+            }
+            if(think===false){
+                requestBody.think=false
+            }
             response=await axios.post(
                 "http://localhost:11434/api/generate",
-                {
-                    model:model.replace(/[\x00-\x1F]/g,""),
-                    prompt,
-                    stream:true,
-                    options:{
-                        ...options,
-                        temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                        top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                        num_predict:options.num_predict
-                    }
-                },
+                requestBody,
                 {
                     // No global timeout — rely on the per-data-packet noDataTimer below.
                     // A fixed axios timeout kills the stream even when data is flowing.
@@ -1083,9 +1090,11 @@ function registerCriticalIpcHandlers():void{
             return{running:false,models:[],error:t("error.failedToConnectToOllama")}
         }
     })
-    handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
+    handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {think?:boolean}}):Promise<{success:boolean;response?:string;error?:string}>=>{
         let{model,prompt,options}=payload
         options=options??{}
+        const think=options.think
+        delete options.think
         if(options.num_predict==null){
             options.num_predict=4096
         }
@@ -1112,19 +1121,23 @@ function registerCriticalIpcHandlers():void{
         let maxRetries=2
         for(let attempt=0;attempt<=maxRetries;attempt++){
             try{
+                const requestBody:Record<string,unknown>={
+                    model:model.replace(/[\x00-\x1F]/g,""),
+                    prompt,
+                    stream:false,
+                    options:{
+                        ...options,
+                        temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
+                        top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                        num_predict:options.num_predict ?? 4096
+                    }
+                }
+                if(think===false){
+                    requestBody.think=false
+                }
                 let response=await axios.post(
                     "http://localhost:11434/api/generate",
-                    {
-                        model:model.replace(/[\x00-\x1F]/g,""),
-                        prompt,
-                        stream:false,
-                        options:{
-                            ...options,
-                            temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
-                            num_predict:options.num_predict ?? 4096
-                        }
-                    },
+                    requestBody,
                     {
                         timeout,
                         maxContentLength:50*1024*1024,
@@ -1155,7 +1168,7 @@ function registerCriticalIpcHandlers():void{
         }
         return{success:false,error:t("error.failedToGenerateResponse")}
     })
-    handle("ollama:generateStream",async(event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string}})=>handleOllamaGenerateStream(event,payload))
+    handle("ollama:generateStream",async(event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean}})=>handleOllamaGenerateStream(event,payload))
     handle("openai:generate",async(_event,payload:{
         apiKey?:string
         baseUrl?:string

@@ -8,6 +8,7 @@ export interface ProviderOptions{
     top_p?:number
     max_tokens?:number
     onToken?:(token:string)=>void
+    think?:boolean
 }
 
 export interface ProviderResult{
@@ -110,6 +111,9 @@ export class OllamaProvider implements Provider{
                     temperature:options?.temperature??0.7,
                     top_p:options?.top_p??0.9,
                     num_predict:maxTokens
+                }
+                if(options?.think===false){
+                    payload.think=false
                 }
                 if(requestId){
                     payload._requestId=requestId

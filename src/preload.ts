@@ -8,9 +8,9 @@ ipcRenderer.on("ollama:stream-token",(_event,data:{requestId:string;token:string
 	const cb=streamTokenCallbacks.get(data.requestId)
 	if(cb)cb(data.token)
 })
-ipcRenderer.on("ollama:stream-done",(_event,data:{requestId:string})=>{
-	streamTokenCallbacks.delete(data.requestId)
-})
+// Note: stream-done does NOT delete the callback. The callback is cleaned up
+// by the unsub function returned from onOllamaStreamToken. This allows the
+// same requestId to survive across retry attempts within retryWithBackoff.
 
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>invoke("dialog:openFile"),

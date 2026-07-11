@@ -193,6 +193,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (settings.enableThinking === false && (processingType === "cot" || processingType === "tot")) {
                 processingType = "instruction"
             }
+            processor.enableThinking = settings.enableThinking !== false
             const processedChunks = await processor.processChunks(
                 chunks,
                 model,

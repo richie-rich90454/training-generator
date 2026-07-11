@@ -10,6 +10,7 @@ class Processor{
     private aborted:boolean=false
     concurrency:number=3
     demoMode:boolean=false
+    enableThinking:boolean=false
     provider:Provider|null=null
     stats:StatsTracker
     constructor(){
@@ -72,7 +73,8 @@ class Processor{
                 let result=await provider.generate(combined,model,{
                     temperature:0.7,
                     top_p:0.9,
-                    max_tokens:16384
+                    max_tokens:16384,
+                    think:this.enableThinking
                 })
                 if(signal.aborted)continue
                 let responses=this.splitBatchedResponse(result.text,batch.length)
@@ -155,6 +157,7 @@ class Processor{
         let allItems:TrainingItem[]=[]
         let total=chunks.length
         let effectiveConcurrency=Math.max(1,Math.min(20,Number(this.concurrency)||3))
+        let enableThinking=this.enableThinking
         const completeChunk=(index:number,_total:number,items:TrainingItem[])=>{
             allItems.push(...items)
             onChunkComplete(index,total,items)
@@ -265,7 +268,8 @@ class Processor{
                         temperature:0.7,
                         top_p:0.9,
                         max_tokens:16384,
-                        onToken:streamChunk
+                        onToken:streamChunk,
+                        think:enableThinking
                     })
                     setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
                     let result=await responsePromise
