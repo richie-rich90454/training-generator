@@ -153,7 +153,7 @@ export class ShareGptExporter implements Exporter{
             }
             lines.push(JSON.stringify({ id: i+1, conversations: record.conversations }))
         }
-        return lines.join("\n")+"\n"
+        return lines.length>0?lines.join("\n")+"\n":""
     }
 }
 export class OpenAIFineTuneExporter implements Exporter{
@@ -178,7 +178,7 @@ export class OpenAIFineTuneExporter implements Exporter{
             }
             lines.push(JSON.stringify({ messages: valid }))
         }
-        return lines.join("\n")+"\n"
+        return lines.length>0?lines.join("\n")+"\n":""
     }
 }
 export class Llama2Exporter implements Exporter{
@@ -194,7 +194,7 @@ export class Llama2Exporter implements Exporter{
             }
             lines.push(JSON.stringify({ text: applyLlama2Template(messages) }))
         }
-        return lines.join("\n")+"\n"
+        return lines.length>0?lines.join("\n")+"\n":""
     }
 }
 export class Llama3Exporter implements Exporter{
@@ -210,7 +210,7 @@ export class Llama3Exporter implements Exporter{
             }
             lines.push(JSON.stringify({ text: applyLlama3Template(messages) }))
         }
-        return lines.join("\n")+"\n"
+        return lines.length>0?lines.join("\n")+"\n":""
     }
 }
 export class MistralExporter implements Exporter{
@@ -226,6 +226,6 @@ export class MistralExporter implements Exporter{
             }
             lines.push(JSON.stringify({ text: applyMistralTemplate(messages) }))
         }
-        return lines.join("\n")+"\n"
+        return lines.length>0?lines.join("\n")+"\n":""
     }
 }
