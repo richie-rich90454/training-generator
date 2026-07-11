@@ -1042,6 +1042,12 @@ function registerCriticalIpcHandlers():void{
     handle("ollama:generate",async(_event,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions}):Promise<{success:boolean;response?:string;error?:string}>=>{
         let{model,prompt,options}=payload
         options=options??{}
+        if(options.num_predict==null){
+            options.num_predict=4096
+        }
+        else{
+            options.num_predict=Math.min(8192,Math.max(256,options.num_predict))
+        }
         if(!model||typeof model!=="string"||!prompt||typeof prompt!=="string"){
             return{success:false,error:t("error.invalidModelNameOrPrompt")}
         }
@@ -1071,7 +1077,8 @@ function registerCriticalIpcHandlers():void{
                         options:{
                             ...options,
                             temperature:Math.min(2,Math.max(0,options.temperature ?? 0.7)),
-                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9))
+                            top_p:Math.min(1,Math.max(0,options.top_p ?? 0.9)),
+                            num_predict:options.num_predict ?? 4096
                         }
                     },
                     {
@@ -1154,6 +1161,95 @@ function registerCriticalIpcHandlers():void{
                 return{success:false,error:t("error.apiError",undefined,{status:String(error.response.status),data:JSON.stringify(error.response.data)})}
             }
             return{success:false,error:error.message||t("error.failedToCallOpenAI")}
+        }
+    })
+    handle("anthropic:generate",async(_event,payload:{
+        apiKey?:string
+        model?:string
+        prompt?:string
+        options?:{temperature?:number;top_p?:number;max_tokens?:number}
+    }):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+        let{apiKey,model,prompt,options}=payload
+        options=options??{}
+        if(!apiKey||!model||!prompt){
+            return{success:false,error:t("error.missingRequiredParameters")}
+        }
+        try{
+            let response=await axios.post(
+                "https://api.anthropic.com/v1/messages",
+                {
+                    model,
+                    max_tokens:options.max_tokens??4096,
+                    messages:[{role:"user",content:prompt}],
+                    temperature:options.temperature??0.7,
+                    top_p:options.top_p??0.9
+                },
+                {
+                    headers:{
+                        "Content-Type":"application/json",
+                        "x-api-key":apiKey,
+                        "anthropic-version":"2023-06-01"
+                    },
+                    timeout:300000,
+                    httpAgent,
+                    httpsAgent
+                }
+            )
+            let rc=response.data.content?.[0]?.text||""
+            return{
+                success:true,
+                response:rc,
+                usage:response.data.usage
+            }
+        }
+        catch(error:any){
+            if(error.response){
+                return{success:false,error:t("error.apiError",undefined,{status:String(error.response.status),data:JSON.stringify(error.response.data)})}
+            }
+            return{success:false,error:error.message||t("error.failedToCallAnthropic")}
+        }
+    })
+    handle("gemini:generate",async(_event,payload:{
+        apiKey?:string
+        model?:string
+        prompt?:string
+        options?:{temperature?:number;top_p?:number;max_tokens?:number}
+    }):Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>=>{
+        let{apiKey,model,prompt,options}=payload
+        options=options??{}
+        if(!apiKey||!model||!prompt){
+            return{success:false,error:t("error.missingRequiredParameters")}
+        }
+        try{
+            let response=await axios.post(
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+                {
+                    contents:[{parts:[{text:prompt}]}],
+                    generationConfig:{
+                        temperature:options.temperature??0.7,
+                        topP:options.top_p??0.9,
+                        maxOutputTokens:options.max_tokens??4096
+                    }
+                },
+                {
+                    headers:{"Content-Type":"application/json"},
+                    timeout:300000,
+                    httpAgent,
+                    httpsAgent
+                }
+            )
+            let rc=response.data.candidates?.[0]?.content?.parts?.[0]?.text||""
+            return{
+                success:true,
+                response:rc,
+                usage:{total_tokens:response.data.usageMetadata?.totalTokenCount??Math.ceil(rc.length/4)}
+            }
+        }
+        catch(error:any){
+            if(error.response){
+                return{success:false,error:t("error.apiError",undefined,{status:String(error.response.status),data:JSON.stringify(error.response.data)})}
+            }
+            return{success:false,error:error.message||t("error.failedToCallGemini")}
         }
     })
     handle("app:getVersion",(_:Electron.IpcMainInvokeEvent):string=>app.getVersion())
