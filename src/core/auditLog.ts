@@ -53,7 +53,7 @@ export class AuditLog{
     private readonly storageKey="tg-audit-log"
     constructor(options: {storage?: AuditStorage}={}){
         this.storage=options.storage??new InMemoryAuditStorage()
-        this.entries=[]
+        this.load()
     }
     append(action: string, actor: string, resource: string, details: Record<string, unknown>={}): AuditEntry{
         let prevHash="0"
