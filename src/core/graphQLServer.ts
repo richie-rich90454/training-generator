@@ -55,6 +55,9 @@ export class PubSub{
                 if (idx>-1){
                     list.splice(idx, 1)
                 }
+                while (pending.length>0){
+                    pending.shift()!({value: undefined, done: true})
+                }
                 return Promise.resolve({value: undefined, done: true})
             },
             throw: (err: any)=>Promise.reject(err)
