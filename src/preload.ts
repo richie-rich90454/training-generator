@@ -2,6 +2,16 @@ import{contextBridge,ipcRenderer}from "electron"
 import{invoke}from "./ipcRenderer.ts"
 import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANNEL,WINDOW_IS_MAXIMIZED_CHANNEL,WINDOW_MAXIMIZED_CHANGED_EVENT}from "./types/ipc.ts"
 import type{FileObj}from "./types/index.js"
+
+const streamTokenCallbacks=new Map<string,(token:string)=>void>()
+ipcRenderer.on("ollama:stream-token",(_event,data:{requestId:string;token:string})=>{
+	const cb=streamTokenCallbacks.get(data.requestId)
+	if(cb)cb(data.token)
+})
+ipcRenderer.on("ollama:stream-done",(_event,data:{requestId:string})=>{
+	streamTokenCallbacks.delete(data.requestId)
+})
+
 contextBridge.exposeInMainWorld("electronAPI",{
     openFileDialog:()=>invoke("dialog:openFile"),
     readFile:(filePath:string)=>invoke("file:read",{filePath}),
@@ -43,6 +53,12 @@ contextBridge.exposeInMainWorld("electronAPI",{
         ipcRenderer.on(WINDOW_MAXIMIZED_CHANGED_EVENT,handler)
         return ()=>{
             ipcRenderer.off(WINDOW_MAXIMIZED_CHANGED_EVENT,handler)
+        }
+    },
+    onOllamaStreamToken:(requestId:string,callback:(token:string)=>void):()=>void=>{
+        streamTokenCallbacks.set(requestId,callback)
+        return ()=>{
+            streamTokenCallbacks.delete(requestId)
         }
     }
 })
