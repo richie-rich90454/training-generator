@@ -7,6 +7,7 @@ export interface ProviderOptions{
     temperature?:number
     top_p?:number
     max_tokens?:number
+    onToken?:(token:string)=>void
 }
 
 export interface ProviderResult{
@@ -96,14 +97,24 @@ export class OllamaProvider implements Provider{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
         console.log(`[ollama-provider] request start: model=${model}, prompt=${prompt.length} chars`)
+        const onToken=options?.onToken
+        const requestId=onToken?`ollama-${Date.now()}-${Math.random().toString(36).slice(2,9)}`:""
+        let unsub:(()=>void)|null=null
+        if(onToken&&requestId&&api.onOllamaStreamToken){
+            unsub=api.onOllamaStreamToken(requestId,onToken)
+        }
         try{
             let result=await retryWithBackoff(async()=>{
                 const maxTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
-                let r=await api.generateWithOllamaStream(model,prompt,{
+                const payload:Record<string,unknown>={
                     temperature:options?.temperature??0.7,
                     top_p:options?.top_p??0.9,
                     num_predict:maxTokens
-                })
+                }
+                if(requestId){
+                    payload._requestId=requestId
+                }
+                let r=await api.generateWithOllamaStream(model,prompt,payload)
                 if(!r.success)throw new Error(r.error||"Ollama generation failed")
                 return r
             },3,1000)
@@ -114,6 +125,9 @@ export class OllamaProvider implements Provider{
         catch(error){
             console.error("OllamaProvider.generate failed:",(error as Error).message)
             throw error
+        }
+        finally{
+            if(unsub)unsub()
         }
     }
 }
