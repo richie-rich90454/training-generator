@@ -602,6 +602,17 @@ function createTray():void{
         })
     }
 }
+export function buildOllamaBaseUrl(host?:string,port?:number):string{
+    let h=(host&&typeof host==="string"&&host.trim().length>0)?host.trim():"localhost"
+    let p=(typeof port==="number"&&port>=1&&port<=65535)?port:11434
+    let protocol="http"
+    let protocolMatch=h.match(/^(https?):\/\//i)
+    if(protocolMatch){
+        protocol=protocolMatch[1].toLowerCase()
+        h=h.replace(/^https?:\/\//i,"")
+    }
+    return `${protocol}://${h}:${p}`
+}
 export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEvent,payload:{model?:string;prompt?:string;options?:OllamaGenerateOptions & {_requestId?:string;think?:boolean}}={}):Promise<{success:boolean;response?:string;error?:string}>{
     let{model,prompt,options}=payload
     options=options??{}
@@ -1062,16 +1073,17 @@ function registerCriticalIpcHandlers():void{
             return{success:false,error:t("error.failedToParseFiles")}
         }
     })
-    handle("ollama:check",async(_:Electron.IpcMainInvokeEvent):Promise<OllamaStatus>=>{
+    handle("ollama:check",async(_event:Electron.IpcMainInvokeEvent,request:{ollamaHost?:string;ollamaPort?:number}):Promise<OllamaStatus>=>{
+        const baseUrl=buildOllamaBaseUrl(request?.ollamaHost,request?.ollamaPort)
         try{
-            let tagsResponse=await axios.get("http://localhost:11434/api/tags",{timeout:5000})
+            let tagsResponse=await axios.get(`${baseUrl}/api/tags`,{timeout:5000})
             let models:OllamaModel[]=(tagsResponse.data.models||[]).map((m:any)=>({
                 ...m,
                 name:typeof m.name==="string"?m.name.replace(/[\x00-\x1F]/g,""):String(m.name||"").replace(/[\x00-\x1F]/g,"")
             }))
             let version="unknown"
             try{
-                let versionResponse=await axios.get("http://localhost:11434/api/version",{timeout:3000})
+                let versionResponse=await axios.get(`${baseUrl}/api/version`,{timeout:3000})
                 version=versionResponse.data.version||"unknown"
             }
             catch{
