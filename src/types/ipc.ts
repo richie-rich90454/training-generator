@@ -38,15 +38,15 @@ export interface IpcChannels{
         response:string|null
     }
     'ollama:check':{
-        request:void
+        request:{ollamaHost?:string;ollamaPort?:number}
         response:OllamaStatus
     }
     'ollama:generate':{
-        request:{model:string;prompt:string;options?:OllamaGenerateOptions}
+        request:{model:string;prompt:string;options?:OllamaGenerateOptions;ollamaHost?:string;ollamaPort?:number}
         response:OllamaGenerateResult
     }
     'ollama:generateStream':{
-        request:{model:string;prompt:string;options?:OllamaGenerateOptions}
+        request:{model:string;prompt:string;options?:OllamaGenerateOptions;ollamaHost?:string;ollamaPort?:number}
         response:OllamaGenerateResult
     }
     'ollama:status-update':{
