@@ -36,7 +36,7 @@ export async function retryWithBackoff<T>(
     onRetry?:(attempt:number,error:string)=>void,
     rateLimiter?:RateLimiter
 ):Promise<T>{
-    let lastError:Error
+    let lastError:Error|null=null
     for(let attempt=0;attempt<=maxRetries;attempt++){
         try{
             return await fn()
@@ -67,8 +67,8 @@ export async function retryWithBackoff<T>(
             }
         }
     }
-    console.error("retryWithBackoff: all retries exhausted",lastError!.message)
-    throw lastError!
+    console.error("retryWithBackoff: all retries exhausted",lastError?.message||"unknown error")
+    throw lastError||new Error("retryWithBackoff: all retries exhausted")
 }
 
 function parseRetryAfter(msg:string):number|undefined{
