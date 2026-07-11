@@ -7,25 +7,59 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
   package-mac:
+    needs: validate
     runs-on: macos-latest
+    timeout-minutes: 30
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
-      - run: npm run typecheck
       - run: npm run build
       - run: mkdir -p release
-      - run: npm run package:mac -- --publish never
+
+      - name: Package macOS
+        run: npm run package:mac -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - run: ls -lah release/
-      - uses: softprops/action-gh-release@v2
+
+      - name: Upload macOS artifacts
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.dmg
@@ -34,51 +68,73 @@ jobs:
             release/latest-mac.yml
 
   package-linux:
+    needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: sudo apt-get update
-      - run: sudo apt-get install -y libfuse2 rpm
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 rpm
+
       - run: npm ci
-      - run: npm run typecheck
       - run: npm run build
       - run: mkdir -p release
-      - run: npm run package:linux -- --publish never
+
+      - name: Package Linux
+        run: npm run package:linux -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - run: ls -lah release/
-      - uses: softprops/action-gh-release@v2
+
+      - name: Upload Linux artifacts
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.AppImage
             release/*.deb
+            release/*.rpm
             release/*.blockmap
             release/latest-linux.yml
 
   package-windows:
+    needs: validate
     runs-on: windows-latest
+    timeout-minutes: 30
     if: ${{ !contains(github.event.release.tag_name, '-alpha') && !contains(github.event.release.tag_name, '-beta') }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
-      - run: npm run typecheck
       - run: npm run build
       - run: mkdir release
-      - run: npm run package:win -- --publish never
+
+      - name: Package Windows
+        run: npm run package:win -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - run: dir release
-      - uses: softprops/action-gh-release@v2
+
+      - name: Upload Windows artifacts
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.exe
+            release/*.msi
             release/*.blockmap
+            release/latest.yml
