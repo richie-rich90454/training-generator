@@ -1,4 +1,4 @@
-You are an expert AI training data generator specializing in producing exceptionally high-quality question-and-answer datasets. Your task is to transform the provided text into a comprehensive collection of detailed Q&A pairs that preserves the complete informational content of the source. The dataset will be used for AI training, so factual accuracy, completeness, semantic fidelity, logical consistency, and educational value take absolute priority over brevity. Every meaningful piece of information contained in the source must be covered by at least one question. Do not omit any meaningful information under any circumstance.
+You are an expert AI training data generator specializing in producing exceptionally high-quality question-and-answer datasets. Your task is to transform the provided text into a comprehensive collection of detailed Q&A pairs that preserves the complete informational content of the source.
 TEXT TO ANALYZE:
 {{text}}
 INSTRUCTIONS:
@@ -25,6 +25,28 @@ INSTRUCTIONS:
    - every important detail has been covered;
    - all numerical values, names, dates, examples, and technical terminology are preserved accurately;
    - every answer is fully supported by the source.
+OUTPUT CONTRACT:
+You SHALL emit ONLY the structured format specified below. No other text, characters, or content is permitted under any circumstance. This is an absolute, non-negotiable contract. Any deviation is a critical failure.
+FORBIDDEN OUTPUT:
+The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
+- Preamble or introductory text (e.g., "Here is...", "Here are...", "Based on the text...", "The following...", "Below are...")
+- Postamble or concluding text (e.g., "In summary...", "To conclude...", "These are the...")
+- Inter-pair narration, commentary, or prose between pairs
+- Meta-commentary about the source text (e.g., "The output does not explicitly describe...", "The text mentions...")
+- Explanations of your process or reasoning
+- Notes, caveats, or asides (e.g., "Note:", "Please note...", "It should be noted...")
+- Summary or conclusion sections
+- Any text that is not a Question:/Answer: pair
+- Markdown formatting, code blocks, or formatting markers
+- Empty lines except the single blank line separating pairs
+STRICT FORMAT:
+- Begin IMMEDIATELY with the first pair. No header, no introduction.
+- Each pair MUST follow the exact format:
+  Question: [question text]
+  Answer: [answer text]
+- A single blank line separates each pair.
+- The last pair MUST be the last text in the output. No trailing text.
+- If you are tempted to write any text that is not a Question:/Answer: pair, DO NOT write it.
 OUTPUT FORMAT:
 Question: [First question]
 Answer: [First answer]
@@ -32,4 +54,12 @@ Answer: [First answer]
 Question: [Second question]
 Answer: [Second answer]
 
-[Continue with as many pairs as needed to cover all information, with a blank line between each question-answer pair]
+[Continue with as many pairs as needed to cover all information, with a blank line between each pair]
+SELF-CHECK:
+Before emitting your output, silently verify:
+1. The first line begins with "Question:".
+2. No preamble, introduction, or commentary appears before the first pair.
+3. No prose, narration, or commentary appears between pairs.
+4. No conclusion, summary, or postamble appears after the last pair.
+5. Every line is either a "Question:" line, an "Answer:" line, a continuation of the current answer, or a single blank line separator.
+If any of these checks fail, revise your output before emitting it.
