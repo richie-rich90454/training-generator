@@ -1,5 +1,6 @@
 import {readFile, writeFile, unlink, mkdir} from "fs/promises";
 import path from "path";
+import crypto from "crypto";
 import {gzip as zlibGzip, gunzip as zlibGunzip} from "zlib";
 export interface TieredStorageOptions{
     hotCapacity?: number;
@@ -173,7 +174,8 @@ export class TieredStorage{
         await mkdir(this.coldDir, {recursive: true});
     }
     private _coldPath(key: string): string{
-        return path.join(this.coldDir, key+".gz");
+        let hash=crypto.createHash("sha256").update(key).digest("hex");
+        return path.join(this.coldDir, hash+".gz");
     }
     private _updateCounts(): void{
         this.stats.hot=this.hot.size;
