@@ -71,7 +71,10 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         id="config-provider"
                         class={`${styles["form-control"]} ${styles["config-field__control"]}`}
                         value={settingsStore.settings.provider}
-                        onChange={(e) => settingsStore.setProvider(e.currentTarget.value)}
+                        onChange={(e) => {
+                            settingsStore.setProvider(e.currentTarget.value)
+                            props.appStore.initProvider()
+                        }}
                     >
                         <For each={PROVIDERS}>
                             {(provider) => (
