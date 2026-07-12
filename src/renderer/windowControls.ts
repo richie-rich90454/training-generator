@@ -12,14 +12,24 @@ function handleWindowBtn(btn:HTMLButtonElement|null,action:()=>void,label:string
         console.warn(`[windowControls] ${label} button not found`)
         return
     }
+    let safeAction=()=>{
+        try{
+            let result=action() as void|Promise<void>
+            if(result&&typeof (result as Promise<void>).then==="function"){
+                (result as Promise<void>).catch((e:unknown)=>console.error(`[windowControls] ${label} failed:`,e))
+            }
+        }catch(e){
+            console.error(`[windowControls] ${label} failed:`,e)
+        }
+    }
     let clickHandler=(e:MouseEvent)=>{
         e.stopPropagation()
-        action()
+        safeAction()
     }
     let keyHandler=(e:KeyboardEvent)=>{
         if(e.key==="Enter"||e.key===" "){
             e.preventDefault()
-            action()
+            safeAction()
         }
     }
     btn.addEventListener("click",clickHandler)
