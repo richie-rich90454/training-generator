@@ -393,7 +393,9 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
         chunks.push(currentChunk.trim())
     }
 
-    return chunks
+    // Filter out any chunks that became empty after trimming (e.g. a chunk
+    // that consisted solely of whitespace produced by a boundary break).
+    return chunks.filter(c => c.trim().length > 0)
 }
 
 export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
@@ -441,7 +443,9 @@ export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
         start = end
     }
 
-    return chunks
+    // Filter out any chunks that became empty after trimming (e.g. a slice
+    // that landed entirely on a run of whitespace between word boundaries).
+    return chunks.filter(c => c.trim().length > 0)
 }
 
 const ABBREVIATIONS = new Set([
