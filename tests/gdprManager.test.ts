@@ -171,7 +171,8 @@ vi.mock("fs", ()=>({
                 listenerCount: vi.fn((event: string)=>{
                     return (stream.listeners[event] || []).length
                 }),
-                pipe: vi.fn()
+                pipe: vi.fn(),
+                destroy: vi.fn()
             }
             fsState.streams[filePath]=stream
             return stream
@@ -189,7 +190,8 @@ vi.mock("tar", ()=>{
                 })
                 return dest
             },
-            on: vi.fn()
+            on: vi.fn(),
+            destroy: vi.fn()
         }
         return stream as unknown as NodeJS.ReadableStream
     }
@@ -215,7 +217,8 @@ vi.mock("zlib", ()=>({
         on: vi.fn(),
         once: vi.fn(),
         emit: vi.fn(),
-        end: vi.fn()
+        end: vi.fn(),
+        destroy: vi.fn()
     }))
 }))
 beforeEach(()=>{
