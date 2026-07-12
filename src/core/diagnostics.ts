@@ -164,7 +164,7 @@ export class DiagnosticsGenerator{
 }
 function isSecretKey(key: string): boolean{
     let lower=key.toLowerCase();
-    let patterns=["apikey", "api_key", "api-key", "secret", "token", "password", "auth", "privatekey", "private_key", "private-key", "credential", "credentials", "passphrase", "passwd", "pwd"];
+    let patterns=["apikey", "api_key", "api-key", "secret", "token", "password", "auth", "privatekey", "private_key", "private-key", "credential", "credentials", "passphrase", "passwd", "pwd", "accesskey", "access_key", "access-key", "sessionid", "session_id", "session-id", "bearer"];
     for (let pattern of patterns){
         if (lower.includes(pattern)){
             return true;
