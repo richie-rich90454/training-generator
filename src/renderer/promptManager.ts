@@ -116,6 +116,13 @@ class PromptManager{
     async getPromptWithFallback(language:string,processingType:string):Promise<string|null>{
         let prompt=await this.getPrompt(language,processingType)
         if(prompt)return prompt
+        if(language.includes("-")){
+            let baseLanguage=language.split("-")[0]
+            if(baseLanguage&&baseLanguage!==language){
+                prompt=await this.getPrompt(baseLanguage,processingType)
+                if(prompt)return prompt
+            }
+        }
         if(language!=="en"){
             prompt=await this.getPrompt("en",processingType)
             if(prompt)return prompt
