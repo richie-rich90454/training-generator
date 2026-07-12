@@ -54,7 +54,9 @@ export class TokenBudgeter{
         return Math.min(this.maxOutputTokens, Math.max(this.minOutputTokens, remaining))
     }
     consume(used:number):void{
+        if(!Number.isFinite(used)||used<0)return
         this.used+=used
+        if(this.used>this.maxSessionTokens)this.used=this.maxSessionTokens
     }
     remaining():number{
         return this.maxSessionTokens-this.used
