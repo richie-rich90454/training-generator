@@ -245,7 +245,7 @@ describe("exporters handle empty items", ()=>{
     test("all exporters return empty string for empty array", ()=>{
         let exporters: Exporter[]=[new ShareGptExporter(), new OpenAIFineTuneExporter(), new Llama2Exporter(), new Llama3Exporter(), new MistralExporter()]
         for(let exporter of exporters){
-            expect(exporter.export([])).toBe("\n")
+            expect(exporter.export([])).toBe("")
         }
     })
     test("all exporters skip items with no content", ()=>{
