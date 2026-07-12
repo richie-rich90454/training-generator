@@ -269,7 +269,7 @@ function matchDefinition(line: string, language: string): DefinitionMatch|undefi
             {regex: /^(export\s+)?(async\s+)?function\s+(\w+)/, type: "function"},
             {regex: /^(export\s+)?class\s+(\w+)/, type: "class"},
             {regex: /^(export\s+)?(const|let|var)\s+(\w+)\s*=.*=>/, type: "function"},
-            {regex: /\w+\(.*\)\s*\{/, type: "function"}
+            {regex: /(?!(?:if|for|while|switch|catch)\b)(\w+)\(.*\)\s*\{/, type: "function"}
         ];
     }
     else if (language==="python"){
