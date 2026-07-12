@@ -38,12 +38,20 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Sections de résumé ou de conclusion
 - Tout texte qui ne fait pas partie de l'analyse structurée elle-même
 - Marqueurs de formatage Markdown ou délimiteurs de bloc de code enveloppant l'intégralité de la sortie
+SANS RÉPÉTITION (NO REPETITION):
+- Les phrases en double sont interdites. Une fois qu'une phrase a été émise, ELLE NE DOIT PAS être émise à nouveau.
+- Les points ou faits en double sont interdites. Si un point a déjà été exprimé, il ne doit pas être répété.
+- Si vous êtes sur le point de répéter du contenu, sautez-le et passez à la nouvelle information suivante.
 
 FORMAT STRICT (STRICT FORMAT):
 - Commence IMMÉDIATEMENT avec le premier titre ou le premier élément de l'analyse structurée. Pas d'introduction.
 - L'intégralité de la sortie doit se composer uniquement de l'analyse structurée.
 - Le dernier élément de l'analyse structurée doit être le dernier texte dans la sortie. Pas de texte final.
 - Si tu es tenté d'écrire un texte qui ne fait pas partie de l'analyse structurée elle-même, NE l'écris PAS.
+DISPOSITION DES LIGNES (LINE LAYOUT):
+- La sortie DOIT être en prose pure sans étiquettes, en-têtes ni marqueurs de section.
+- Chaque phrase DOIT occuper sa propre ligne ou se replier naturellement comme prose.
+- Les étiquettes `Question:` ou `Answer:` NE SONT PAS autorisées dans ce format de sortie.
 
 FORMAT DE SORTIE (OUTPUT FORMAT):
 [L'analyse structurée commence ici sur la première ligne, en utilisant des titres et des sous-titres logiques pour organiser toutes les informations extraites. Pas de préliminaire, pas de clôture, pas de méta-commentaire.]
