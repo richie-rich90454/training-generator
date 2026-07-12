@@ -30,6 +30,11 @@ class Toast {
     this.container.setAttribute("aria-live", type === "error" ? "assertive" : "polite")
   }
   show(message: string, type: ToastType = "info", duration?: number): number {
+    const existing = this.toasts.find((t) => t.message === message && t.type === type)
+    if (existing) {
+      clearTimeout(existing.timer)
+      this.dismiss(existing.id)
+    }
     this.setAriaLive(type)
     const id = this.nextId++
     const toastDuration = duration ?? this.defaultDuration
