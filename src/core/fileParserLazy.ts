@@ -242,7 +242,7 @@ class FileParserLazy{
         }
         catch (error){
             console.error("RTF parsing error:", error);
-            return this.extractPlainTextFromRTF(this.stripBom(buffer.toString("utf-8")));
+            throw error;
         }
     }
     async parseRTFText(rtfText:string):Promise<string>{
