@@ -49,7 +49,13 @@ export function scrubProperties(props: Record<string, unknown>): Record<string, 
             }
         }
         if (!isPii){
-            result[key]=props[key]
+            let value=props[key]
+            if (value!==null && typeof value==="object" && !Array.isArray(value)){
+                result[key]=scrubProperties(value as Record<string, unknown>)
+            }
+            else{
+                result[key]=value
+            }
         }
     }
     return result
