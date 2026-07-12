@@ -300,7 +300,7 @@ function matchDefinition(line: string, language: string): DefinitionMatch|undefi
     }
     else if (language==="java"){
         patterns=[
-            {regex: /^\s*(public|private|protected|static|\s)*(class|interface|enum|void|[A-Za-z0-9_<>]+)\s+(\w+)\s*\(/, type: "function"},
+            {regex: /^\s*(public|private|protected|static|\s)*(?!(?:if|for|while|switch|catch|synchronized|return|new|throw)\s)(class|interface|enum|void|[A-Za-z0-9_<>]+)\s+(\w+)\s*\(/, type: "function"},
             {regex: /^\s*(public|private|protected)?\s*class\s+(\w+)/, type: "class"}
         ];
     }
