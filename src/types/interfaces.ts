@@ -198,6 +198,9 @@ export interface LogEntry{
 export interface Citation{
     page?:number
     line?:number
+    url?:string
+    doi?:string
+    isbn?:string
     text:string
 }
 export interface QualityScores{
