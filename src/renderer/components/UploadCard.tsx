@@ -88,7 +88,10 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
                     multiple
                     accept={ACCEPT_TYPES}
                     class={`file-input`}
-                    onChange={(e) => handleFiles(e.currentTarget.files)}
+                    onChange={(e) => {
+                        handleFiles(e.currentTarget.files)
+                        e.currentTarget.value = ""
+                    }}
                 />
                 <button
                     id="browse-btn"
