@@ -37,7 +37,7 @@ async function generateAndCacheKey():Promise<CryptoKey>{
     let raw=new Uint8Array(await crypto.subtle.exportKey("raw", extractable))
     let encoded=arrayBufferToBase64Chunked(raw)
     let stored=await storeSecureKey(encoded)
-    if(!stored){
+    if(!stored && typeof window!=="undefined" && window.electronAPI){
         try{
             localStorage.setItem(STORAGE_KEY, encoded)
         }catch{}
