@@ -39,11 +39,21 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Formato Markdown, bloques de código o marcadores de formato
 - Líneas en blanco iniciales o finales
 
+SIN REPETICIÓN (NO REPETITION):
+- Las oraciones duplicadas están prohibidas. Una vez que se ha emitido una oración, NO DEBE emitirse de nuevo.
+- Los puntos o hechos duplicados están prohibidos. Si ya se ha expresado un punto, no se debe reiterar.
+- Si está a punto de repetir contenido, omítalo y pase a la siguiente información nueva.
+
 FORMATO ESTRICTO (STRICT FORMAT):
 - Comienza INMEDIATAMENTE con el texto del resumen. Sin encabezado, sin introducción, sin etiqueta.
 - El resumen debe ser un único bloque continuo de texto.
 - El último carácter del resumen debe ser el último texto en la salida. Sin texto final, sin cierre.
 - Si tienes la tentación de escribir algo que no sea el propio texto del resumen, NO lo escribas.
+
+DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
+- La salida DEBE ser prosa pura sin etiquetas, encabezados ni marcadores de sección.
+- Cada oración DEBE ocupar su propia línea o ajustarse naturalmente como prosa.
+- En este formato de salida NO se permiten etiquetas `Question:` o `Answer:`.
 
 FORMATO DE SALIDA (OUTPUT FORMAT):
 [Texto continuo del resumen que preserva íntegramente toda la información del texto original, escrito en español claro, preciso y profesional, con la máxima densidad de información posible, sin encabezados, sin etiquetas, sin meta-comentarios]
