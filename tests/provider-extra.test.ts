@@ -60,7 +60,7 @@ describe("OllamaProvider", () => {
     it("passes temperature and top_p", async() => {
         let provider=new OllamaProvider()
         await provider.generate("prompt", "model", { temperature: 0.5, top_p: 0.8 })
-        expect(window.electronAPI!.generateWithOllamaStream).toHaveBeenCalledWith("model", "prompt", expect.objectContaining({ temperature: 0.5, top_p: 0.8 }))
+        expect(window.electronAPI!.generateWithOllamaStream).toHaveBeenCalledWith("model", "prompt", expect.objectContaining({ temperature: 0.5, top_p: 0.8 }), undefined, undefined)
     })
 })
 describe("OpenAIProvider", () => {
