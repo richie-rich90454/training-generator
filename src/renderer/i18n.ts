@@ -2106,9 +2106,12 @@ export function detectLocale(): string{
     "zh-MO":"zh-Hant"
   }
   if(map[lang])return map[lang]
-  let base=lang.split("-")[0]
-  let supported=["en","zh-Hans","zh-Hant","es","fr","de","ja","ko"]
-  if(supported.includes(base))return base
+  let parts=lang.split("-")
+  while(parts.length>0){
+    let candidate=parts.join("-")
+    if(translations[candidate])return candidate
+    parts.pop()
+  }
   return "en"
 }
 
