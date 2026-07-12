@@ -14,6 +14,9 @@ export class ProviderScopeEnforcer{
         this.scopes=options.scopes
     }
     hasScope(provider: string, scope: ProviderScope): boolean{
+        if(!Object.prototype.hasOwnProperty.call(this.scopes, provider)){
+            return true
+        }
         let configured=this.scopes[provider]
         if(!configured)return true
         return configured.includes(scope)
@@ -24,6 +27,9 @@ export class ProviderScopeEnforcer{
         }
     }
     setScopes(provider: string, scopes: ProviderScope[]): void{
+        if(provider==="__proto__"||provider==="constructor"||provider==="prototype"){
+            throw new ScopeError("Invalid provider name: "+provider)
+        }
         this.scopes[provider]=scopes
     }
     listProvidersWithScope(scope: ProviderScope): string[]{
