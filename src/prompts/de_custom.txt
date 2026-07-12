@@ -37,6 +37,11 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Codeblöcke, die den strukturierten Inhalt umschließen, oder Formatierungsmarker außerhalb der hierarchischen Überschriften
 - Frage-Antwort-Paare, Dialogformatierungen (User:/Assistant:) oder andere fremde Label-Schemata
 
+KEINE WIEDERHOLUNG (NO REPETITION):
+- Doppelte Sätze sind verboten. Sobald ein Satz ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
+- Doppelte Punkte oder Fakten sind verboten. Wenn ein Punkt bereits gemacht wurde, darf er nicht wiederholt werden.
+- Wenn Sie dabei sind, Inhalte zu wiederholen, überspringen Sie diese und fahren Sie mit der nächsten neuen Information fort.
+
 STRIKTES FORMAT (STRICT FORMAT):
 - Beginne SOFORT mit der ersten Überschrift oder dem ersten inhaltlichen Block. Keine Einführung, kein Vorspann.
 - Die Ausgabe besteht ausschließlich aus der hierarchisch strukturierten Wissensrepräsentation: Überschriften, Unterüberschriften und die zugehörigen inhaltlichen Blöcke.
@@ -44,6 +49,11 @@ STRIKTES FORMAT (STRICT FORMAT):
 - Absätze innerhalb eines inhaltlichen Blocks dürfen einzelne Leerzeilen enthalten, sofern dies die Lesbarkeit unterstützt.
 - Der letzte inhaltliche Block muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text, keine Schlussformulierung.
 - Wenn du versucht bist, anderen Text als die strukturierte Wissensausgabe zu schreiben, schreibe ihn NICHT.
+
+ZEILENLAYOUT (LINE LAYOUT):
+- Die Ausgabe MUSS reiner Fließtext ohne Labels, Überschriften oder Abschnittsmarkierungen sein.
+- Jeder Satz MUSS seine eigene Zeile belegen oder als Prosatext natürlich umbrechen.
+- In diesem Ausgabeformat sind `Question:`- oder `Answer:`-Labels NICHT erlaubt.
 
 AUSGABEFORMAT (OUTPUT FORMAT):
 [Überschrift 1]
