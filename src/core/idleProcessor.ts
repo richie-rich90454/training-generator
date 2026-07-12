@@ -103,13 +103,22 @@ export class IdleProcessor{
             return;
         }
         this.processing=true;
-        while (this.tasks.length>0){
-            let task=this.tasks.shift();
-            if (task){
-                await task();
+        try{
+            while (this.tasks.length>0){
+                let task=this.tasks.shift();
+                if (task){
+                    try{
+                        await task();
+                    }
+                    catch{
+                        // continue with remaining tasks
+                    }
+                }
             }
         }
-        this.processing=false;
+        finally{
+            this.processing=false;
+        }
     }
 }
 export class LazyModelLoader{
