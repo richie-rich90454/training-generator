@@ -60,10 +60,21 @@ export class TieredStorage{
         }
         if (this.coldKeys.has(key)){
             let filePath=this._coldPath(key);
-            let compressed=await readFile(filePath);
+            let compressed: Buffer;
+            try{
+                compressed=await readFile(filePath);
+            }
+            catch(err){
+                if((err as NodeJS.ErrnoException).code==="ENOENT"){
+                    this.coldKeys.delete(key);
+                    this._updateCounts();
+                    return undefined;
+                }
+                throw err;
+            }
             let buffer=await gunzipBuffer(compressed);
             let value=this.deserializer(buffer);
-            await unlink(filePath);
+            await this._unlinkCold(filePath);
             this.coldKeys.delete(key);
             this._touchHot(key, value);
             await this._enforceHotCapacity();
@@ -84,7 +95,7 @@ export class TieredStorage{
         }
         else if (this.coldKeys.has(key)){
             let filePath=this._coldPath(key);
-            await unlink(filePath);
+            await this._unlinkCold(filePath);
             this.coldKeys.delete(key);
         }
         this._touchHot(key, value);
@@ -103,7 +114,7 @@ export class TieredStorage{
         }
         if (this.coldKeys.has(key)){
             let filePath=this._coldPath(key);
-            await unlink(filePath);
+            await this._unlinkCold(filePath);
             this.coldKeys.delete(key);
             deleted=true;
         }
@@ -115,7 +126,7 @@ export class TieredStorage{
         this.warm.clear();
         for (let key of this.coldKeys){
             let filePath=this._coldPath(key);
-            await unlink(filePath);
+            await this._unlinkCold(filePath);
         }
         this.coldKeys.clear();
         this.stats.hot=0;
@@ -172,6 +183,16 @@ export class TieredStorage{
     }
     private async _ensureColdDir(): Promise<void>{
         await mkdir(this.coldDir, {recursive: true});
+    }
+    private async _unlinkCold(filePath: string): Promise<void>{
+        try{
+            await unlink(filePath);
+        }
+        catch(err){
+            if((err as NodeJS.ErrnoException).code!=="ENOENT"){
+                throw err;
+            }
+        }
     }
     private _coldPath(key: string): string{
         let hash=crypto.createHash("sha256").update(key).digest("hex");
