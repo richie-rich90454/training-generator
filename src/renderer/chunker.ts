@@ -541,6 +541,23 @@ function pushNewlineSentence(result: string[], current: string): string {
     return ""
 }
 
+function containsCJK(text: string): boolean {
+    for (let i = 0; i < text.length; i++) {
+        let code = text.charCodeAt(i)
+        if (
+            (code >= 0x4E00 && code <= 0x9FFF) ||
+            (code >= 0x3400 && code <= 0x4DBF) ||
+            (code >= 0xF900 && code <= 0xFAFF) ||
+            (code >= 0x3040 && code <= 0x309F) ||
+            (code >= 0x30A0 && code <= 0x30FF) ||
+            (code >= 0xAC00 && code <= 0xD7AF)
+        ) {
+            return true
+        }
+    }
+    return false
+}
+
 export function splitSentences(text: string): string[] {
     if (!text || text.length === 0) return []
     if (text.length > MAX_INPUT_CHARS) {
@@ -567,6 +584,22 @@ export function splitSentences(text: string): string[] {
         }
         if (current.trim().length > 0 && result.length < MAX_SENTENCES) {
             result.push(current.trim())
+        }
+        return result.length > 0 ? result : [text]
+    }
+
+    // CJK text without any sentence punctuation or newlines: there are no
+    // whitespace-delimited word boundaries or ASCII sentence terminators to
+    // split on, so the Latin path below would return the whole text as a
+    // single sentence. Fall back to a character-count split so the chunker
+    // can still break the text into reasonable pieces.
+    if (containsCJK(text) && !/[.!?。！？\n\r]/.test(text)) {
+        const result: string[] = []
+        const chunkLen = 200
+        for (let i = 0; i < text.length; i += chunkLen) {
+            if (result.length >= MAX_SENTENCES) break
+            let chunk = text.slice(i, i + chunkLen).trim()
+            if (chunk.length > 0) result.push(chunk)
         }
         return result.length > 0 ? result : [text]
     }
