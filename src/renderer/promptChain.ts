@@ -112,11 +112,13 @@ export class PromptChain{
     async executeBatch(
         provider:Provider,
         inputs:string[],
-        defaultModel:string
+        defaultModel:string,
+        maxInputs:number=1000
     ):Promise<ChainExecutionResult[]>{
         let results:ChainExecutionResult[]=[]
-        for(let input of inputs){
-            let result=await this.execute(provider, input, defaultModel)
+        let limit=Math.min(inputs.length, maxInputs)
+        for(let i=0;i<limit;i++){
+            let result=await this.execute(provider, inputs[i], defaultModel)
             results.push(result)
         }
         return results
