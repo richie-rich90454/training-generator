@@ -78,7 +78,8 @@ class Processor{
                     max_tokens:16384,
                     think:this.enableThinking,
                     ollamaHost:this.ollamaHost,
-                    ollamaPort:this.ollamaPort
+                    ollamaPort:this.ollamaPort,
+                    signal:signal
                 })
                 if(signal.aborted)continue
                 let responses=this.splitBatchedResponse(result.text,batch.length)
@@ -277,7 +278,8 @@ class Processor{
                         onToken:streamChunk,
                         think:enableThinking,
                         ollamaHost,
-                        ollamaPort
+                        ollamaPort,
+                        signal:sig
                     })
                     let result=await responsePromise
                     response=result.text

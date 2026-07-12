@@ -11,6 +11,7 @@ export interface ProviderOptions{
     think?:boolean
     ollamaHost?:string
     ollamaPort?:number
+    signal?:AbortSignal
 }
 
 export interface ProviderResult{
@@ -101,6 +102,8 @@ export class OllamaProvider implements Provider{
         if(!api)throw new Error("Electron API not available")
         console.log(`[ollama-provider] request start: model=${model}, prompt=${prompt.length} chars`)
         const onToken=options?.onToken
+        const signal=options?.signal
+        if(signal?.aborted)throw new Error("Aborted")
         const requestId=onToken?`ollama-${Date.now()}-${Math.random().toString(36).slice(2,9)}`:""
         let unsub:(()=>void)|null=null
         if(onToken&&requestId&&api.onOllamaStreamToken){
@@ -108,6 +111,7 @@ export class OllamaProvider implements Provider{
         }
         try{
             let result=await retryWithBackoff(async()=>{
+                if(signal?.aborted)throw new Error("Aborted")
                 const maxTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
                 const payload:Record<string,unknown>={
                     temperature:options?.temperature??0.7,
@@ -120,7 +124,16 @@ export class OllamaProvider implements Provider{
                 if(requestId){
                     payload._requestId=requestId
                 }
-                let r=await api.generateWithOllamaStream(model,prompt,payload,options?.ollamaHost,options?.ollamaPort)
+                let ipcPromise=api.generateWithOllamaStream(model,prompt,payload,options?.ollamaHost,options?.ollamaPort)
+                if(signal){
+                    let abortPromise=new Promise<never>((_,reject)=>{
+                        signal.addEventListener("abort",()=>reject(new Error("Aborted")),{once:true})
+                    })
+                    let r=await Promise.race([ipcPromise,abortPromise])
+                    if(!r.success)throw new Error(r.error||"Ollama generation failed")
+                    return r
+                }
+                let r=await ipcPromise
                 if(!r.success)throw new Error(r.error||"Ollama generation failed")
                 return r
             },3,1000)
