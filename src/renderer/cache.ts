@@ -56,7 +56,10 @@ async function loadCache():Promise<void>{
 }
 
 async function hashKey(chunk:string,model:string,prompt:string):Promise<string>{
-    let str=`${chunk}|${model}|${prompt}`
+    let chunkLen=String(chunk.length)
+    let modelLen=String(model.length)
+    let promptLen=String(prompt.length)
+    let str=`${chunkLen}|${chunk}|${modelLen}|${model}|${promptLen}|${prompt}`
     let data=new TextEncoder().encode(str)
     let digest=await crypto.subtle.digest("SHA-256",data)
     let bytes=new Uint8Array(digest)
