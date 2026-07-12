@@ -382,3 +382,43 @@ describe("OutputStore parseConversationTurns filler stripping", () => {
         expect(turns[0].assistant).toBe("Hi there!")
     })
 })
+describe("Parser normalization and deduplication", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "warn").mockImplementation(() => {})
+    })
+    it("splits same-line Question/Answer into two lines", () => {
+        const text = "Question: What is X? Answer: X is a library.\n\nQuestion: What is Y? Answer: Y is a framework."
+        const pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].question).toBe("What is X?")
+        expect(pairs[0].answer).toBe("X is a library.")
+        expect(pairs[1].question).toBe("What is Y?")
+        expect(pairs[1].answer).toBe("Y is a framework.")
+    })
+    it("splits same-line User/Assistant into two lines for conversation", () => {
+        const text = "User: Hello Assistant: Hi there"
+        const turns = store.parseConversationTurns(text)
+        expect(turns.length).toBe(1)
+        expect(turns[0].user).toBe("Hello")
+        expect(turns[0].assistant).toBe("Hi there")
+    })
+    it("deduplicates consecutive duplicate Q&A pairs", () => {
+        const text = "Question: What is X?\nAnswer: X is a library.\n\nQuestion: What is X?\nAnswer: X is a library."
+        const pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(1)
+        expect(pairs[0].question).toBe("What is X?")
+    })
+    it("deduplicates non-consecutive duplicate Q&A pairs", () => {
+        const text = "Question: What is X?\nAnswer: X is a library.\n\nQuestion: What is Y?\nAnswer: Y is a framework.\n\nQuestion: What is X?\nAnswer: X is a library."
+        const pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].question).toBe("What is X?")
+        expect(pairs[1].question).toBe("What is Y?")
+    })
+    it("deduplicates conversation turns with same user text", () => {
+        const text = "User: Hello\nAssistant: Hi\n\nUser: Hello\nAssistant: Hey"
+        const turns = store.parseConversationTurns(text)
+        expect(turns.length).toBe(1)
+        expect(turns[0].user).toBe("Hello")
+    })
+})
