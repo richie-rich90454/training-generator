@@ -65,7 +65,10 @@ export function validateItems(items: TrainingItem[]): QualityReport {
     } else {
       let answer = item.output || ""
       let question = item.instruction || item.input || ""
-      if (question && !answer) {
+      if (!question && !answer) {
+        reasons.push("missing_question")
+        reasons.push("missing_answer")
+      } else if (question && !answer) {
         reasons.push("missing_answer")
       } else if (!question && answer) {
         reasons.push("missing_question")
