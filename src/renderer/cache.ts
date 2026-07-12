@@ -169,6 +169,7 @@ export async function warmCache(outputItems:Array<{instruction?:string;input?:st
         let key=await hashKey(chunk,model,prompt)
         let tokens=Math.ceil(response.length/4)
         cacheMap.set(key,{response,tokens,timestamp:Date.now()})
+        evictOldestIfNeeded()
         warmed++
     }
     try{
