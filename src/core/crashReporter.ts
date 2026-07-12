@@ -16,6 +16,28 @@ export interface CrashReporterConfig{
     beforeSend?: (event: CrashEvent)=>CrashEvent | null
 }
 export type CrashTransport=(event: CrashEvent)=>Promise<void>
+const CRASH_PII_PATTERNS: RegExp[]=[
+    /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/g,
+    /\b\d{3}-\d{2}-\d{4}\b/g,
+    /\b(?:\d{4}[ -]?){3}\d{4}\b/g
+]
+const CRASH_PII_KEYS: string[]=["email", "name", "phone", "ssn", "token", "key", "password", "secret", "authorization", "credential", "credentials"]
+function redactPiiInString(s: string): string{
+    let result=s
+    for(let pattern of CRASH_PII_PATTERNS){
+        result=result.replace(pattern, "[REDACTED]")
+    }
+    return result
+}
+function isCrashPiiKey(key: string): boolean{
+    let words=key.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().split(/[_\s]+/)
+    for(let word of words){
+        if(CRASH_PII_KEYS.includes(word)){
+            return true
+        }
+    }
+    return false
+}
 export function generateEventId(): string{
     let bytes=new Uint8Array(16)
     for (let i=0;i<bytes.length;i++){
@@ -58,7 +80,7 @@ export class CrashReporter{
         }
         event.exception={
             type: error.name,
-            value: error.message,
+            value: redactPiiInString(error.message),
             stack: error.stack
         }
         if (context){
@@ -111,7 +133,7 @@ export class CrashReporter{
             id: generateEventId(),
             timestamp: Date.now(),
             level,
-            message,
+            message: redactPiiInString(message),
             breadcrumbs: this.breadcrumbs.length>0 ? this.breadcrumbs.slice() : undefined,
             tags: Object.keys(this.tags).length>0 ? {...this.tags} : undefined
         }
@@ -133,6 +155,9 @@ export class CrashReporter{
     private contextToTags(context: Record<string, unknown>): Record<string, string>{
         let tags: Record<string, string>={}
         for (let key of Object.keys(context)){
+            if(isCrashPiiKey(key)){
+                continue
+            }
             let value=context[key]
             if (typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
                 tags[key]=String(value)
