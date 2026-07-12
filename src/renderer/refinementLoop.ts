@@ -90,15 +90,20 @@ export async function refineItem(
     let passes=0
     for(let pass=0;pass<config.maxPasses;pass++){
         passes++
-        let critique=await critiqueItem(provider, currentItem, config.critiqueModel||model, config.options)
+        let critiquePrompt=`${CRITIQUE_PROMPT}\n\nTraining item to evaluate:\n${currentItem}`
+        let critiqueResult=await provider.generate(critiquePrompt, config.critiqueModel||model, config.options)
+        totalTokens+=critiqueResult.tokens
+        let critique=parseCritiqueResponse(critiqueResult.text)
         critiques.push(critique)
-        totalTokens+=0
         finalScore=critique.score
         if(critique.score>=config.qualityThreshold){
             reachedThreshold=true
             break
         }
-        let revised=await reviseItem(provider, currentItem, critique, config.reviseModel||model, config.options)
+        let revisePrompt=`${REVISE_PROMPT}\n\nOriginal item:\n${currentItem}\n\nIssues to fix:\n${critique.issues.join("\n")}\n\nSuggestions:\n${critique.suggestions.join("\n")}`
+        let reviseResult=await provider.generate(revisePrompt, config.reviseModel||model, config.options)
+        totalTokens+=reviseResult.tokens
+        let revised=reviseResult.text.trim()
         revisions.push(revised)
         currentItem=revised
     }
@@ -110,7 +115,7 @@ export async function refineItem(
         reachedThreshold,
         critiques,
         revisions,
-        provider:"",
+        provider:provider.name,
         totalTokens
     }
 }
