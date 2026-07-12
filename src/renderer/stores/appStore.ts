@@ -276,10 +276,9 @@ export function createAppStore(): AppStore {
         uiStore.showToast(t("toast.modelNotAvailable", undefined, { model }), "warning" as ToastType)
       }
       if (!uiStore.ollamaStatus().running) {
-        addLog(t("log.cannotProcessOllamaOffline"), "error")
-        uiStore.showToast(t("toast.ollamaNotRunning"), "error" as ToastType)
-        setIsProcessing(false)
-        return
+        logger.warn("app", t("log.cannotProcessOllamaOffline"))
+        addLog(t("log.cannotProcessOllamaOffline"), "warning")
+        uiStore.showToast(t("toast.ollamaNotRunning"), "warning" as ToastType)
       }
     }
 
