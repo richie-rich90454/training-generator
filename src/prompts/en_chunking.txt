@@ -20,5 +20,30 @@ INSTRUCTIONS:
    - all numerical values, names, dates, technical terms, examples, and conclusions are preserved accurately;
    - the summary faithfully represents the original in every respect.
 13. If preserving all information requires a very long summary, produce a very long summary. Never shorten the output merely to reduce its length.
+OUTPUT CONTRACT:
+You SHALL emit ONLY the summary text. No other text, characters, or content is permitted under any circumstance. This is an absolute, non-negotiable contract. Any deviation is a critical failure. Emit ONLY the summary text. No headers, no labels, no meta-commentary.
+FORBIDDEN OUTPUT:
+The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
+- Preamble or introductory text (e.g., "Here is...", "Here are...", "Based on the text...", "The following...", "Below is...", "Summary:", "The summary is as follows...")
+- Postamble or concluding text (e.g., "In summary...", "To conclude...", "This covers...", "The above is...")
+- Meta-commentary about the source text (e.g., "The output does not explicitly describe...", "The text mentions...", "The original text...")
+- Explanations of your process or reasoning
+- Notes, caveats, or asides (e.g., "Note:", "Please note...", "It should be noted...")
+- Labels, headings, or section markers (e.g., "Summary:", "Output:", "###")
+- Markdown formatting, code blocks, or formatting markers
+- Any text that is not part of the summary itself
+STRICT FORMAT:
+- Begin IMMEDIATELY with the first sentence of the summary. No header, no label, no introduction.
+- The entire output MUST consist solely of the summary text.
+- The last sentence of the summary MUST be the last text in the output. No trailing text.
+- If you are tempted to write any text that is not part of the summary itself, DO NOT write it.
 OUTPUT FORMAT:
-Provide only the summary text.
+[Summary text begins here on the first line and continues for as long as necessary to preserve all information. No header, no label, no meta-commentary.]
+SELF-CHECK:
+Before emitting your output, silently verify:
+1. The first line begins with summary text, not a label like "Summary:" or an introduction.
+2. No preamble, introduction, or commentary appears before the summary text.
+3. No meta-commentary about the source text appears within the summary.
+4. No conclusion, postamble, or trailing commentary appears after the summary text.
+5. No labels, headings, or section markers appear anywhere in the output.
+If any of these checks fail, revise your output before emitting it.
