@@ -158,11 +158,8 @@ export class IssueReporter{
             if (typeof value==="string"){
                 result[key]=redactEmail(redactPhone(value));
             }
-            else if (Array.isArray(value)){
-                result[key]=value.map(item=>typeof item==="string" ? redactEmail(redactPhone(item)) : item);
-            }
             else{
-                result[key]=value;
+                result[key]=this.scrubDiagnostics(value);
             }
         }
         return result;
