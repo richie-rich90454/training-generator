@@ -14,20 +14,18 @@ declare module "node:stream/web"{
     }
 }
 declare module "pdf-parse"{
+    export class PDFParse{
+        constructor(options:{data:Buffer|Uint8Array;verbosity?:number;[key:string]:unknown})
+        getText(options?:Record<string,unknown>):Promise<{text:string;pages:{text:string;num:number}[];total:number}>
+    }
     let pdfParse:(buffer:Buffer)=>Promise<{text:string;numpages:number;info:Record<string,unknown>;metadata:Record<string,unknown>;version:string}>;
     export default pdfParse;
 }
 declare module "rtf-parser-fixes"{
-    import{EventEmitter}from "events"
-    class RtfParser extends EventEmitter{
-        write(data:string):void
-        end():void
-        on(event:"text",listener:(text:string)=>void):this
-        on(event:"error",listener:(error:Error)=>void):this
-        on(event:"end",listener:()=>void):this
-        on(event:string|symbol,listener:(...args:any[])=>void):this
+    interface RTFDocument{
+        content:{value:string}[]
     }
-    export{RtfParser}
+    export function string(rtfText:string, callback:(err:Error|null, doc:RTFDocument)=>void):void
 }
 declare module "html-to-text"{
     export interface HtmlToTextOptions{
