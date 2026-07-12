@@ -82,10 +82,15 @@ export async function autoRegenerate(
     let allAttempts:{item:string, grade:GradeResult, attempt:number}[]=[{item, grade:originalGrade, attempt:0}]
     let currentItem=item
     let currentGrade=originalGrade
+    let seenItems=new Set<string>([item])
     for(let attempt=1;attempt<=config.maxAttempts;attempt++){
         try{
             let result=await regenerateItem(provider, originalPrompt, model, config, currentGrade, attempt)
             let newItem=result.text.trim()
+            if(seenItems.has(newItem)){
+                continue
+            }
+            seenItems.add(newItem)
             let newGrade=await gradeItemLocal(provider, newItem, model, config.options)
             allAttempts.push({item:newItem, grade:newGrade, attempt})
             if(newGrade.score>currentGrade.score){
