@@ -74,13 +74,12 @@ class Processor{
                 stats.recordPromptTokens(combined)
                 let batchStart=Date.now()
                 let result=await provider.generate(combined,model,{
-                    temperature:0.7,
-                    top_p:0.9,
                     max_tokens:16384,
                     think:this.enableThinking,
                     ollamaHost:this.ollamaHost,
                     ollamaPort:this.ollamaPort,
-                    signal:signal
+                    signal:signal,
+                    processingType:processingType
                 })
                 stats.recordLatency(Date.now()-batchStart)
                 if(signal.aborted)continue
@@ -280,14 +279,13 @@ class Processor{
                     console.log(`[processor] starting chunk ${idx}/${total} (${chunk.length} chars) with ${provider.name}`)
                     let chunkStart = Date.now()
                     let responsePromise=provider.generate(prompt,model,{
-                        temperature:0.7,
-                        top_p:0.9,
                         max_tokens:16384,
                         onToken:streamChunk,
                         think:enableThinking,
                         ollamaHost,
                         ollamaPort,
-                        signal:sig
+                        signal:sig,
+                        processingType:processingType
                     })
                     let result=await responsePromise
                     response=result.text

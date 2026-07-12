@@ -12,6 +12,25 @@ export interface ProviderOptions{
     ollamaHost?:string
     ollamaPort?:number
     signal?:AbortSignal
+    processingType?:string
+}
+
+export interface StrictGenerationOptions{
+    temperature:number
+    top_p:number
+    repeat_penalty?:number
+}
+
+export function getStrictGenerationOptions(processingType:string):StrictGenerationOptions{
+    // Lower temperature for more deterministic, format-compliant output
+    // instruction/conversation need slightly more creativity for diverse questions
+    // chunking/custom are more extractive and benefit from even lower temperature
+    const temp=(processingType==="instruction"||processingType==="conversation")?0.3:0.4
+    return{
+        temperature:temp,
+        top_p:0.85,
+        repeat_penalty:1.1
+    }
 }
 
 export interface ProviderResult{
@@ -113,9 +132,11 @@ export class OllamaProvider implements Provider{
             let result=await retryWithBackoff(async()=>{
                 if(signal?.aborted)throw new Error("Aborted")
                 const maxTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
+                const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 const payload:Record<string,unknown>={
-                    temperature:options?.temperature??0.7,
-                    top_p:options?.top_p??0.9,
+                    temperature:strictOpts?.temperature??options?.temperature??0.7,
+                    top_p:strictOpts?.top_p??options?.top_p??0.9,
+                    repeat_penalty:strictOpts?.repeat_penalty??1.1,
                     num_predict:maxTokens
                 }
                 if(options?.think===false){
@@ -185,10 +206,11 @@ export class OpenAIProvider implements Provider{
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 let r=await api.generateWithOpenAI(
                     this.apiKey,this.baseUrl,model,prompt,{
-                        temperature:options?.temperature??0.7,
-                        top_p:options?.top_p??0.9,
+                        temperature:strictOpts?.temperature??options?.temperature??0.7,
+                        top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )
@@ -339,10 +361,11 @@ export class AnthropicProvider implements Provider{
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 let r=await api.generateWithAnthropic(
                     this.apiKey,model,prompt,{
-                        temperature:options?.temperature??0.7,
-                        top_p:options?.top_p??0.9,
+                        temperature:strictOpts?.temperature??options?.temperature??0.7,
+                        top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )
@@ -385,10 +408,11 @@ export class GeminiProvider implements Provider{
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 let r=await api.generateWithGemini(
                     this.apiKey,model,prompt,{
-                        temperature:options?.temperature??0.7,
-                        top_p:options?.top_p??0.9,
+                        temperature:strictOpts?.temperature??options?.temperature??0.7,
+                        top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )

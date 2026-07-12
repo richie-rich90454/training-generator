@@ -178,6 +178,7 @@ describe("OllamaProvider", () => {
     expect(mockGenerate).toHaveBeenCalledWith("llama2", "test prompt", {
       temperature: 0.7,
       top_p: 0.9,
+      repeat_penalty: 1.1,
       num_predict: 4096,
     }, undefined, undefined)
   })
