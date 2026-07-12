@@ -271,10 +271,9 @@ export function createAppStore(): AppStore {
     if (isOllamaProvider && !processor.demoMode) {
       const availableModels = uiStore.availableOllamaModels()
       if (availableModels.length > 0 && !availableModels.includes(model)) {
-        addLog(t("log.modelNotAvailable", undefined, { model }), "error")
-        uiStore.showToast(t("toast.modelNotAvailable", undefined, { model }), "error" as ToastType)
-        setIsProcessing(false)
-        return
+        logger.warn("app", t("log.modelNotAvailable", undefined, { model }))
+        addLog(t("log.modelNotAvailable", undefined, { model }), "warning")
+        uiStore.showToast(t("toast.modelNotAvailable", undefined, { model }), "warning" as ToastType)
       }
       if (!uiStore.ollamaStatus().running) {
         addLog(t("log.cannotProcessOllamaOffline"), "error")
