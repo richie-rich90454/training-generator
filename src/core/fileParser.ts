@@ -1,7 +1,7 @@
 import mammoth from "mammoth"
-import pdfParse from "pdf-parse"
+import{PDFParse}from "pdf-parse"
 import officeParser from "officeparser"
-import{RtfParser}from "rtf-parser-fixes"
+import{string as rtfStringParser}from "rtf-parser-fixes"
 import{htmlToText}from "html-to-text"
 import fs from "fs"
 import path from "path"
@@ -109,7 +109,8 @@ class FileParser{
     }
     async parsePDF(buffer:Buffer):Promise<string>{
         try{
-            let data=await pdfParse(buffer)
+            let parser=new PDFParse({data:buffer})
+            let data=await parser.getText()
             return data.text
         }
         catch(error){
@@ -149,19 +150,14 @@ class FileParser{
     }
     async parseRTFText(rtfText:string):Promise<string>{
         return new Promise((resolve,reject)=>{
-            let parser=new RtfParser()
-            let result=""
-            parser.on("text",(text:string)=>{
-                result+=text
+            rtfStringParser(rtfText,(err:Error|null,doc:any)=>{
+                if(err){
+                    reject(err)
+                    return
+                }
+                let text=doc.content.map((span:any)=>span.value).join("")
+                resolve(text)
             })
-            parser.on("error",(error:Error)=>{
-                reject(error)
-            })
-            parser.on("end",()=>{
-                resolve(result)
-            })
-            parser.write(rtfText)
-            parser.end()
         })
     }
     private stripBom(text:string):string{
