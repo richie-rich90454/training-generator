@@ -55,6 +55,12 @@ ZEILENLAYOUT (LINE LAYOUT):
 - Jeder Satz MUSS seine eigene Zeile belegen oder als Prosatext natürlich umbrechen.
 - In diesem Ausgabeformat sind `Question:`- oder `Answer:`-Labels NICHT erlaubt.
 
+INHALTSREGELN (CONTENT RULES):
+- Die Ausgabe MUSS direkte, sachliche Prosa sein.
+- Markdown-Tabellen, Codeblöcke und Formatierungen sind VERBOTEN.
+- Innerer Monolog, Selbstkorrektur und Meta-Kommentare sind VERBOTEN.
+- Schreibe als fortlaufende Prosa, nicht als Liste oder Tabelle.
+
 AUSGABEFORMAT (OUTPUT FORMAT):
 [Überschrift 1]
 [Inhaltlicher Block zu Überschrift 1 – vollständig, informationsbewahrend]
