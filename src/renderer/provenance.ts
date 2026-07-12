@@ -27,11 +27,11 @@ export function mergeProvenance(surviving: TrainingItem, removed: TrainingItem, 
             _provenance: {
                 ...removedProv,
                 sourceFile: survivingSource || removedProv.sourceFile,
-                _mergedFrom: [removedProv.sourceFile]
+                _mergedFrom: Array.from(new Set([removedProv.sourceFile, ...(removedProv._mergedFrom || [])]))
             }
         }
     }
-    let merged = [...(existing._mergedFrom || []), removedProv.sourceFile]
+    let merged = [...(existing._mergedFrom || []), removedProv.sourceFile, ...(removedProv._mergedFrom || [])]
     let deduped = Array.from(new Set(merged))
     return {
         ...cloneItem(surviving),
