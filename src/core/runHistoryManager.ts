@@ -71,6 +71,7 @@ export class RunHistoryManager{
         this.autosaveIntervalMs=options.autosaveIntervalMs??30000
         this.history=[]
         this.queue=new JobQueue()
+        this.load()
     }
     startAutosave(): void{
         this.stopAutosave()
