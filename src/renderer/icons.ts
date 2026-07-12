@@ -87,11 +87,22 @@ export const iconRegistry: Record<string, string>={
     "fa-window-restore": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M8 8h8v8H8z"/><path d="M4 14v6h6"/><path d="M20 10V4h-6"/></svg>`,
     "fa-code": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`
 }
+function sanitizeSvg(svg:string):string{
+    let sanitized=svg
+    sanitized=sanitized.replace(/<script[\s\S]*?<\/script>/gi,"")
+    sanitized=sanitized.replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,"")
+    sanitized=sanitized.replace(/(href|xlink:href)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]+)/gi,"")
+    return sanitized
+}
+export function hasIcon(name: string): boolean{
+    return Object.prototype.hasOwnProperty.call(iconRegistry, name)
+}
 export function renderIcon(name: string, size: number=16): string{
     let svg=iconRegistry[name]
     if(!svg){
         console.warn(`Icon "${name}" not found in registry`)
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>`
     }
-    return svg.replace(/width="\d+"/, `width="${size}"`).replace(/height="\d+"/, `height="${size}"`)
+    let sanitized=sanitizeSvg(svg)
+    return sanitized.replace(/width="\d+"/, `width="${size}"`).replace(/height="\d+"/, `height="${size}"`)
 }
