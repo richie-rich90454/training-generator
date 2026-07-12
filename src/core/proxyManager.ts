@@ -123,17 +123,35 @@ export class ProxyManager{
     }
 }
 export function parseProxyUrl(url: string): ProxyConfig{
-    let parsed=new URL(url);
+    let parsed: URL;
+    try{
+        parsed=new URL(url);
+    }
+    catch{
+        throw new Error("Invalid proxy URL: "+url);
+    }
     let protocol=parsed.protocol.replace(":", "") as "http"|"https"|"socks5"|"socks5h";
+    if(protocol!=="http"&&protocol!=="https"&&protocol!=="socks5"&&protocol!=="socks5h"){
+        throw new Error("Unsupported proxy protocol: "+protocol);
+    }
+    let host=parsed.hostname;
+    if(!host){
+        throw new Error("Proxy URL missing host: "+url);
+    }
     let port=parsed.port?parseInt(parsed.port, 10):(protocol==="https"?443:(protocol==="http"?80:1080));
     let config: ProxyConfig={
         protocol: protocol,
-        host: parsed.hostname,
+        host: host,
         port: port
     };
     if(parsed.username){
-        config.username=decodeURIComponent(parsed.username);
-        config.password=parsed.password?decodeURIComponent(parsed.password):undefined;
+        try{
+            config.username=decodeURIComponent(parsed.username);
+            config.password=parsed.password?decodeURIComponent(parsed.password):undefined;
+        }
+        catch{
+            throw new Error("Invalid URL-encoded credentials in proxy URL: "+url);
+        }
     }
     return config;
 }
