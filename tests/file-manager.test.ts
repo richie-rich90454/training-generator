@@ -44,11 +44,12 @@ describe("FileStore selection", () => {
         expect(store.selectedFiles.length).toBe(0)
         expect(result.rejectedCount).toBe(1)
     })
-    it("detects duplicate file names", () => {
+    it("skips duplicate file names", () => {
         let store: FileStore=makeFileStore()
         store.addFiles([createFile("doc.txt")])
-        store.addFiles([createFile("doc.txt")])
-        expect(store.selectedFiles.length).toBe(2)
+        let result=store.addFiles([createFile("doc.txt")])
+        expect(store.selectedFiles.length).toBe(1)
+        expect(result.skippedCount).toBe(1)
     })
     it("enforces max 100 files", () => {
         let store: FileStore=makeFileStore()
