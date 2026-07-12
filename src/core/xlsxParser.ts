@@ -145,6 +145,12 @@ function parseCell(cellType: string, content: string, sharedStrings: string[]): 
         }
         return {value: v, type: "formula"};
     }
+    else if(cellType==="d"){
+        if(!vMatch){
+            return emptyCell;
+        }
+        return {value: v, type: "date"};
+    }
     else if(cellType==="inlineStr"){
         let isMatch: RegExpMatchArray|null=content.match(/<is\b[^>]*>([\s\S]*?)<\/is>/i);
         if(!isMatch){
