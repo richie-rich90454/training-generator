@@ -176,7 +176,7 @@ describe("autoRegenerate", ()=>{
                     gradeCalls++
                     return{text:gradeJson(score, ["issue1"]), tokens:5, provider:"mock"}
                 }
-                return{text:"regenerated-item", tokens:5, provider:"mock"}
+                return{text:`regenerated-item-${gradeCalls}`, tokens:5, provider:"mock"}
             })
         }
         let result=await autoRegenerate(provider, "bad item", "orig prompt", "model", {
@@ -187,7 +187,7 @@ describe("autoRegenerate", ()=>{
         expect(result.originalGrade.score).toBe(0.3)
         expect(result.attempts).toBe(2)
         expect(result.allAttempts.length).toBe(3)
-        expect(result.finalItem).toBe("regenerated-item")
+        expect(result.finalItem).toBe("regenerated-item-2")
     })
     it("stops when threshold reached", async()=>{
         let gradeScores=[0.3, 0.95, 0.99]
@@ -352,33 +352,18 @@ describe("autoRegenerate", ()=>{
 })
 describe("autoRegenerateBatch", ()=>{
     it("correctly categorizes regenerated vs kept", async()=>{
-        let itemAGrades=[0.9]
-        let itemBGrades=[0.3, 0.8]
-        let itemCGrades=[0.3, 0.4]
-        let stateA=0, stateB=0, stateC=0
+        let gradeScores=[0.9, 0.3, 0.8, 0.3, 0.3, 0.3]
+        let gradeIdx=0
+        let regenCount=0
         let provider:Provider={
             name:"m",
             async generate(prompt:string):Promise<ProviderResult>{
                 if(prompt.includes(GRADING_PROMPT)){
-                    if(prompt.includes("item-a")){
-                        let s=itemAGrades[stateA]
-                        stateA++
-                        return{text:gradeJson(s), tokens:5, provider:"m"}
-                    }
-                    else if(prompt.includes("item-b")){
-                        let s=itemBGrades[stateB]
-                        stateB++
-                        return{text:gradeJson(s), tokens:5, provider:"m"}
-                    }
-                    else{
-                        let s=itemCGrades[stateC]
-                        stateC++
-                        return{text:gradeJson(s), tokens:5, provider:"m"}
-                    }
+                    let s=gradeScores[gradeIdx]
+                    gradeIdx++
+                    return{text:gradeJson(s), tokens:5, provider:"m"}
                 }
-                if(prompt.includes("item-a"))return{text:"item-a-regen", tokens:5, provider:"m"}
-                if(prompt.includes("item-b"))return{text:"item-b-regen", tokens:5, provider:"m"}
-                return{text:"item-c-regen", tokens:5, provider:"m"}
+                return{text:`regen-${++regenCount}`, tokens:5, provider:"m"}
             }
         }
         let result=await autoRegenerateBatch(provider, ["item-a", "item-b", "item-c"], "prompt", "model", {
