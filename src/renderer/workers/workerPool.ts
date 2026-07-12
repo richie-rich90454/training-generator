@@ -23,9 +23,12 @@ const TIMEOUT_MS: number = 60000
 const MAX_WORKER_RESTARTS: number = 3
 const MAX_PENDING: number = 100
 const MAX_WORKER_PAYLOAD_CHARS: number = 10 * 1024 * 1024
+const RESTART_BACKOFF_MS: number = 1000
 
 let chunkRestarts: number = 0
 let dedupRestarts: number = 0
+let chunkBackoffUntil: number = 0
+let dedupBackoffUntil: number = 0
 
 function supportsWorkers(): boolean {
   return typeof Worker !== "undefined"
@@ -50,11 +53,12 @@ function rejectAllDedupPending(error: Error): void {
 function recreateChunkWorker(worker: Worker | null): void {
   if (chunkWorker !== worker || !worker) return
   worker.terminate()
+  chunkWorker = null
   if (chunkRestarts < MAX_WORKER_RESTARTS) {
     chunkRestarts++
-    chunkWorker = createChunkWorker()
+    chunkBackoffUntil = Date.now() + RESTART_BACKOFF_MS * chunkRestarts
   } else {
-    chunkWorker = null
+    chunkBackoffUntil = 0
     rejectAllChunkPending(new Error("Chunk worker failed permanently after maximum restart attempts"))
   }
 }
@@ -62,11 +66,12 @@ function recreateChunkWorker(worker: Worker | null): void {
 function recreateDedupWorker(worker: Worker | null): void {
   if (dedupWorker !== worker || !worker) return
   worker.terminate()
+  dedupWorker = null
   if (dedupRestarts < MAX_WORKER_RESTARTS) {
     dedupRestarts++
-    dedupWorker = createDedupWorker()
+    dedupBackoffUntil = Date.now() + RESTART_BACKOFF_MS * dedupRestarts
   } else {
-    dedupWorker = null
+    dedupBackoffUntil = 0
     rejectAllDedupPending(new Error("Dedup worker failed permanently after maximum restart attempts"))
   }
 }
@@ -83,6 +88,7 @@ function createChunkWorker(): Worker | null {
         pending.reject(new Error(e.data.error))
       } else {
         chunkRestarts = 0
+        chunkBackoffUntil = 0
         pending.resolve(e.data.chunks)
       }
     })
@@ -112,6 +118,7 @@ function createDedupWorker(): Worker | null {
         pending.reject(new Error(e.data.error))
       } else {
         dedupRestarts = 0
+        dedupBackoffUntil = 0
         pending.resolve(e.data)
       }
     })
@@ -132,6 +139,7 @@ function createDedupWorker(): Worker | null {
 function getChunkWorker(): Worker | null {
   if (!supportsWorkers()) return null
   if (chunkRestarts >= MAX_WORKER_RESTARTS) return null
+  if (Date.now() < chunkBackoffUntil) return null
   if (!chunkWorker) {
     chunkWorker = createChunkWorker()
   }
@@ -141,6 +149,7 @@ function getChunkWorker(): Worker | null {
 function getDedupWorker(): Worker | null {
   if (!supportsWorkers()) return null
   if (dedupRestarts >= MAX_WORKER_RESTARTS) return null
+  if (Date.now() < dedupBackoffUntil) return null
   if (!dedupWorker) {
     dedupWorker = createDedupWorker()
   }
@@ -219,6 +228,8 @@ export function dedupInWorker(
 export function terminateWorkers(): void {
   chunkRestarts = 0
   dedupRestarts = 0
+  chunkBackoffUntil = 0
+  dedupBackoffUntil = 0
   rejectAllChunkPending(new Error("Workers terminated"))
   rejectAllDedupPending(new Error("Workers terminated"))
   if (chunkWorker) {
