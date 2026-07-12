@@ -55,6 +55,12 @@ DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
 - Cada oración DEBE ocupar su propia línea o ajustarse naturalmente como prosa.
 - En este formato de salida NO se permiten etiquetas `Question:` o `Answer:`.
 
+REGLAS DE CONTENIDO (CONTENT RULES):
+- La salida DEBE ser prosa directa y fáctica.
+- Las tablas Markdown, los bloques de código y el formato están PROHIBIDOS.
+- El monólogo interno, la autocorrección y los meta-comentarios están PROHIBIDOS.
+- Escribe como prosa continua, no como lista o tabla.
+
 FORMATO DE SALIDA (OUTPUT FORMAT):
 [Texto continuo del resumen que preserva íntegramente toda la información del texto original, escrito en español claro, preciso y profesional, con la máxima densidad de información posible, sin encabezados, sin etiquetas, sin meta-comentarios]
 
