@@ -16,6 +16,18 @@ class PromptManager{
         let fileType=this.mapProcessingType(processingType)
         return `${language}_${fileType}.txt`
     }
+    private sanitizeLocale(value:string):string{
+        if(!value||typeof value!=="string"){
+            return "en"
+        }
+        if(/[\\/]/.test(value)||value.includes("..")){
+            return "en"
+        }
+        if(!/^[A-Za-z0-9-]+$/.test(value)){
+            return "en"
+        }
+        return value
+    }
     private isNegativeCached(fileName:string):boolean{
         let addedAt=this.negativeCache.get(fileName)
         if(addedAt===undefined){
@@ -28,8 +40,9 @@ class PromptManager{
         return true
     }
     async getPrompt(language:string,processingType:string):Promise<string|null>{
+        let safeLanguage=this.sanitizeLocale(language)
         let fileType=this.mapProcessingType(processingType)
-        let fileName=this.buildFileName(language,fileType)
+        let fileName=this.buildFileName(safeLanguage,fileType)
         if(this.cache.has(fileName)){
             return this.cache.get(fileName)!
         }
@@ -40,7 +53,7 @@ class PromptManager{
         if(existing){
             return existing
         }
-        let promise=this.loadPrompt(language,fileType,fileName)
+        let promise=this.loadPrompt(safeLanguage,fileType,fileName)
         this.inFlight.set(fileName,promise)
         try{
             let result=await promise
@@ -115,7 +128,8 @@ class PromptManager{
         this.inFlight.clear()
     }
     invalidatePrompt(language:string,processingType:string):void{
-        let fileName=this.buildFileName(language,processingType)
+        let safeLanguage=this.sanitizeLocale(language)
+        let fileName=this.buildFileName(safeLanguage,processingType)
         this.cache.delete(fileName)
         this.negativeCache.delete(fileName)
     }
