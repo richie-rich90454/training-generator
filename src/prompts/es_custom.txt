@@ -41,11 +41,21 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Etiquetas o marcadores de formato externos a la propia estructura jerárquica (ej.: "Análisis estructurado:", "Conocimiento extraído:")
 - Bloques de código o marcadores de formato ajenos a la estructura
 
+SIN REPETICIÓN (NO REPETITION):
+- Las oraciones duplicadas están prohibidas. Una vez que se ha emitido una oración, NO DEBE emitirse de nuevo.
+- Los puntos o hechos duplicados están prohibidos. Si ya se ha expresado un punto, no se debe reiterar.
+- Si está a punto de repetir contenido, omítalo y pase a la siguiente información nueva.
+
 FORMATO ESTRICTO (STRICT FORMAT):
 - Comienza INMEDIATAMENTE con el primer título o elemento de la estructura jerárquica. Sin encabezado, sin introducción.
 - La estructura jerárquica debe usar títulos y subtítulos organizados de forma lógica.
 - El último elemento de la estructura debe ser el último texto en la salida. Sin texto final, sin cierre.
 - Si tienes la tentación de escribir algo que no sea parte del conocimiento estructurado, NO lo escribas.
+
+DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
+- La salida DEBE ser prosa pura sin etiquetas, encabezados ni marcadores de sección.
+- Cada oración DEBE ocupar su propia línea o ajustarse naturalmente como prosa.
+- En este formato de salida NO se permiten etiquetas `Question:` o `Answer:`.
 
 FORMATO DE SALIDA (OUTPUT FORMAT):
 [Título principal de la estructura jerárquica]
