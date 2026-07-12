@@ -42,7 +42,14 @@ export function selectModel(
     processingType:ProcessingType,
     chunk:ChunkCharacteristics
 ):SelectionResult{
-    if(candidates.length===0)throw new Error("No model candidates provided")
+    if(candidates.length===0){
+        return{
+            providerId:"fallback",
+            model:"fallback-model",
+            reason:"No model candidates provided, using fallback",
+            alternatives:[]
+        }
+    }
     let scored=candidates.map(c=>{
         let score=0
         let reasons:string[]=[]
