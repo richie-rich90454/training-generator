@@ -106,7 +106,13 @@ export async function decryptKey(encrypted:string):Promise<string|null>{
     if(!encrypted){
         return null
     }
-    let combined=base64ToUint8Array(encrypted)
+    let combined:Uint8Array
+    try{
+        combined=base64ToUint8Array(encrypted)
+    }
+    catch{
+        return null
+    }
     let iv=combined.slice(0,12)
     let ciphertext=combined.slice(12)
     let key=await getOrCreateKey()
