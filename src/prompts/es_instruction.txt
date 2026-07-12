@@ -1,6 +1,6 @@
-Eres un generador experto de datos de entrenamiento para IA especializado en la creación de conjuntos de datos de preguntas y respuestas de calidad excepcional. Tu tarea consiste en transformar el texto proporcionado en una colección completa de pares de preguntas y respuestas (Q&A) detallados que preserven íntegramente todo el contenido informativo del texto original. Este conjunto de datos se utilizará como datos de entrenamiento para IA; por lo tanto, la precisión factual, la integridad, la fidelidad semántica, la coherencia lógica y el valor educativo tienen prioridad absoluta sobre la brevedad. Toda información significativa contenida en el texto original debe estar cubierta por al menos una pregunta. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
+Eres un generador experto de datos de entrenamiento para IA especializado en la creación de conjuntos de datos de preguntas y respuestas de calidad excepcional. Tu tarea consiste en transformar el texto proporcionado en una colección completa de pares de preguntas y respuestas (Q&A) detallados que preserven íntegramente todo el contenido informativo del texto original.
 
-TEXTO PARA ANALIZAR:
+TEXTO A ANALIZAR:
 {{text}}
 
 INSTRUCCIONES:
@@ -28,11 +28,45 @@ INSTRUCCIONES:
    - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
    - cada respuesta esté completamente respaldada por el texto original.
 
-FORMATO DE SALIDA:
+CONTRATO DE SALIDA (OUTPUT CONTRACT):
+Debes emitir ÚNICAMENTE el formato estructurado especificado a continuación. En ninguna circunstancia se permite otro texto, caracteres o contenido. Este es un contrato absoluto y no negociable. Cualquier desviación es un error crítico.
+
+SALIDA PROHIBIDA (FORBIDDEN OUTPUT):
+Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
+- Texto preliminar o introductorio (ej.: "Aquí están...", "Basado en el texto...", "A continuación...")
+- Texto de cierre o conclusivo (ej.: "En resumen...", "Para concluir...")
+- Narración, comentarios o prosa entre pares
+- Meta-comentarios sobre el texto fuente (ej.: "La salida no describe explícitamente...", "El texto menciona...")
+- Explicaciones de tu proceso o razonamiento
+- Notas, advertencias o apartes (ej.: "Nota:", "Cabe señalar...")
+- Secciones de resumen o conclusión
+- Cualquier texto que no sea un par Question:/Answer:
+- Formato Markdown, bloques de código o marcadores de formato
+- Líneas en blanco excepto la única línea en blanco que separa los pares
+
+FORMATO ESTRICTO (STRICT FORMAT):
+- Comienza INMEDIATAMENTE con el primer par. Sin encabezado, sin introducción.
+- Cada par debe seguir el formato exacto:
+  Question: [texto de la pregunta]
+  Answer: [texto de la respuesta]
+- Una sola línea en blanco separa cada par.
+- El último par debe ser el último texto en la salida. Sin texto final.
+- Si tienes la tentación de escribir algo que no sea un par Question:/Answer:, NO lo escribas.
+
+FORMATO DE SALIDA (OUTPUT FORMAT):
 Question: [Primera pregunta]
 Answer: [Primera respuesta]
 
 Question: [Segunda pregunta]
 Answer: [Segunda respuesta]
 
-[Continúa generando tantos pares de preguntas y respuestas como sean necesarios para cubrir completamente toda la información. Deja exactamente una línea en blanco entre cada par Question-Answer. Todas las preguntas y respuestas deben estar escritas íntegramente en español.]
+[Continúa con tantos pares como sean necesarios para cubrir toda la información, con una línea en blanco entre cada par]
+
+AUTOCOMPROBACIÓN (SELF-CHECK):
+Antes de emitir tu salida, verifica silenciosamente:
+1. La primera línea comienza con "Question:".
+2. No hay preliminar, introducción o comentario antes del primer par.
+3. No hay prosa, narración o comentario entre pares.
+4. No hay conclusión, resumen o cierre después del último par.
+5. Cada línea es o bien una línea "Question:", una línea "Answer:", una continuación de la respuesta actual, o una única línea en blanco separadora.
+Si alguna de estas comprobaciones falla, revisa tu salida antes de emitirla.
