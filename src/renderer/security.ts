@@ -36,7 +36,12 @@ async function generateAndCacheKey():Promise<CryptoKey>{
     let extractable=await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt","decrypt"])
     let raw=new Uint8Array(await crypto.subtle.exportKey("raw", extractable))
     let encoded=arrayBufferToBase64Chunked(raw)
-    await storeSecureKey(encoded)
+    let stored=await storeSecureKey(encoded)
+    if(!stored){
+        try{
+            localStorage.setItem(STORAGE_KEY, encoded)
+        }catch{}
+    }
     memoryKey=await importKeyNonExtractable(raw)
     return memoryKey
 }
