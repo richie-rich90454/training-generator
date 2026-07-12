@@ -262,6 +262,7 @@ export function createOutputStore(): OutputStore {
     function appendOutput(items: TrainingItem[]): void {
         if (items.length === 0) return
         setOutputData(outputData => [...outputData, ...items])
+        setStagingData([])
     }
     function stageItems(items: TrainingItem[]): void {
         if (items.length === 0) return
