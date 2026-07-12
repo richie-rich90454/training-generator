@@ -9,7 +9,7 @@ const SETTINGS_KEY = "train-generator-settings"
 const APP_SETTINGS_KEY = "training-generator-app-settings"
 const UI_LANG_KEY = "train-generator-ui-lang"
 const VALID_PROCESSING_TYPES = ["instruction", "conversation", "chunking", "custom"]
-const VALID_OUTPUT_FORMATS = ["jsonl", "chatml", "text", "csv"]
+const VALID_OUTPUT_FORMATS = ["jsonl", "json", "chatml", "text", "csv"]
 const VALID_LANGUAGES = ["en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko"]
 const VALID_PROVIDERS = ["ollama", "openai", "anthropic", "gemini"]
 function clamp(n: number, min: number, max: number, def: number): number {
