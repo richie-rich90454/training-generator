@@ -378,6 +378,7 @@ export function createAppStore(): AppStore {
           failedFiles++
           fileStore.setFileStatus(event.fileName, "failed")
         }
+        outputStore.clearStaging()
         updateOutputPreview()
       },
       onLog: (message: string, level: "info" | "success" | "warning" | "error") => {
