@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import readline from "readline";
 import { HealthChecker } from "./healthChecker.js";
 import { TrainingItem } from "../types/interfaces.js";
 export interface DiagnosticsReport{
@@ -174,6 +175,28 @@ function isSecretKey(key: string): boolean{
 }
 export async function collectLogs(logPath: string, maxLines: number): Promise<string[]>{
     try{
+        if (typeof fs.createReadStream==="function"){
+            return await new Promise<string[]>((resolve)=>{
+                let lines: string[]=[];
+                let stream=fs.createReadStream(logPath, {encoding: "utf8"});
+                let rl=readline.createInterface({input: stream, crlfDelay: Infinity});
+                rl.on("line", (line: string)=>{
+                    lines.push(line);
+                    if (lines.length>maxLines){
+                        lines.shift();
+                    }
+                });
+                rl.on("close", ()=>{
+                    resolve(lines);
+                });
+                rl.on("error", ()=>{
+                    resolve([]);
+                });
+                stream.on("error", ()=>{
+                    resolve([]);
+                });
+            });
+        }
         let content=await fs.promises.readFile(logPath, "utf8");
         let lines=content.split("\n");
         if (lines.length>0 && lines[lines.length-1]===""){
