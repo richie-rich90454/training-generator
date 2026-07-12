@@ -67,12 +67,12 @@ export function showConfirm(
     }
     const onConfirmClick = () => {
       cleanup()
-      onConfirm?.()
+      try{ onConfirm?.() }catch{}
       resolve(true)
     }
     const onCancelClick = () => {
       cleanup()
-      onCancel?.()
+      try{ onCancel?.() }catch{}
       resolve(false)
     }
     dismissRef = onCancelClick
