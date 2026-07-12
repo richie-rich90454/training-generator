@@ -238,7 +238,12 @@ export class Worker{
             this.socket?.send(JSON.stringify({type: "result", id: message.id, items: items}))
         }
         catch(err){
-            this.socket?.send(JSON.stringify({type: "result", id: message.id, items: [], error: String(err)}))
+            try{
+                this.socket?.send(JSON.stringify({type: "result", id: message.id, items: [], error: String(err)}))
+            }
+            catch{
+                // socket closed; swallow send error
+            }
         }
     }
     private parseMessage(raw: unknown): WorkMessage|null{
