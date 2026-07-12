@@ -15,6 +15,7 @@ const ACCEPT_TYPES = ".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html"
 export function UploadCard(props: UploadCardProps): JSX.Element {
     const { fileStore, clearAll } = props.appStore
     const [dragOver, setDragOver] = createSignal(false)
+    const [dragCounter, setDragCounter] = createSignal(0)
     let fileInputRef: HTMLInputElement | undefined
     function handleFiles(files: FileList | null): void {
         if (!files || files.length === 0) {
@@ -25,16 +26,25 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
             props.appStore.uiStore.showToast(t("toast.noValidFiles"), "error")
         }
     }
+    function handleDragEnter(e: DragEvent): void {
+        e.preventDefault()
+        setDragCounter(dragCounter() + 1)
+        setDragOver(true)
+    }
     function handleDragOver(e: DragEvent): void {
         e.preventDefault()
-        setDragOver(true)
     }
     function handleDragLeave(e: DragEvent): void {
         e.preventDefault()
-        setDragOver(false)
+        const next = dragCounter() - 1
+        setDragCounter(Math.max(0, next))
+        if (next <= 0) {
+            setDragOver(false)
+        }
     }
     function handleDrop(e: DragEvent): void {
         e.preventDefault()
+        setDragCounter(0)
         setDragOver(false)
         handleFiles(e.dataTransfer?.files ?? null)
     }
@@ -68,6 +78,7 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
                 aria-label={t("upload.dropzoneAria")}
                 data-i18n-aria-label="upload.dropzoneAria"
                 tabindex="0"
+                onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
