@@ -48,7 +48,7 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
         updatePreviews()
     }
     function handleClose():void{
-        props.appStore.uiStore.closeModal()
+        props.appStore.uiStore.closeTemplateEditor()
         if (lastFocusedElement&&document.contains(lastFocusedElement)){
             lastFocusedElement.focus()
             lastFocusedElement=null
@@ -107,6 +107,9 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
         setTimeout(()=>URL.revokeObjectURL(url),1000)
     }
     function handleKeydown(e: KeyboardEvent):void{
+        if (!props.appStore.uiStore.templateOpen()){
+            return
+        }
         if (e.key==="Escape"){
             e.preventDefault()
             handleClose()
