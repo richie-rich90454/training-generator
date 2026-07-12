@@ -143,10 +143,15 @@ export async function tagBatch(
     return results
 }
 let tagCache=new Map<string, ParsedTags>()
+const TAG_CACHE_MAX=500
 export function getCachedTags(itemHash:string):ParsedTags|undefined{
     return tagCache.get(itemHash)
 }
 export function setCachedTags(itemHash:string, tags:ParsedTags):void{
+    if(tagCache.size>=TAG_CACHE_MAX){
+        let firstKey=tagCache.keys().next().value
+        if(firstKey!==undefined)tagCache.delete(firstKey)
+    }
     tagCache.set(itemHash, tags)
 }
 export function clearTagCache():void{
