@@ -10,6 +10,7 @@ try{
 }
 const REKEY_THRESHOLD=rekeyThreshold
 let memoryKey:CryptoKey|null=null
+let previousKeys:CryptoKey[]=[]
 let encryptionCount=0
 async function importKeyNonExtractable(raw:Uint8Array):Promise<CryptoKey>{
     return crypto.subtle.importKey("raw", raw as BufferSource, {name:"AES-GCM"}, false, ["encrypt","decrypt"])
@@ -89,6 +90,9 @@ export async function encryptKey(plaintext:string):Promise<string>{
     encryptionCount++
     if(REKEY_THRESHOLD>0&&encryptionCount>=REKEY_THRESHOLD){
         encryptionCount=0
+        if(memoryKey){
+            previousKeys.push(memoryKey)
+        }
         await generateAndCacheKey()
     }
     return arrayBufferToBase64Chunked(combined)
@@ -97,15 +101,24 @@ export async function decryptKey(encrypted:string):Promise<string|null>{
     if(!encrypted){
         return null
     }
+    let combined=base64ToUint8Array(encrypted)
+    let iv=combined.slice(0,12)
+    let ciphertext=combined.slice(12)
+    let key=await getOrCreateKey()
     try{
-        let key=await getOrCreateKey()
-        let combined=base64ToUint8Array(encrypted)
-        let iv=combined.slice(0,12)
-        let ciphertext=combined.slice(12)
         let decrypted=await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ciphertext)
         return new TextDecoder().decode(decrypted)
     }
     catch{
+        for(let prevKey of previousKeys){
+            try{
+                let decrypted=await crypto.subtle.decrypt({name:"AES-GCM", iv}, prevKey, ciphertext)
+                return new TextDecoder().decode(decrypted)
+            }
+            catch{
+                continue
+            }
+        }
         return null
     }
 }
