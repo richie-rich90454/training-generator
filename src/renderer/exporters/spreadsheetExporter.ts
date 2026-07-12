@@ -55,7 +55,7 @@ function rowsToCsv(rows: SpreadsheetRow[], columns: string[]): string{
     return "\uFEFF"+lines.join("\n")+"\n"
 }
 function tsvEscape(value: string): string{
-    let escaped=value.replace(/\t/g, " ").replace(/[\r\n]/g, " ").replace(/"/g,'""')
+    let escaped=value.replace(/"/g,'""')
     if(/^[=\+\-\@\t\r]/.test(escaped)){
         escaped="'"+escaped
     }
