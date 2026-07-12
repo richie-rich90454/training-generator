@@ -82,6 +82,9 @@ export class PipelineOrchestrator{
             this.setProgress({currentStep: i+1, totalSteps: this.steps.length, stepName: step.name, percent: percent, message: "Running step: " + step.name})
             this.emit({type: "step-start", timestamp: Date.now(), payload: {name: step.name, index: i}})
             try{
+                if (this.isCancelled()){
+                    throw new Error("Pipeline cancelled")
+                }
                 this.context=await step.run(this.context)
             }
             catch (error){
