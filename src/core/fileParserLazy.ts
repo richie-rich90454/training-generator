@@ -168,7 +168,7 @@ class FileParserLazy{
         }
         catch (error){
             console.error("PDF parsing error:", error);
-            return this.extractTextFromPDF(buffer);
+            throw error;
         }
     }
     async parsePDFWithWorker(buffer:Buffer,transfer?:boolean):Promise<string>{
