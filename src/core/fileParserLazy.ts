@@ -57,7 +57,7 @@ class FileParserLazy{
             case "officeParser":
                 return (await import("officeparser")).default
             case "RtfParser":
-                return (await import("rtf-parser-fixes")).RtfParser
+                return (await import("rtf-parser-fixes")).string
             case "htmlToText":
                 return (await import("html-to-text")).htmlToText
             default:
@@ -246,21 +246,16 @@ class FileParserLazy{
         }
     }
     async parseRTFText(rtfText:string):Promise<string>{
-        let {RtfParser}=await this.loadDependency("RtfParser") as any;
+        let rtfString=await this.loadDependency("RtfParser") as any;
         return new Promise((resolve, reject)=>{
-            let parser=new RtfParser();
-            let result="";
-            parser.on("text", (text:string)=>{
-                result+=text;
+            rtfString(rtfText, (error:Error|null, doc:any)=>{
+                if(error){
+                    reject(error);
+                    return;
+                }
+                let text=doc.content.map((span:any)=>span.value).join("");
+                resolve(text);
             });
-            parser.on("error", (error:Error)=>{
-                reject(error);
-            });
-            parser.on("end", ()=>{
-                resolve(result);
-            });
-            parser.write(rtfText);
-            parser.end();
         });
     }
     async parseHTML(buffer:Buffer):Promise<string>{
