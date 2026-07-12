@@ -1,7 +1,8 @@
 class PromptManager{
     private cache:Map<string,string>=new Map()
-    private negativeCache:Set<string>=new Set()
+    private negativeCache:Map<string,number>=new Map()
     private inFlight:Map<string,Promise<string|null>>=new Map()
+    private static readonly NEGATIVE_CACHE_TTL_MS=60_000
     private mapProcessingType(processingType:string):string{
         let processingTypeMap:Record<string,string>={
             "instruction":"instruction",
@@ -15,13 +16,24 @@ class PromptManager{
         let fileType=this.mapProcessingType(processingType)
         return `${language}_${fileType}.txt`
     }
+    private isNegativeCached(fileName:string):boolean{
+        let addedAt=this.negativeCache.get(fileName)
+        if(addedAt===undefined){
+            return false
+        }
+        if(Date.now()-addedAt>PromptManager.NEGATIVE_CACHE_TTL_MS){
+            this.negativeCache.delete(fileName)
+            return false
+        }
+        return true
+    }
     async getPrompt(language:string,processingType:string):Promise<string|null>{
         let fileType=this.mapProcessingType(processingType)
         let fileName=this.buildFileName(language,fileType)
         if(this.cache.has(fileName)){
             return this.cache.get(fileName)!
         }
-        if(this.negativeCache.has(fileName)){
+        if(this.isNegativeCached(fileName)){
             return null
         }
         let existing=this.inFlight.get(fileName)
@@ -36,7 +48,7 @@ class PromptManager{
                 this.cache.set(fileName,result)
             }
             else{
-                this.negativeCache.add(fileName)
+                this.negativeCache.set(fileName,Date.now())
             }
             return result
         }
