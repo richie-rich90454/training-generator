@@ -2,6 +2,7 @@
 import {describe, it, expect, vi, beforeEach} from "vitest"
 import {TieredStorage} from "../src/core/tieredStorage.js"
 import path from "path"
+import crypto from "crypto"
 let mockFsFiles: Map<string, Buffer>;
 vi.mock("fs/promises", ()=>{
     return {
@@ -197,7 +198,8 @@ describe("TieredStorage", ()=>{
         await store.set("a", 1);
         await store.set("b", 2);
         await store.set("c", 3);
-        let filePath=path.join("/tmp/cold", "a.gz");
+        let hash=crypto.createHash("sha256").update("a").digest("hex");
+        let filePath=path.join("/tmp/cold", hash+".gz");
         expect(mockFsFiles.has(filePath)).toBe(true);
         let data=mockFsFiles.get(filePath);
         expect(data).toBeDefined();
