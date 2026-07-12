@@ -46,6 +46,11 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Formato Markdown, bloques de código o marcadores de formato
 - Líneas en blanco excepto la única línea en blanco que separa los pares
 
+SIN REPETICIÓN (NO REPETITION):
+- Los turnos de usuario duplicados están prohibidos. Una vez que se ha emitido un turno de usuario, NO DEBE emitirse de nuevo.
+- Los turnos del asistente duplicados están prohibidos. Una vez que se ha emitido un turno del asistente, NO DEBE emitirse de nuevo.
+- Si está a punto de emitir un turno de usuario que ya ha hecho, omítalo y pase al siguiente turno nuevo.
+
 FORMATO ESTRICTO (STRICT FORMAT):
 - Comienza INMEDIATAMENTE con el primer par. Sin encabezado, sin introducción.
 - Cada par debe seguir el formato exacto:
@@ -54,6 +59,12 @@ FORMATO ESTRICTO (STRICT FORMAT):
 - Una sola línea en blanco separa cada par.
 - El último par debe ser el último texto en la salida. Sin texto final.
 - Si tienes la tentación de escribir algo que no sea un par User:/Assistant:, NO lo escribas.
+
+DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
+- La etiqueta `User:` y la etiqueta `Assistant:` (o `User:`/`Assistant:`) DEBEN ocupar cada una su propia línea.
+- La línea `User:` y la línea `Assistant:` NO DEBEN combinarse en la misma línea.
+- Exactamente una línea en blanco separa cada par.
+- La respuesta puede continuar en múltiples líneas después de la etiqueta `Assistant:`, pero una nueva `User:` DEBE comenzar en su propia línea.
 
 FORMATO DE SALIDA (OUTPUT FORMAT):
 User: [Primer mensaje del usuario]
