@@ -26,10 +26,12 @@ export function getStrictGenerationOptions(processingType:string):StrictGenerati
     // instruction/conversation need slightly more creativity for diverse questions
     // chunking/custom are more extractive and benefit from even lower temperature
     const temp=(processingType==="instruction"||processingType==="conversation")?0.3:0.4
+    // Higher repeat_penalty for instruction/conversation to break repetition loops
+    const repeatPenalty=(processingType==="instruction"||processingType==="conversation")?1.2:1.15
     return{
         temperature:temp,
         top_p:0.85,
-        repeat_penalty:1.1
+        repeat_penalty:repeatPenalty
     }
 }
 
@@ -131,12 +133,16 @@ export class OllamaProvider implements Provider{
         try{
             let result=await retryWithBackoff(async()=>{
                 if(signal?.aborted)throw new Error("Aborted")
-                const maxTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
+                const requestedTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
+                // Cap num_predict at 4096 for instruction/conversation to truncate runaway repetition loops early
+                const maxTokens=(options?.processingType==="instruction"||options?.processingType==="conversation")
+                    ?Math.min(4096,requestedTokens)
+                    :requestedTokens
                 const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 const payload:Record<string,unknown>={
                     temperature:strictOpts?.temperature??options?.temperature??0.7,
                     top_p:strictOpts?.top_p??options?.top_p??0.9,
-                    repeat_penalty:strictOpts?.repeat_penalty??1.1,
+                    repeat_penalty:strictOpts?.repeat_penalty??1.15,
                     num_predict:maxTokens
                 }
                 if(options?.think===false){
