@@ -4,6 +4,8 @@ export interface AdversarialConfig{
     threshold:number
     options?:ProviderOptions
     dropBelowThreshold:boolean
+    minItems?:number
+    keepTopN?:number
 }
 export const DEFAULT_ADVERSARIAL_CONFIG:AdversarialConfig={
     model:"gpt-3.5-turbo",
@@ -56,10 +58,12 @@ export function parseGradeResponse(response:string):GradeResult{
     let score=Number(parsed.score)
     if(isNaN(score))score=0.5
     score=Math.max(0, Math.min(1, score))
+    let reason=typeof parsed.reason==="string"?parsed.reason:""
+    let issues=Array.isArray(parsed.issues)?parsed.issues.filter((i:unknown)=>typeof i==="string"):[]
     return{
         score,
-        reason:parsed.reason||"",
-        issues:parsed.issues||[],
+        reason,
+        issues,
         rawResponse:response
     }
 }
@@ -98,6 +102,17 @@ export async function filterBatch(
     }
     let accepted=results.filter(r=>r.accepted)
     let rejected=results.filter(r=>!r.accepted)
+    let minTarget=Math.max(config.minItems??0, config.keepTopN??0)
+    if(minTarget>0&&accepted.length<minTarget&&rejected.length>0){
+        let sortedRejected=[...rejected].sort((a, b)=>b.grade.score-a.grade.score)
+        while(accepted.length<minTarget&&sortedRejected.length>0){
+            let promoted=sortedRejected.shift()!
+            promoted.accepted=true
+            promoted.filteredOut=false
+            accepted.push(promoted)
+        }
+        rejected=results.filter(r=>!r.accepted)
+    }
     let totalScore=results.reduce((sum, r)=>sum+r.grade.score, 0)
     let acceptanceRate=results.length>0?accepted.length/results.length:0
     let averageScore=results.length>0?totalScore/results.length:0
