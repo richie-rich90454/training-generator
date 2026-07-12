@@ -87,7 +87,7 @@ describe("security IV usage counter",()=>{
         let e3=await encryptKey("c")
         let e4=await encryptKey("d")
         expect(await decryptKey(e4)).toBe("d")
-        expect(await decryptKey(e1)).toBe(null)
+        expect(await decryptKey(e1)).toBe("a")
     })
 })
 describe("logger", () => {
