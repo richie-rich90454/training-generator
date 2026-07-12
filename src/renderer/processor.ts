@@ -279,7 +279,6 @@ class Processor{
                         ollamaHost,
                         ollamaPort
                     })
-                    setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
                     let result=await responsePromise
                     response=result.text
                     let latencyMs = Date.now() - chunkStart
