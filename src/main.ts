@@ -835,64 +835,76 @@ async function getCurrentLogFilePathAsync():Promise<string>{
 }
 function registerCriticalIpcHandlers():void{
     handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
-        let result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
-            properties:["openFile","multiSelections"],
-            filters:[
-                {name:t("dialog.fileFilter.documents"),extensions:["pdf","docx","doc","rtf","txt","md","html"]},
-                {name:t("dialog.fileFilter.allFiles"),extensions:["*"]}
-            ]
-        })
-        if(result.canceled)return[]
-        let maxSize=100*1024*1024
-        let rejected:string[]=[]
-        let files=await Promise.all(result.filePaths.map(async filePath=>{
-            try{
-                if(filePath.includes("\x00"))return null
-                let resolvedPath=path.resolve(filePath)
-                let userHome=path.resolve(app.getPath("home"))
-                if(!isPathWithin(userHome,resolvedPath))return null
-                let stats=await fsp.stat(filePath)
-                if(!stats.isFile()||stats.size>maxSize)return null
-                return{
-                    path:filePath,
-                    name:path.basename(filePath),
-                    size:stats.size,
-                    type:path.extname(filePath).slice(1),
-                    lastModified:stats.mtime
-                }as FileObj
+        try{
+            let result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
+                properties:["openFile","multiSelections"],
+                filters:[
+                    {name:t("dialog.fileFilter.documents"),extensions:["pdf","docx","doc","rtf","txt","md","html"]},
+                    {name:t("dialog.fileFilter.allFiles"),extensions:["*"]}
+                ]
+            })
+            if(result.canceled)return[]
+            let maxSize=100*1024*1024
+            let rejected:string[]=[]
+            let files=await Promise.all(result.filePaths.map(async filePath=>{
+                try{
+                    if(filePath.includes("\x00"))return null
+                    let resolvedPath=path.resolve(filePath)
+                    let userHome=path.resolve(app.getPath("home"))
+                    if(!isPathWithin(userHome,resolvedPath))return null
+                    let stats=await fsp.stat(filePath)
+                    if(!stats.isFile()||stats.size>maxSize)return null
+                    return{
+                        path:filePath,
+                        name:path.basename(filePath),
+                        size:stats.size,
+                        type:path.extname(filePath).slice(1),
+                        lastModified:stats.mtime
+                    }as FileObj
+                }
+                catch{
+                    return null
+                }
+            }))
+            result.filePaths.forEach((filePath,index)=>{
+                if(files[index]){
+                    allowParsePath(filePath)
+                }
+                else{
+                    rejected.push(filePath)
+                }
+            })
+            if(rejected.length>0){
+                dialog.showErrorBox(t("dialog.fileRejectedTitle"),t("dialog.fileRejectedMessage")+rejected.join("\n"))
             }
-            catch{
-                return null
-            }
-        }))
-        result.filePaths.forEach((filePath,index)=>{
-            if(files[index]){
-                allowParsePath(filePath)
-            }
-            else{
-                rejected.push(filePath)
-            }
-        })
-        if(rejected.length>0){
-            dialog.showErrorBox(t("dialog.fileRejectedTitle"),t("dialog.fileRejectedMessage")+rejected.join("\n"))
+            return files.filter(Boolean)as FileObj[]
         }
-        return files.filter(Boolean)as FileObj[]
+        catch(error){
+            console.error("dialog:openFile failed:",error)
+            return[]
+        }
     })
     handle("dialog:saveFile",async(_event,{defaultFilename}:{defaultFilename?:string}):Promise<string|null>=>{
-        let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
-            defaultPath:defaultFilename||`${t("dialog.saveDefaultFilename")}.jsonl`,
-            filters:[
-                {name:t("dialog.saveFilter.jsonl"),extensions:["jsonl"]},
-                {name:t("dialog.saveFilter.json"),extensions:["json"]},
-                {name:t("dialog.saveFilter.text"),extensions:["txt"]},
-                {name:t("dialog.saveFilter.allFiles"),extensions:["*"]}
-            ]
-        })
-        if(result.canceled||!result.filePath)return null
-        if(result.filePath.includes("\x00"))return null
-        if(!isPathSafeForWrite(result.filePath))return null
-        allowSavePath(result.filePath)
-        return result.filePath
+        try{
+            let result=await dialog.showSaveDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
+                defaultPath:defaultFilename||`${t("dialog.saveDefaultFilename")}.jsonl`,
+                filters:[
+                    {name:t("dialog.saveFilter.jsonl"),extensions:["jsonl"]},
+                    {name:t("dialog.saveFilter.json"),extensions:["json"]},
+                    {name:t("dialog.saveFilter.text"),extensions:["txt"]},
+                    {name:t("dialog.saveFilter.allFiles"),extensions:["*"]}
+                ]
+            })
+            if(result.canceled||!result.filePath)return null
+            if(result.filePath.includes("\x00"))return null
+            if(!isPathSafeForWrite(result.filePath))return null
+            allowSavePath(result.filePath)
+            return result.filePath
+        }
+        catch(error){
+            console.error("dialog:saveFile failed:",error)
+            return null
+        }
     })
     handle("secureKey:getKey",async():Promise<string|null>=>{
         return getSecureKey()
