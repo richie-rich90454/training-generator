@@ -96,7 +96,9 @@ describe("OutputStore parseQuestionAnswerPairs", () => {
         let pairs = store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(1)
         expect(pairs[0].question).toBe("What is 2+2? More detail")
-        expect(pairs[0].answer).toBe("4 Indeed")
+        // Continuation lines after Answer: are preserved with their original
+        // line breaks (joined with \n, not space) to support multi-line answers.
+        expect(pairs[0].answer).toBe("4\nIndeed")
     })
     it("parses Q/A regex fallback", () => {
         let text = "Q: one\nA: two"
@@ -123,7 +125,9 @@ describe("OutputStore parseConversationTurns", () => {
         let turns = store.parseConversationTurns(text)
         expect(turns.length).toBe(1)
         expect(turns[0].user).toBe("hello world")
-        expect(turns[0].assistant).toBe("hi there")
+        // Continuation lines after Assistant: are preserved with their original
+        // line breaks (joined with \n, not space) to support multi-line replies.
+        expect(turns[0].assistant).toBe("hi\nthere")
     })
     it("parses Human/AI regex fallback", () => {
         let text = "Human: q\nAI: a"
