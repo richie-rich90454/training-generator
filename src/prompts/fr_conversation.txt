@@ -64,6 +64,12 @@ DISPOSITION DES LIGNES (LINE LAYOUT):
 - Exactement une ligne vide sépare chaque paire.
 - La réponse peut s'étendre sur plusieurs lignes après l'étiquette `Assistant:`, mais une nouvelle `User:` DOIT commencer sur sa propre ligne.
 
+RÈGLES DE CONTENU DES RÉPONSES (ANSWER CONTENT RULES):
+- Les réponses DOIVENT être directes, factuelles et autonomes.
+- Les tableaux Markdown, les blocs de code et la mise en forme sont INTERDITS dans les réponses.
+- Le monologue interne (par ex., « Attends, je relis... », « Examinons... »), l'autocorrection et les méta-commentaires sont INTERDITS dans les réponses.
+- Si la réponse nécessite plusieurs phrases, écrivez-la en prose continue, non sous forme de liste ou de tableau.
+
 FORMAT DE SORTIE (OUTPUT FORMAT):
 User: [Premier message de l'utilisateur]
 Assistant: [Première réponse de l'assistant]
