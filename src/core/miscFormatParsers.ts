@@ -20,6 +20,59 @@ function decodeXmlEntities(text: string): string{
 function stripTags(text: string): string{
     return text.replace(/<[^>]+>/g, "");
 }
+function extractBracedContent(text: string, command: string): string|undefined{
+    let needle: string="\\"+command+"{";
+    let startIdx: number=text.indexOf(needle);
+    if(startIdx===-1){
+        return undefined;
+    }
+    let braceStart: number=startIdx+needle.length-1;
+    let depth: number=0;
+    for(let i: number=braceStart;i<text.length;i++){
+        if(text[i]==="{"){
+            depth++;
+        }
+        else if(text[i]==="}"){
+            depth--;
+            if(depth===0){
+                return text.substring(braceStart+1, i);
+            }
+        }
+    }
+    return undefined;
+}
+function extractAllBracedContent(text: string, command: string): {content: string, index: number, length: number}[]{
+    let results: {content: string, index: number, length: number}[]=[];
+    let needle: string="\\"+command+"{";
+    let searchFrom: number=0;
+    while(searchFrom<text.length){
+        let startIdx: number=text.indexOf(needle, searchFrom);
+        if(startIdx===-1){
+            break;
+        }
+        let braceStart: number=startIdx+needle.length-1;
+        let depth: number=0;
+        let endIdx: number=-1;
+        for(let i: number=braceStart;i<text.length;i++){
+            if(text[i]==="{"){
+                depth++;
+            }
+            else if(text[i]==="}"){
+                depth--;
+                if(depth===0){
+                    endIdx=i;
+                    break;
+                }
+            }
+        }
+        if(endIdx===-1){
+            break;
+        }
+        results.push({content: text.substring(braceStart+1, endIdx), index: startIdx, length: endIdx-startIdx+1});
+        searchFrom=endIdx+1;
+    }
+    return results;
+}
 function cleanLatexText(text: string): string{
     let t: string=text;
     t=t.replace(/\$\$[\s\S]*?\$\$/g, " [MATH] ");
@@ -35,18 +88,18 @@ function cleanLatexText(text: string): string{
 export function parseLatex(latex: string): ParsedTextResult{
     let metadata: Record<string, unknown>={};
     let title: string|undefined=undefined;
-    let titleMatch: RegExpMatchArray|null=latex.match(/\\title\{([^{}]*)\}/);
-    if(titleMatch){
-        title=titleMatch[1];
+    let titleContent: string|undefined=extractBracedContent(latex, "title");
+    if(titleContent!==undefined){
+        title=titleContent;
         metadata.title=title;
     }
-    let authorMatch: RegExpMatchArray|null=latex.match(/\\author\{([^{}]*)\}/);
-    if(authorMatch){
-        metadata.author=authorMatch[1];
+    let authorContent: string|undefined=extractBracedContent(latex, "author");
+    if(authorContent!==undefined){
+        metadata.author=authorContent;
     }
-    let dateMatch: RegExpMatchArray|null=latex.match(/\\date\{([^{}]*)\}/);
-    if(dateMatch){
-        metadata.date=dateMatch[1];
+    let dateContent: string|undefined=extractBracedContent(latex, "date");
+    if(dateContent!==undefined){
+        metadata.date=dateContent;
     }
     let body: string=latex;
     let docBeginMatch: RegExpMatchArray|null=latex.match(/\\begin\{document\}/);
@@ -60,12 +113,11 @@ export function parseLatex(latex: string): ParsedTextResult{
     body=body.replace(/%.*$/gm, "");
     let sections: {title: string, text: string}[]=[];
     let introText: string="";
-    let sectionRegex: RegExp=/\\section\{([^{}]*)\}/g;
+    let sectionMatches: {content: string, index: number, length: number}[]=extractAllBracedContent(body, "section");
     let lastIndex: number=0;
     let currentSection: {title: string, text: string}|null=null;
-    let match: RegExpExecArray|null;
-    while((match=sectionRegex.exec(body))!==null){
-        let chunk: string=body.substring(lastIndex, match.index);
+    for(let sm of sectionMatches){
+        let chunk: string=body.substring(lastIndex, sm.index);
         if(currentSection===null){
             introText=cleanLatexText(chunk);
         }
@@ -73,8 +125,8 @@ export function parseLatex(latex: string): ParsedTextResult{
             currentSection.text=cleanLatexText(chunk);
             sections.push(currentSection);
         }
-        currentSection={title: match[1], text: ""};
-        lastIndex=match.index+match[0].length;
+        currentSection={title: sm.content, text: ""};
+        lastIndex=sm.index+sm.length;
     }
     let tail: string=body.substring(lastIndex);
     if(currentSection===null){
