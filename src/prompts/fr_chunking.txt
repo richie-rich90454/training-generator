@@ -36,12 +36,20 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Étiquettes, en-têtes ou marqueurs de section (ex. : "Résumé:", "Sortie:", "###")
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Tout texte qui ne fait pas partie du résumé lui-même
+SANS RÉPÉTITION (NO REPETITION):
+- Les phrases en double sont interdites. Une fois qu'une phrase a été émise, ELLE NE DOIT PAS être émise à nouveau.
+- Les points ou faits en double sont interdites. Si un point a déjà été exprimé, il ne doit pas être répété.
+- Si vous êtes sur le point de répéter du contenu, sautez-le et passez à la nouvelle information suivante.
 
 FORMAT STRICT (STRICT FORMAT):
 - Commence IMMÉDIATEMENT avec la première phrase du résumé. Pas d'en-tête, pas d'étiquette, pas d'introduction.
 - L'intégralité de la sortie doit se composer uniquement du texte du résumé.
 - La dernière phrase du résumé doit être le dernier texte dans la sortie. Pas de texte final.
 - Si tu es tenté d'écrire un texte qui ne fait pas partie du résumé lui-même, NE l'écris PAS.
+DISPOSITION DES LIGNES (LINE LAYOUT):
+- La sortie DOIT être en prose pure sans étiquettes, en-têtes ni marqueurs de section.
+- Chaque phrase DOIT occuper sa propre ligne ou se replier naturellement comme prose.
+- Les étiquettes `Question:` ou `Answer:` NE SONT PAS autorisées dans ce format de sortie.
 
 FORMAT DE SORTIE (OUTPUT FORMAT):
 [Le texte du résumé commence ici sur la première ligne et se poursuit aussi longtemps que nécessaire pour préserver toutes les informations. Pas d'en-tête, pas d'étiquette, pas de méta-commentaire.]
