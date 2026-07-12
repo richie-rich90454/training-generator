@@ -53,6 +53,12 @@ DISPOSITION DES LIGNES (LINE LAYOUT):
 - Chaque phrase DOIT occuper sa propre ligne ou se replier naturellement comme prose.
 - Les étiquettes `Question:` ou `Answer:` NE SONT PAS autorisées dans ce format de sortie.
 
+RÈGLES DE CONTENU (CONTENT RULES):
+- La sortie DOIT être une prose directe et factuelle.
+- Les tableaux Markdown, les blocs de code et la mise en forme sont INTERDITS.
+- Le monologue interne, l'autocorrection et les méta-commentaires sont INTERDITS.
+- Écrivez en prose continue, non sous forme de liste ou de tableau.
+
 FORMAT DE SORTIE (OUTPUT FORMAT):
 [L'analyse structurée commence ici sur la première ligne, en utilisant des titres et des sous-titres logiques pour organiser toutes les informations extraites. Pas de préliminaire, pas de clôture, pas de méta-commentaire.]
 
