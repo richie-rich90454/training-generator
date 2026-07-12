@@ -470,6 +470,7 @@ export function createAppStore(): AppStore {
       if (!runSucceeded) {
         processor.abort()
       }
+      activePipeline = null
       outputStore.clearStaging()
       updateOutputPreview()
       if (outputStore.itemCount() > 0) {
@@ -808,6 +809,10 @@ export function createAppStore(): AppStore {
 
   function dispose(): void {
     stopOllamaMonitor()
+    if (activePipeline) {
+      activePipeline.abort()
+      activePipeline = null
+    }
     processor.abort()
     uiStore.stopDashboard()
     providerManager()?.dispose()
