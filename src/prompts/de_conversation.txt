@@ -41,6 +41,11 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
 - Leerzeilen außer der einzelnen Leerzeile, die Paare trennt
 
+KEINE WIEDERHOLUNG (NO REPETITION):
+- Doppelte Nutzer-Beiträge sind verboten. Sobald ein Nutzer-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
+- Doppelte Assistenten-Beiträge sind verboten. Sobald ein Assistenten-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
+- Wenn Sie dabei sind, einen bereits gestellten Nutzer-Beitrag auszugeben, überspringen Sie diesen und fahren Sie mit dem nächsten neuen Nutzer-Beitrag fort.
+
 STRIKTES FORMAT (STRICT FORMAT):
 - Beginne SOFORT mit dem ersten Paar. Keine Überschrift, keine Einführung.
 - Jedes Paar muss genau diesem Format folgen:
@@ -49,6 +54,12 @@ STRIKTES FORMAT (STRICT FORMAT):
 - Eine einzelne Leerzeile trennt jedes Paar.
 - Das letzte Paar muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text.
 - Wenn du versucht bist, anderen Text als ein User:/Assistant:-Paar zu schreiben, schreibe ihn NICHT.
+
+ZEILENLAYOUT (LINE LAYOUT):
+- Das `User:`-Label und das `Assistant:`-Label (oder `User:`/`Assistant:`) MÜSSEN jeweils eine eigene Zeile belegen.
+- Die `User:`-Zeile und die `Assistant:`-Zeile DÜRFEN NICPT in derselben Zeile zusammengeführt werden.
+- Genau eine Leerzeile trennt jedes Paar.
+- Die Antwort kann nach dem `Assistant:`-Label über mehrere Zeilen fortgesetzt werden, aber eine neue `User:` MUSS in einer eigenen Zeile beginnen.
 
 AUSGABEFORMAT (OUTPUT FORMAT):
 User: [Erste Benutzernachricht]
