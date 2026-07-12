@@ -114,7 +114,7 @@ class FileParser{
         }
         catch(error){
             console.error("PDF parsing error:",error)
-            return this.extractTextFromPDF(buffer)
+            throw error
         }
     }
     async parseDOCX(buffer:Buffer):Promise<string>{
