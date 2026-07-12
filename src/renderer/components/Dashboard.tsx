@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { Show, onMount, onCleanup } from "solid-js"
+import { Show, createEffect, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
@@ -60,8 +60,9 @@ export function Dashboard(props: DashboardProps): JSX.Element {
         document.addEventListener("keydown", focusTrapHandler)
         document.addEventListener("keydown", keydownHandler)
     }
-    onMount(() => {
-        if (props.appStore.uiStore.dashboardOpen()) {
+    createEffect(() => {
+        const isOpen = props.appStore.uiStore.dashboardOpen()
+        if (isOpen) {
             lastFocusedElement = document.activeElement as HTMLElement
             trapFocus()
             let focusable = overlayRef?.querySelectorAll<HTMLElement>(
@@ -69,6 +70,13 @@ export function Dashboard(props: DashboardProps): JSX.Element {
             )
             if (focusable && focusable.length > 0) {
                 focusable[0].focus()
+            }
+        }
+        else {
+            removeFocusTrap()
+            if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                lastFocusedElement.focus()
+                lastFocusedElement = null
             }
         }
     })
