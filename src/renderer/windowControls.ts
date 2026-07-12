@@ -1,4 +1,5 @@
 let unsubscribe:(()=>void)|null=null
+let buttonCleanups:(()=>void)[]=[]
 function ensureApi():NonNullable<typeof window.electronAPI>|null{
     let api=window.electronAPI
     if(!api){
@@ -34,6 +35,10 @@ function handleWindowBtn(btn:HTMLButtonElement|null,action:()=>void,label:string
     }
     btn.addEventListener("click",clickHandler)
     btn.addEventListener("keydown",keyHandler)
+    buttonCleanups.push(()=>{
+        btn.removeEventListener("click",clickHandler)
+        btn.removeEventListener("keydown",keyHandler)
+    })
 }
 export function initWindowControls():void{
     let minBtn=document.querySelector<HTMLButtonElement>(".window-btn-min")
@@ -46,6 +51,13 @@ export function initWindowControls():void{
     handleWindowBtn(minBtn,()=>api.windowMinimize(),"minimize")
     handleWindowBtn(maxBtn,()=>api.windowMaximizeToggle(),"maximize")
     handleWindowBtn(closeBtn,()=>api.windowClose(),"close")
+    if(api.windowIsMaximized){
+        api.windowIsMaximized().then((isMaximized:boolean)=>{
+            if(maxBtn){
+                maxBtn.classList.toggle("is-maximized",isMaximized)
+            }
+        }).catch(()=>{})
+    }
     if(api.onWindowMaximizedChange){
         unsubscribe=api.onWindowMaximizedChange((isMaximized:boolean)=>{
             if(maxBtn){
@@ -59,4 +71,8 @@ export function disposeWindowControls():void{
         unsubscribe()
         unsubscribe=null
     }
+    for(let cleanup of buttonCleanups){
+        cleanup()
+    }
+    buttonCleanups=[]
 }
