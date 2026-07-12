@@ -191,53 +191,46 @@ export function createOutputStore(): OutputStore {
         const turns: ConversationTurn[] = []
         const lines = text.split("\n")
         let currentUser = ""
-        let currentAssistant = ""
+        let currentAssistantLines: string[] = []
         let inUser = false
         let inAssistant = false
-        let assistantComplete = false
+        function flushTurn(): void {
+            if (currentUser) {
+                turns.push({
+                    user: currentUser.trim(),
+                    assistant: currentAssistantLines.join("\n").trim()
+                })
+            }
+            currentUser = ""
+            currentAssistantLines = []
+            inUser = false
+            inAssistant = false
+        }
         for (const line of lines) {
             const trimmedLine = line.trim()
             if (trimmedLine.match(/^user:?\s*/i)) {
-                if (currentUser) {
-                    turns.push({
-                        user: currentUser.trim(),
-                        assistant: currentAssistant.trim()
-                    })
-                }
+                flushTurn()
                 currentUser = trimmedLine.replace(/^user:?\s*/i, "")
-                currentAssistant = ""
                 inUser = true
                 inAssistant = false
-                assistantComplete = false
             }
             else if (trimmedLine.match(/^assistant:?\s*/i)) {
                 inUser = false
                 inAssistant = true
-                assistantComplete = false
-                currentAssistant = trimmedLine.replace(/^assistant:?\s*/i, "")
+                currentAssistantLines = [trimmedLine.replace(/^assistant:?\s*/i, "")]
+            }
+            else if (inAssistant) {
+                // All lines after Assistant: (including blank lines) are part of the assistant turn
+                // until the next User: delimiter
+                currentAssistantLines.push(line)
             }
             else if (trimmedLine) {
-                if (inAssistant && !assistantComplete && currentAssistant) {
-                    currentAssistant += " " + trimmedLine
-                }
-                else if (inUser && currentUser) {
+                if (inUser && currentUser) {
                     currentUser += " " + trimmedLine
                 }
-                // Once the assistant turn is complete, non-User: lines are filler and discarded
-            }
-            else {
-                // Blank line: once we have assistant content, mark the turn as complete
-                if (inAssistant && currentAssistant) {
-                    assistantComplete = true
-                }
             }
         }
-        if (currentUser) {
-            turns.push({
-                user: currentUser.trim(),
-                assistant: currentAssistant.trim()
-            })
-        }
+        flushTurn()
         if (turns.length === 0 && text.length < 100000) {
             const convRegex = /(Human|User):\s*([\s\S]*?)\s*(Assistant|AI):\s*([\s\S]*?)(?=(?:Human|User):|$)/gi
             let convMatch: RegExpExecArray | null
