@@ -23,7 +23,13 @@ const PII_KEYS: string[]=[
     "ssn",
     "token",
     "key",
-    "password"
+    "password",
+    "secret",
+    "address",
+    "authorization",
+    "credential",
+    "credentials",
+    "ip"
 ]
 function splitKeyWords(key: string): string[]{
     return key
