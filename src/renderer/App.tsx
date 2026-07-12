@@ -33,6 +33,12 @@ export function App(): JSX.Element {
         { id: "export", label: t("commandPalette.export"), icon: "💾", action: () => appStore.exportOutput(appStore.outputStore.exportFormat()) },
         { id: "copy", label: t("commandPalette.copy"), icon: "📋", action: () => appStore.copyOutput() }
     ]
+    function handleBeforeUnload(e: BeforeUnloadEvent): void {
+        if (appStore.isProcessing()) {
+            e.preventDefault();
+            (e as BeforeUnloadEvent).returnValue = ""
+        }
+    }
     function handleKeydown(e: KeyboardEvent): void {
         const tag = (e.target as HTMLElement).tagName
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
@@ -90,15 +96,11 @@ export function App(): JSX.Element {
         applyLanguage()
         appStore.init()
         document.addEventListener("keydown", handleKeydown)
-        window.addEventListener("beforeunload", (e) => {
-            if (appStore.isProcessing()) {
-                e.preventDefault();
-                (e as BeforeUnloadEvent).returnValue = ""
-            }
-        })
+        window.addEventListener("beforeunload", handleBeforeUnload)
     })
     onCleanup(() => {
         document.removeEventListener("keydown", handleKeydown)
+        window.removeEventListener("beforeunload", handleBeforeUnload)
         appStore.dispose()
     })
     return (
