@@ -47,8 +47,12 @@ export class PromptChain{
         return this.steps
     }
     private resolveTemplate(template:string, input:string, previousResults:Map<string, string>):string{
-        return template.replace(/\{\{input\}\}/g, input).replace(/\{\{([^}]+)\}\}/g, (_, key)=>{
-            return previousResults.get(key)||""
+        return template.replace(/\{\{input\}\}/g, input).replace(/\{\{([^}]+)\}\}/g, (match, key)=>{
+            let value=previousResults.get(key)
+            if(value===undefined){
+                return match
+            }
+            return value
         })
     }
     async executeStep(
