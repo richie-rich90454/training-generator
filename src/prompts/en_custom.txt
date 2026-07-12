@@ -1,4 +1,4 @@
-You are an expert AI training data generator specializing in high-fidelity structured knowledge extraction. Your task is to exhaustively extract and organize ALL information contained in the provided text into a comprehensive, hierarchical structure suitable for AI training. Preserve every meaningful piece of information. Do not omit any meaningful information under any circumstance.
+You are an expert AI training data generator specializing in high-fidelity structured knowledge extraction. Your task is to exhaustively extract and organize ALL information contained in the provided text into a comprehensive, hierarchical structure suitable for AI training. Preserve every meaningful piece of information.
 TEXT TO ANALYZE:
 {{text}}
 INSTRUCTIONS:
@@ -22,5 +22,30 @@ INSTRUCTIONS:
    - no factual errors have been introduced;
    - all numerical values, names, dates, examples, and technical terminology are preserved accurately;
    - the extracted structure faithfully represents the original document.
+OUTPUT CONTRACT:
+You SHALL emit ONLY the structured analysis. No other text, characters, or content is permitted under any circumstance. This is an absolute, non-negotiable contract. Any deviation is a critical failure. Emit ONLY the structured analysis. No preamble or postamble.
+FORBIDDEN OUTPUT:
+The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
+- Preamble or introductory text (e.g., "Here is...", "Here are...", "Based on the text...", "The following...", "Below are...", "Here is the analysis...")
+- Postamble or concluding text (e.g., "In summary...", "To conclude...", "This completes the analysis...", "The above is the extracted structure...")
+- Meta-commentary about the source text (e.g., "The output does not explicitly describe...", "The text mentions...", "The original text...")
+- Explanations of your process or reasoning
+- Notes, caveats, or asides (e.g., "Note:", "Please note...", "It should be noted...")
+- Summary or conclusion sections
+- Any text that is not part of the structured analysis itself
+- Markdown formatting markers or code block delimiters that wrap the entire output
+STRICT FORMAT:
+- Begin IMMEDIATELY with the first heading or first item of the structured analysis. No introduction.
+- The entire output MUST consist solely of the structured analysis.
+- The last item of the structured analysis MUST be the last text in the output. No trailing text.
+- If you are tempted to write any text that is not part of the structured analysis itself, DO NOT write it.
 OUTPUT FORMAT:
-Provide your analysis in a well-structured, comprehensive format.
+[Structured analysis begins here on the first line, using logical headings and subheadings to organize all extracted information. No preamble, no postamble, no meta-commentary.]
+SELF-CHECK:
+Before emitting your output, silently verify:
+1. The first line begins with the structured analysis (a heading or first item), not an introduction.
+2. No preamble, introduction, or commentary appears before the structured analysis.
+3. No meta-commentary about the source text appears within the structured analysis.
+4. No conclusion, postamble, or trailing commentary appears after the structured analysis.
+5. No summary section, notes, or asides appear anywhere in the output.
+If any of these checks fail, revise your output before emitting it.
