@@ -179,7 +179,7 @@ describe("OllamaProvider", () => {
       temperature: 0.7,
       top_p: 0.9,
       num_predict: 4096,
-    })
+    }, undefined, undefined)
   })
 
   it("should throw on failure", async () => {
