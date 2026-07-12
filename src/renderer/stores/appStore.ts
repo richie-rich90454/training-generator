@@ -239,6 +239,8 @@ export function createAppStore(): AppStore {
       maxChunks: settingsStore.appSettings.maxChunks,
       maxParallelFiles: settingsStore.appSettings.maxParallelFiles || 1,
       provider: settingsStore.settings.provider || "ollama",
+      ollamaHost: settingsStore.settings.ollamaHost,
+      ollamaPort: settingsStore.settings.ollamaPort,
     }
   }
 

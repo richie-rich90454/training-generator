@@ -9,6 +9,8 @@ export interface ProviderOptions{
     max_tokens?:number
     onToken?:(token:string)=>void
     think?:boolean
+    ollamaHost?:string
+    ollamaPort?:number
 }
 
 export interface ProviderResult{
@@ -118,7 +120,7 @@ export class OllamaProvider implements Provider{
                 if(requestId){
                     payload._requestId=requestId
                 }
-                let r=await api.generateWithOllamaStream(model,prompt,payload)
+                let r=await api.generateWithOllamaStream(model,prompt,payload,options?.ollamaHost,options?.ollamaPort)
                 if(!r.success)throw new Error(r.error||"Ollama generation failed")
                 return r
             },3,1000)

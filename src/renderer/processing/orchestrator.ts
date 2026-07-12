@@ -16,6 +16,8 @@ export interface OrchestratorSettings {
     enableThinking: boolean
     customPrompt?: string
     maxChunks?: number
+    ollamaHost?: string
+    ollamaPort?: number
 }
 export interface OrchestratorDeps {
     processor: Processor
@@ -194,6 +196,8 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 processingType = "instruction"
             }
             processor.enableThinking = settings.enableThinking !== false
+            processor.ollamaHost = settings.ollamaHost
+            processor.ollamaPort = settings.ollamaPort
             const processedChunks = await processor.processChunks(
                 chunks,
                 model,

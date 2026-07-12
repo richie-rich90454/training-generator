@@ -90,6 +90,8 @@ export interface PipelineSettings {
   maxChunks?: number
   maxParallelFiles: number
   provider: string
+  ollamaHost?: string
+  ollamaPort?: number
 }
 
 export class GenerationPipeline {
@@ -156,6 +158,8 @@ export class GenerationPipeline {
       enableThinking: settings.enableThinking,
       customPrompt: settings.customPrompt,
       maxChunks: settings.maxChunks,
+      ollamaHost: settings.ollamaHost,
+      ollamaPort: settings.ollamaPort,
     }
 
     // JavaScript is single-threaded (no preemption), so queueIndex++ is atomic.

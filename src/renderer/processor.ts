@@ -11,6 +11,8 @@ class Processor{
     concurrency:number=3
     demoMode:boolean=false
     enableThinking:boolean=false
+    ollamaHost?:string
+    ollamaPort?:number
     provider:Provider|null=null
     stats:StatsTracker
     constructor(){
@@ -74,7 +76,9 @@ class Processor{
                     temperature:0.7,
                     top_p:0.9,
                     max_tokens:16384,
-                    think:this.enableThinking
+                    think:this.enableThinking,
+                    ollamaHost:this.ollamaHost,
+                    ollamaPort:this.ollamaPort
                 })
                 if(signal.aborted)continue
                 let responses=this.splitBatchedResponse(result.text,batch.length)
@@ -158,6 +162,8 @@ class Processor{
         let total=chunks.length
         let effectiveConcurrency=Math.max(1,Math.min(20,Number(this.concurrency)||3))
         let enableThinking=this.enableThinking
+        let ollamaHost=this.ollamaHost
+        let ollamaPort=this.ollamaPort
         const completeChunk=(index:number,_total:number,items:TrainingItem[])=>{
             allItems.push(...items)
             onChunkComplete(index,total,items)
@@ -269,7 +275,9 @@ class Processor{
                         top_p:0.9,
                         max_tokens:16384,
                         onToken:streamChunk,
-                        think:enableThinking
+                        think:enableThinking,
+                        ollamaHost,
+                        ollamaPort
                     })
                     setTimeout(()=>freeSlot(),0) // Defer slot freeing — next chunk starts after current tick
                     let result=await responsePromise
