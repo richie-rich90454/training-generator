@@ -44,6 +44,11 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Formato Markdown, bloques de código o marcadores de formato
 - Líneas en blanco excepto la única línea en blanco que separa los pares
 
+SIN REPETICIÓN (NO REPETITION):
+- Las preguntas duplicadas están prohibidas. Una vez que se ha emitido una pregunta, NO DEBE emitirse de nuevo.
+- Las respuestas duplicadas están prohibidas. Una vez que se ha emitido una respuesta, NO DEBE emitirse de nuevo.
+- Si está a punto de emitir una pregunta que ya ha hecho, omítala y pase a la siguiente pregunta nueva.
+
 FORMATO ESTRICTO (STRICT FORMAT):
 - Comienza INMEDIATAMENTE con el primer par. Sin encabezado, sin introducción.
 - Cada par debe seguir el formato exacto:
@@ -52,6 +57,12 @@ FORMATO ESTRICTO (STRICT FORMAT):
 - Una sola línea en blanco separa cada par.
 - El último par debe ser el último texto en la salida. Sin texto final.
 - Si tienes la tentación de escribir algo que no sea un par Question:/Answer:, NO lo escribas.
+
+DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
+- La etiqueta `Question:` y la etiqueta `Answer:` (o `User:`/`Assistant:`) DEBEN ocupar cada una su propia línea.
+- La línea `Question:` y la línea `Answer:` NO DEBEN combinarse en la misma línea.
+- Exactamente una línea en blanco separa cada par.
+- La respuesta puede continuar en múltiples líneas después de la etiqueta `Answer:`, pero una nueva `Question:` DEBE comenzar en su propia línea.
 
 FORMATO DE SALIDA (OUTPUT FORMAT):
 Question: [Primera pregunta]
