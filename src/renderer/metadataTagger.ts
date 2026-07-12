@@ -70,7 +70,11 @@ export function estimateDifficulty(text:string):'easy'|'medium'|'hard'{
     return'easy'
 }
 export function estimateTopic(text:string):string{
-    let words=text.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>4)
+    let words=text.toLowerCase().split(/[^a-z\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]+/).filter(w=>{
+        if(!w)return false
+        if(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(w))return w.length>=2
+        return w.length>4
+    })
     let freq=new Map<string, number>()
     let stopWords=new Set(['which', 'there', 'their', 'about', 'would', 'could', 'should', 'between', 'through', 'during', 'before', 'after', 'above', 'below', 'other', 'where', 'while', 'these', 'those', 'being'])
     for(let word of words){
