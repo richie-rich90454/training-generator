@@ -151,7 +151,13 @@ class Processor{
         provenanceBase?:Omit<ProvenanceData,'chunkIndex'>,
         onStreamChunk?:(text:string)=>void
     ):Promise<TrainingItem[]>{
-        this.reset()
+        // Only reset if the processor is not already active. When multiple files
+        // are processed in parallel (maxParallelFiles > 1), each processChunks call
+        // would otherwise create a new AbortController, orphaning the previous signal
+        // and leaving earlier files immune to abort.
+        if(this.aborted||!this.abortController){
+            this.reset()
+        }
         // Only start stats if not already tracking — prevents parallel workers
         // from zeroing out each other's cumulative metrics (totalTokens, latency, etc.)
         if(this.stats.startTime===0){
