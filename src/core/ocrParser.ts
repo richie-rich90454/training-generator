@@ -40,12 +40,22 @@ export async function isImageOnlyPdf(buffer: Buffer): Promise<boolean>{
     if(header!=="%PDF-"){
         return false;
     }
-    let content: string=buffer.toString("latin1");
-    let imageMatches: RegExpMatchArray|null=content.match(/\/Image\b/g);
-    let textMatches: RegExpMatchArray|null=content.match(/\/Text\b/g);
-    let imageCount: number=imageMatches?imageMatches.length:0;
-    let textCount: number=textMatches?textMatches.length:0;
+    let imageCount: number=countInBuffer(buffer, Buffer.from("/Image", "latin1"));
+    let textCount: number=countInBuffer(buffer, Buffer.from("/Text", "latin1"));
     return imageCount>0&&textCount===0;
+}
+function countInBuffer(haystack: Buffer, needle: Buffer): number{
+    let count: number=0;
+    let pos: number=0;
+    while(true){
+        pos=haystack.indexOf(needle, pos);
+        if(pos===-1){
+            break;
+        }
+        count++;
+        pos+=needle.length;
+    }
+    return count;
 }
 export async function recognizeImage(buffer: Buffer, options?: OcrOptions): Promise<OcrResult>{
     let opts: OcrOptions={...DEFAULT_OCR_OPTIONS, ...(options||{})};
