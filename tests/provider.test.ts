@@ -178,7 +178,7 @@ describe("OllamaProvider", () => {
     expect(mockGenerate).toHaveBeenCalledWith("llama2", "test prompt", {
       temperature: 0.7,
       top_p: 0.9,
-      repeat_penalty: 1.1,
+      repeat_penalty: 1.15,
       num_predict: 4096,
     }, undefined, undefined)
   })
@@ -275,28 +275,28 @@ describe("getStrictGenerationOptions", () => {
     expect(getStrictGenerationOptions("instruction")).toEqual({
       temperature: 0.3,
       top_p: 0.85,
-      repeat_penalty: 1.1,
+      repeat_penalty: 1.2,
     })
   })
   it("returns strict preset for conversation processing type", () => {
     expect(getStrictGenerationOptions("conversation")).toEqual({
       temperature: 0.3,
       top_p: 0.85,
-      repeat_penalty: 1.1,
+      repeat_penalty: 1.2,
     })
   })
   it("returns strict preset for chunking processing type", () => {
     expect(getStrictGenerationOptions("chunking")).toEqual({
       temperature: 0.4,
       top_p: 0.85,
-      repeat_penalty: 1.1,
+      repeat_penalty: 1.15,
     })
   })
   it("returns strict preset for custom processing type", () => {
     expect(getStrictGenerationOptions("custom")).toEqual({
       temperature: 0.4,
       top_p: 0.85,
-      repeat_penalty: 1.1,
+      repeat_penalty: 1.15,
     })
   })
 })
@@ -327,9 +327,10 @@ describe("OllamaProvider with processingType", () => {
       "llama2",
       "prompt",
       expect.objectContaining({
-        repeat_penalty: 1.1,
+        repeat_penalty: 1.2,
         temperature: 0.3,
         top_p: 0.85,
+        num_predict: 4096,
       }),
       undefined,
       undefined
