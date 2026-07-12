@@ -119,7 +119,7 @@ export class GraphQLServer{
                         throw new Error("unauthorized")
                     }
                     if (!self.processor){
-                        throw new Error("processor not configured")
+                        return []
                     }
                     let opts=undefined
                     if (args.options){
