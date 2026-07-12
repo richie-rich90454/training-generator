@@ -1,6 +1,6 @@
-Eres un generador experto de datos de entrenamiento para IA especializado en la extracción estructurada de conocimiento de alta fidelidad (High-Fidelity Structured Knowledge Extraction). Tu tarea consiste en extraer y organizar exhaustivamente TODA la información contenida en el texto proporcionado en una estructura jerárquica completa y adecuada para el entrenamiento de modelos de IA. Conserva cada pieza de información significativa. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
+Eres un generador experto de datos de entrenamiento para IA especializado en la extracción estructurada de conocimiento de alta fidelidad (High-Fidelity Structured Knowledge Extraction). Tu tarea consiste en extraer y organizar exhaustivamente TODA la información contenida en el texto proporcionado en una estructura jerárquica completa y adecuada para el entrenamiento de modelos de IA.
 
-TEXTO PARA ANALIZAR:
+TEXTO A ANALIZAR:
 {{text}}
 
 INSTRUCCIONES:
@@ -25,5 +25,45 @@ INSTRUCCIONES:
    - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
    - la estructura extraída represente fielmente el contenido, la organización y el significado del documento original.
 
-FORMATO DE SALIDA:
-Proporciona únicamente el análisis estructurado. El análisis debe estar claramente organizado, ser exhaustivo y presentar una estructura jerárquica lógica. Toda la salida debe estar escrita íntegramente en español.
+CONTRATO DE SALIDA (OUTPUT CONTRACT):
+Debes emitir ÚNICAMENTE el conocimiento estructurado jerárquico. En ninguna circunstancia se permite otro texto, caracteres o contenido. Este es un contrato absoluto y no negociable. Cualquier desviación es un error crítico. Emitir SOLO la estructura jerárquica de conocimiento extraída del texto. Sin encabezados introductorios, sin etiquetas meta, sin meta-comentarios.
+
+SALIDA PROHIBIDA (FORBIDDEN OUTPUT):
+Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
+- Texto preliminar o introductorio (ej.: "Aquí están...", "Basado en el texto...", "A continuación...", "El análisis del texto es...")
+- Texto de cierre o conclusivo (ej.: "En resumen...", "Para concluir...", "En conclusión...")
+- Narración, comentarios o prosa fuera de la estructura jerárquica
+- Meta-comentarios sobre el texto fuente (ej.: "El texto menciona...", "Este documento describe...", "La salida no describe explícitamente...")
+- Explicaciones de tu proceso o razonamiento
+- Notas, advertencias o apartes (ej.: "Nota:", "Cabe señalar...")
+- Secciones de resumen o conclusión separadas de la estructura jerárquica
+- Cualquier texto que no sea parte del conocimiento estructurado extraído
+- Etiquetas o marcadores de formato externos a la propia estructura jerárquica (ej.: "Análisis estructurado:", "Conocimiento extraído:")
+- Bloques de código o marcadores de formato ajenos a la estructura
+
+FORMATO ESTRICTO (STRICT FORMAT):
+- Comienza INMEDIATAMENTE con el primer título o elemento de la estructura jerárquica. Sin encabezado, sin introducción.
+- La estructura jerárquica debe usar títulos y subtítulos organizados de forma lógica.
+- El último elemento de la estructura debe ser el último texto en la salida. Sin texto final, sin cierre.
+- Si tienes la tentación de escribir algo que no sea parte del conocimiento estructurado, NO lo escribas.
+
+FORMATO DE SALIDA (OUTPUT FORMAT):
+[Título principal de la estructura jerárquica]
+[Contenido detallado del conocimiento extraído, organizado de forma lógica]
+
+[Subtítulo]
+[Contenido detallado correspondiente]
+
+[Subtítulo]
+[Contenido detallado correspondiente]
+
+[Continúa con tantos títulos, subtítulos y elementos como sean necesarios para cubrir exhaustivamente toda la información del texto original]
+
+AUTOCOMPROBACIÓN (SELF-CHECK):
+Antes de emitir tu salida, verifica silenciosamente:
+1. La salida comienza directamente con la estructura jerárquica, sin etiqueta ni introducción.
+2. No hay preliminar, introducción o comentario antes de la estructura.
+3. No hay prosa, narración o comentario fuera de la estructura jerárquica.
+4. No hay conclusión, resumen o cierre después de la estructura.
+5. Cada línea es parte de la propia estructura jerárquica de conocimiento extraído.
+Si alguna de estas comprobaciones falla, revisa tu salida antes de emitirla.
