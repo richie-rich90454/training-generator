@@ -2138,8 +2138,14 @@ function setElementText(el: Element, text: string): void{
 }
 
 export function applyLanguage(lang?: string): void{
-  currentLang=lang || localStorage.getItem("train-generator-ui-lang") || detectLocale()
-  localStorage.setItem("train-generator-ui-lang",currentLang)
+  let storedLang=""
+  try{
+    storedLang=localStorage.getItem("train-generator-ui-lang") || ""
+  }catch{}
+  currentLang=lang || storedLang || detectLocale()
+  try{
+    localStorage.setItem("train-generator-ui-lang",currentLang)
+  }catch{}
   let elements=document.querySelectorAll("[data-i18n]")
   elements.forEach((el)=>{
     let key=el.getAttribute("data-i18n")
