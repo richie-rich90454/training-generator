@@ -30,6 +30,19 @@ export class StatsTracker {
     this.endTime = Date.now()
   }
 
+  reset(): void {
+    this.totalChunks = 0
+    this.successfulChunks = 0
+    this.failedChunks = 0
+    this.totalTokens = 0
+    this.promptTokens = 0
+    this.startTime = 0
+    this.endTime = 0
+    this.deduplicatedCount = 0
+    this.totalLatencyMs = 0
+    this.latencySampleCount = 0
+  }
+
   recordChunkSuccess(tokens: number): void {
     this.totalChunks++
     this.successfulChunks++
