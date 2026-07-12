@@ -123,6 +123,9 @@ export class CrashReporter{
     }
     private handleUncaughtException=(error: Error): void=>{
         this.captureException(error)
+        if (typeof process!=="undefined" && typeof process.exit==="function"){
+            process.exit(1)
+        }
     }
     private handleUnhandledRejection=(reason: unknown): void=>{
         let message=reason instanceof Error ? reason.message : String(reason)
