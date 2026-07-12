@@ -39,6 +39,10 @@ The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
 - Any text that is not a Question:/Answer: pair
 - Markdown formatting, code blocks, or formatting markers
 - Empty lines except the single blank line separating pairs
+NO REPETITION:
+- Duplicate questions are forbidden. Once a question has been emitted, it MUST NOT be emitted again.
+- Duplicate answers are forbidden. Once an answer has been emitted, it MUST NOT be emitted again.
+- If you are about to emit a question you have already asked, skip it and move to the next new question.
 STRICT FORMAT:
 - Begin IMMEDIATELY with the first pair. No header, no introduction.
 - Each pair MUST follow the exact format:
@@ -47,6 +51,11 @@ STRICT FORMAT:
 - A single blank line separates each pair.
 - The last pair MUST be the last text in the output. No trailing text.
 - If you are tempted to write any text that is not a Question:/Answer: pair, DO NOT write it.
+LINE LAYOUT:
+- The `Question:` label and the `Answer:` label (or `User:`/`Assistant:`) MUST each occupy exactly one line.
+- The `Question:` line and the `Answer:` line MUST NOT be merged onto the same line.
+- Exactly one blank line separates each pair.
+- The answer MAY continue onto multiple lines after the `Answer:` label, but a new `Question:` MUST begin on its own line.
 OUTPUT FORMAT:
 Question: [First question]
 Answer: [First answer]
