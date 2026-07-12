@@ -47,6 +47,11 @@ LINE LAYOUT:
 - The output MUST be plain prose with no labels, headers, or section markers.
 - Each sentence MUST occupy its own line or wrap naturally as prose.
 - No `Question:` or `Answer:` labels are permitted in this output format.
+CONTENT RULES:
+- Output MUST be direct, factual prose.
+- Markdown tables, code blocks, and formatting are FORBIDDEN.
+- Internal monologue, self-correction, and meta-commentary are FORBIDDEN.
+- Write as continuous prose, not as a list or table.
 OUTPUT FORMAT:
 [Structured analysis begins here on the first line, using logical headings and subheadings to organize all extracted information. No preamble, no postamble, no meta-commentary.]
 SELF-CHECK:
