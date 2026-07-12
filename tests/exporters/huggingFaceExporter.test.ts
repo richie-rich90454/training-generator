@@ -56,7 +56,7 @@ describe("HuggingFaceExporter", ()=>{
         let exporter: Exporter=new HuggingFaceExporter();
         expect(exporter.name).toBe("huggingface");
         expect(exporter.mimeType).toBe("application/json");
-        expect(exporter.extension).toBe(".jsonl");
+        expect(exporter.extension).toBe(".json");
         expect(typeof exporter.export).toBe("function");
     });
     test("export returns JSON string containing jsonl and readme", ()=>{
