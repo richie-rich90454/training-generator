@@ -1,8 +1,11 @@
 import type{Provider, ProviderOptions, ProviderResult}from"./provider.js"
+const DEFAULT_MAX_SAMPLES=50
 export interface SelfConsistencyConfig{
     samples:number
     temperature:number
     options?:Omit<ProviderOptions, 'temperature'>
+    maxSamples?:number
+    signal?:AbortSignal
 }
 export const DEFAULT_SC_CONFIG:SelfConsistencyConfig={
     samples:5,
@@ -76,12 +79,20 @@ export async function selfConsistencyGenerate(
     model:string,
     config:SelfConsistencyConfig=DEFAULT_SC_CONFIG
 ):Promise<VoteResult>{
+    if(config.signal?.aborted){
+        throw new Error("Self-consistency generation aborted")
+    }
+    let maxSamples=config.maxSamples??DEFAULT_MAX_SAMPLES
+    let sampleCount=Math.min(config.samples, maxSamples)
     let options:ProviderOptions={
         ...config.options,
         temperature:config.temperature
     }
+    if(config.signal){
+        options.signal=config.signal
+    }
     let promises:Promise<ProviderResult>[]=[]
-    for(let i=0;i<config.samples;i++){
+    for(let i=0;i<sampleCount;i++){
         promises.push(
             provider.generate(prompt, model, options).catch(error=>{
                 return{text:`__ERROR__: ${(error as Error).message}`, tokens:0, provider:provider.name}as ProviderResult
@@ -89,9 +100,12 @@ export async function selfConsistencyGenerate(
         )
     }
     let results=await Promise.all(promises)
+    if(config.signal?.aborted){
+        throw new Error("Self-consistency generation aborted")
+    }
     let validResults=results.filter(r=>!r.text.startsWith("__ERROR__"))
     if(validResults.length===0){
-        throw new Error(`All ${config.samples} samples failed: ${results.map(r=>r.text).join("; ")}`)
+        throw new Error(`All ${sampleCount} samples failed: ${results.map(r=>r.text).join("; ")}`)
     }
     return vote(validResults)
 }
