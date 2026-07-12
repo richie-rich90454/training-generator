@@ -43,6 +43,10 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Tout texte qui n'est pas une paire Question:/Answer:
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Lignes vides à l'exception de la ligne vide unique séparant les paires
+SANS RÉPÉTITION (NO REPETITION):
+- Les questions en double sont interdites. Une fois qu'une question a été émise, ELLE NE DOIT PAS être émise à nouveau.
+- Les réponses en double sont interdites. Une fois qu'une réponse a été émise, ELLE NE DOIT PAS être émise à nouveau.
+- Si vous êtes sur le point d'émettre une question que vous avez déjà posée, sautez-la et passez à la nouvelle question suivante.
 
 FORMAT STRICT (STRICT FORMAT):
 - Commence IMMÉDIATEMENT avec la première paire. Pas d'en-tête, pas d'introduction.
@@ -52,6 +56,11 @@ FORMAT STRICT (STRICT FORMAT):
 - Une seule ligne vide sépare chaque paire.
 - La dernière paire doit être le dernier texte dans la sortie. Pas de texte final.
 - Si tu es tenté d'écrire un texte qui n'est pas une paire Question:/Answer:, NE l'écris PAS.
+DISPOSITION DES LIGNES (LINE LAYOUT):
+- L'étiquette `Question:` et l'étiquette `Answer:` (ou `User:`/`Assistant:`) DOIVENT chacune occuper leur propre ligne.
+- La ligne `Question:` et la ligne `Answer:` NE DOIVENT PAS être fusionnées sur la même ligne.
+- Exactement une ligne vide sépare chaque paire.
+- La réponse peut s'étendre sur plusieurs lignes après l'étiquette `Answer:`, mais une nouvelle `Question:` DOIT commencer sur sa propre ligne.
 
 FORMAT DE SORTIE (OUTPUT FORMAT):
 Question: [Première question]
