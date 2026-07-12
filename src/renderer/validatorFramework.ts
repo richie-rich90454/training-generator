@@ -39,6 +39,9 @@ export class ValidatorChain{
         this.threshold=threshold??0.5
     }
     add(validator: Validator): void{
+        if (this.validators.some(v => v.name===validator.name)){
+            throw new Error(`Validator with name "${validator.name}" already exists`)
+        }
         this.validators.push(validator)
     }
     remove(name: string): void{
@@ -59,13 +62,27 @@ export class ValidatorChain{
             if (!validator.enabled){
                 continue
             }
-            let result=await Promise.resolve(validator.validate(item))
-            results[validator.name]=result
-            totalScore+=result.score
-            count++
-            for (let flag of result.flags){
-                if (!flags.includes(flag)){
-                    flags.push(flag)
+            try {
+                let result=await Promise.resolve(validator.validate(item))
+                results[validator.name]=result
+                totalScore+=result.score
+                count++
+                for (let flag of result.flags){
+                    if (!flags.includes(flag)){
+                        flags.push(flag)
+                    }
+                }
+            } catch (error) {
+                let errorMsg=(error as Error).message
+                results[validator.name]={
+                    score: 0,
+                    passed: false,
+                    details: [`Validator error: ${errorMsg}`],
+                    flags: ["validator_error"]
+                }
+                count++
+                if (!flags.includes("validator_error")){
+                    flags.push("validator_error")
                 }
             }
         }
