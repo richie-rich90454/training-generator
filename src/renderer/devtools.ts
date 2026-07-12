@@ -14,10 +14,27 @@ export class Devtools{
     private workerContent:HTMLElement|null=null
     private memoryContent:HTMLElement|null=null
     private pendingRender:false|number=false
+    private keydownHandler:((e:KeyboardEvent)=>void)|null=null
+    private static isDevelopment():boolean{
+        try{
+            return typeof process!=="undefined"&&process.env&&process.env.NODE_ENV==="development"
+        }catch{
+            return false
+        }
+    }
     constructor(){
         this.container=this.createContainer()
         document.body.appendChild(this.container)
         this.bindEvents()
+        if(Devtools.isDevelopment()){
+            this.keydownHandler=(e:KeyboardEvent)=>{
+                if(e.ctrlKey&&e.shiftKey&&e.key==="D"){
+                    e.preventDefault()
+                    this.toggle()
+                }
+            }
+            document.addEventListener("keydown",this.keydownHandler)
+        }
     }
     private createContainer():HTMLElement{
         let panel=document.createElement("div")
@@ -103,6 +120,7 @@ export class Devtools{
         }
     }
     show():void{
+        if(!Devtools.isDevelopment())return
         this.container.style.display="block"
         this.visible=true
         this.refresh()
@@ -244,6 +262,10 @@ export class Devtools{
     dispose():void{
         this.logEntries=[]
         this.visible=false
+        if(this.keydownHandler){
+            document.removeEventListener("keydown",this.keydownHandler)
+            this.keydownHandler=null
+        }
         if(this.pendingRender){
             cancelAnimationFrame(this.pendingRender)
             this.pendingRender=false
