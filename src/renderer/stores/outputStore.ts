@@ -45,6 +45,40 @@ function stripFillerBetweenPairs(text: string): string {
     }
     return text
 }
+function normalizePairSeparators(text: string): string {
+    if (!text || typeof text !== "string") return text
+    // Split "Question: <q> Answer: <a>" on a single line into two lines
+    let normalized = text.replace(/^(Question:.*?)([ \t]+Answer:[ \t]*)(.*)$/gm, "$1\nAnswer: $3")
+    // Split "User: <u> Assistant: <a>" on a single line into two lines
+    normalized = normalized.replace(/^(User:.*?)([ \t]+Assistant:[ \t]*)(.*)$/gm, "$1\nAssistant: $3")
+    // Also handle "Human:" variant
+    normalized = normalized.replace(/^(Human:.*?)([ \t]+Assistant:[ \t]*)(.*)$/gm, "$1\nAssistant: $3")
+    return normalized
+}
+function deduplicatePairs(pairs: QAPair[]): QAPair[] {
+    const seen = new Set<string>()
+    const result: QAPair[] = []
+    for (const pair of pairs) {
+        const key = pair.question.trim().toLowerCase()
+        if (!seen.has(key)) {
+            seen.add(key)
+            result.push(pair)
+        }
+    }
+    return result
+}
+function deduplicateTurns(turns: ConversationTurn[]): ConversationTurn[] {
+    const seen = new Set<string>()
+    const result: ConversationTurn[] = []
+    for (const turn of turns) {
+        const key = turn.user.trim().toLowerCase()
+        if (!seen.has(key)) {
+            seen.add(key)
+            result.push(turn)
+        }
+    }
+    return result
+}
 export type ExportFormat = "jsonl" | "json" | "chatml" | "csv" | "text"
 export interface OutputStore {
     outputData: TrainingItem[]
@@ -99,6 +133,7 @@ export function createOutputStore(): OutputStore {
             console.warn("parseQuestionAnswerPairs: text is not a string", text)
             return []
         }
+        text = normalizePairSeparators(text)
         const pairs: QAPair[] = []
         const lines = text.split("\n")
         let currentQuestion = ""
@@ -157,13 +192,14 @@ export function createOutputStore(): OutputStore {
                 }
             }
         }
-        return pairs
+        return deduplicatePairs(pairs)
     }
     function parseConversationTurns(text: string): ConversationTurn[] {
         if (!text || typeof text !== "string") {
             console.warn("parseConversationTurns: text is not a string", text)
             return []
         }
+        text = normalizePairSeparators(text)
         const turns: ConversationTurn[] = []
         const lines = text.split("\n")
         let currentUser = ""
@@ -226,7 +262,7 @@ export function createOutputStore(): OutputStore {
                 }
             }
         }
-        return turns
+        return deduplicateTurns(turns)
     }
     function createTrainingItem(input: string, output: string, processingType: string, outputFormat: string): TrainingItem[] {
         const format = outputFormat
