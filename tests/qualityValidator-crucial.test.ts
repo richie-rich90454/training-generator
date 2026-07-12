@@ -181,9 +181,10 @@ describe("validateItems edge cases", () => {
         let report = validateItems([item])
         expect(report.flags[0].reasons).toContain("answer_too_short")
     })
-    it("flags answer too short when both question and answer are empty", () => {
+    it("flags missing question and answer when both question and answer are empty", () => {
         let report = validateItems([instructionItem({ instruction: "", input: "", output: "" })])
-        expect(report.flags[0].reasons).toContain("answer_too_short")
+        expect(report.flags[0].reasons).toContain("missing_question")
+        expect(report.flags[0].reasons).toContain("missing_answer")
     })
     it("detects CJK in output", () => {
         let report = validateItems([instructionItem({ instruction: "What is AI?", output: "人工智能是计算机科学的一个分支。" })])
