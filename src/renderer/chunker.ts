@@ -228,6 +228,40 @@ function splitUnitAtRowBoundary(unitText: string, unitType: string): string[] {
     return rows
 }
 
+// Splits a chunk that exceeds chunkSize into smaller pieces, attempting to
+// break at whitespace boundaries. Used as a safety net for sentences or
+// semantic units that are individually larger than chunkSize (which would
+// otherwise be emitted whole and violate the chunkSize contract).
+function splitOversizedChunk(chunk: string, chunkSize: number): string[] {
+    if (chunk.length <= chunkSize) return [chunk]
+    let parts: string[] = []
+    let start = 0
+    while (start < chunk.length) {
+        if (parts.length >= MAX_CHUNKS) {
+            console.warn(`splitOversizedChunk: exceeded ${MAX_CHUNKS} parts; stopping early`)
+            break
+        }
+        let end = Math.min(start + chunkSize, chunk.length)
+        if (end < chunk.length) {
+            // Try to break at a whitespace boundary near the end so we don't
+            // split mid-word. Only accept a boundary in the back half of the
+            // chunk to avoid producing tiny fragments.
+            let wsIdx = findPreviousWhitespace(chunk, end)
+            if (wsIdx > start + Math.floor(chunkSize / 2)) {
+                end = wsIdx
+            }
+        }
+        let part = chunk.slice(start, end).trim()
+        if (part.length > 0) parts.push(part)
+        if (end <= start) {
+            // Defensive guard against any accidental infinite loop.
+            end = start + 1
+        }
+        start = end
+    }
+    return parts
+}
+
 // --- Main chunking functions ---
 
 export function estimateTextDensity(text: string, sentences?: string[]): number {
@@ -383,6 +417,20 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
             previousChunkText = currentChunk.trim()
 
             currentChunk = buildPrefix(previousChunkText, overlap) + (tail ? tail + " " : "") + sentence
+        } else if (currentChunk.length === 0 && sentence.length > chunkSize * 2) {
+            // Single sentence is much larger than chunkSize and there is no
+            // existing chunk to append to. Split it now so we don't emit a
+            // chunk that is many times the requested size. The 2x threshold
+            // avoids interfering with the normal accumulation path (which
+            // tests expect to produce slightly-oversized chunks when context
+            // prefixes or sentence grouping apply).
+            let parts = splitOversizedChunk(sentence, chunkSize)
+            for (let p of parts) {
+                if (p.trim().length === 0) continue
+                chunks.push(p.trim())
+                previousChunkText = p.trim()
+            }
+            currentChunk = ""
         } else {
             currentChunk += (currentChunk ? " " : "") + sentence
         }
@@ -393,9 +441,26 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
         chunks.push(currentChunk.trim())
     }
 
-    // Filter out any chunks that became empty after trimming (e.g. a chunk
-    // that consisted solely of whitespace produced by a boundary break).
-    return chunks.filter(c => c.trim().length > 0)
+    // Safety net: split any chunk that is pathologically larger than chunkSize
+    // (more than 10x). The 10x threshold avoids interfering with the existing
+    // context-prefix accumulation behaviour (which intentionally produces
+    // chunks somewhat larger than chunkSize) while still preventing a single
+    // runaway sentence or semantic unit from producing a chunk that is
+    // hundreds of times the requested size. Also drop any chunks that became
+    // empty after trimming.
+    let result: string[] = []
+    for (let chunk of chunks) {
+        let trimmed = chunk.trim()
+        if (trimmed.length === 0) continue
+        if (trimmed.length > chunkSize * 10) {
+            for (let part of splitOversizedChunk(trimmed, chunkSize)) {
+                if (part.trim().length > 0) result.push(part.trim())
+            }
+        } else {
+            result.push(trimmed)
+        }
+    }
+    return result
 }
 
 export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
