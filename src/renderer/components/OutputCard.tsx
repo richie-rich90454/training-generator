@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { Show } from "solid-js"
+import { Show, createEffect } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -14,6 +14,7 @@ export interface OutputCardProps {
 export function OutputCard(props: OutputCardProps): JSX.Element {
     const { appStore } = props
     const { outputStore, uiStore } = appStore
+    let liveStreamRef: HTMLDivElement | undefined
     function handleExport(): void {
         appStore.exportOutput(outputStore.exportFormat())
     }
@@ -22,6 +23,12 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
     }
     const liveStream = () => uiStore.liveStreamText()
     const hasLiveStream = () => liveStream().length > 0
+    createEffect(() => {
+        const text = liveStream()
+        if (text.length > 0 && liveStreamRef) {
+            liveStreamRef.scrollTop = liveStreamRef.scrollHeight
+        }
+    })
     return (
         <div class={styles["card"]}>
             <div class={styles["card-header"]}>
@@ -112,8 +119,9 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
             </div>
             <Show when={hasLiveStream()}>
                 <div
+                    ref={liveStreamRef}
                     class={styles["output-preview"]}
-                    style={{ "max-height": "200px", "margin-top": "8px" }}
+                    style={{ "max-height": "200px", "margin-top": "8px", "overflow-y": "auto" }}
                     role="region"
                     aria-label={t("output.liveStreamAria")}
                 >
