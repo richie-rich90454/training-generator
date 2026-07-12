@@ -66,13 +66,11 @@ export function createFileStore(): FileStore {
         if (remainingSlots <= 0) {
             return { addedCount: 0, skippedCount: 0, rejectedCount: files.length }
         }
-        const existingNames = new Set(selectedFiles.map(f => f.name))
         let toAdd = files
         if (files.length > remainingSlots) {
             toAdd = files.slice(0, remainingSlots)
             rejectedCount += files.length - remainingSlots
         }
-        const seenInBatch = new Set<string>()
         for (const file of toAdd) {
             if (!isValidFile(file)) {
                 rejectedCount++
@@ -82,14 +80,9 @@ export function createFileStore(): FileStore {
                 skippedCount++
                 continue
             }
-            if (existingNames.has(file.name) || seenInBatch.has(file.name)) {
-                skippedCount++
-                continue
-            }
             const selected = buildSelectedFile(file)
             setSelectedFiles(selectedFiles.length, selected)
             setFileStatuses(selected.name, "waiting")
-            seenInBatch.add(file.name)
             addedCount++
         }
         return { addedCount, skippedCount, rejectedCount }
