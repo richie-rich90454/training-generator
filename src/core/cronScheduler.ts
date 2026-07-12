@@ -203,9 +203,13 @@ export class CronScheduler{
         }
     }
     private async executeJob(job: CronJob): Promise<void>{
+        let current=this.jobs.get(job.id);
+        if(!current){
+            return;
+        }
         let now=Date.now();
-        this.updateJob(job.id, {lastRun: now, runCount: job.runCount+1});
-        let updatedJob=this.jobs.get(job.id)!;
+        this.updateJob(current.id, {lastRun: now, runCount: current.runCount+1});
+        let updatedJob=this.jobs.get(current.id)!;
         let nextRun=this.getNextRun(updatedJob.cronExpression, this.timezone);
         if(nextRun!==undefined){
             this.updateJob(updatedJob.id, {nextRun});
