@@ -2,15 +2,16 @@ import type{TrainingItem}from"../types/index.js"
 import{mergeProvenance}from"./provenance.js"
 
 function tokenize(str:string):string[]{
+    let normalized=str.normalize("NFC")
     let tokens:string[]=[]
     let regex=/[a-zA-Z0-9\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+/g
     let match:RegExpExecArray|null
-    while((match=regex.exec(str))!==null){
+    while((match=regex.exec(normalized))!==null){
         tokens.push(match[0].toLowerCase())
     }
     if(tokens.length===0){
-        for(let i=0;i<=str.length-3;i++){
-            tokens.push(str.slice(i,i+3))
+        for(let i=0;i<=normalized.length-3;i++){
+            tokens.push(normalized.slice(i,i+3).toLowerCase())
         }
     }
     return tokens
