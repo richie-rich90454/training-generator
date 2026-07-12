@@ -116,7 +116,7 @@ class FileParserLazy{
                 }
             });
             readStream.on("end", ()=>{
-                settle(()=>resolve(content));
+                settle(()=>resolve(this.stripBom(content)));
             });
             readStream.on("error", (error)=>{
                 settle(()=>reject(error));
