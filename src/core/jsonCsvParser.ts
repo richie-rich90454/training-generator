@@ -108,10 +108,16 @@ export function flattenObject(obj: Record<string, unknown>, prefix: string=""): 
     }
     return result;
 }
+function stripBom(text: string): string{
+    if(text.charCodeAt(0)===0xFEFF){
+        return text.slice(1);
+    }
+    return text;
+}
 export function parseJson(text: string): ParseResult{
     let data: unknown;
     try{
-        data=JSON.parse(text);
+        data=JSON.parse(stripBom(text));
     }
     catch(e){
         throw new Error("Invalid JSON: "+(e as Error).message);
@@ -176,7 +182,7 @@ export function parseJson(text: string): ParseResult{
 }
 export function parseNdjson(text: string): ParseResult{
     let warnings: string[]=[];
-    let lines: string[]=text.split(/\r?\n/);
+    let lines: string[]=stripBom(text).split(/\r?\n/);
     let rows: Record<string, unknown>[]=[];
     let keysSet: Set<string>=new Set();
     let lineNum: number=0;
@@ -226,7 +232,7 @@ export function parseNdjson(text: string): ParseResult{
 export function parseCsv(text: string, options?: {delimiter?: string, quote?: string}): ParseResult{
     let delimiter: string=options?.delimiter??",";
     let quote: string=options?.quote??'"';
-    let rows: string[][]=parseCsvRows(text, delimiter, quote);
+    let rows: string[][]=parseCsvRows(stripBom(text), delimiter, quote);
     let headers: string[]=rows.length>0?rows[0]:[];
     let dataRows: string[][]=rows.slice(1);
     let schema: SchemaField[]=inferSchemaFromCsv(headers, dataRows);
