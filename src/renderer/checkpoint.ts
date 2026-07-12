@@ -22,7 +22,8 @@ function isSelectedFile(value: unknown): value is SelectedFile{
 function isValidCheckpointData(value: unknown): value is CheckpointData{
     if(value===null||typeof value!=="object")return false
     let data=value as Record<string,unknown>
-    if(typeof data.version!=="number"||data.version!==CHECKPOINT_VERSION)return false
+    let version=typeof data.version==="number"?data.version:CHECKPOINT_VERSION
+    if(version!==CHECKPOINT_VERSION)return false
     if(!Array.isArray(data.files)||!data.files.every(isSelectedFile))return false
     if(data.completedChunks===null||typeof data.completedChunks!=="object")return false
     if(!Array.isArray(data.outputData))return false
