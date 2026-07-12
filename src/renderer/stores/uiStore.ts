@@ -88,6 +88,7 @@ export interface UIStore {
     setLastProcessed: (time: string) => void
     setAvailableOllamaModels: (models: string[]) => void
     getLogIcon: (type: LogType) => string
+    dispose: () => void
 }
 const MAX_LOGS = 50
 const MAX_LIVE_STREAM_CHARS = 5000
@@ -301,6 +302,16 @@ export function createUIStore(): UIStore {
         }
         return icons[type] || "fa-info-circle"
     }
+    function dispose(): void {
+        if (dashboardInterval !== null) {
+            window.clearInterval(dashboardInterval)
+            dashboardInterval = null
+        }
+        if (previewTimer) {
+            clearTimeout(previewTimer)
+            previewTimer = null
+        }
+    }
     return {
         progressPercent,
         progressText,
@@ -360,6 +371,7 @@ export function createUIStore(): UIStore {
         setFilesProcessed: (count: number) => setFilesProcessed(count),
         setLastProcessed: (time: string) => setLastProcessed(time),
         setAvailableOllamaModels: (models: string[]) => setAvailableOllamaModels(models),
-        getLogIcon
+        getLogIcon,
+        dispose
     }
 }

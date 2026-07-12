@@ -815,6 +815,7 @@ export function createAppStore(): AppStore {
     }
     processor.abort()
     uiStore.stopDashboard()
+    uiStore.dispose()
     providerManager()?.dispose()
     setProviderManager(null)
     processor.provider = null
