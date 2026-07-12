@@ -6,6 +6,7 @@ interface ToastItem {
   type: ToastType
   element: HTMLDivElement
   timer: ReturnType<typeof setTimeout>
+  fallbackTimer?: ReturnType<typeof setTimeout>
   animatingOut: boolean
 }
 class Toast {
@@ -99,12 +100,16 @@ class Toast {
     let wrappedCallback = () => {
       if (called) return
       called = true
+      if (toast.fallbackTimer) {
+        clearTimeout(toast.fallbackTimer)
+        toast.fallbackTimer = undefined
+      }
       toast.element.remove()
     }
     toast.element.classList.add("toast-hiding")
     toast.element.addEventListener("transitionend", wrappedCallback, { once: true })
     const duration = this.readTransitionDuration(toast.element)
-    setTimeout(wrappedCallback, duration)
+    toast.fallbackTimer = setTimeout(wrappedCallback, duration)
   }
   private readTransitionDuration(element: HTMLElement): number {
     const duration = getComputedStyle(element).transitionDuration || "0.4s"
