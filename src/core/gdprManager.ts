@@ -18,7 +18,7 @@ export interface GdprManagerOptions{
     secureDelete?: (filePath: string)=>Promise<void>
 }
 interface TarModule{
-    create(options: {gzip: boolean}, files: string[]): NodeJS.ReadableStream
+    create(options: {gzip: boolean}, files: string[]): import("stream").Readable
 }
 export class GdprManager{
     private userDataPath: string
