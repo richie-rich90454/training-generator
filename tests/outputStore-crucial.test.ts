@@ -315,3 +315,70 @@ describe("OutputStore copyOutput", () => {
         expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
     })
 })
+describe("OutputStore parseQuestionAnswerPairs filler stripping", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "warn").mockImplementation(() => {})
+    })
+    it("does not append filler between pairs to the first answer", () => {
+        let text = "Question: What is 2+2?\nAnswer: 4\n\nThe output does not explicitly describe a follow-up here.\n\nQuestion: What is 3+3?\nAnswer: 6"
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].question).toBe("What is 2+2?")
+        expect(pairs[0].answer).toBe("4")
+        expect(pairs[0].answer).not.toContain("explicitly describe")
+        expect(pairs[1].question).toBe("What is 3+3?")
+        expect(pairs[1].answer).toBe("6")
+    })
+    it("ignores preamble before the first pair", () => {
+        let text = "This is a preamble that should be ignored.\nLet's begin.\n\nQuestion: What is 2+2?\nAnswer: 4"
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(1)
+        expect(pairs[0].question).toBe("What is 2+2?")
+        expect(pairs[0].answer).toBe("4")
+    })
+    it("ignores postamble after the last pair", () => {
+        let text = "Question: What is 2+2?\nAnswer: 4\n\nThis is a postamble that should be ignored."
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(1)
+        expect(pairs[0].question).toBe("What is 2+2?")
+        expect(pairs[0].answer).toBe("4")
+    })
+    it("strips multi-line filler between pairs", () => {
+        let text = "Question: What is 2+2?\nAnswer: 4\n\nFiller line one.\nFiller line two.\nFiller line three.\n\nQuestion: What is 3+3?\nAnswer: 6"
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].answer).toBe("4")
+        expect(pairs[0].answer).not.toContain("Filler")
+        expect(pairs[1].answer).toBe("6")
+    })
+    it("strips prose-like filler that mimics meta-commentary", () => {
+        let text = "Question: What is the capital of France?\nAnswer: Paris\n\nThe output does not explicitly describe the Eiffel Tower's height in this pair.\n\nQuestion: What is 2+2?\nAnswer: 4"
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].answer).toBe("Paris")
+        expect(pairs[0].answer).not.toContain("Eiffel Tower")
+        expect(pairs[1].answer).toBe("4")
+    })
+})
+describe("OutputStore parseConversationTurns filler stripping", () => {
+    beforeEach(() => {
+        vi.spyOn(console, "warn").mockImplementation(() => {})
+    })
+    it("does not append filler between turns to the first assistant reply", () => {
+        let text = "User: Hello\nAssistant: Hi there!\n\nThis is filler between turns.\n\nUser: How are you?\nAssistant: I'm fine."
+        let turns = store.parseConversationTurns(text)
+        expect(turns.length).toBe(2)
+        expect(turns[0].user).toBe("Hello")
+        expect(turns[0].assistant).toBe("Hi there!")
+        expect(turns[0].assistant).not.toContain("filler")
+        expect(turns[1].user).toBe("How are you?")
+        expect(turns[1].assistant).toBe("I'm fine.")
+    })
+    it("ignores preamble before the first turn", () => {
+        let text = "This is a preamble.\nAnother preamble line.\n\nUser: Hello\nAssistant: Hi there!"
+        let turns = store.parseConversationTurns(text)
+        expect(turns.length).toBe(1)
+        expect(turns[0].user).toBe("Hello")
+        expect(turns[0].assistant).toBe("Hi there!")
+    })
+})

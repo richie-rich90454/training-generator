@@ -328,6 +328,14 @@ describe("UIStore dashboard", () => {
         store.tickDashboard()
         expect(store.dashboardMetrics().elapsed).toMatch(/\d+m/)
     })
+    it("propagates metrics and derives nonzero rates after tick", () => {
+        store.startDashboard()
+        store.setDashboardMetrics({ chunksDone: 5, chunksTotal: 10, totalTokens: 1000, providerLatency: 500 })
+        vi.advanceTimersByTime(1000)
+        store.tickDashboard()
+        expect(store.dashboardMetrics().chunksPerSecond).toBeGreaterThan(0)
+        expect(store.dashboardMetrics().tokensPerSecond).toBeGreaterThan(0)
+    })
 })
 describe("UIStore devtools", () => {
     it("starts closed", () => {

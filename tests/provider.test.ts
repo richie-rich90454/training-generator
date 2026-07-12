@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider, AnthropicProvider, GeminiProvider, ProviderManager } from "../src/renderer/provider.js"
+import { retryWithBackoff, createProvider, OllamaProvider, OpenAIProvider, AnthropicProvider, GeminiProvider, ProviderManager, getStrictGenerationOptions } from "../src/renderer/provider.js"
 import type { Provider, ProviderResult } from "../src/renderer/provider.js"
 
 // Mock window.electronAPI for provider tests
@@ -267,5 +267,72 @@ describe("OpenAIProvider", () => {
     })
     let provider = new OpenAIProvider("bad-key")
     await expect(provider.generate("prompt", "gpt-4")).rejects.toThrow("invalid api key")
+  })
+})
+
+describe("getStrictGenerationOptions", () => {
+  it("returns strict preset for instruction processing type", () => {
+    expect(getStrictGenerationOptions("instruction")).toEqual({
+      temperature: 0.3,
+      top_p: 0.85,
+      repeat_penalty: 1.1,
+    })
+  })
+  it("returns strict preset for conversation processing type", () => {
+    expect(getStrictGenerationOptions("conversation")).toEqual({
+      temperature: 0.3,
+      top_p: 0.85,
+      repeat_penalty: 1.1,
+    })
+  })
+  it("returns strict preset for chunking processing type", () => {
+    expect(getStrictGenerationOptions("chunking")).toEqual({
+      temperature: 0.4,
+      top_p: 0.85,
+      repeat_penalty: 1.1,
+    })
+  })
+  it("returns strict preset for custom processing type", () => {
+    expect(getStrictGenerationOptions("custom")).toEqual({
+      temperature: 0.4,
+      top_p: 0.85,
+      repeat_penalty: 1.1,
+    })
+  })
+})
+
+describe("OllamaProvider with processingType", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    vi.stubGlobal("setTimeout", (fn: () => void) => { fn(); return 0 })
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+  it("includes repeat_penalty in payload when processingType is set", async () => {
+    let mockGenerate = vi.fn(async () => ({
+      success: true,
+      response: "strict response",
+    }))
+    vi.stubGlobal("window", {
+      electronAPI: { generateWithOllamaStream: mockGenerate },
+    })
+    let provider = new OllamaProvider()
+    await provider.generate("prompt", "llama2", { processingType: "instruction" })
+    expect(mockGenerate).toHaveBeenCalledTimes(1)
+    expect(mockGenerate).toHaveBeenCalledWith(
+      "llama2",
+      "prompt",
+      expect.objectContaining({
+        repeat_penalty: 1.1,
+        temperature: 0.3,
+        top_p: 0.85,
+      }),
+      undefined,
+      undefined
+    )
   })
 })
