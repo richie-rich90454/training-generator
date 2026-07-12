@@ -56,6 +56,11 @@ LINE LAYOUT:
 - The `Question:` line and the `Answer:` line MUST NOT be merged onto the same line.
 - Exactly one blank line separates each pair.
 - The answer MAY continue onto multiple lines after the `Answer:` label, but a new `Question:` MUST begin on its own line.
+ANSWER CONTENT RULES:
+- Answers MUST be direct, factual, and self-contained.
+- Markdown tables, code blocks, and formatting are FORBIDDEN in answers.
+- Internal monologue (e.g., "Wait, let me re-read...", "Let's examine..."), self-correction, and meta-commentary are FORBIDDEN in answers.
+- If the answer requires multiple sentences, write them as continuous prose, not as a list or table.
 OUTPUT FORMAT:
 Question: [First question]
 Answer: [First answer]
