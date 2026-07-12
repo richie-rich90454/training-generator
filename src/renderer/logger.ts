@@ -104,6 +104,9 @@ export class Logger {
   }
 
   addListener(fn: (entry: LogEntry) => void): void {
+    if (this.listeners.length >= this.maxListeners) {
+      this.listeners.shift()
+    }
     this.listeners.push(fn)
   }
 
