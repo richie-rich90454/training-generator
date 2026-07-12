@@ -232,7 +232,7 @@ class FileParserLazy{
         }
         catch (error){
             console.error("DOC parsing error:", error);
-            return this.extractTextFromBuffer(buffer);
+            throw error;
         }
     }
     async parseRTF(buffer:Buffer):Promise<string>{
