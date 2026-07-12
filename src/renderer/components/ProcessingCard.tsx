@@ -52,11 +52,11 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                     <button
                         id="process-btn"
                         class={`${styles["btn"]} ${styles["btn-primary"]} ${styles["btn--process"]}`}
-                        disabled={!fileStore.canProcess()}
-                        title={t("processing.startTitle")}
-                        aria-label={t("processing.startAria")}
-                        data-i18n-title="processing.startTitle"
-                        data-i18n-aria-label="processing.startAria"
+                        disabled={!appStore.isProcessing() && !fileStore.canProcess()}
+                        title={appStore.isProcessing() ? t("processing.running") : t("processing.startTitle")}
+                        aria-label={appStore.isProcessing() ? t("processing.running") : t("processing.startAria")}
+                        data-i18n-title={appStore.isProcessing() ? "processing.running" : "processing.startTitle"}
+                        data-i18n-aria-label={appStore.isProcessing() ? "processing.running" : "processing.startAria"}
                         onClick={handleProcess}
                     >
                         <Icon html={appStore.isProcessing() ? renderIcon("fa-times") : renderIcon("fa-play")} />
