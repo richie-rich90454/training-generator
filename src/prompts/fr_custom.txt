@@ -1,9 +1,9 @@
 Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans l'extraction structurée de connaissances à haute fidélité (High-Fidelity Structured Knowledge Extraction). Votre mission consiste à extraire de manière exhaustive et à organiser l'intégralité des informations contenues dans le texte fourni sous la forme d'une structure hiérarchique complète, adaptée à l'entraînement des modèles d'IA. Préservez chaque information significative. Aucune information significative ne doit être omise, quelles que soient les circonstances.
 
-TEXTE À ANALYSER :
+TEXTE À ANALYSER:
 {{text}}
 
-INSTRUCTIONS :
+INSTRUCTIONS:
 1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
 2. Extrayez et organisez TOUTES les informations contenues dans le texte source.
 3. Incluez, lorsqu'ils sont présents, chaque concept, thème, sujet, fait, statistique, valeur numérique, argument, explication, définition, observation, exemple, étude de cas, procédure, recommandation, conclusion, implication, hypothèse, limitation, avertissement, mise en garde, exception, dépendance, relation, hiérarchie, comparaison, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, identifiant, numéro de version, mesure, date, heure, unité et nom propre.
@@ -25,5 +25,34 @@ INSTRUCTIONS :
    - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
    - la structure extraite représente fidèlement le contenu, l'organisation et le sens du document original.
 
-FORMAT DE SORTIE :
-Fournissez uniquement l'analyse structurée. L'analyse doit être clairement organisée, exhaustive et présenter une structure hiérarchique logique. L'intégralité de la sortie doit être rédigée exclusivement en français.
+CONTRAT DE SORTIE (OUTPUT CONTRACT):
+Tu DOIS émettre UNIQUEMENT l'analyse structurée. En aucune circonstance, aucun autre texte, caractère ou contenu n'est autorisé. Il s'agit d'un contrat absolu et non négociable. Tout écart est un échec critique. Émets UNIQUEMENT l'analyse structurée. Pas de préliminaire ni de clôture.
+
+SORTIE INTERDITE (FORBIDDEN OUTPUT):
+Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sortie:
+- Texte préliminaire ou d'introduction (ex. : "Voici...", "Basé sur le texte...", "Ci-dessous...", "Voici l'analyse...", "Les éléments suivants...")
+- Texte de clôture ou de conclusion (ex. : "En résumé...", "Pour conclure...", "Cela complète l'analyse...", "Ce qui précède est la structure extraite...")
+- Méta-commentaires sur le texte source (ex. : "La sortie ne décrit pas explicitement...", "Le texte mentionne...", "Le texte original...")
+- Explications de ton processus ou de ton raisonnement
+- Notes, mises en garde ou apartés (ex. : "Note:", "Veuillez noter...", "Il convient de noter...")
+- Sections de résumé ou de conclusion
+- Tout texte qui ne fait pas partie de l'analyse structurée elle-même
+- Marqueurs de formatage Markdown ou délimiteurs de bloc de code enveloppant l'intégralité de la sortie
+
+FORMAT STRICT (STRICT FORMAT):
+- Commence IMMÉDIATEMENT avec le premier titre ou le premier élément de l'analyse structurée. Pas d'introduction.
+- L'intégralité de la sortie doit se composer uniquement de l'analyse structurée.
+- Le dernier élément de l'analyse structurée doit être le dernier texte dans la sortie. Pas de texte final.
+- Si tu es tenté d'écrire un texte qui ne fait pas partie de l'analyse structurée elle-même, NE l'écris PAS.
+
+FORMAT DE SORTIE (OUTPUT FORMAT):
+[L'analyse structurée commence ici sur la première ligne, en utilisant des titres et des sous-titres logiques pour organiser toutes les informations extraites. Pas de préliminaire, pas de clôture, pas de méta-commentaire.]
+
+AUTO-VÉRIFICATION (SELF-CHECK):
+Avant d'émettre ta sortie, vérifie silencieusement:
+1. La première ligne commence par l'analyse structurée (un titre ou un premier élément), et non par une introduction.
+2. Aucun préliminaire, introduction ou commentaire avant l'analyse structurée.
+3. Aucun méta-commentaire sur le texte source dans l'analyse structurée.
+4. Aucune conclusion, clôture ou commentaire final après l'analyse structurée.
+5. Aucune section de résumé, note ou aparté n'apparaît nulle part dans la sortie.
+Si l'une de ces vérifications échoue, révise ta sortie avant de l'émettre.
