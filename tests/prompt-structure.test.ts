@@ -94,6 +94,16 @@ describe("Prompt structure validation", () => {
         expect(containsAny(content, selfCheckTerms)).toBe(true)
     })
 
+    test.each(files)("file %s contains LINE LAYOUT subsection", (file: string) => {
+        let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
+        expect(content).toContain("LINE LAYOUT")
+    })
+
+    test.each(files)("file %s contains NO REPETITION subsection", (file: string) => {
+        let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
+        expect(content).toContain("NO REPETITION")
+    })
+
     test("all prompt files contain every required contract section", () => {
         for (let file of files) {
             let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
