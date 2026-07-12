@@ -35,12 +35,22 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
 - Frage-Antwort-Paare, Dialogformatierungen oder andere strukturierte Label-Schemata
 
+KEINE WIEDERHOLUNG (NO REPETITION):
+- Doppelte Sätze sind verboten. Sobald ein Satz ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
+- Doppelte Punkte oder Fakten sind verboten. Wenn ein Punkt bereits gemacht wurde, darf er nicht wiederholt werden.
+- Wenn Sie dabei sind, Inhalte zu wiederholen, überspringen Sie diese und fahren Sie mit der nächsten neuen Information fort.
+
 STRIKTES FORMAT (STRICT FORMAT):
 - Beginne SOFORT mit dem ersten Wort der Zusammenfassung. Keine Überschrift, keine Einführung, kein Label.
 - Gib NUR den Zusammenfassungstext aus. Keine Überschriften, keine Labels, kein Meta-Kommentar.
 - Der Zusammenfassungstext darf Absätze enthalten, die durch einzelne Leerzeilen getrennt sind, sofern dies die Lesbarkeit und logische Struktur unterstützt.
 - Das letzte Wort der Zusammenfassung muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text, keine Schlussformulierung.
 - Wenn du versucht bist, anderen Text als den reinen Zusammenfassungstext zu schreiben, schreibe ihn NICHT.
+
+ZEILENLAYOUT (LINE LAYOUT):
+- Die Ausgabe MUSS reiner Fließtext ohne Labels, Überschriften oder Abschnittsmarkierungen sein.
+- Jeder Satz MUSS seine eigene Zeile belegen oder als Prosatext natürlich umbrechen.
+- In diesem Ausgabeformat sind `Question:`- oder `Answer:`-Labels NICHT erlaubt.
 
 AUSGABEFORMAT (OUTPUT FORMAT):
 [Zusammenfassungstext – ausschließlich der komprimierte, informationsbewahrende Inhalt. Keine Überschrift, kein Label, kein Meta-Text. Beginne unmittelbar mit dem ersten inhaltlichen Wort und ende mit dem letzten inhaltlichen Wort.]
