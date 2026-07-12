@@ -126,7 +126,7 @@ export async function fetchUrl(options: FetchOptions): Promise<FetchResult>{
     let title=extractTitle(html);
     let content=extractMainContent(html);
     let finalUrl: string=response.request?.res?.responseUrl||options.url;
-    let bytes=typeof rawData==="string"?rawData.length:0;
+    let bytes=typeof rawData==="string"?Buffer.byteLength(rawData, "utf-8"):0;
     return{
         url: options.url,
         finalUrl: finalUrl,
