@@ -194,7 +194,12 @@ export class CronScheduler{
             ...job.options
         };
         let task=cron.schedule(job.cronExpression, async ()=>{
-            await this.executeJob(job);
+            try{
+                await this.executeJob(job);
+            }
+            catch{
+                // ignore to prevent unhandled rejection from cron callback
+            }
         }, options);
         this.tasks.set(job.id, task);
         let nextRun=this.getNextRun(job.cronExpression, this.timezone);
