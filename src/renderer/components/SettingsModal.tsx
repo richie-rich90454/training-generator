@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, For, Show, onMount, onCleanup } from "solid-js"
+import { createSignal, For, Show, createEffect, onCleanup } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -24,15 +24,21 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
     let overlayRef: HTMLDivElement | undefined
     let firstFocusable: HTMLElement | undefined
     let lastFocusable: HTMLElement | undefined
-    onMount(() => {
-        settingsStore.refreshProfiles()
-        const focusable = overlayRef?.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
-        )
-        if (focusable && focusable.length > 0) {
-            firstFocusable = focusable[0]
-            lastFocusable = focusable[focusable.length - 1]
-            firstFocusable.focus()
+    createEffect(() => {
+        if (props.appStore.uiStore.settingsOpen()) {
+            settingsStore.refreshProfiles()
+            const focusable = overlayRef?.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+            )
+            if (focusable && focusable.length > 0) {
+                firstFocusable = focusable[0]
+                lastFocusable = focusable[focusable.length - 1]
+                firstFocusable.focus()
+            }
+        }
+        else {
+            firstFocusable = undefined
+            lastFocusable = undefined
         }
     })
     function handleKeydown(e: KeyboardEvent): void {
