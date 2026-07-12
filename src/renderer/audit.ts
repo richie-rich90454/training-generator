@@ -10,8 +10,10 @@ export class AuditTrail {
   private readonly maxEntries = 10000
 
   record(operation: string, details?: Record<string, unknown>): void {
+    if (!operation || typeof operation !== 'string' || operation.trim().length === 0) return
+    const op = operation.length > 200 ? operation.substring(0, 200) : operation
     this.entries.push({
-      operation,
+      operation: op,
       timestamp: new Date().toISOString(),
       details
     })
