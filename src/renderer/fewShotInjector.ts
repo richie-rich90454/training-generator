@@ -22,7 +22,11 @@ export class FewShotBuffer{
         this.config=config
     }
     add(example:FewShotExample):void{
+        if(typeof example.input!=="string"||example.input.trim()==="")return
+        if(typeof example.output!=="string"||example.output.trim()==="")return
+        if(typeof example.processingType!=="string"||example.processingType.trim()==="")return
         if(example.qualityScore!==undefined&&example.qualityScore<this.config.minQualityScore)return
+        if(this.examples.some(e=>e.input===example.input))return
         this.examples.push(example)
         if(this.examples.length>this.config.bufferSize){
             this.examples.shift()
@@ -34,7 +38,13 @@ export class FewShotBuffer{
             this.examples
         let max=count??this.config.maxExamplesPerPrompt
         let sorted=[...filtered].sort((a, b)=>(b.qualityScore??0)-(a.qualityScore??0))
-        return sorted.slice(0, max)
+        let seen=new Set<string>()
+        let deduped=sorted.filter(e=>{
+            if(seen.has(e.input))return false
+            seen.add(e.input)
+            return true
+        })
+        return deduped.slice(0, max)
     }
     size():number{
         return this.examples.length
@@ -55,7 +65,18 @@ export class FewShotBuffer{
         return this.examples
     }
     fromJSON(examples:FewShotExample[]):void{
-        this.examples=examples.slice(-this.config.bufferSize)
+        let valid=examples.filter(e=>
+            typeof e.input==="string"&&e.input.trim()!==""&&
+            typeof e.output==="string"&&e.output.trim()!==""&&
+            typeof e.processingType==="string"&&e.processingType.trim()!==""
+        )
+        let seen=new Set<string>()
+        let deduped=valid.filter(e=>{
+            if(seen.has(e.input))return false
+            seen.add(e.input)
+            return true
+        })
+        this.examples=deduped.slice(-this.config.bufferSize)
     }
 }
 export function formatExamplesForPrompt(examples:FewShotExample[]):string{
