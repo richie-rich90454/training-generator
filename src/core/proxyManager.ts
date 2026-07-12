@@ -156,6 +156,9 @@ export function parseProxyUrl(url: string): ProxyConfig{
     return config;
 }
 export function formatProxyUrl(config: ProxyConfig): string{
+    if(!config.host){
+        throw new Error("Proxy config missing host");
+    }
     let auth="";
     if(config.username){
         if(config.password){
