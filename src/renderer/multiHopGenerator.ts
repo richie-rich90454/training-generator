@@ -1,4 +1,5 @@
 import type{Provider, ProviderOptions}from"./provider.js"
+const DEFAULT_MAX_ITERATIONS=100
 export interface ChunkRef{
     index:number
     text:string
@@ -16,6 +17,8 @@ export interface MultiHopConfig{
     minHops:number
     maxHops:number
     options?:ProviderOptions
+    maxIterations?:number
+    signal?:AbortSignal
 }
 export const DEFAULT_MULTIHOP_CONFIG:MultiHopConfig={
     model:"gpt-3.5-turbo",
@@ -57,7 +60,11 @@ export async function generateMultiHopQuestion(
 ):Promise<MultiHopQuestion>{
     if(chunks.length<2)throw new Error("Multi-hop questions require at least 2 chunks")
     let prompt=`${MULTIHOP_PROMPT}\n\nUse between ${config.minHops} and ${config.maxHops} chunks. Ensure the question cannot be answered from a single chunk.\n\n${formatChunksForPrompt(chunks)}`
-    let result=await provider.generate(prompt, config.model, config.options)
+    let options:ProviderOptions|undefined=config.options
+    if(config.signal){
+        options={...config.options, signal:config.signal}
+    }
+    let result=await provider.generate(prompt, config.model, options)
     return parseMultiHopResponse(result.text)
 }
 export async function generateMultiHopBatch(
@@ -66,8 +73,13 @@ export async function generateMultiHopBatch(
     count:number,
     config:MultiHopConfig=DEFAULT_MULTIHOP_CONFIG
 ):Promise<MultiHopQuestion[]>{
+    let maxIterations=config.maxIterations??DEFAULT_MAX_ITERATIONS
+    let limitedCount=Math.min(count, maxIterations)
     let questions:MultiHopQuestion[]=[]
-    for(let i=0;i<count;i++){
+    for(let i=0;i<limitedCount;i++){
+        if(config.signal?.aborted){
+            throw new Error("Multi-hop batch aborted")
+        }
         let question=await generateMultiHopQuestion(provider, chunks, config)
         questions.push(question)
     }
