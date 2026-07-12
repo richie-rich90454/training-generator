@@ -59,6 +59,12 @@ ZEILENLAYOUT (LINE LAYOUT):
 - Genau eine Leerzeile trennt jedes Paar.
 - Die Antwort kann nach dem `Answer:`-Label über mehrere Zeilen fortgesetzt werden, aber eine neue `Question:` MUSS in einer eigenen Zeile beginnen.
 
+ANTWORT-REGELN (ANSWER CONTENT RULES):
+- Antworten MÜSSEN direkt, sachlich und in sich geschlossen sein.
+- Markdown-Tabellen, Codeblöcke und Formatierungen sind in Antworten VERBOTEN.
+- Innerer Monolog (z.B. "Warte, ich lese nochmal...", "Lass uns betrachten..."), Selbstkorrektur und Meta-Kommentare sind in Antworten VERBOTEN.
+- Wenn eine Antwort mehrere Sätze erfordert, schreibe sie als fortlaufende Prosa, nicht als Liste oder Tabelle.
+
 AUSGABEFORMAT (OUTPUT FORMAT):
 Question: [Erste Frage]
 Answer: [Erste Antwort]
