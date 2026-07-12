@@ -48,7 +48,7 @@ export function createGenesisEntry(): AuditEntry{
     }
 }
 export class AuditLog{
-    private entries: AuditEntry[]
+    private entries!: AuditEntry[]
     private storage: AuditStorage
     private readonly storageKey="tg-audit-log"
     constructor(options: {storage?: AuditStorage}={}){
