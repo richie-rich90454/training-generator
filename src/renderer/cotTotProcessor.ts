@@ -1,4 +1,5 @@
 import type{Provider, ProviderOptions, ProviderResult}from"./provider.js"
+const MAX_TREE_DEPTH=10
 export interface CoTResult{
     reasoning:string
     answer:string
@@ -81,25 +82,27 @@ export function parseToTResponse(response:string, providerName:string="", tokens
     let solutionNode=findNodeByText(tree, solution)
     return{tree, bestPath, solution, rawResponse:response, provider:providerName, tokens}
 }
-function buildToTNode(data:Record<string, unknown>, id:string):ToTNode{
+function buildToTNode(data:Record<string, unknown>, id:string, depth:number=0):ToTNode{
     let thought=String(data.thought||"")
     let score=Number(data.score)||0
     let isSolution=Boolean(data.is_solution||data.isSolution)
     let children:ToTNode[]=[]
-    let branches=data.branches||data.sub_branches||data.children
-    if(Array.isArray(branches)){
-        children=branches.map((b:Record<string, unknown>, i:number)=>buildToTNode(b, `${id}-${i}`))
+    if(depth<MAX_TREE_DEPTH){
+        let branches=data.branches||data.sub_branches||data.children
+        if(Array.isArray(branches)){
+            children=branches.map((b:Record<string, unknown>, i:number)=>buildToTNode(b, `${id}-${i}`, depth+1))
+        }
     }
     return{id, thought, children, score, isSolution}
 }
-function findBestPath(node:ToTNode):string[]{
-    if(node.isSolution||node.children.length===0){
+function findBestPath(node:ToTNode, depth:number=0):string[]{
+    if(node.isSolution||node.children.length===0||depth>=MAX_TREE_DEPTH){
         return[node.thought]
     }
     let bestChildPath:string[]=[]
     let bestScore=-1
     for(let child of node.children){
-        let childPath=findBestPath(child)
+        let childPath=findBestPath(child, depth+1)
         let childScore=child.score
         if(childScore>bestScore){
             bestScore=childScore
@@ -108,10 +111,11 @@ function findBestPath(node:ToTNode):string[]{
     }
     return[node.thought, ...bestChildPath]
 }
-function findNodeByText(node:ToTNode, text:string):ToTNode|null{
+function findNodeByText(node:ToTNode, text:string, depth:number=0):ToTNode|null{
     if(node.thought===text)return node
+    if(depth>=MAX_TREE_DEPTH)return null
     for(let child of node.children){
-        let found=findNodeByText(child, text)
+        let found=findNodeByText(child, text, depth+1)
         if(found)return found
     }
     return null
