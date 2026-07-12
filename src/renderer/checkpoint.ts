@@ -1,5 +1,7 @@
 import type{SelectedFile,TrainingItem}from "../types/index.js"
+export const CHECKPOINT_VERSION=1
 export interface CheckpointData{
+    version?: number
     files: SelectedFile[]
     completedChunks: Record<string,number>
     outputData: TrainingItem[]
@@ -20,6 +22,7 @@ function isSelectedFile(value: unknown): value is SelectedFile{
 function isValidCheckpointData(value: unknown): value is CheckpointData{
     if(value===null||typeof value!=="object")return false
     let data=value as Record<string,unknown>
+    if(typeof data.version!=="number"||data.version!==CHECKPOINT_VERSION)return false
     if(!Array.isArray(data.files)||!data.files.every(isSelectedFile))return false
     if(data.completedChunks===null||typeof data.completedChunks!=="object")return false
     if(!Array.isArray(data.outputData))return false
@@ -31,7 +34,8 @@ function isValidCheckpointData(value: unknown): value is CheckpointData{
 export async function saveCheckpoint(data: CheckpointData): Promise<boolean>{
     if(!window.electronAPI?.saveCheckpoint)return false
     try{
-        await window.electronAPI.saveCheckpoint(data)
+        let dataWithVersion:CheckpointData={...data, version:CHECKPOINT_VERSION}
+        await window.electronAPI.saveCheckpoint(dataWithVersion)
         return true
     }
     catch(error){

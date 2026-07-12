@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { saveCheckpoint, loadCheckpoint, clearCheckpoint, CheckpointData } from "../src/renderer/checkpoint.js"
+import { saveCheckpoint, loadCheckpoint, clearCheckpoint, CheckpointData, CHECKPOINT_VERSION } from "../src/renderer/checkpoint.js"
 import type { SelectedFile, TrainingItem } from "../src/types/index.js"
 function makeFile(name: string): SelectedFile {
     return { file: null, name, size: 100, type: "text/plain", path: null }
 }
 function makeCheckpoint(overrides: Partial<CheckpointData> = {}): CheckpointData {
     return {
+        version: CHECKPOINT_VERSION,
         files: [makeFile("doc.txt")],
         completedChunks: { "doc.txt": 3 },
         outputData: [{ format: "instruction", instruction: "q", output: "a" }],
