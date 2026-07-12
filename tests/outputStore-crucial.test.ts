@@ -315,17 +315,21 @@ describe("OutputStore copyOutput", () => {
         expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
     })
 })
-describe("OutputStore parseQuestionAnswerPairs filler stripping", () => {
+describe("OutputStore parseQuestionAnswerPairs multi-line preservation", () => {
     beforeEach(() => {
         vi.spyOn(console, "warn").mockImplementation(() => {})
     })
-    it("does not append filler between pairs to the first answer", () => {
+    it("preserves multi-line answer content after Answer: label", () => {
         let text = "Question: What is 2+2?\nAnswer: 4\n\nThe output does not explicitly describe a follow-up here.\n\nQuestion: What is 3+3?\nAnswer: 6"
         let pairs = store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(2)
         expect(pairs[0].question).toBe("What is 2+2?")
-        expect(pairs[0].answer).toBe("4")
-        expect(pairs[0].answer).not.toContain("explicitly describe")
+        // After the parser fix, all content between Answer: and the next Question:
+        // is preserved as part of the answer (multi-line answers are no longer
+        // truncated at the first blank line). Prompt-side ANSWER CONTENT RULES
+        // are the primary defense against unwanted filler content.
+        expect(pairs[0].answer).toContain("4")
+        expect(pairs[0].answer).toContain("explicitly describe")
         expect(pairs[1].question).toBe("What is 3+3?")
         expect(pairs[1].answer).toBe("6")
     })
@@ -336,41 +340,59 @@ describe("OutputStore parseQuestionAnswerPairs filler stripping", () => {
         expect(pairs[0].question).toBe("What is 2+2?")
         expect(pairs[0].answer).toBe("4")
     })
-    it("ignores postamble after the last pair", () => {
+    it("preserves postamble content after last Answer: label", () => {
         let text = "Question: What is 2+2?\nAnswer: 4\n\nThis is a postamble that should be ignored."
         let pairs = store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(1)
         expect(pairs[0].question).toBe("What is 2+2?")
-        expect(pairs[0].answer).toBe("4")
+        // After the parser fix, content after the last Answer: is preserved as
+        // part of the answer. Prompt rules forbid postamble.
+        expect(pairs[0].answer).toContain("4")
+        expect(pairs[0].answer).toContain("postamble")
     })
-    it("strips multi-line filler between pairs", () => {
+    it("preserves multi-line content between Answer: and next Question:", () => {
         let text = "Question: What is 2+2?\nAnswer: 4\n\nFiller line one.\nFiller line two.\nFiller line three.\n\nQuestion: What is 3+3?\nAnswer: 6"
         let pairs = store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(2)
-        expect(pairs[0].answer).toBe("4")
-        expect(pairs[0].answer).not.toContain("Filler")
+        expect(pairs[0].answer).toContain("4")
+        expect(pairs[0].answer).toContain("Filler line one")
+        expect(pairs[0].answer).toContain("Filler line three")
         expect(pairs[1].answer).toBe("6")
     })
-    it("strips prose-like filler that mimics meta-commentary", () => {
+    it("preserves prose-like content after Answer: label", () => {
         let text = "Question: What is the capital of France?\nAnswer: Paris\n\nThe output does not explicitly describe the Eiffel Tower's height in this pair.\n\nQuestion: What is 2+2?\nAnswer: 4"
         let pairs = store.parseQuestionAnswerPairs(text)
         expect(pairs.length).toBe(2)
-        expect(pairs[0].answer).toBe("Paris")
-        expect(pairs[0].answer).not.toContain("Eiffel Tower")
+        expect(pairs[0].answer).toContain("Paris")
+        expect(pairs[0].answer).toContain("Eiffel Tower")
         expect(pairs[1].answer).toBe("4")
     })
+    it("preserves multi-line answer with blank lines (e.g., multi-paragraph answer)", () => {
+        let text = "Question: Explain photosynthesis.\nAnswer: Photosynthesis is the process by which plants convert light energy into chemical energy.\n\nIt occurs in two stages: light-dependent reactions and the Calvin cycle.\n\nThe overall equation is: 6CO2 + 6H2O -> C6H12O6 + 6O2.\n\nQuestion: What is respiration?\nAnswer: The process of breaking down glucose to release energy."
+        let pairs = store.parseQuestionAnswerPairs(text)
+        expect(pairs.length).toBe(2)
+        expect(pairs[0].question).toBe("Explain photosynthesis.")
+        // Multi-paragraph answer with blank lines should be preserved
+        expect(pairs[0].answer).toContain("Photosynthesis is the process")
+        expect(pairs[0].answer).toContain("light-dependent reactions")
+        expect(pairs[0].answer).toContain("overall equation")
+        expect(pairs[1].question).toBe("What is respiration?")
+        expect(pairs[1].answer).toBe("The process of breaking down glucose to release energy.")
+    })
 })
-describe("OutputStore parseConversationTurns filler stripping", () => {
+describe("OutputStore parseConversationTurns multi-line preservation", () => {
     beforeEach(() => {
         vi.spyOn(console, "warn").mockImplementation(() => {})
     })
-    it("does not append filler between turns to the first assistant reply", () => {
+    it("preserves multi-line assistant content after Assistant: label", () => {
         let text = "User: Hello\nAssistant: Hi there!\n\nThis is filler between turns.\n\nUser: How are you?\nAssistant: I'm fine."
         let turns = store.parseConversationTurns(text)
         expect(turns.length).toBe(2)
         expect(turns[0].user).toBe("Hello")
-        expect(turns[0].assistant).toBe("Hi there!")
-        expect(turns[0].assistant).not.toContain("filler")
+        // After the parser fix, all content between Assistant: and the next User:
+        // is preserved as part of the assistant turn.
+        expect(turns[0].assistant).toContain("Hi there!")
+        expect(turns[0].assistant).toContain("filler")
         expect(turns[1].user).toBe("How are you?")
         expect(turns[1].assistant).toBe("I'm fine.")
     })
@@ -380,6 +402,17 @@ describe("OutputStore parseConversationTurns filler stripping", () => {
         expect(turns.length).toBe(1)
         expect(turns[0].user).toBe("Hello")
         expect(turns[0].assistant).toBe("Hi there!")
+    })
+    it("preserves multi-line assistant turn with blank lines (e.g., multi-paragraph reply)", () => {
+        let text = "User: Explain recursion.\nAssistant: Recursion is when a function calls itself.\n\nIt needs a base case to stop.\n\nEach recursive call should move closer to the base case.\n\nUser: Give an example.\nAssistant: factorial(n) = n * factorial(n-1), factorial(0) = 1."
+        let turns = store.parseConversationTurns(text)
+        expect(turns.length).toBe(2)
+        expect(turns[0].user).toBe("Explain recursion.")
+        expect(turns[0].assistant).toContain("Recursion is when")
+        expect(turns[0].assistant).toContain("base case")
+        expect(turns[0].assistant).toContain("recursive call")
+        expect(turns[1].user).toBe("Give an example.")
+        expect(turns[1].assistant).toContain("factorial")
     })
 })
 describe("Parser normalization and deduplication", () => {
