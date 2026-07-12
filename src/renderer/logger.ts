@@ -20,6 +20,29 @@ export class Logger {
   private listeners: Array<(entry: LogEntry) => void> = []
   private minLevel: LogLevel = 'debug'
   private readonly maxEntries = 10000
+  private readonly maxListeners = 100
+
+  private redactPII(text: string): string {
+    return text
+      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[REDACTED_EMAIL]')
+      .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[REDACTED_PHONE]')
+      .replace(/\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, '[REDACTED_CC]')
+      .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED_SSN]')
+      .replace(/\b(?:sk|pk|key|token|apikey|api_key|access_token)[-_\s]?[A-Za-z0-9]{20,}\b/gi, '[REDACTED_KEY]')
+  }
+
+  private redactContext(context: Record<string, unknown>): Record<string, unknown> {
+    const result: Record<string, unknown> = {}
+    for (const key in context) {
+      const value = context[key]
+      if (typeof value === 'string') {
+        result[key] = this.redactPII(value)
+      } else {
+        result[key] = value
+      }
+    }
+    return result
+  }
 
   private createEntry(level: LogLevel, module: string, message: string, context?: Record<string, unknown>): LogEntry | null {
     if (LEVEL_ORDER[level] < LEVEL_ORDER[this.minLevel]) return null
@@ -27,8 +50,8 @@ export class Logger {
       timestamp: new Date().toISOString(),
       level,
       module,
-      message,
-      ...(context ? { context } : {})
+      message: this.redactPII(message),
+      ...(context ? { context: this.redactContext(context) } : {})
     }
     this.entries.push(entry)
     if (this.entries.length > this.maxEntries) {
