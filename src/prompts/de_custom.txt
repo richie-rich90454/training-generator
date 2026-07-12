@@ -19,11 +19,49 @@ ANWEISUNGEN:
 13. Bewahre die ursprüngliche Bedeutung, sämtliche semantischen Nuancen sowie den vollständigen technischen Detailgrad des Originals.
 14. Sämtliche Ausgaben müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden.
 15. Erzeuge so viele strukturierte Inhalte wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes zu bewahren. Es gibt keine maximale Längenbegrenzung. Falls Vollständigkeit und Kürze miteinander in Konflikt stehen, hat Vollständigkeit stets oberste Priorität.
-16. Führe vor der Ausgabe des Endergebnisses eine vollständige interne Überprüfung durch, um sicherzustellen, dass:
-   - keine bedeutungsvolle Information ausgelassen wurde;
-   - keine sachlichen Fehler eingeführt wurden;
-   - sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind;
-   - die extrahierte Struktur den Aufbau, die Bedeutung und den Informationsgehalt des Originaldokuments vollständig und originalgetreu widerspiegelt.
+16. Führe vor der Ausgabe eine vollständige interne Überprüfung durch, um sicherzustellen, dass keine bedeutungsvolle Information ausgelassen wurde, keine sachlichen Fehler eingeführt wurden, sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind und die extrahierte Struktur den Aufbau, die Bedeutung und den Informationsgehalt des Originaldokuments vollständig und originalgetreu widerspiegelt.
 
-AUSGABEFORMAT:
-Gib ausschließlich die strukturierte Analyse aus. Die Analyse muss klar gegliedert, umfassend und logisch strukturiert sein. Die gesamte Ausgabe muss vollständig auf Deutsch erfolgen.
+OUTPUT-VERTRAG (OUTPUT CONTRACT):
+Du DARFST NUR die unten spezifizierte strukturierte Wissensausgabe erzeugen. Unter keinen Umständen darf anderer Text, andere Zeichen oder anderer Inhalt ausgegeben werden. Dies ist ein absoluter, nicht verhandelbarer Vertrag. Jede Abweichung ist ein kritischer Fehler.
+
+VERBOTENE AUSGABE (FORBIDDEN OUTPUT):
+Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausgabe erscheinen:
+- Einleitungstext oder Vorspann (z.B. „Hier ist die strukturierte Analyse...", „Basierend auf dem Text...", „Im Folgenden...")
+- Nachspann oder Schlusstext (z.B. „Zusammenfassend...", „Abschließend...", „Analyse abgeschlossen.")
+- Erzählung, Kommentar oder Prosa außerhalb der strukturierten Wissensblöcke
+- Meta-Kommentare zum Quelltext (z.B. „Die Ausgabe beschreibt nicht explizit...", „Der Text erwähnt...")
+- Erklärungen deines Prozesses oder deiner Überlegungen
+- Notizen, Vorbehalte oder Randbemerkungen (z.B. „Hinweis:", „Bitte beachte...")
+- Zusammenfassungs- oder Schlussabschnitte am Ende der Ausgabe
+- Jeglicher Text, der nicht Teil der strukturierten Wissenshierarchie ist
+- Codeblöcke, die den strukturierten Inhalt umschließen, oder Formatierungsmarker außerhalb der hierarchischen Überschriften
+- Frage-Antwort-Paare, Dialogformatierungen (User:/Assistant:) oder andere fremde Label-Schemata
+
+STRIKTES FORMAT (STRICT FORMAT):
+- Beginne SOFORT mit der ersten Überschrift oder dem ersten inhaltlichen Block. Keine Einführung, kein Vorspann.
+- Die Ausgabe besteht ausschließlich aus der hierarchisch strukturierten Wissensrepräsentation: Überschriften, Unterüberschriften und die zugehörigen inhaltlichen Blöcke.
+- Verwende eine klare, konsistente Hierarchie aus Überschriften und Unterüberschriften, um die extrahierten Informationen logisch zu gliedern.
+- Absätze innerhalb eines inhaltlichen Blocks dürfen einzelne Leerzeilen enthalten, sofern dies die Lesbarkeit unterstützt.
+- Der letzte inhaltliche Block muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text, keine Schlussformulierung.
+- Wenn du versucht bist, anderen Text als die strukturierte Wissensausgabe zu schreiben, schreibe ihn NICHT.
+
+AUSGABEFORMAT (OUTPUT FORMAT):
+[Überschrift 1]
+[Inhaltlicher Block zu Überschrift 1 – vollständig, informationsbewahrend]
+
+[Unterüberschrift 1.1]
+[Inhaltlicher Block zu Unterüberschrift 1.1]
+
+[Überschrift 2]
+[Inhaltlicher Block zu Überschrift 2]
+
+[Fahre mit so vielen Überschriften, Unterüberschriften und inhaltlichen Blöcken fort, wie nötig sind, um sämtliche Informationen vollständig und hierarchisch gegliedert abzudecken]
+
+SELBSTPRÜFUNG (SELF-CHECK):
+Vor der Ausgabe prüfe stillschweigend:
+1. Die erste Zeile beginnt unmittelbar mit der ersten Überschrift oder dem ersten inhaltlichen Block – kein Vorspann, keine Einführung, kein Kommentar.
+2. Keine Prosa, Erzählung oder Meta-Kommentar erscheint außerhalb der strukturierten Wissensblöcke.
+3. Kein Schluss, keine Zusammenfassung und kein Nachspann erscheint nach dem letzten inhaltlichen Block.
+4. Jede Zeile ist entweder eine Überschrift, eine Unterüberschrift, Teil eines inhaltlichen Blocks oder eine einzelne Leerzeile als Trennzeichen.
+5. Die gesamte Ausgabe besteht ausschließlich aus der hierarchisch strukturierten Wissensrepräsentation in deutscher Sprache.
+Wenn eine dieser Prüfungen fehlschlägt, überarbeite deine Ausgabe vor der Ausgabe.
