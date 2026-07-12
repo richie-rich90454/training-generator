@@ -443,31 +443,43 @@ export function createAppStore(): AppStore {
       successfulFiles = result.successfulFiles
       failedFiles = result.failedFiles
 
-      setProgress(100, t("processing.complete"))
-      const summaryMessage =
-        successfulFiles > 0
-          ? t("toast.processingSummarySuccess", undefined, {
-              successful: String(successfulFiles),
-              total: String(queue.length),
-              count: String(totalItemsGenerated),
-            })
-          : t("toast.processingSummaryWarning", undefined, {
-              successful: String(successfulFiles),
-              total: String(queue.length),
-              failed: String(failedFiles),
-              count: String(totalItemsGenerated),
-            })
-      addLog(summaryMessage, successfulFiles > 0 ? "success" : "warning")
-      uiStore.showToast(summaryMessage, successfulFiles > 0 ? "success" : "warning" as ToastType)
-      audit.record("processing_completed", {
-        itemsGenerated: totalItemsGenerated,
-        successfulFiles,
-        failedFiles,
-      })
-      uiStore.setFilesProcessed(successfulFiles)
-      uiStore.setLastProcessed(new Date().toLocaleString())
-      await clearCheckpoint()
-      runSucceeded = true
+      if (totalItemsGenerated === 0 && failedFiles > 0) {
+        // All files failed — don't show "100% complete"
+        setProgress(0, t("processing.failed"))
+        addLog(t("toast.processingFailed"), "error")
+        uiStore.showToast(t("toast.processingFailed"), "error" as ToastType)
+        audit.record("processing_failed", {
+          itemsGenerated: 0,
+          successfulFiles: 0,
+          failedFiles,
+        })
+      } else {
+        setProgress(100, t("processing.complete"))
+        const summaryMessage =
+          successfulFiles > 0
+            ? t("toast.processingSummarySuccess", undefined, {
+                successful: String(successfulFiles),
+                total: String(queue.length),
+                count: String(totalItemsGenerated),
+              })
+            : t("toast.processingSummaryWarning", undefined, {
+                successful: String(successfulFiles),
+                total: String(queue.length),
+                failed: String(failedFiles),
+                count: String(totalItemsGenerated),
+              })
+        addLog(summaryMessage, successfulFiles > 0 ? "success" : "warning")
+        uiStore.showToast(summaryMessage, successfulFiles > 0 ? "success" : "warning" as ToastType)
+        audit.record("processing_completed", {
+          itemsGenerated: totalItemsGenerated,
+          successfulFiles,
+          failedFiles,
+        })
+        uiStore.setFilesProcessed(successfulFiles)
+        uiStore.setLastProcessed(new Date().toLocaleString())
+        await clearCheckpoint()
+        runSucceeded = true
+      }
     } catch (error) {
       logger.error("app", t("processing.failed"), { error: (error as Error).message })
       addLog(t("processing.failed"), "error")
