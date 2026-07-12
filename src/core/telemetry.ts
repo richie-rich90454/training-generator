@@ -109,6 +109,9 @@ export class Telemetry{
         if (!this.enabled){
             return
         }
+        if (this.respectDoNotTrack()){
+            return
+        }
         if (Math.random()>this.sampleRate){
             return
         }
