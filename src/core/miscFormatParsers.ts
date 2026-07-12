@@ -105,7 +105,14 @@ export function parseLatex(latex: string): ParsedTextResult{
 }
 export function parseOdt(buffer: Buffer): ParsedTextResult{
     let warnings: string[]=[];
-    let entries: Map<string, Buffer>=extractZipEntries(buffer);
+    let entries: Map<string, Buffer>;
+    try{
+        entries=extractZipEntries(buffer);
+    }
+    catch(e){
+        warnings.push("Failed to extract ZIP: "+(e as Error).message);
+        return {text: "", format: "odt", metadata: {}, warnings: warnings};
+    }
     let contentBuffer: Buffer|undefined=entries.get("content.xml");
     if(!contentBuffer){
         warnings.push("content.xml not found");
@@ -127,7 +134,14 @@ export function parseOdt(buffer: Buffer): ParsedTextResult{
 }
 export function parseOds(buffer: Buffer): ParsedTextResult{
     let warnings: string[]=[];
-    let entries: Map<string, Buffer>=extractZipEntries(buffer);
+    let entries: Map<string, Buffer>;
+    try{
+        entries=extractZipEntries(buffer);
+    }
+    catch(e){
+        warnings.push("Failed to extract ZIP: "+(e as Error).message);
+        return {text: "", format: "ods", metadata: {}, warnings: warnings};
+    }
     let contentBuffer: Buffer|undefined=entries.get("content.xml");
     if(!contentBuffer){
         warnings.push("content.xml not found");
@@ -178,7 +192,14 @@ export function parseOds(buffer: Buffer): ParsedTextResult{
 }
 export function parseOdp(buffer: Buffer): ParsedTextResult{
     let warnings: string[]=[];
-    let entries: Map<string, Buffer>=extractZipEntries(buffer);
+    let entries: Map<string, Buffer>;
+    try{
+        entries=extractZipEntries(buffer);
+    }
+    catch(e){
+        warnings.push("Failed to extract ZIP: "+(e as Error).message);
+        return {text: "", format: "odp", metadata: {}, warnings: warnings};
+    }
     let contentBuffer: Buffer|undefined=entries.get("content.xml");
     if(!contentBuffer){
         warnings.push("content.xml not found");
@@ -216,7 +237,14 @@ function extractVisioText(xml: string): string[]{
 }
 export function parseVisio(buffer: Buffer): ParsedTextResult{
     let warnings: string[]=["Visio parsing is best-effort; complex diagrams may not preserve structure"];
-    let entries: Map<string, Buffer>=extractZipEntries(buffer);
+    let entries: Map<string, Buffer>;
+    try{
+        entries=extractZipEntries(buffer);
+    }
+    catch(e){
+        warnings.push("Failed to extract ZIP: "+(e as Error).message);
+        return {text: "", format: "visio", metadata: {}, warnings: warnings};
+    }
     let texts: string[]=[];
     let documentBuffer: Buffer|undefined=entries.get("document.xml");
     if(documentBuffer){
@@ -362,7 +390,14 @@ export function parseMindMap(buffer: Buffer): ParsedTextResult{
     let warnings: string[]=[];
     let text: string="";
     if(buffer.length>=4&&buffer[0]===0x50&&buffer[1]===0x4b){
-        let entries: Map<string, Buffer>=extractZipEntries(buffer);
+        let entries: Map<string, Buffer>;
+        try{
+            entries=extractZipEntries(buffer);
+        }
+        catch(e){
+            warnings.push("Failed to extract ZIP: "+(e as Error).message);
+            return {text: "", format: "mindmap", metadata: {}, warnings: warnings};
+        }
         let contentBuffer: Buffer|undefined=entries.get("content.xml");
         if(!contentBuffer){
             warnings.push("content.xml not found in XMind archive");
