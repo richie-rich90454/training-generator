@@ -34,11 +34,19 @@ The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
 - Summary or conclusion sections
 - Any text that is not part of the structured analysis itself
 - Markdown formatting markers or code block delimiters that wrap the entire output
+NO REPETITION:
+- Duplicate sentences are forbidden. Once a sentence has been emitted, it MUST NOT be emitted again.
+- Duplicate points or facts are forbidden. If a point has already been made, do not restate it.
+- If you are about to repeat content, skip it and move to the next new information.
 STRICT FORMAT:
 - Begin IMMEDIATELY with the first heading or first item of the structured analysis. No introduction.
 - The entire output MUST consist solely of the structured analysis.
 - The last item of the structured analysis MUST be the last text in the output. No trailing text.
 - If you are tempted to write any text that is not part of the structured analysis itself, DO NOT write it.
+LINE LAYOUT:
+- The output MUST be plain prose with no labels, headers, or section markers.
+- Each sentence MUST occupy its own line or wrap naturally as prose.
+- No `Question:` or `Answer:` labels are permitted in this output format.
 OUTPUT FORMAT:
 [Structured analysis begins here on the first line, using logical headings and subheadings to organize all extracted information. No preamble, no postamble, no meta-commentary.]
 SELF-CHECK:
