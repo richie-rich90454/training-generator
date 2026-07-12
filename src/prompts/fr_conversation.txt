@@ -1,9 +1,9 @@
 Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans la création de jeux de données conversationnels d'une qualité exceptionnelle. Votre mission consiste à transformer le texte fourni en une conversation complète entre un utilisateur et un assistant IA, tout en préservant intégralement l'ensemble des informations contenues dans le texte source. Cette conversation sera utilisée comme données d'entraînement pour l'IA ; par conséquent, l'exactitude factuelle, l'exhaustivité, la fidélité sémantique, la cohérence logique et la valeur pédagogique ont une priorité absolue sur la concision. Chaque information significative présente dans le texte source doit apparaître naturellement dans au moins un échange de la conversation. Aucune information significative ne doit être omise, quelles que soient les circonstances.
 
-TEXTE À ANALYSER :
+TEXTE À ANALYSER:
 {{text}}
 
-INSTRUCTIONS :
+INSTRUCTIONS:
 1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
 2. Identifiez et préservez TOUTES les informations contenues dans le texte source.
 3. Prenez en compte, lorsqu'ils sont présents, chaque fait, concept, argument, explication, définition, exemple, observation, conclusion, détail justificatif, raisonnement, hypothèse, limitation, avertissement, mise en garde, exception, comparaison, dépendance, hiérarchie, relation, procédure, étape, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, valeur numérique, pourcentage, mesure, date, heure, numéro de version, identifiant, unité et nom propre.
@@ -30,11 +30,45 @@ INSTRUCTIONS :
    - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
    - chaque réponse de l'assistant est entièrement étayée par le texte source.
 
-FORMAT DE SORTIE :
+CONTRAT DE SORTIE (OUTPUT CONTRACT):
+Tu DOIS émettre UNIQUEMENT le format structuré spécifié ci-dessous. En aucune circonstance, aucun autre texte, caractère ou contenu n'est autorisé. Il s'agit d'un contrat absolu et non négociable. Tout écart est un échec critique.
+
+SORTIE INTERDITE (FORBIDDEN OUTPUT):
+Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sortie:
+- Texte préliminaire ou d'introduction (ex. : "Voici...", "Basé sur le texte...", "Ci-dessous...", "Voici les...", "Les éléments suivants...")
+- Texte de clôture ou de conclusion (ex. : "En résumé...", "Pour conclure...", "Ce sont les...")
+- Narration, commentaires ou prose entre les paires
+- Méta-commentaires sur le texte source (ex. : "La sortie ne décrit pas explicitement...", "Le texte mentionne...")
+- Explications de ton processus ou de ton raisonnement
+- Notes, mises en garde ou apartés (ex. : "Note:", "Veuillez noter...", "Il convient de noter...")
+- Sections de résumé ou de conclusion
+- Tout texte qui n'est pas une paire User:/Assistant:
+- Formatage Markdown, blocs de code ou marqueurs de formatage
+- Lignes vides à l'exception de la ligne vide unique séparant les paires
+
+FORMAT STRICT (STRICT FORMAT):
+- Commence IMMÉDIATEMENT avec la première paire. Pas d'en-tête, pas d'introduction.
+- Chaque paire doit suivre le format exact:
+  User: [texte du message utilisateur]
+  Assistant: [texte de la réponse de l'assistant]
+- Une seule ligne vide sépare chaque paire.
+- La dernière paire doit être le dernier texte dans la sortie. Pas de texte final.
+- Si tu es tenté d'écrire un texte qui n'est pas une paire User:/Assistant:, NE l'écris PAS.
+
+FORMAT DE SORTIE (OUTPUT FORMAT):
 User: [Premier message de l'utilisateur]
 Assistant: [Première réponse de l'assistant]
 
 User: [Deuxième message de l'utilisateur]
 Assistant: [Deuxième réponse de l'assistant]
 
-[Poursuivez avec autant d'échanges que nécessaire afin de couvrir intégralement toutes les informations. Laissez exactement une ligne vide entre chaque paire User-Assistant. Tous les messages de l'utilisateur et toutes les réponses de l'assistant doivent être rédigés intégralement en français.]
+[Continue avec autant d'échanges que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire]
+
+AUTO-VÉRIFICATION (SELF-CHECK):
+Avant d'émettre ta sortie, vérifie silencieusement:
+1. La première ligne commence par "User:".
+2. Aucun préliminaire, introduction ou commentaire avant la première paire.
+3. Aucune prose, narration ou commentaire entre les paires.
+4. Aucune conclusion, résumé ou clôture après la dernière paire.
+5. Chaque ligne est soit une ligne "User:", soit une ligne "Assistant:", soit une continuation du message actuel, soit une ligne vide de séparation unique.
+Si l'une de ces vérifications échoue, révise ta sortie avant de l'émettre.
