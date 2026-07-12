@@ -303,6 +303,11 @@ export function createAppStore(): AppStore {
     // Re-init provider to ensure it's current
     initProvider()
 
+    // Reset processor state before the pipeline starts so a previously
+    // aborted processor does not carry over into this run.
+    processor.reset()
+    processor.resetStats()
+
     // Dashboard
     uiStore.startDashboard()
     uiStore.setDashboardMetrics({
