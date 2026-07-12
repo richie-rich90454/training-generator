@@ -101,9 +101,13 @@ describe("analyzeChunk - language detection", ()=>{
     })
 })
 describe("selectModel - validation", ()=>{
-    it("throws when candidates array is empty", ()=>{
+    it("returns fallback when candidates array is empty", ()=>{
         let chunk=makeChunk()
-        expect(()=>selectModel([], 'instruction', chunk)).toThrow("No model candidates provided")
+        let result=selectModel([], 'instruction', chunk)
+        expect(result.providerId).toBe("fallback")
+        expect(result.model).toBe("fallback-model")
+        expect(result.reason).toContain("No model candidates provided")
+        expect(result.alternatives).toEqual([])
     })
 })
 describe("selectModel - strength matching", ()=>{
