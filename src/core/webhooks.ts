@@ -37,7 +37,8 @@ export class WebhookOutput{
                 }
                 let response=await axios.post(this.url, payload, {
                     headers: headers,
-                    timeout: 30000
+                    timeout: 30000,
+                    validateStatus: ()=>true
                 })
                 if (response.status>=200&&response.status<300){
                     return {
@@ -47,7 +48,7 @@ export class WebhookOutput{
                     }
                 }
                 lastStatus=response.status
-                if (response.status>=400&&response.status<500){
+                if (response.status>=400&&response.status<500&&response.status!==429){
                     break
                 }
             }
