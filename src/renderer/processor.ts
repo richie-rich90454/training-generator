@@ -72,6 +72,7 @@ class Processor{
                 if(signal.aborted||prompts.length===0)continue
                 let combined=prompts.map((p,j)=>`--- CHUNK ${j+1} ---\n${p}`).join("\n\n")
                 stats.recordPromptTokens(combined)
+                let batchStart=Date.now()
                 let result=await provider.generate(combined,model,{
                     temperature:0.7,
                     top_p:0.9,
@@ -81,6 +82,7 @@ class Processor{
                     ollamaPort:this.ollamaPort,
                     signal:signal
                 })
+                stats.recordLatency(Date.now()-batchStart)
                 if(signal.aborted)continue
                 let responses=this.splitBatchedResponse(result.text,batch.length)
                 for(let j=0;j<batch.length;j++){

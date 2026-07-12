@@ -324,6 +324,9 @@ export function createAppStore(): AppStore {
     let failedFiles = 0
     let chunksTotal = 0
     let chunksDone = 0
+    // Incremental token estimate accumulated from onStreamChunk calls so the
+    // dashboard reflects live throughput during long streams (before chunks complete).
+    let streamedTokensEstimate = 0
 
     const pipelineEvents: PipelineEvents = {
       onFileStart: (_fileName: string, chunkCount: number) => {
@@ -344,6 +347,7 @@ export function createAppStore(): AppStore {
           providerLatency: event.latencyMs,
           activeProvider: settingsStore.settings.provider || "--",
         })
+        streamedTokensEstimate = 0
         setProgress(
           Math.min(99, Math.round((chunksDone / Math.max(1, chunksTotal)) * 100)),
           t("processing.chunksProgress", undefined, {
@@ -366,6 +370,7 @@ export function createAppStore(): AppStore {
           providerLatency: processor.stats.averageLatencyMs,
           activeProvider: settingsStore.settings.provider || "--",
         })
+        streamedTokensEstimate = 0
         setProgress(
           Math.min(99, Math.round((chunksDone / Math.max(1, chunksTotal)) * 100)),
           t("processing.chunksProgress", undefined, {
@@ -391,6 +396,10 @@ export function createAppStore(): AppStore {
       },
       onStreamChunk: (text: string) => {
         uiStore.appendLiveStream(text)
+        streamedTokensEstimate += Math.ceil(text.length / 4)
+        uiStore.setDashboardMetrics({
+          totalTokens: processor.stats.totalTokens + streamedTokensEstimate,
+        })
       },
     }
 

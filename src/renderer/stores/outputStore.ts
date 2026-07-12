@@ -5,6 +5,46 @@ import { exportJSONL, exportJSONArray, exportCSV } from "../exportFormats.js"
 import { t } from "../i18n.js"
 const SPLIT_THRESHOLD = 100000
 const MAX_CLIPBOARD_SIZE = 5 * 1024 * 1024
+function trimBlockFiller(block: string, answerLabel: string): string {
+    const lines = block.split("\n")
+    const result: string[] = []
+    let inAnswer = false
+    let answerComplete = false
+    const answerRe = new RegExp("^" + answerLabel + ":?\\s*", "i")
+    for (const line of lines) {
+        const trimmed = line.trim()
+        if (answerRe.test(trimmed)) {
+            inAnswer = true
+            answerComplete = false
+            result.push(line)
+        }
+        else if (inAnswer && answerComplete) {
+            // Filler after a completed answer — discard
+        }
+        else if (inAnswer && trimmed === "") {
+            // Blank line marks the end of answer content
+            answerComplete = true
+        }
+        else {
+            result.push(line)
+        }
+    }
+    return result.join("\n").trim()
+}
+function stripFillerBetweenPairs(text: string): string {
+    if (!text || typeof text !== "string") return text
+    const qaRegex = /Question:[\s\S]*?Answer:[\s\S]*?(?=Question:|$)/gi
+    const qaMatches = text.match(qaRegex)
+    if (qaMatches && qaMatches.length > 0) {
+        return qaMatches.map(b => trimBlockFiller(b, "Answer")).filter(Boolean).join("\n\n")
+    }
+    const convRegex = /(?:User|Human):[\s\S]*?Assistant:[\s\S]*?(?=(?:User|Human):|$)/gi
+    const convMatches = text.match(convRegex)
+    if (convMatches && convMatches.length > 0) {
+        return convMatches.map(b => trimBlockFiller(b, "Assistant")).filter(Boolean).join("\n\n")
+    }
+    return text
+}
 export type ExportFormat = "jsonl" | "json" | "chatml" | "csv" | "text"
 export interface OutputStore {
     outputData: TrainingItem[]
@@ -64,6 +104,7 @@ export function createOutputStore(): OutputStore {
         let currentQuestion = ""
         let currentAnswer = ""
         let inAnswer = false
+        let answerComplete = false
         function flushPair(): void {
             if (currentQuestion || currentAnswer) {
                 pairs.push({
@@ -74,6 +115,7 @@ export function createOutputStore(): OutputStore {
             currentQuestion = ""
             currentAnswer = ""
             inAnswer = false
+            answerComplete = false
         }
         for (const line of lines) {
             const trimmedLine = line.trim()
@@ -83,14 +125,22 @@ export function createOutputStore(): OutputStore {
             }
             else if (trimmedLine.match(/^answer:\s*/i)) {
                 inAnswer = true
+                answerComplete = false
                 currentAnswer = trimmedLine.replace(/^answer:\s*/i, "")
             }
             else if (trimmedLine) {
-                if (inAnswer && currentAnswer) {
+                if (inAnswer && !answerComplete && currentAnswer) {
                     currentAnswer += " " + trimmedLine
                 }
                 else if (currentQuestion && !inAnswer) {
                     currentQuestion += " " + trimmedLine
+                }
+                // Once the answer is complete, non-Question: lines are filler and discarded
+            }
+            else {
+                // Blank line: once we have answer content, mark the answer as complete
+                if (inAnswer && currentAnswer) {
+                    answerComplete = true
                 }
             }
         }
@@ -120,6 +170,7 @@ export function createOutputStore(): OutputStore {
         let currentAssistant = ""
         let inUser = false
         let inAssistant = false
+        let assistantComplete = false
         for (const line of lines) {
             const trimmedLine = line.trim()
             if (trimmedLine.match(/^user:?\s*/i)) {
@@ -133,18 +184,27 @@ export function createOutputStore(): OutputStore {
                 currentAssistant = ""
                 inUser = true
                 inAssistant = false
+                assistantComplete = false
             }
             else if (trimmedLine.match(/^assistant:?\s*/i)) {
                 inUser = false
                 inAssistant = true
+                assistantComplete = false
                 currentAssistant = trimmedLine.replace(/^assistant:?\s*/i, "")
             }
             else if (trimmedLine) {
-                if (inAssistant && currentAssistant) {
+                if (inAssistant && !assistantComplete && currentAssistant) {
                     currentAssistant += " " + trimmedLine
                 }
                 else if (inUser && currentUser) {
                     currentUser += " " + trimmedLine
+                }
+                // Once the assistant turn is complete, non-User: lines are filler and discarded
+            }
+            else {
+                // Blank line: once we have assistant content, mark the turn as complete
+                if (inAssistant && currentAssistant) {
+                    assistantComplete = true
                 }
             }
         }
@@ -172,7 +232,7 @@ export function createOutputStore(): OutputStore {
         const format = outputFormat
         const items: TrainingItem[] = []
         if (processingType === "instruction") {
-            const qaPairs = parseQuestionAnswerPairs(output)
+            const qaPairs = parseQuestionAnswerPairs(stripFillerBetweenPairs(output))
             if (qaPairs.length > 0) {
                 for (const pair of qaPairs) {
                     if (format === "chatml") {
@@ -203,7 +263,7 @@ export function createOutputStore(): OutputStore {
             }
         }
         else if (processingType === "conversation") {
-            const conversationTurns = parseConversationTurns(output)
+            const conversationTurns = parseConversationTurns(stripFillerBetweenPairs(output))
             if (conversationTurns.length > 0) {
                 if (format === "chatml") {
                     const messages: ChatMessage[] = []
