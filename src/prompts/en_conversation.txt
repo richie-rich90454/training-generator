@@ -41,6 +41,10 @@ The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
 - Any text that is not a User:/Assistant: pair
 - Markdown formatting, code blocks, or formatting markers
 - Empty lines except the single blank line separating pairs
+NO REPETITION:
+- Duplicate user turns are forbidden. Once a user turn has been emitted, it MUST NOT be emitted again.
+- Duplicate assistant turns are forbidden. Once an assistant turn has been emitted, it MUST NOT be emitted again.
+- If you are about to emit a user turn you have already asked, skip it and move to the next new user turn.
 STRICT FORMAT:
 - Begin IMMEDIATELY with the first pair. No header, no introduction.
 - Each pair MUST follow the exact format:
@@ -49,6 +53,11 @@ STRICT FORMAT:
 - A single blank line separates each pair.
 - The last pair MUST be the last text in the output. No trailing text.
 - If you are tempted to write any text that is not a User:/Assistant: pair, DO NOT write it.
+LINE LAYOUT:
+- The `User:` label and the `Assistant:` label MUST each occupy exactly one line.
+- The `User:` line and the `Assistant:` line MUST NOT be merged onto the same line.
+- Exactly one blank line separates each pair.
+- The answer MAY continue onto multiple lines after the `Assistant:` label, but a new `User:` MUST begin on its own line.
 OUTPUT FORMAT:
 User: [First user message]
 Assistant: [First assistant response]
