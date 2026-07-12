@@ -8,6 +8,37 @@ export interface LogEntry{
     context?: Record<string, unknown>
     trace?: string[]
 }
+const PII_PATTERNS: RegExp[]=[
+    /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/g,
+    /\b\d{3}-\d{2}-\d{4}\b/g,
+    /\b(?:\d{4}[ -]?){3}\d{4}\b/g
+]
+const LOG_PII_KEYS: string[]=["email", "name", "phone", "ssn", "token", "key", "password", "secret", "authorization", "credential", "credentials"]
+function redactPiiInString(s: string): string{
+    let result=s
+    for(let pattern of PII_PATTERNS){
+        result=result.replace(pattern, "[REDACTED]")
+    }
+    return result
+}
+function isLogPiiKey(key: string): boolean{
+    let words=key.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().split(/[_\s]+/)
+    for(let word of words){
+        if(LOG_PII_KEYS.includes(word)){
+            return true
+        }
+    }
+    return false
+}
+function scrubContextKeys(ctx: Record<string, unknown>): Record<string, unknown>{
+    let result: Record<string, unknown>={}
+    for(let key of Object.keys(ctx)){
+        if(!isLogPiiKey(key)){
+            result[key]=ctx[key]
+        }
+    }
+    return result
+}
 export interface LoggerOptions{
     level?: LogLevel
     console?: boolean
@@ -78,11 +109,14 @@ export class Logger{
         let entry: LogEntry = {
             timestamp: new Date().toISOString(),
             level,
-            message
+            message: redactPiiInString(message)
         }
         let merged = this.mergeContext(context)
         if (merged){
-            entry.context = merged
+            let scrubbed = scrubContextKeys(merged)
+            if (Object.keys(scrubbed).length > 0){
+                entry.context = scrubbed
+            }
         }
         if (level === "error"){
             let err = new Error()
