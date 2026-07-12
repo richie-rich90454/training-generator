@@ -104,6 +104,15 @@ describe("Prompt structure validation", () => {
         expect(content).toContain("NO REPETITION")
     })
 
+    test.each(files)("file %s contains ANSWER CONTENT RULES or CONTENT RULES subsection", (file: string) => {
+        let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
+        // instruction/conversation files contain "ANSWER CONTENT RULES";
+        // chunking/custom files contain "CONTENT RULES". Either is acceptable.
+        let hasAnswerRules = content.includes("ANSWER CONTENT RULES")
+        let hasContentRules = content.includes("CONTENT RULES")
+        expect(hasAnswerRules || hasContentRules).toBe(true)
+    })
+
     test("all prompt files contain every required contract section", () => {
         for (let file of files) {
             let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
@@ -112,6 +121,11 @@ describe("Prompt structure validation", () => {
             expect(containsAny(content, strictFormatTerms), `${file} missing STRICT FORMAT`).toBe(true)
             expect(content, `${file} missing {{text}} placeholder`).toContain("{{text}}")
             expect(containsAny(content, selfCheckTerms), `${file} missing SELF-CHECK`).toBe(true)
+            expect(content, `${file} missing LINE LAYOUT`).toContain("LINE LAYOUT")
+            expect(content, `${file} missing NO REPETITION`).toContain("NO REPETITION")
+            let hasAnswerRules = content.includes("ANSWER CONTENT RULES")
+            let hasContentRules = content.includes("CONTENT RULES")
+            expect(hasAnswerRules || hasContentRules, `${file} missing ANSWER CONTENT RULES or CONTENT RULES`).toBe(true)
         }
     })
 })
