@@ -114,6 +114,38 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         />
                     </div>
                 </Show>
+                <Show when={settingsStore.settings.provider === "ollama"}>
+                    <div class={styles["config-field"]}>
+                        <label class={styles["config-field__label"]} for="config-ollama-host">
+                            <Icon html={renderIcon("fa-server")} />
+                            <span data-i18n="config.ollamaHost">{t("config.ollamaHost")}</span>
+                        </label>
+                        <input
+                            id="config-ollama-host"
+                            class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                            type="text"
+                            value={settingsStore.settings.ollamaHost ?? "localhost"}
+                            placeholder={t("config.ollamaHost.placeholder")}
+                            data-i18n-placeholder="config.ollamaHost.placeholder"
+                            onInput={(e) => settingsStore.setOllamaHost(e.currentTarget.value)}
+                        />
+                    </div>
+                    <div class={styles["config-field"]}>
+                        <label class={styles["config-field__label"]} for="config-ollama-port">
+                            <Icon html={renderIcon("fa-link")} />
+                            <span data-i18n="config.ollamaPort">{t("config.ollamaPort")}</span>
+                        </label>
+                        <input
+                            id="config-ollama-port"
+                            class={`${styles["form-control"]} ${styles["config-field__control"]}`}
+                            type="number"
+                            min="1"
+                            max="65535"
+                            value={settingsStore.settings.ollamaPort ?? 11434}
+                            onChange={(e) => settingsStore.setOllamaPort(parseInt(e.currentTarget.value, 10) || 11434)}
+                        />
+                    </div>
+                </Show>
                 <div class={styles["config-field"]}>
                     <label class={styles["config-field__label"]} for="config-processing-type">
                         <Icon html={renderIcon("fa-cogs")} />
