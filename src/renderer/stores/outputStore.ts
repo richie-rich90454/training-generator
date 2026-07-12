@@ -9,21 +9,17 @@ function trimBlockFiller(block: string, answerLabel: string): string {
     const lines = block.split("\n")
     const result: string[] = []
     let inAnswer = false
-    let answerComplete = false
     const answerRe = new RegExp("^" + answerLabel + ":?\\s*", "i")
     for (const line of lines) {
         const trimmed = line.trim()
         if (answerRe.test(trimmed)) {
             inAnswer = true
-            answerComplete = false
             result.push(line)
         }
-        else if (inAnswer && answerComplete) {
-            // Filler after a completed answer — discard
-        }
-        else if (inAnswer && trimmed === "") {
-            // Blank line marks the end of answer content
-            answerComplete = true
+        else if (inAnswer) {
+            // Keep ALL lines after the answer label (including blank lines) —
+            // the block boundary is already delimited by stripFillerBetweenPairs.
+            result.push(line)
         }
         else {
             result.push(line)
