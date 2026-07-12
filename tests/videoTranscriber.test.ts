@@ -59,6 +59,16 @@ vi.mock("child_process", ()=>{
                     cb(null, cpState.execStdout, "");
                 }
             });
+        }),
+        execFile: vi.fn((file: string, args: string[], cb: Function)=>{
+            process.nextTick(()=>{
+                if(cpState.execError){
+                    cb(cpState.execError, "", "");
+                }
+                else{
+                    cb(null, cpState.execStdout, "");
+                }
+            });
         })
     };
     return{

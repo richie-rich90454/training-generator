@@ -1,4 +1,4 @@
-import {spawn, exec} from "child_process";
+import {spawn, execFile} from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -58,8 +58,8 @@ export function getVideoDuration(videoPath: string, ffmpegPath?: string): Promis
         if(ffmpegPath){
             ffprobePath=path.join(path.dirname(ffmpegPath), path.basename(ffmpegPath).replace(/ffmpeg/i, "ffprobe"));
         }
-        let cmd='"'+ffprobePath+'" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+videoPath+'"';
-        exec(cmd, (error, stdout, stderr)=>{
+        let args=["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", videoPath];
+        execFile(ffprobePath, args, (error, stdout, stderr)=>{
             if(error){
                 resolve(undefined);
                 return;
