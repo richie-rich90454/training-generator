@@ -3,6 +3,7 @@ export interface ChunkCharacteristics{
     hasCode:boolean
     hasMath:boolean
     hasTable:boolean
+    hasImage?:boolean
     language:string
     isMultilingual:boolean
     estimatedComplexity:'easy'|'medium'|'hard'
@@ -13,6 +14,7 @@ export interface ModelCandidate{
     contextWindow:number
     strengths:('code'|'math'|'multilingual'|'reasoning'|'speed'|'general')[]
     costPer1kTokens?:number
+    vision?:boolean
 }
 export interface SelectionResult{
     providerId:string
@@ -26,6 +28,7 @@ export function analyzeChunk(text:string):ChunkCharacteristics{
     let hasCode=/```|`[^`]+`|function\s|class\s|def\s|import\s|require\(/.test(text)
     let hasMath=/\$[^$]+\$/gi.test(text)||/\\frac|\\sum|\\int|\\sqrt/.test(text)
     let hasTable=/\|.*\|.*\|/.test(text)&&/\|[-:\s]+\|/.test(text)
+    let hasImage=/!\[.*\]\(.*\)|<img|data:image\//.test(text)
     let cjkCount=(text.match(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g)||[]).length
     let isMultilingual=cjkCount>0&&/[a-zA-Z]/.test(text)
     let language='en'
@@ -35,7 +38,7 @@ export function analyzeChunk(text:string):ChunkCharacteristics{
     let estimatedComplexity:'easy'|'medium'|'hard'='easy'
     if(length>5000||hasMath||hasCode)estimatedComplexity='hard'
     else if(length>2000||hasTable)estimatedComplexity='medium'
-    return{length, hasCode, hasMath, hasTable, language, isMultilingual, estimatedComplexity}
+    return{length, hasCode, hasMath, hasTable, hasImage, language, isMultilingual, estimatedComplexity}
 }
 export function selectModel(
     candidates:ModelCandidate[],
@@ -72,6 +75,14 @@ export function selectModel(
         if(chunk.isMultilingual&&c.strengths.includes('multilingual')){
             score+=25
             reasons.push("multilingual capable")
+        }
+        if(chunk.hasImage&&c.vision){
+            score+=50
+            reasons.push("vision capable")
+        }
+        if(chunk.hasImage&&!c.vision){
+            score-=30
+            reasons.push("no vision support")
         }
         if(processingType==='cot'||processingType==='tot'){
             if(c.strengths.includes('reasoning')){
