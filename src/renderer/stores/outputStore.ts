@@ -133,20 +133,18 @@ export function createOutputStore(): OutputStore {
         const pairs: QAPair[] = []
         const lines = text.split("\n")
         let currentQuestion = ""
-        let currentAnswer = ""
+        let currentAnswerLines: string[] = []
         let inAnswer = false
-        let answerComplete = false
         function flushPair(): void {
-            if (currentQuestion || currentAnswer) {
+            if (currentQuestion || currentAnswerLines.length > 0) {
                 pairs.push({
                     question: currentQuestion.trim(),
-                    answer: currentAnswer.trim()
+                    answer: currentAnswerLines.join("\n").trim()
                 })
             }
             currentQuestion = ""
-            currentAnswer = ""
+            currentAnswerLines = []
             inAnswer = false
-            answerComplete = false
         }
         for (const line of lines) {
             const trimmedLine = line.trim()
@@ -156,22 +154,16 @@ export function createOutputStore(): OutputStore {
             }
             else if (trimmedLine.match(/^answer:\s*/i)) {
                 inAnswer = true
-                answerComplete = false
-                currentAnswer = trimmedLine.replace(/^answer:\s*/i, "")
+                currentAnswerLines = [trimmedLine.replace(/^answer:\s*/i, "")]
+            }
+            else if (inAnswer) {
+                // All lines after Answer: (including blank lines) are part of the answer
+                // until the next Question: delimiter
+                currentAnswerLines.push(line)
             }
             else if (trimmedLine) {
-                if (inAnswer && !answerComplete && currentAnswer) {
-                    currentAnswer += " " + trimmedLine
-                }
-                else if (currentQuestion && !inAnswer) {
+                if (currentQuestion) {
                     currentQuestion += " " + trimmedLine
-                }
-                // Once the answer is complete, non-Question: lines are filler and discarded
-            }
-            else {
-                // Blank line: once we have answer content, mark the answer as complete
-                if (inAnswer && currentAnswer) {
-                    answerComplete = true
                 }
             }
         }
