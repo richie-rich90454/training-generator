@@ -1,8 +1,11 @@
 import type{Provider, ProviderOptions, ProviderResult}from"./provider.js"
+const DEFAULT_MAX_ITERATIONS=10
 export interface EnsembleConfig{
     models:{providerId:string, model:string}[]
     options?:ProviderOptions
     scoringFn?:(result:ProviderResult, prompt:string)=>number
+    maxIterations?:number
+    signal?:AbortSignal
 }
 export interface EnsembleResult{
     best:ProviderResult
@@ -36,12 +39,19 @@ export async function runEnsemble(
     prompt:string,
     config:EnsembleConfig
 ):Promise<EnsembleResult>{
+    if(config.signal?.aborted){
+        throw new Error("Ensemble aborted")
+    }
     let scoringFn=config.scoringFn||defaultScoreFn
+    let options:ProviderOptions|undefined=config.options
+    if(config.signal){
+        options={...config.options, signal:config.signal}
+    }
     let promises=config.models.map(async(m)=>{
         let provider=providers.get(m.providerId)
         if(!provider)return{providerId:m.providerId, model:m.model, result:null, score:-Infinity, error:`Provider ${m.providerId} not found`}
         try{
-            let result=await provider.generate(prompt, m.model, config.options)
+            let result=await provider.generate(prompt, m.model, options)
             let score=scoringFn(result, prompt)
             return{providerId:m.providerId, model:m.model, result, score}
         }
@@ -50,6 +60,9 @@ export async function runEnsemble(
         }
     })
     let allResults=await Promise.all(promises)
+    if(config.signal?.aborted){
+        throw new Error("Ensemble aborted")
+    }
     let best=allResults[0]
     for(let r of allResults){
         if(r.score>best.score)best=r
@@ -76,8 +89,13 @@ export async function runEnsembleBatch(
     prompts:string[],
     config:EnsembleConfig
 ):Promise<EnsembleResult[]>{
+    let maxIterations=config.maxIterations??DEFAULT_MAX_ITERATIONS
+    let limited=prompts.slice(0, maxIterations)
     let results:EnsembleResult[]=[]
-    for(let prompt of prompts){
+    for(let prompt of limited){
+        if(config.signal?.aborted){
+            throw new Error("Ensemble batch aborted")
+        }
         let result=await runEnsemble(providers, prompt, config)
         results.push(result)
     }
