@@ -30,7 +30,7 @@ describe("ExportFormats csvEscape", () => {
 })
 describe("ExportFormats exportJSONL", () => {
     it("exports empty array", () => {
-        expect(exportJSONL([])).toBe("\n")
+        expect(exportJSONL([])).toBe("")
     })
     it("exports one item per line", () => {
         let result = exportJSONL([item({ format: "instruction", input: "in", output: "out" })])
