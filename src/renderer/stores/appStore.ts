@@ -421,6 +421,7 @@ export function createAppStore(): AppStore {
       })
     }, 30000)
 
+    let runSucceeded = false
     try {
       const result = await pipeline.processFiles(queue, getPipelineSettings())
       totalItemsGenerated = result.totalItems
@@ -451,6 +452,7 @@ export function createAppStore(): AppStore {
       uiStore.setFilesProcessed(successfulFiles)
       uiStore.setLastProcessed(new Date().toLocaleString())
       await clearCheckpoint()
+      runSucceeded = true
     } catch (error) {
       logger.error("app", t("processing.failed"), { error: (error as Error).message })
       addLog(t("processing.failed"), "error")
@@ -459,7 +461,9 @@ export function createAppStore(): AppStore {
       window.clearInterval(checkpointInterval)
       setIsProcessing(false)
       uiStore.stopDashboard()
-      processor.abort()
+      if (!runSucceeded) {
+        processor.abort()
+      }
       outputStore.clearStaging()
       updateOutputPreview()
       if (outputStore.itemCount() > 0) {
