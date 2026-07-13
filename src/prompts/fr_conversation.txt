@@ -45,6 +45,16 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Tout texte qui n'est pas une paire User:/Assistant:
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Lignes vides à l'exception de la ligne vide unique séparant les paires
+
+RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
+- Le TOUT PREMIER caractère de ta sortie DOIT être « U » (le début de « User: »).
+- Si ta sortie commence par un autre caractère, mot ou texte, c'est un ÉCHEC CRITIQUE.
+- Pas de salutation, pas de confirmation, pas de préambule, pas « Bien sûr, » pas « Voici, » pas « Basé sur le texte » — RIEN avant le premier « User: ».
+- Si tu es sur le point d'écrire du texte avant le premier « User: », ARRÊTE et supprime-le.
+- Ta sortie DOIT ressembler exactement à ceci dès le premier caractère :
+  User: ...
+  Assistant: ...
+
 SANS RÉPÉTITION (NO REPETITION):
 - Les tours utilisateur en double sont interdits. Une fois qu'un tour utilisateur a été émis, IL NE DOIT PAS être émis à nouveau.
 - Les tours de l'assistant en double sont interdits. Une fois qu'un tour de l'assistant a été émis, IL NE DOIT PAS être émis à nouveau.
