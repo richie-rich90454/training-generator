@@ -311,11 +311,39 @@ export function createOutputStore(): OutputStore {
                 return items
             }
         }
-        // When no Q&A pairs or conversation turns were parsed, the model output
-        // did not follow the required format. Return an empty array rather than
-        // creating a fallback item with raw (often garbage) output. This prevents
-        // meta-commentary, preamble, and other non-Q&A content from polluting the
-        // training dataset. The caller handles empty arrays gracefully.
+        // For instruction/conversation: when no Q&A pairs or conversation turns
+        // were parsed, the model output did not follow the required format. Return
+        // an empty array rather than creating a fallback item with raw (often
+        // garbage) output. This prevents meta-commentary, preamble, and other
+        // non-Q&A content from polluting the training dataset.
+        if (processingType === "instruction" || processingType === "conversation") {
+            return items
+        }
+        // For chunking/custom: the model output IS the content (no Q&A parsing
+        // applies). Create a fallback item from the raw output.
+        if (format === "chatml") {
+            items.push({
+                format: "chatml",
+                messages: [
+                    { role: "user", content: input },
+                    { role: "assistant", content: output }
+                ]
+            })
+        }
+        else if (format === "text") {
+            items.push({ format: "text", text: output })
+        }
+        else if (format === "csv") {
+            items.push({ format: "instruction", input, output })
+        }
+        else {
+            items.push({
+                format: "instruction",
+                instruction: t("training.instruction.default"),
+                input,
+                output
+            })
+        }
         return items
     }
     function appendOutput(items: TrainingItem[]): void {
