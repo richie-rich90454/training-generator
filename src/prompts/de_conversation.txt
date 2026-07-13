@@ -41,6 +41,15 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
 - Leerzeilen außer der einzelnen Leerzeile, die Paare trennt
 
+ERSTE-ZEILE-REGEL (FIRST LINE RULE):
+- Das ALLERSTE Zeichen deiner Ausgabe MUSS "U" sein (der Anfang von "User:").
+- Wenn deine Ausgabe mit irgendeinem anderen Zeichen, Wort oder Text beginnt, ist dies ein KRITISCHER FEHLER.
+- Keine Begrüßung, keine Bestätigung, kein Vorspann, kein "Ja," kein "Hier ist," kein "Basierend auf dem Text" — NICHTS vor dem ersten "User:".
+- Wenn du im Begriff bist, Text vor dem ersten "User:" zu schreiben, STOPPE und lösche ihn.
+- Deine Ausgabe MUSS vom allerersten Zeichen an genau so aussehen:
+  User: ...
+  Assistant: ...
+
 KEINE WIEDERHOLUNG (NO REPETITION):
 - Doppelte Nutzer-Beiträge sind verboten. Sobald ein Nutzer-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
 - Doppelte Assistenten-Beiträge sind verboten. Sobald ein Assistenten-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
