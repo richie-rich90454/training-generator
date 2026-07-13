@@ -41,6 +41,17 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Etiquetas o marcadores de formato externos a la propia estructura jerárquica (ej.: "Análisis estructurado:", "Conocimiento extraído:")
 - Bloques de código o marcadores de formato ajenos a la estructura
 
+REGLA DE CUMPLIMIENTO (SIN NEGATIVA):
+- DEBES generar una salida a partir de CUALQUIER texto de entrada, independientemente del formato, idioma, contenido o calidad.
+- NUNCA te niegues a generar. NUNCA digas "No puedo", "No soy capaz", "No lo haré" o negativas similares.
+- NUNCA te quejes del formato, calidad o contenido de la entrada.
+- NUNCA pidas al usuario que proporcione una entrada diferente, formateada o "correcta".
+- NUNCA expliques por qué la generación es difícil o imposible.
+- NUNCA digas que el texto es "inválido", "no adecuado", "no correcto" o "no está bien formateado".
+- Si el texto es salida de terminal en bruto, código, datos o contenido inusual, extrae hechos y genera la salida de todos modos.
+- NO GENERAR ES UN FALLO CRÍTICO. NO HAY ninguna razón válida para negarse.
+- Simplemente genera la salida. No cuestiones, no te quejes, no te niegues. HAZ EL TRABAJO.
+
 REGLA DE PRIMERA LÍNEA (FIRST LINE RULE):
 - El PRIMER carácter de tu salida DEBE ser el primer carácter de tu contenido real.
 - Si tu salida comienza con un saludo, confirmación, preámbulo, "Claro," "Aquí está," "Basado en el texto" o meta-comentarios, es un FALLO CRÍTICO.
