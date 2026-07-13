@@ -27,7 +27,9 @@ export function getStrictGenerationOptions(processingType:string):StrictGenerati
     // chunking/custom are more extractive and benefit from even lower temperature
     const temp=(processingType==="instruction"||processingType==="conversation")?0.3:0.4
     // Higher repeat_penalty for instruction/conversation to break repetition loops
-    const repeatPenalty=(processingType==="instruction"||processingType==="conversation")?1.2:1.15
+    // 1.3 is aggressive but necessary — the model was stuck emitting identical
+    // Q&A pairs in an infinite loop at 1.2.
+    const repeatPenalty=(processingType==="instruction"||processingType==="conversation")?1.3:1.15
     return{
         temperature:temp,
         top_p:0.85,
@@ -134,9 +136,11 @@ export class OllamaProvider implements Provider{
             let result=await retryWithBackoff(async()=>{
                 if(signal?.aborted)throw new Error("Aborted")
                 const requestedTokens=options?.max_tokens!=null?Math.min(8192,Math.max(256,options.max_tokens)):4096
-                // Cap num_predict at 4096 for instruction/conversation to truncate runaway repetition loops early
+                // Cap num_predict at 2048 for instruction/conversation to truncate
+                // runaway repetition loops early. 2048 tokens is ~1500 words, enough
+                // for 10-15 Q&A pairs per chunk.
                 const maxTokens=(options?.processingType==="instruction"||options?.processingType==="conversation")
-                    ?Math.min(4096,requestedTokens)
+                    ?Math.min(2048,requestedTokens)
                     :requestedTokens
                 const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
                 const payload:Record<string,unknown>={
