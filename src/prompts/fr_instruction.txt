@@ -43,6 +43,16 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Tout texte qui n'est pas une paire Question:/Answer:
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Lignes vides à l'exception de la ligne vide unique séparant les paires
+
+RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
+- Le TOUT PREMIER caractère de ta sortie DOIT être « Q » (le début de « Question: »).
+- Si ta sortie commence par un autre caractère, mot ou texte, c'est un ÉCHEC CRITIQUE.
+- Pas de salutation, pas de confirmation, pas de préambule, pas « Bien sûr, » pas « Voici, » pas « Basé sur le texte » — RIEN avant le premier « Question: ».
+- Si tu es sur le point d'écrire du texte avant le premier « Question: », ARRÊTE et supprime-le.
+- Ta sortie DOIT ressembler exactement à ceci dès le premier caractère :
+  Question: ...
+  Answer: ...
+
 SANS RÉPÉTITION (NO REPETITION):
 - Les questions en double sont interdites. Une fois qu'une question a été émise, ELLE NE DOIT PAS être émise à nouveau.
 - Les réponses en double sont interdites. Une fois qu'une réponse a été émise, ELLE NE DOIT PAS être émise à nouveau.
