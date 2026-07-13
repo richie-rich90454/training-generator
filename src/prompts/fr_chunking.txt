@@ -36,6 +36,13 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Étiquettes, en-têtes ou marqueurs de section (ex. : "Résumé:", "Sortie:", "###")
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Tout texte qui ne fait pas partie du résumé lui-même
+
+RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
+- Le TOUT PREMIER caractère de ta sortie DOIT être le premier caractère de ton contenu de résumé.
+- Si ta sortie commence par une salutation, confirmation, préambule, « Bien sûr, » « Voici, » « Basé sur le texte » ou des méta-commentaires, c'est un ÉCHEC CRITIQUE.
+- Pas de salutation, pas de confirmation, pas de préambule — RIEN avant le contenu réel.
+- Si tu es sur le point d'écrire du texte avant le contenu réel, ARRÊTE et supprime-le.
+
 SANS RÉPÉTITION (NO REPETITION):
 - Les phrases en double sont interdites. Une fois qu'une phrase a été émise, ELLE NE DOIT PAS être émise à nouveau.
 - Les points ou faits en double sont interdites. Si un point a déjà été exprimé, il ne doit pas être répété.
