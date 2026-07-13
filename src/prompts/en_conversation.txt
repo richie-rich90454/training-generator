@@ -42,6 +42,18 @@ The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
 - Markdown formatting, code blocks, or formatting markers
 - Empty lines except the single blank line separating pairs
 
+COMPLIANCE RULE (NO REFUSAL):
+- You MUST generate conversation turns from ANY input text, regardless of format, language, content, or quality.
+- NEVER refuse to generate. NEVER say "I cannot", "I am unable to", "I will not", or any similar refusal.
+- NEVER complain about the input format, quality, or content.
+- NEVER ask the user to provide different, formatted, or "proper" input.
+- NEVER explain why generation is difficult or impossible.
+- NEVER say the text is "not valid", "not suitable", "not proper", or "not formatted correctly".
+- If the text is raw terminal output, code, data, or unusual content, extract facts from it and generate conversation turns anyway.
+- If the text seems to have no clear information, generate turns about what IS there — names, numbers, commands, paths, versions, any literal content.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. There is NO valid reason to refuse. Your ONLY job is to generate.
+- Just generate the conversation turns. Do not question, do not complain, do not refuse. DO THE WORK.
+
 FIRST LINE RULE:
 - The VERY FIRST character of your output MUST be "U" (the start of "User:").
 - If your output begins with ANY other character, word, or text, it is a CRITICAL FAILURE.
