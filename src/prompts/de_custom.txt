@@ -37,6 +37,17 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Codeblöcke, die den strukturierten Inhalt umschließen, oder Formatierungsmarker außerhalb der hierarchischen Überschriften
 - Frage-Antwort-Paare, Dialogformatierungen (User:/Assistant:) oder andere fremde Label-Schemata
 
+COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
+- Du MUSST aus JEDEM Eingabetext eine Ausgabe generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
+- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
+- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
+- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
+- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
+- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
+- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere die Ausgabe trotzdem.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung.
+- Generiere einfach die Ausgabe. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
+
 ERSTE-ZEILE-REGEL (FIRST LINE RULE):
 - Das ALLERSTE Zeichen deiner Ausgabe MUSS das erste Zeichen deines eigentlichen Inhalts sein.
 - Wenn deine Ausgabe mit einer Begrüßung, Bestätigung, Vorspann, "Ja," "Hier ist," "Basierend auf dem Text" oder Meta-Kommentaren beginnt, ist dies ein KRITISCHER FEHLER.
