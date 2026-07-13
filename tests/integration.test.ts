@@ -93,7 +93,19 @@ describe("integration: processor + output store", () => {
     })
     it("processes multiple chunks concurrently", async() => {
         let processor=new Processor()
-        processor.provider=makeMockProvider("Question: What is X?\nAnswer: X is a variable used in programming.")
+        // Each call returns a DIFFERENT Q&A pair so deduplication doesn't collapse them
+        let calls=0
+        processor.provider={
+            name:"mock",
+            async generate(){
+                calls++
+                return{
+                    text:`Question: What is X${calls}?\nAnswer: X${calls} is a variable used in programming.`,
+                    tokens:10,
+                    provider:"mock"
+                }
+            }
+        } as any
         processor.concurrency=3
         let app=makeMockApp("jsonl")
         let chunks=[
@@ -564,7 +576,9 @@ describe("integration: edge cases and error handling", () => {
             () => {},
             () => {}
         )
-        expect(results.length).toBeGreaterThan(0)
+        // Empty response produces 0 Q&A pairs, so 0 items — this is correct
+        // behavior (no fallback to prevent trash in the dataset)
+        expect(results.length).toBe(0)
     })
 })
 describe("integration: processor format x processing type matrix", () => {
