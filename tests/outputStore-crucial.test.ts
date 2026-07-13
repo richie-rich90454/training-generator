@@ -210,6 +210,24 @@ describe("OutputStore createTrainingItem fallback", () => {
         let items = store.createTrainingItem("in", "out", "custom", "csv")
         expect(items[0].format).toBe("instruction")
     })
+    it("returns empty array for instruction when output has no Q&A pairs", () => {
+        // When the model outputs trash (meta-commentary, preamble) instead of
+        // Q&A pairs, createTrainingItem should return an empty array — not a
+        // fallback item with raw garbage stuffed into the input field.
+        let trashOutput = "I cannot generate Q&A from this text because it contains no questions or answers."
+        let items = store.createTrainingItem("input text", trashOutput, "instruction", "jsonl")
+        expect(items.length).toBe(0)
+    })
+    it("returns empty array for conversation when output has no turns", () => {
+        let trashOutput = "This text does not contain a conversation. Please provide a different input."
+        let items = store.createTrainingItem("input text", trashOutput, "conversation", "jsonl")
+        expect(items.length).toBe(0)
+    })
+    it("returns empty array for instruction when output is preamble only", () => {
+        let preambleOnly = "Based on my analysis of the provided text, I will now generate questions. However, the text does not contain enough information."
+        let items = store.createTrainingItem("input text", preambleOnly, "instruction", "jsonl")
+        expect(items.length).toBe(0)
+    })
 })
 describe("OutputStore formatData", () => {
     it("formats jsonl", () => {

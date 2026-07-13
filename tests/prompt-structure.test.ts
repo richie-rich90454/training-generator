@@ -113,6 +113,11 @@ describe("Prompt structure validation", () => {
         expect(hasAnswerRules || hasContentRules).toBe(true)
     })
 
+    test.each(files)("file %s contains FIRST LINE RULE subsection", (file: string) => {
+        let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
+        expect(content).toContain("FIRST LINE RULE")
+    })
+
     test("all prompt files contain every required contract section", () => {
         for (let file of files) {
             let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
@@ -123,6 +128,7 @@ describe("Prompt structure validation", () => {
             expect(containsAny(content, selfCheckTerms), `${file} missing SELF-CHECK`).toBe(true)
             expect(content, `${file} missing LINE LAYOUT`).toContain("LINE LAYOUT")
             expect(content, `${file} missing NO REPETITION`).toContain("NO REPETITION")
+            expect(content, `${file} missing FIRST LINE RULE`).toContain("FIRST LINE RULE")
             let hasAnswerRules = content.includes("ANSWER CONTENT RULES")
             let hasContentRules = content.includes("CONTENT RULES")
             expect(hasAnswerRules || hasContentRules, `${file} missing ANSWER CONTENT RULES or CONTENT RULES`).toBe(true)

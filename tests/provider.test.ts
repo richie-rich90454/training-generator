@@ -275,14 +275,14 @@ describe("getStrictGenerationOptions", () => {
     expect(getStrictGenerationOptions("instruction")).toEqual({
       temperature: 0.3,
       top_p: 0.85,
-      repeat_penalty: 1.2,
+      repeat_penalty: 1.3,
     })
   })
   it("returns strict preset for conversation processing type", () => {
     expect(getStrictGenerationOptions("conversation")).toEqual({
       temperature: 0.3,
       top_p: 0.85,
-      repeat_penalty: 1.2,
+      repeat_penalty: 1.3,
     })
   })
   it("returns strict preset for chunking processing type", () => {
@@ -327,10 +327,10 @@ describe("OllamaProvider with processingType", () => {
       "llama2",
       "prompt",
       expect.objectContaining({
-        repeat_penalty: 1.2,
+        repeat_penalty: 1.3,
         temperature: 0.3,
         top_p: 0.85,
-        num_predict: 4096,
+        num_predict: 2048,
       }),
       undefined,
       undefined
