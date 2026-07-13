@@ -41,6 +41,18 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
 - Leerzeilen außer der einzelnen Leerzeile, die Paare trennt
 
+COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
+- Du MUSST aus JEDEM Eingabetext Gesprächsrunden generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
+- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
+- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
+- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
+- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
+- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
+- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere Gesprächsrunden trotzdem.
+- Wenn der Text keine klaren Informationen zu enthalten scheint, generiere Runden über das, WAS da ist — Namen, Zahlen, Befehle, Pfade, Versionen, jeglicher wörtliche Inhalt.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung. Deine EINZIGE Aufgabe ist zu generieren.
+- Generiere einfach die Gesprächsrunden. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
+
 ERSTE-ZEILE-REGEL (FIRST LINE RULE):
 - Das ALLERSTE Zeichen deiner Ausgabe MUSS "U" sein (der Anfang von "User:").
 - Wenn deine Ausgabe mit irgendeinem anderen Zeichen, Wort oder Text beginnt, ist dies ein KRITISCHER FEHLER.
