@@ -46,6 +46,18 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Formato Markdown, bloques de código o marcadores de formato
 - Líneas en blanco excepto la única línea en blanco que separa los pares
 
+REGLA DE CUMPLIMIENTO (SIN NEGATIVA):
+- DEBES generar turnos de conversación a partir de CUALQUIER texto de entrada, independientemente del formato, idioma, contenido o calidad.
+- NUNCA te niegues a generar. NUNCA digas "No puedo", "No soy capaz", "No lo haré" o negativas similares.
+- NUNCA te quejes del formato, calidad o contenido de la entrada.
+- NUNCA pidas al usuario que proporcione una entrada diferente, formateada o "correcta".
+- NUNCA expliques por qué la generación es difícil o imposible.
+- NUNCA digas que el texto es "inválido", "no adecuado", "no correcto" o "no está bien formateado".
+- Si el texto es salida de terminal en bruto, código, datos o contenido inusual, extrae hechos y genera turnos de conversación de todos modos.
+- Si el texto parece no tener información clara, genera turnos sobre lo QUE ESTÁ ahí — nombres, números, comandos, rutas, versiones, cualquier contenido literal.
+- NO GENERAR ES UN FALLO CRÍTICO. NO HAY ninguna razón válida para negarse. Tu ÚNICA tarea es generar.
+- Simplemente genera los turnos de conversación. No cuestiones, no te quejes, no te niegues. HAZ EL TRABAJO.
+
 REGLA DE PRIMERA LÍNEA (FIRST LINE RULE):
 - El PRIMER carácter de tu salida DEBE ser "U" (el inicio de "User:").
 - Si tu salida comienza con cualquier otro carácter, palabra o texto, es un FALLO CRÍTICO.
