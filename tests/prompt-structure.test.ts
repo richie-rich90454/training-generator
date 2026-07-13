@@ -118,6 +118,16 @@ describe("Prompt structure validation", () => {
         expect(content).toContain("FIRST LINE RULE")
     })
 
+    test.each(files)("file %s contains COMPLIANCE RULE (NO REFUSAL) subsection", (file: string) => {
+        let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
+        // English files contain "COMPLIANCE RULE"; other languages contain
+        // translated equivalents (NO REFUSAL / SIN NEGATIVA / SANS REFUS / etc.)
+        let hasComplianceRule = content.includes("COMPLIANCE RULE")
+        let hasNoRefusal = content.includes("NO REFUSAL") || content.includes("SIN NEGATIVA") || content.includes("SANS REFUS") || content.includes("KEINE VERWEIGERUNG")
+        let hasAsianRefusal = content.includes("禁止拒绝") || content.includes("禁止拒絕") || content.includes("拒否禁止") || content.includes("거부 금지")
+        expect(hasComplianceRule || hasNoRefusal || hasAsianRefusal).toBe(true)
+    })
+
     test("all prompt files contain every required contract section", () => {
         for (let file of files) {
             let content: string = fs.readFileSync(path.join(promptsDir, file), "utf8")
@@ -129,6 +139,10 @@ describe("Prompt structure validation", () => {
             expect(content, `${file} missing LINE LAYOUT`).toContain("LINE LAYOUT")
             expect(content, `${file} missing NO REPETITION`).toContain("NO REPETITION")
             expect(content, `${file} missing FIRST LINE RULE`).toContain("FIRST LINE RULE")
+            let hasComplianceRule = content.includes("COMPLIANCE RULE")
+            let hasNoRefusal = content.includes("NO REFUSAL") || content.includes("SIN NEGATIVA") || content.includes("SANS REFUS") || content.includes("KEINE VERWEIGERUNG")
+            let hasAsianRefusal = content.includes("禁止拒绝") || content.includes("禁止拒絕") || content.includes("拒否禁止") || content.includes("거부 금지")
+            expect(hasComplianceRule || hasNoRefusal || hasAsianRefusal, `${file} missing COMPLIANCE RULE`).toBe(true)
             let hasAnswerRules = content.includes("ANSWER CONTENT RULES")
             let hasContentRules = content.includes("CONTENT RULES")
             expect(hasAnswerRules || hasContentRules, `${file} missing ANSWER CONTENT RULES or CONTENT RULES`).toBe(true)
