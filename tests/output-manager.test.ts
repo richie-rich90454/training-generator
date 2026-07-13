@@ -29,7 +29,16 @@ describe("OutputStore createTrainingItem", () => {
         processingTypes.forEach(type=>{
             it(`creates item for ${format}/${type}`, () => {
                 let store: OutputStore=makeStore()
-                let items=store.createTrainingItem("input text", "output text", type, format)
+                // Use format-appropriate output so instruction/conversation parse correctly
+                let output: string
+                if (type === "instruction") {
+                    output = "Question: What is 2+2?\nAnswer: 4"
+                } else if (type === "conversation") {
+                    output = "User: Hello\nAssistant: Hi there"
+                } else {
+                    output = "output text"
+                }
+                let items=store.createTrainingItem("input text", output, type, format)
                 expect(items.length).toBeGreaterThan(0)
             })
         })
@@ -59,12 +68,12 @@ describe("OutputStore createTrainingItem", () => {
         let items=store.createTrainingItem("input", output, "conversation", "chatml")
         expect(items[0].messages!.length).toBe(2)
     })
-    it("falls back to direct input/output when no pairs parsed", () => {
+    it("returns empty array when no pairs parsed for instruction", () => {
         let store: OutputStore=makeStore()
+        // Non-Q&A output for instruction type should return empty array
+        // (no fallback to prevent trash in the dataset)
         let items=store.createTrainingItem("in", "out", "instruction", "jsonl")
-        expect(items[0].instruction).toBeDefined()
-        expect(items[0].input).toBe("in")
-        expect(items[0].output).toBe("out")
+        expect(items.length).toBe(0)
     })
 })
 describe("OutputStore parseQuestionAnswerPairs", () => {

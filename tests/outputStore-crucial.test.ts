@@ -141,11 +141,12 @@ describe("OutputStore parseConversationTurns", () => {
     })
 })
 describe("OutputStore createTrainingItem instruction", () => {
-    it("creates jsonl instruction item", () => {
-        let items = store.createTrainingItem("in", "out", "instruction", "jsonl")
+    it("creates jsonl instruction item from Q&A pairs", () => {
+        let output = "Question: q\nAnswer: a"
+        let items = store.createTrainingItem("in", output, "instruction", "jsonl")
         expect(items[0].format).toBe("instruction")
-        expect(items[0].input).toBe("in")
-        expect(items[0].output).toBe("out")
+        expect(items[0].input).toBe("q")
+        expect(items[0].output).toBe("a")
     })
     it("creates chatml from q/a pairs", () => {
         let output = "Question: q\nAnswer: a"
