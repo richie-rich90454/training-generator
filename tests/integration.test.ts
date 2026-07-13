@@ -108,10 +108,12 @@ describe("integration: processor + output store", () => {
         } as any
         processor.concurrency=3
         let app=makeMockApp("jsonl")
+        // Chunks must be >500 chars to avoid batching (batching combines small chunks)
+        let longContent="This is detailed chunk content that exceeds the 500 character batching threshold. ".repeat(10)
         let chunks=[
-            "Chunk one content with enough length to be processed.",
-            "Chunk two content with enough length to be processed.",
-            "Chunk three content with enough length to be processed."
+            longContent + " Chunk one unique suffix.",
+            longContent + " Chunk two unique suffix.",
+            longContent + " Chunk three unique suffix."
         ]
         let results=await processor.processChunks(
             chunks,
