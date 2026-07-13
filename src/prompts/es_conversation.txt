@@ -46,6 +46,15 @@ Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
 - Formato Markdown, bloques de código o marcadores de formato
 - Líneas en blanco excepto la única línea en blanco que separa los pares
 
+REGLA DE PRIMERA LÍNEA (FIRST LINE RULE):
+- El PRIMER carácter de tu salida DEBE ser "U" (el inicio de "User:").
+- Si tu salida comienza con cualquier otro carácter, palabra o texto, es un FALLO CRÍTICO.
+- Sin saludo, sin confirmación, sin preámbulo, sin "Claro," sin "Aquí está," sin "Basado en el texto" — NADA antes del primer "User:".
+- Si estás a punto de escribir texto antes del primer "User:", DETENTE y bórralo.
+- Tu salida DEBE verse exactamente así desde el primer carácter:
+  User: ...
+  Assistant: ...
+
 SIN REPETICIÓN (NO REPETITION):
 - Los turnos de usuario duplicados están prohibidos. Una vez que se ha emitido un turno de usuario, NO DEBE emitirse de nuevo.
 - Los turnos del asistente duplicados están prohibidos. Una vez que se ha emitido un turno del asistente, NO DEBE emitirse de nuevo.
