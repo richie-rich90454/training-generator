@@ -37,6 +37,12 @@ Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausga
 - Codeblöcke, die den strukturierten Inhalt umschließen, oder Formatierungsmarker außerhalb der hierarchischen Überschriften
 - Frage-Antwort-Paare, Dialogformatierungen (User:/Assistant:) oder andere fremde Label-Schemata
 
+ERSTE-ZEILE-REGEL (FIRST LINE RULE):
+- Das ALLERSTE Zeichen deiner Ausgabe MUSS das erste Zeichen deines eigentlichen Inhalts sein.
+- Wenn deine Ausgabe mit einer Begrüßung, Bestätigung, Vorspann, "Ja," "Hier ist," "Basierend auf dem Text" oder Meta-Kommentaren beginnt, ist dies ein KRITISCHER FEHLER.
+- Keine Begrüßung, keine Bestätigung, kein Vorspann — NICHTS vor dem eigentlichen Inhalt.
+- Wenn du im Begriff bist, Text vor dem eigentlichen Inhalt zu schreiben, STOPPE und lösche ihn.
+
 KEINE WIEDERHOLUNG (NO REPETITION):
 - Doppelte Sätze sind verboten. Sobald ein Satz ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
 - Doppelte Punkte oder Fakten sind verboten. Wenn ein Punkt bereits gemacht wurde, darf er nicht wiederholt werden.
