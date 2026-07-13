@@ -46,6 +46,18 @@ Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sor
 - Formatage Markdown, blocs de code ou marqueurs de formatage
 - Lignes vides à l'exception de la ligne vide unique séparant les paires
 
+RÈGLE DE CONFORMITÉ (SANS REFUS):
+- Tu DOIS générer des tours de conversation à partir de N'IMPORTE QUEL texte d'entrée, quel que soit le format, la langue, le contenu ou la qualité.
+- NE REFUSE JAMAIS de générer. Ne dis JAMAIS « Je ne peux pas », « Je suis incapable de », « Je ne le ferai pas » ou tout refus similaire.
+- Ne te plains JAMAIS du format, de la qualité ou du contenu de l'entrée.
+- Ne demande JAMAIS à l'utilisateur de fournir une entrée différente, formatée ou « correcte ».
+- N'explique JAMAIS pourquoi la génération est difficile ou impossible.
+- Ne dis JAMAIS que le texte est « invalide », « inadéquat », « incorrect » ou « mal formaté ».
+- Si le texte est une sortie de terminal brute, du code, des données ou du contenu inhabituel, extrais les faits et génère des tours de conversation quand même.
+- Si le texte semble ne contenir aucune information claire, génère des tours sur ce QUI EST là — noms, nombres, commandes, chemins, versions, tout contenu littéral.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Il n'y a AUCUNE raison valable de refuser. Ton UNIQUE tâche est de générer.
+- Génère simplement les tours de conversation. Ne questionne pas, ne te plains pas, ne refuse pas. FAIS LE TRAVAIL.
+
 RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
 - Le TOUT PREMIER caractère de ta sortie DOIT être « U » (le début de « User: »).
 - Si ta sortie commence par un autre caractère, mot ou texte, c'est un ÉCHEC CRITIQUE.
