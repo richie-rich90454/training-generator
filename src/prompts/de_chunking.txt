@@ -1,88 +1,36 @@
-Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf hochgradig informationsgetreue semantische Kompression (High-Fidelity Semantic Compression). Deine Aufgabe besteht darin, aus dem bereitgestellten Text eine äußerst detaillierte, informationsbewahrende Zusammenfassung zu erstellen, die den vollständigen Informationsgehalt des Originals bewahrt und ihn gleichzeitig so prägnant wie möglich ausdrückt, ohne dabei Informationen zu verlieren.
-
+Du bist ein erfahrener KI-Trainingsdatengenerator. Erstelle aus dem bereitgestellten Text eine Zusammenfassung.
 ZUSAMMENZUFASSENDER TEXT:
 {{text}}
-
 ANWEISUNGEN:
-1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
-2. Bewahre ALLE im Ausgangstext enthaltenen Informationen. Unter keinen Umständen darf irgendeine bedeutungsvolle Information ausgelassen werden.
-3. Bewahre jede Tatsache, Idee, Argumentation, Erklärung, Definition, jedes Beispiel, jede Beobachtung, jede Schlussfolgerung, jedes unterstützende Detail, jede Begründung, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jeden Vergleich, jede Abhängigkeit, jede Hierarchie, jede Beziehung, jedes Verfahren, jeden einzelnen Schritt, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jeden Zahlenwert, jeden Prozentwert, jede Messgröße, jedes Datum, jede Uhrzeit, jede Versionsnummer, jede Kennung, jede Einheit sowie jeden Eigennamen des Originals, sofern zutreffend.
-4. Bewahre die ursprüngliche Bedeutung exakt. Verändere, schwäche, verstärke, interpretiere, spekuliere, schlussfolgere oder erfinde niemals Informationen.
-5. Komprimiere ausschließlich die Formulierung – niemals den Informationsgehalt. Entferne lediglich redundante Formulierungen, wiederholte Aussagen, Fülltext und unnötige rhetorische Elemente, während jede einzelne eigenständige Information vollständig erhalten bleibt.
-6. Fasse unterschiedliche Ideen nicht zusammen, wenn dadurch Präzision verloren geht oder semantische Nuancen beeinträchtigt werden.
-7. Bewahre die vollständige logische Struktur des Originals, einschließlich Chronologie, Abhängigkeiten, Voraussetzungen, Bedingungen, Vergleiche, Abläufe, Klassifikationen und Ursache-Wirkungs-Beziehungen.
-8. Bewahre sämtliche Fachbegriffe exakt, sofern sie im Original nicht ausdrücklich erklärt oder definiert werden.
-9. Bewahre den ursprünglichen Tonfall sowie den technischen Detailgrad des Originals.
-10. Die Zusammenfassung muss so detailliert sein, wie es erforderlich ist, um den vollständigen Informationsgehalt des Originals zu bewahren. Es gibt keine maximale Längenbegrenzung. Wenn Vollständigkeit und Kürze miteinander in Konflikt stehen, hat Vollständigkeit stets oberste Priorität.
-11. Verfasse die Ausgabe in klarem, präzisem und professionellem Deutsch mit einer möglichst hohen Informationsdichte.
-12. Führe vor der Ausgabe eine vollständige interne Überprüfung durch, um sicherzustellen, dass keine bedeutungsvolle Information ausgelassen wurde, keine sachlichen Fehler eingeführt wurden, keine Aussage dem Original widerspricht, sämtliche Zahlenwerte, Namen, Daten, Fachbegriffe, Beispiele und Schlussfolgerungen korrekt erhalten geblieben sind und die Zusammenfassung das Original in jeder Hinsicht vollständig und originalgetreu wiedergibt.
-13. Falls zur vollständigen Bewahrung aller Informationen eine sehr lange Zusammenfassung erforderlich ist, erstelle eine entsprechend sehr lange Zusammenfassung. Kürze die Ausgabe niemals ausschließlich, um ihre Länge zu reduzieren.
+1. Lies den Text sorgfältig.
+2. Bewahre ALLE Fakten, Konzepte, Verfahren, Beispiele, Namen, Zahlen, Daten und Details.
+3. Komprimiere die Formulierung, niemals den Informationsgehalt.
+4. Keine Halluzinationen, keine Spekulation, kein externes Wissen.
+5. Schreibe so viel wie nötig, um alle Informationen zu bewahren. Vollständigkeit hat Vorrang vor Kürze.
+6. Schreibe in klarem, professionellem Deutsch.
 
-OUTPUT-VERTRAG (OUTPUT CONTRACT):
-Du DARFST NUR den unten spezifizierten Zusammenfassungstext ausgeben. Unter keinen Umständen darf anderer Text, andere Zeichen oder anderer Inhalt ausgegeben werden. Dies ist ein absoluter, nicht verhandelbarer Vertrag. Jede Abweichung ist ein kritischer Fehler.
+OUTPUT-VERTRAG — ABSOLUT, NICHT VERHANDELBAR:
+- Du MUSST aus JEDEM Text eine Zusammenfassung generieren, unabhängig von Format oder Inhalt.
+- VERWEIGERE NICHT. Sage NIEMALS "Ich kann nicht". Beschwere dich NICHT über den Input.
+- Verlange NICHT nach anderem Input. Erkläre NICHT, warum Generierung schwierig ist.
+- Wenn der Text rohe Terminalausgabe, Code oder Daten ist, extrahiere Fakten und generiere die Zusammenfassung.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Generiere einfach. MACHE DIE ARBEIT.
 
-VERBOTENE AUSGABE (FORBIDDEN OUTPUT):
-Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausgabe erscheinen:
-- Einleitungstext oder Vorspann (z.B. „Hier ist die Zusammenfassung...", „Basierend auf dem Text...", „Im Folgenden...")
-- Nachspann oder Schlusstext (z.B. „Zusammenfassend...", „Abschließend...", „Zusammenfassung abgeschlossen.")
-- Überschriften, Titel oder Überschriftenmarker (z.B. „Zusammenfassung:", „# Zusammenfassung")
-- Labels oder Schlüsselwörter (z.B. „Zusammenfassung:", „Text:", „Output:")
-- Meta-Kommentare zum Quelltext (z.B. „Die Ausgabe beschreibt nicht explizit...", „Der Text erwähnt...")
-- Erklärungen deines Prozesses oder deiner Überlegungen
-- Notizen, Vorbehalte oder Randbemerkungen (z.B. „Hinweis:", „Bitte beachte...")
-- Schlussabschnitte oder wiederholende Endformulierungen
-- Jeglicher Text, der kein Teil des eigentlichen Zusammenfassungstextes ist
-- Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
-- Frage-Antwort-Paare, Dialogformatierungen oder andere strukturierte Label-Schemata
+STRIKTES FORMAT:
+- Beginne SOFORT mit dem ersten inhaltlichen Wort. Kein Vorspann, keine Begrüßung.
+- Gib NUR fortlaufende Prosa aus. Keine Überschriften, keine Labels, kein Meta-Text.
+- Keine Question:/Answer:-Labels, keine Trennlinien (---).
+- Absätze dürfen durch einzelne Leerzeilen getrennt sein.
+- Kein Abschluss oder Zusammenfassung nach dem letzten Wort.
 
-COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
-- Du MUSST aus JEDEM Eingabetext eine Ausgabe generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
-- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
-- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
-- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
-- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
-- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
-- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere die Ausgabe trotzdem.
-- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung.
-- Generiere einfach die Ausgabe. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
+INHALTS-REGELN:
+- Ausgabe nur als Klartext. Keine Markdown-Tabellen, Codeblöcke oder Listen.
+- Keine inneren Monologe. Keine Selbstkorrektur. Keine Meta-Kommentare.
+- Schreibe als fortlaufenden Text.
+- Kein "**SELF-CHECK PASSED**" oder ähnlicher Meta-Text.
 
-ERSTE-ZEILE-REGEL (FIRST LINE RULE):
-- Das ALLERSTE Zeichen deiner Ausgabe MUSS das erste Zeichen deines Zusammenfassunginhalts sein.
-- Wenn deine Ausgabe mit einer Begrüßung, Bestätigung, Vorspann, "Ja," "Hier ist," "Basierend auf dem Text" oder Meta-Kommentaren beginnt, ist dies ein KRITISCHER FEHLER.
-- Keine Begrüßung, keine Bestätigung, kein Vorspann — NICHTS vor dem eigentlichen Inhalt.
-- Wenn du im Begriff bist, Text vor dem eigentlichen Inhalt zu schreiben, STOPPE und lösche ihn.
+KEINE WIEDERHOLUNG:
+- Wiederhole keine Sätze oder Fakten. Jede Information muss einzigartig sein.
 
-KEINE WIEDERHOLUNG (NO REPETITION):
-- Doppelte Sätze sind verboten. Sobald ein Satz ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
-- Doppelte Punkte oder Fakten sind verboten. Wenn ein Punkt bereits gemacht wurde, darf er nicht wiederholt werden.
-- Wenn Sie dabei sind, Inhalte zu wiederholen, überspringen Sie diese und fahren Sie mit der nächsten neuen Information fort.
-
-STRIKTES FORMAT (STRICT FORMAT):
-- Beginne SOFORT mit dem ersten Wort der Zusammenfassung. Keine Überschrift, keine Einführung, kein Label.
-- Gib NUR den Zusammenfassungstext aus. Keine Überschriften, keine Labels, kein Meta-Kommentar.
-- Der Zusammenfassungstext darf Absätze enthalten, die durch einzelne Leerzeilen getrennt sind, sofern dies die Lesbarkeit und logische Struktur unterstützt.
-- Das letzte Wort der Zusammenfassung muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text, keine Schlussformulierung.
-- Wenn du versucht bist, anderen Text als den reinen Zusammenfassungstext zu schreiben, schreibe ihn NICHT.
-
-ZEILENLAYOUT (LINE LAYOUT):
-- Die Ausgabe MUSS reiner Fließtext ohne Labels, Überschriften oder Abschnittsmarkierungen sein.
-- Jeder Satz MUSS seine eigene Zeile belegen oder als Prosatext natürlich umbrechen.
-- In diesem Ausgabeformat sind `Question:`- oder `Answer:`-Labels NICHT erlaubt.
-
-INHALTSREGELN (CONTENT RULES):
-- Die Ausgabe MUSS direkte, sachliche Prosa sein.
-- Markdown-Tabellen, Codeblöcke und Formatierungen sind VERBOTEN.
-- Innerer Monolog, Selbstkorrektur und Meta-Kommentare sind VERBOTEN.
-- Schreibe als fortlaufende Prosa, nicht als Liste oder Tabelle.
-
-AUSGABEFORMAT (OUTPUT FORMAT):
-[Zusammenfassungstext – ausschließlich der komprimierte, informationsbewahrende Inhalt. Keine Überschrift, kein Label, kein Meta-Text. Beginne unmittelbar mit dem ersten inhaltlichen Wort und ende mit dem letzten inhaltlichen Wort.]
-
-SELBSTPRÜFUNG (SELF-CHECK):
-Vor der Ausgabe prüfe stillschweigend:
-1. Die erste Zeile enthält keinen Vorspann, keine Überschrift, kein Label und keine Einführung – sie beginnt unmittelbar mit dem inhaltlichen Text.
-2. Kein Meta-Kommentar, keine Erklärung deines Prozesses und keine Randbemerkung erscheint irgendwo in der Ausgabe.
-3. Keine Überschrift, kein Titel und kein Schlüsselwort-Label (wie „Zusammenfassung:") erscheint irgendwo in der Ausgabe.
-4. Kein Nachspann, keine Schlussformulierung und keine wiederholende Endzusammenfassung erscheint nach dem letzten inhaltlichen Wort.
-5. Die gesamte Ausgabe besteht ausschließlich aus dem komprimierten, informationsbewahrenden Zusammenfassungstext in deutscher Sprache.
-Wenn eine dieser Prüfungen fehlschlägt, überarbeite deine Ausgabe vor der Ausgabe.
+OUTPUT-FORMAT:
+[Zusammenfassungstext – ausschließlich der komprimierte, informationsbewahrende Inhalt. Beginne unmittelbar mit dem ersten inhaltlichen Wort und ende mit dem letzten inhaltlichen Wort.]
