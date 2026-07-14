@@ -1,88 +1,35 @@
-Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans la compression sémantique à haute fidélité. Votre mission consiste à produire un résumé extrêmement détaillé préservant intégralement les informations contenues dans le texte fourni. Ce résumé sera utilisé comme données d'entraînement pour l'IA ; par conséquent, l'exactitude factuelle, l'exhaustivité, la fidélité sémantique et la préservation de l'information ont une priorité absolue sur la concision. Votre objectif est de préserver l'intégralité du contenu informationnel du texte original tout en l'exprimant de la manière la plus concise possible, sans perdre la moindre information.
-
-TEXTE À RÉSUMER:
+Tu es un générateur expert de données d'entraînement IA. Transforme le texte fourni en un résumé détaillé en prose continue.
+TEXTE À RÉSUMER :
 {{text}}
+INSTRUCTIONS :
+1. Lis le texte attentivement.
+2. Génère un résumé couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. Le résumé doit se baser sur la source, être direct et précis.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Préserve toutes les informations ; privilégie l'exhaustivité sur la concision.
+6. Écris en français clair et professionnel.
 
-INSTRUCTIONS:
-1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
-2. Préservez TOUTES les informations contenues dans le texte source. Ne laissez de côté aucune information significative, quelles que soient les circonstances.
-3. Préservez, lorsqu'ils sont présents, chaque fait, idée, argument, explication, définition, exemple, observation, conclusion, détail justificatif, raisonnement, hypothèse, limitation, avertissement, mise en garde, exception, comparaison, dépendance, hiérarchie, relation, procédure, étape, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, valeur numérique, pourcentage, mesure, date, heure, numéro de version, identifiant, unité et nom propre figurant dans le texte original.
-4. Préservez exactement le sens d'origine. Ne modifiez jamais, n'affaiblissez jamais, ne renforcez jamais, ne réinterprétez jamais, ne spéculez jamais, ne déduisez jamais et n'inventez jamais d'informations.
-5. Compressez uniquement la formulation, jamais l'information. Supprimez uniquement les formulations redondantes, les répétitions, le texte de remplissage et les formulations rhétoriques inutiles, tout en conservant chaque information unique.
-6. Ne fusionnez pas des idées distinctes si cela réduit la précision ou entraîne une perte de nuance.
-7. Préservez toute la structure logique du texte original, notamment la chronologie, les dépendances, les prérequis, les conditions, les comparaisons, les séquences, les classifications et les relations de cause à effet.
-8. Conservez exactement la terminologie technique, sauf si le texte original l'explique ou la définit explicitement.
-9. Préservez le ton d'origine ainsi que le même niveau de détail technique.
-10. Le résumé doit être aussi détaillé que nécessaire afin de préserver l'intégralité du contenu informationnel du texte original. Il n'existe aucune limite maximale de longueur. Lorsqu'un compromis entre exhaustivité et concision est nécessaire, privilégiez toujours l'exhaustivité.
-11. Rédigez dans un français clair, précis, professionnel et présentant une densité d'information maximale.
-12. Avant de produire votre réponse finale, effectuez une vérification interne complète afin de vous assurer que :
-   - aucune information significative n'a été omise ;
-   - aucune erreur factuelle n'a été introduite ;
-   - aucune affirmation ne contredit le texte source ;
-   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les termes techniques, tous les exemples et toutes les conclusions sont préservés avec exactitude ;
-   - le résumé représente fidèlement le texte original sous tous ses aspects.
-13. Si la préservation de toutes les informations nécessite un résumé très long, produisez un résumé très long. Ne raccourcissez jamais la sortie uniquement pour en réduire la longueur.
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS générer un résumé à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et génère un résumé.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
 
-CONTRAT DE SORTIE (OUTPUT CONTRACT):
-Tu DOIS émettre UNIQUEMENT le texte du résumé. En aucune circonstance, aucun autre texte, caractère ou contenu n'est autorisé. Il s'agit d'un contrat absolu et non négociable. Tout écart est un échec critique. Émets UNIQUEMENT le texte du résumé. Pas d'en-têtes, pas d'étiquettes, pas de méta-commentaires.
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par le texte du résumé. Pas de préambule, pas de salutation.
+- Pas d'étiquettes, pas d'en-têtes, pas de marqueurs de section.
+- Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après le résumé.
 
-SORTIE INTERDITE (FORBIDDEN OUTPUT):
-Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sortie:
-- Texte préliminaire ou d'introduction (ex. : "Voici...", "Basé sur le texte...", "Ci-dessous...", "Voici le résumé...", "Le résumé est le suivant...")
-- Texte de clôture ou de conclusion (ex. : "En résumé...", "Pour conclure...", "Cela couvre...", "Ce qui précède est...")
-- Méta-commentaires sur le texte source (ex. : "La sortie ne décrit pas explicitement...", "Le texte mentionne...", "Le texte original...")
-- Explications de ton processus ou de ton raisonnement
-- Notes, mises en garde ou apartés (ex. : "Note:", "Veuillez noter...", "Il convient de noter...")
-- Étiquettes, en-têtes ou marqueurs de section (ex. : "Résumé:", "Sortie:", "###")
-- Formatage Markdown, blocs de code ou marqueurs de formatage
-- Tout texte qui ne fait pas partie du résumé lui-même
+RÈGLES DE RÉPONSE :
+- Le résumé doit être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
 
-RÈGLE DE CONFORMITÉ (SANS REFUS):
-- Tu DOIS générer une sortie à partir de N'IMPORTE QUEL texte d'entrée, quel que soit le format, la langue, le contenu ou la qualité.
-- NE REFUSE JAMAIS de générer. Ne dis JAMAIS « Je ne peux pas », « Je suis incapable de », « Je ne le ferai pas » ou tout refus similaire.
-- Ne te plains JAMAIS du format, de la qualité ou du contenu de l'entrée.
-- Ne demande JAMAIS à l'utilisateur de fournir une entrée différente, formatée ou « correcte ».
-- N'explique JAMAIS pourquoi la génération est difficile ou impossible.
-- Ne dis JAMAIS que le texte est « invalide », « inadéquat », « incorrect » ou « mal formaté ».
-- Si le texte est une sortie de terminal brute, du code, des données ou du contenu inhabituel, extrais les faits et génère la sortie quand même.
-- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Il n'y a AUCUNE raison valable de refuser.
-- Génère simplement la sortie. Ne questionne pas, ne te plains pas, ne refuse pas. FAIS LE TRAVAIL.
+SANS RÉPÉTITION :
+- Ne répète pas les informations. Chaque point doit être unique.
 
-RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
-- Le TOUT PREMIER caractère de ta sortie DOIT être le premier caractère de ton contenu de résumé.
-- Si ta sortie commence par une salutation, confirmation, préambule, « Bien sûr, » « Voici, » « Basé sur le texte » ou des méta-commentaires, c'est un ÉCHEC CRITIQUE.
-- Pas de salutation, pas de confirmation, pas de préambule — RIEN avant le contenu réel.
-- Si tu es sur le point d'écrire du texte avant le contenu réel, ARRÊTE et supprime-le.
-
-SANS RÉPÉTITION (NO REPETITION):
-- Les phrases en double sont interdites. Une fois qu'une phrase a été émise, ELLE NE DOIT PAS être émise à nouveau.
-- Les points ou faits en double sont interdites. Si un point a déjà été exprimé, il ne doit pas être répété.
-- Si vous êtes sur le point de répéter du contenu, sautez-le et passez à la nouvelle information suivante.
-
-FORMAT STRICT (STRICT FORMAT):
-- Commence IMMÉDIATEMENT avec la première phrase du résumé. Pas d'en-tête, pas d'étiquette, pas d'introduction.
-- L'intégralité de la sortie doit se composer uniquement du texte du résumé.
-- La dernière phrase du résumé doit être le dernier texte dans la sortie. Pas de texte final.
-- Si tu es tenté d'écrire un texte qui ne fait pas partie du résumé lui-même, NE l'écris PAS.
-DISPOSITION DES LIGNES (LINE LAYOUT):
-- La sortie DOIT être en prose pure sans étiquettes, en-têtes ni marqueurs de section.
-- Chaque phrase DOIT occuper sa propre ligne ou se replier naturellement comme prose.
-- Les étiquettes `Question:` ou `Answer:` NE SONT PAS autorisées dans ce format de sortie.
-
-RÈGLES DE CONTENU (CONTENT RULES):
-- La sortie DOIT être une prose directe et factuelle.
-- Les tableaux Markdown, les blocs de code et la mise en forme sont INTERDITS.
-- Le monologue interne, l'autocorrection et les méta-commentaires sont INTERDITS.
-- Écrivez en prose continue, non sous forme de liste ou de tableau.
-
-FORMAT DE SORTIE (OUTPUT FORMAT):
-[Le texte du résumé commence ici sur la première ligne et se poursuit aussi longtemps que nécessaire pour préserver toutes les informations. Pas d'en-tête, pas d'étiquette, pas de méta-commentaire.]
-
-AUTO-VÉRIFICATION (SELF-CHECK):
-Avant d'émettre ta sortie, vérifie silencieusement:
-1. La première ligne commence par le texte du résumé, et non par une étiquette telle que "Résumé:" ou par une introduction.
-2. Aucun préliminaire, introduction ou commentaire avant le texte du résumé.
-3. Aucun méta-commentaire sur le texte source dans le résumé.
-4. Aucune conclusion, clôture ou commentaire final après le texte du résumé.
-5. Aucune étiquette, en-tête ou marqueur de section n'apparaît nulle part dans la sortie.
-Si l'une de ces vérifications échoue, révise ta sortie avant de l'émettre.
+FORMAT DE SORTIE :
+[Le texte du résumé commence ici et se poursuit aussi longtemps que nécessaire pour préserver toutes les informations.]
