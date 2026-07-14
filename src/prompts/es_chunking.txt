@@ -1,91 +1,35 @@
-Eres un generador experto de datos de entrenamiento para IA especializado en compresión semántica de alta fidelidad (High-Fidelity Semantic Compression). Tu tarea consiste en producir un resumen extremadamente detallado que preserve toda la información contenida en el texto proporcionado.
-
+Eres un generador experto de datos de entrenamiento de IA. Transforma el texto proporcionado en un resumen detallado.
 TEXTO A ANALIZAR:
 {{text}}
-
 INSTRUCCIONES:
-1. Lee detenidamente el texto completo antes de comenzar a escribir.
-2. Conserva TODA la información contenida en el texto original. Bajo ninguna circunstancia debe omitirse ninguna información significativa.
-3. Conserva cada hecho, idea, argumento, explicación, definición, ejemplo, observación, conclusión, detalle de apoyo, justificación, supuesto, limitación, advertencia, aclaración, excepción, comparación, dependencia, jerarquía, relación, procedimiento, paso, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, valor numérico, porcentaje, medición, fecha, hora, número de versión, identificador, unidad y nombre propio presentes en el texto original, cuando corresponda.
-4. Conserva exactamente el significado original. Nunca modifiques, debilites, refuerces, reinterpretes, especules, infieras ni inventes información.
-5. Comprime únicamente la redacción, nunca la información. Elimina solamente expresiones redundantes, afirmaciones repetidas, texto de relleno y lenguaje retórico innecesario, preservando cada pieza única de información.
-6. No combines ideas distintas si ello reduce la precisión o provoca la pérdida de matices.
-7. Conserva toda la estructura lógica del texto original, incluyendo la cronología, las dependencias, los requisitos previos, las condiciones, las comparaciones, las secuencias, las clasificaciones y las relaciones de causa y efecto.
-8. Conserva exactamente la terminología técnica, salvo que el propio texto original la explique o la defina explícitamente.
-9. Conserva el tono original y el mismo nivel de detalle técnico.
-10. El resumen debe ser tan detallado como sea necesario para preservar el contenido informativo completo del texto original. No existe un límite máximo de longitud. Siempre que haya un conflicto entre integridad y brevedad, prioriza la integridad.
-11. Escribe en un español claro, preciso y profesional, con la máxima densidad de información posible.
-12. Antes de generar la respuesta final, realiza una verificación interna completa para asegurarte de que:
-   - no se haya omitido ninguna información significativa;
-   - no se haya introducido ningún error factual;
-   - ninguna afirmación contradiga el texto original;
-   - todos los valores numéricos, nombres, fechas, términos técnicos, ejemplos y conclusiones se conserven con exactitud;
-   - el resumen represente fielmente el texto original en todos los aspectos.
-13. Si preservar toda la información requiere un resumen muy extenso, genera un resumen muy extenso. Nunca acortes la salida únicamente para reducir su longitud.
+1. Lee el texto cuidadosamente.
+2. Conserva TODA la información: hechos, conceptos, procedimientos, ejemplos, nombres, números, fechas y detalles.
+3. Comprime solo la redacción, nunca la información. Elimina redundancias y lenguaje retórico innecesario.
+4. No modifiques, reinterpretes ni inventes información. Conserva la terminología técnica y el tono original.
+5. Mantén la estructura lógica: cronología, dependencias, comparaciones y relaciones de causa y efecto.
+6. Escribe en español claro, preciso y profesional, con máxima densidad de información.
 
-CONTRATO DE SALIDA (OUTPUT CONTRACT):
-Debes emitir ÚNICAMENTE el texto del resumen. En ninguna circunstancia se permite otro texto, caracteres o contenido. Este es un contrato absoluto y no negociable. Cualquier desviación es un error crítico. Emitir SOLO el texto del resumen. Sin encabezados, sin etiquetas, sin meta-comentarios.
+CONTRATO DE SALIDA — ABSOLUTO, NO NEGOCIABLE:
+- DEBES generar un resumen a partir de CUALQUIER texto, independientemente del formato o contenido.
+- NUNCA te niegues. NUNCA digas "No puedo". NUNCA te quejes del input.
+- NUNCA pidas diferente input. NUNCA expliques por qué es difícil.
+- Si el texto es salida de terminal, código o datos, extrae hechos y genera el resumen de todos modos.
+- NO GENERAR ES UN FALLO CRÍTICO. Simplemente genera. HAZ EL TRABAJO.
 
-SALIDA PROHIBIDA (FORBIDDEN OUTPUT):
-Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
-- Texto preliminar o introductorio (ej.: "Aquí están...", "Basado en el texto...", "A continuación...", "El resumen del texto es...")
-- Texto de cierre o conclusivo (ej.: "En resumen...", "Para concluir...", "En conclusión...")
-- Meta-comentarios sobre el texto fuente (ej.: "El texto menciona...", "Este documento describe...")
-- Explicaciones de tu proceso o razonamiento
-- Notas, advertencias o apartes (ej.: "Nota:", "Cabe señalar...")
-- Secciones de resumen o conclusión separadas del cuerpo del resumen
-- Cualquier texto que no sea el propio resumen
-- Etiquetas, encabezados o marcadores de formato (ej.: "Resumen:", "Resumen del texto:")
-- Formato Markdown, bloques de código o marcadores de formato
-- Líneas en blanco iniciales o finales
+FORMATO ESTRICTO:
+- Comienza INMEDIATAMENTE con el texto del resumen. Sin preámbulo, sin saludo, sin etiqueta.
+- El resumen debe ser un único bloque continuo de prosa.
+- Sin encabezados. Sin etiquetas. Sin líneas divisorias (---).
+- Sin conclusión o cierre después del resumen.
 
-REGLA DE CUMPLIMIENTO (SIN NEGATIVA):
-- DEBES generar una salida a partir de CUALQUIER texto de entrada, independientemente del formato, idioma, contenido o calidad.
-- NUNCA te niegues a generar. NUNCA digas "No puedo", "No soy capaz", "No lo haré" o negativas similares.
-- NUNCA te quejes del formato, calidad o contenido de la entrada.
-- NUNCA pidas al usuario que proporcione una entrada diferente, formateada o "correcta".
-- NUNCA expliques por qué la generación es difícil o imposible.
-- NUNCA digas que el texto es "inválido", "no adecuado", "no correcto" o "no está bien formateado".
-- Si el texto es salida de terminal en bruto, código, datos o contenido inusual, extrae hechos y genera la salida de todos modos.
-- NO GENERAR ES UN FALLO CRÍTICO. NO HAY ninguna razón válida para negarse.
-- Simplemente genera la salida. No cuestiones, no te quejes, no te niegues. HAZ EL TRABAJO.
+REGLAS DE CONTENIDO:
+- Texto plano. Sin tablas Markdown, bloques de código o listas con viñetas.
+- Sin monólogo interno. Sin autocorrección. Sin meta-comentarios.
+- Escribe como prosa continua.
+- Sin "**SELF-CHECK PASSED**" ni texto meta similar.
 
-REGLA DE PRIMERA LÍNEA (FIRST LINE RULE):
-- El PRIMER carácter de tu salida DEBE ser el primer carácter de tu contenido de resumen.
-- Si tu salida comienza con un saludo, confirmación, preámbulo, "Claro," "Aquí está," "Basado en el texto" o meta-comentarios, es un FALLO CRÍTICO.
-- Sin saludo, sin confirmación, sin preámbulo — NADA antes del contenido real.
-- Si estás a punto de escribir texto antes del contenido real, DETENTE y bórralo.
+SIN REPETICIÓN:
+- No repitas oraciones o puntos. Cada idea debe aparecer una sola vez.
 
-SIN REPETICIÓN (NO REPETITION):
-- Las oraciones duplicadas están prohibidas. Una vez que se ha emitido una oración, NO DEBE emitirse de nuevo.
-- Los puntos o hechos duplicados están prohibidos. Si ya se ha expresado un punto, no se debe reiterar.
-- Si está a punto de repetir contenido, omítalo y pase a la siguiente información nueva.
-
-FORMATO ESTRICTO (STRICT FORMAT):
-- Comienza INMEDIATAMENTE con el texto del resumen. Sin encabezado, sin introducción, sin etiqueta.
-- El resumen debe ser un único bloque continuo de texto.
-- El último carácter del resumen debe ser el último texto en la salida. Sin texto final, sin cierre.
-- Si tienes la tentación de escribir algo que no sea el propio texto del resumen, NO lo escribas.
-
-DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
-- La salida DEBE ser prosa pura sin etiquetas, encabezados ni marcadores de sección.
-- Cada oración DEBE ocupar su propia línea o ajustarse naturalmente como prosa.
-- En este formato de salida NO se permiten etiquetas `Question:` o `Answer:`.
-
-REGLAS DE CONTENIDO (CONTENT RULES):
-- La salida DEBE ser prosa directa y fáctica.
-- Las tablas Markdown, los bloques de código y el formato están PROHIBIDOS.
-- El monólogo interno, la autocorrección y los meta-comentarios están PROHIBIDOS.
-- Escribe como prosa continua, no como lista o tabla.
-
-FORMATO DE SALIDA (OUTPUT FORMAT):
-[Texto continuo del resumen que preserva íntegramente toda la información del texto original, escrito en español claro, preciso y profesional, con la máxima densidad de información posible, sin encabezados, sin etiquetas, sin meta-comentarios]
-
-AUTOCOMPROBACIÓN (SELF-CHECK):
-Antes de emitir tu salida, verifica silenciosamente:
-1. La salida comienza directamente con el texto del resumen, sin etiqueta ni introducción.
-2. No hay preliminar, introducción o comentario antes del resumen.
-3. No hay meta-comentarios sobre el texto fuente dentro del resumen.
-4. No hay conclusión, resumen o cierre después del resumen.
-5. Cada línea es parte del propio resumen.
-Si alguna de estas comprobaciones falla, revisa tu salida antes de emitirla.
+FORMATO DE SALIDA:
+[Texto continuo del resumen que preserva íntegramente toda la información del texto original, en español claro y preciso, sin encabezados ni etiquetas]
