@@ -133,13 +133,13 @@ function allowParsePath(filePath:string):void{
     try{
         allowedParsePaths.add(normalizeAllowlistPath(filePath))
     }
-    catch{}
+    catch(err){console.warn("allowParsePath:",err)}
 }
 function allowSavePath(filePath:string):void{
     try{
         allowedSavePaths.add(normalizeAllowlistPath(filePath))
     }
-    catch{}
+    catch(err){console.warn("allowSavePath:",err)}
 }
 function isAllowedParsePath(filePath:string):boolean{
     try{
@@ -189,7 +189,7 @@ function getSafeReadDirs():string[]{
         dirs.push(path.resolve(metaDir,"..","..","src","prompts"))
         dirs.push(path.resolve(metaDir,"..","..","dist","prompts"))
     }
-    catch{}
+    catch(err){console.warn("getSafeReadDirs:",err)}
     return dirs
 }
 function isPathSafeForRead(filePath:string):boolean{
@@ -474,7 +474,7 @@ function createMainWindow(){
                 shell.openExternal(url)
             }
         }
-        catch{}
+        catch(err){console.warn("window-open-handler URL parse:",err)}
         return{action:"deny"}
     })
     mainWindow.webContents.on("will-navigate",(event,url)=>{
@@ -487,7 +487,7 @@ function createMainWindow(){
                 shell.openExternal(url)
             }
         }
-        catch{}
+        catch(err){console.warn("will-navigate URL parse:",err)}
     })
     mainWindow.on("maximize",()=>{
         if(!mainWindow||mainWindow.isDestroyed())return
@@ -696,7 +696,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                 settled=true
                 clearTimer()
                 if(requestId){
-                    try{sender.send("ollama:stream-done",{requestId})}catch{}
+                    try{sender.send("ollama:stream-done",{requestId})}catch{}// intentional: sender throws when renderer window is destroyed
                 }
                 resolve(value)
             }
@@ -705,7 +705,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                 settled=true
                 clearTimer()
                 if(requestId){
-                    try{sender.send("ollama:stream-done",{requestId})}catch{}
+                    try{sender.send("ollama:stream-done",{requestId})}catch{}// intentional: sender throws when renderer window is destroyed
                 }
                 reject(error)
             }
@@ -730,7 +730,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                         if(parsed.response){
                             fullResponse+=parsed.response
                             if(requestId){
-                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}
+                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}// intentional: sender throws when renderer window is destroyed
                             }
                         }
                         if(parsed.done){
@@ -738,7 +738,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                             return
                         }
                     }
-                    catch{}
+                    catch(err){console.warn("ollama stream line parse:",err)}
                 }
             })
             stream.on("error",(error:Error)=>{
@@ -751,7 +751,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                         if(parsed.response){
                             fullResponse+=parsed.response
                             if(requestId){
-                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}
+                                try{sender.send("ollama:stream-token",{requestId,token:parsed.response})}catch{}// intentional: sender throws when renderer window is destroyed
                             }
                         }
                         if(parsed.done){
@@ -759,7 +759,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
                             return
                         }
                     }
-                    catch{}
+                    catch(err){console.warn("ollama stream end parse:",err)}
                 }
                 if(!fullResponse){
                     safeReject(new Error(t("error.streamEndedWithoutResponse")))
@@ -770,7 +770,7 @@ export async function handleOllamaGenerateStream(event:Electron.IpcMainInvokeEve
             })
         }).finally(()=>{
             clearTimer()
-            try{stream.destroy()}catch{}
+            try{stream.destroy()}catch{}// intentional: stream.destroy throws during teardown
             stream.removeAllListeners()
         })
     }
@@ -821,10 +821,10 @@ async function getCurrentLogFilePathAsync():Promise<string>{
                 try{
                     await fsp.unlink(dst)
                 }
-                catch{}
+                catch(err){console.warn("log rotation unlink:",err)}
                 await fsp.rename(src,dst)
             }
-            catch{}
+            catch(err){console.warn("log rotation rotate:",err)}
         }
         await fsp.writeFile(getLogFilePath(0),"","utf-8")
         return getLogFilePath(0)
@@ -949,7 +949,7 @@ function registerCriticalIpcHandlers():void{
                             break
                         }
                     }
-                    catch{}
+                    catch(err){console.warn("file:read existsSync:",err)}
                 }
             }
             if(!isPathSafeForRead(resolvedPath)){
@@ -988,7 +988,7 @@ function registerCriticalIpcHandlers():void{
                         return{success:true,content}
                     }
                 }
-                catch{}
+                catch(err){console.warn("prompt:get load:",err)}
             }
             return{success:false,error:t("error.promptFileNotFound")}
         }
@@ -1139,7 +1139,7 @@ function registerCriticalIpcHandlers():void{
                 timeout:10000
             }).catch(()=>{})
         }
-        catch{}
+        catch(err){console.warn("ollama show preflight:",err)}
         let promptLength=prompt.length
         let timeout=1800000
         if(promptLength>10000)timeout=3600000
@@ -1555,15 +1555,15 @@ app.on("before-quit",async(event)=>{
     event.preventDefault()
     isAppQuitting=true
     if(fileParser){
-        try{await fileParser.dispose()}catch{}
+        try{await fileParser.dispose()}catch{}// intentional: dispose throws during shutdown
         fileParser=null
     }
     if(tray&&!tray.isDestroyed()){
         tray.destroy()
         tray=null
     }
-    try{httpAgent.destroy()}catch{}
-    try{httpsAgent.destroy()}catch{}
+    try{httpAgent.destroy()}catch{}// intentional: agent.destroy throws during shutdown
+    try{httpsAgent.destroy()}catch{}// intentional: agent.destroy throws during shutdown
     app.exit()
 })
 app.on("activate",()=>{
