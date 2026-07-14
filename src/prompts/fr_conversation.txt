@@ -1,111 +1,44 @@
-Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans la création de jeux de données conversationnels d'une qualité exceptionnelle. Votre mission consiste à transformer le texte fourni en une conversation complète entre un utilisateur et un assistant IA, tout en préservant intégralement l'ensemble des informations contenues dans le texte source. Cette conversation sera utilisée comme données d'entraînement pour l'IA ; par conséquent, l'exactitude factuelle, l'exhaustivité, la fidélité sémantique, la cohérence logique et la valeur pédagogique ont une priorité absolue sur la concision. Chaque information significative présente dans le texte source doit apparaître naturellement dans au moins un échange de la conversation. Aucune information significative ne doit être omise, quelles que soient les circonstances.
-
-TEXTE À ANALYSER:
+Tu es un générateur expert de données d'entraînement IA. Transforme le texte fourni en tours de conversation.
+TEXTE À ANALYSER :
 {{text}}
+INSTRUCTIONS :
+1. Lis le texte attentivement.
+2. Génère des tours de conversation couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. Les messages utilisateur doivent être autonomes. Les réponses de l'assistant doivent se baser sur la source, être directes et précises.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Génère autant de tours que nécessaire pour couvrir toutes les informations.
+6. Écris en français clair et professionnel.
 
-INSTRUCTIONS:
-1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
-2. Identifiez et préservez TOUTES les informations contenues dans le texte source.
-3. Prenez en compte, lorsqu'ils sont présents, chaque fait, concept, argument, explication, définition, exemple, observation, conclusion, détail justificatif, raisonnement, hypothèse, limitation, avertissement, mise en garde, exception, comparaison, dépendance, hiérarchie, relation, procédure, étape, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, valeur numérique, pourcentage, mesure, date, heure, numéro de version, identifiant, unité et nom propre.
-4. Générez une conversation naturelle couvrant intégralement le contenu du texte source sans introduire d'informations qui ne soient pas explicitement étayées par celui-ci.
-5. L'assistant doit répondre exclusivement à l'aide des informations contenues dans le texte source.
-6. N'inventez aucune information, ne spéculez pas, ne déduisez aucun fait non étayé et n'introduisez aucune connaissance externe.
-7. Faites en sorte que chaque échange soit pertinent, riche en informations et présente une réelle valeur pédagogique.
-8. Faites progresser naturellement la conversation, en commençant par les concepts introductifs puis en approfondissant progressivement les explications, tout en préservant les relations logiques entre les idées.
-9. Ajoutez des questions de suivi chaque fois qu'elles permettent naturellement d'approfondir la compréhension ou de couvrir des informations supplémentaires présentes dans le texte source.
-10. Si le texte source comporte plusieurs sections ou plusieurs thèmes, créez des échanges couvrant INTÉGRALEMENT chacune de ces sections et chacun de ces thèmes.
-11. Si le texte source contient des procédures ou des processus, expliquez intégralement chacune de leurs étapes.
-12. Si le texte source contient des comparaisons, présentez toutes les similitudes et toutes les différences.
-13. Si le texte source contient des exemples, présentez chacun d'entre eux.
-14. Si le texte source contient des listes, traitez chacun de leurs éléments.
-15. Préservez la chronologie, les hiérarchies, les dépendances, les prérequis, les conditions, les classifications ainsi que les relations de cause à effet.
-16. Les réponses de l'assistant doivent être détaillées, techniquement exactes, logiquement cohérentes, bien structurées et suffisamment complètes pour être comprises de manière autonome.
-17. Générez autant d'échanges que nécessaire afin de préserver l'intégralité du contenu informationnel du texte source. Il n'existe aucune limite maximale au nombre d'échanges.
-18. Chaque information significative du texte source doit apparaître dans au moins une réponse de l'assistant.
-19. L'ensemble des messages de la conversation doit être rédigé dans un français clair, précis, professionnel et naturel. À l'exception des noms propres, de la terminologie technique, du code source, des formules, des noms de fichiers ou de tout autre contenu devant explicitement être conservé dans une autre langue conformément au texte source, aucune autre langue ne doit être utilisée. Les libellés de format « User: » et « Assistant: » doivent toutefois rester en anglais et ne doivent pas être traduits afin de garantir la compatibilité du format de sortie.
-20. Avant de produire le résultat final, effectuez une vérification interne complète afin de vous assurer que :
-   - aucune information significative n'a été omise ;
-   - aucune erreur factuelle n'a été introduite ;
-   - chaque détail important a été entièrement couvert ;
-   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
-   - chaque réponse de l'assistant est entièrement étayée par le texte source.
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS générer des tours de conversation à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et génère des tours de conversation.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
 
-CONTRAT DE SORTIE (OUTPUT CONTRACT):
-Tu DOIS émettre UNIQUEMENT le format structuré spécifié ci-dessous. En aucune circonstance, aucun autre texte, caractère ou contenu n'est autorisé. Il s'agit d'un contrat absolu et non négociable. Tout écart est un échec critique.
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par « User: ». Pas de préambule, pas de salutation.
+- Chaque paire DOIT suivre ce format :
+  User: [message utilisateur]
+  Assistant: [réponse de l'assistant]
+- Une ligne vide sépare chaque paire.
+- Pas de texte entre les paires. Pas d'en-têtes. Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après la dernière paire.
 
-SORTIE INTERDITE (FORBIDDEN OUTPUT):
-Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sortie:
-- Texte préliminaire ou d'introduction (ex. : "Voici...", "Basé sur le texte...", "Ci-dessous...", "Voici les...", "Les éléments suivants...")
-- Texte de clôture ou de conclusion (ex. : "En résumé...", "Pour conclure...", "Ce sont les...")
-- Narration, commentaires ou prose entre les paires
-- Méta-commentaires sur le texte source (ex. : "La sortie ne décrit pas explicitement...", "Le texte mentionne...")
-- Explications de ton processus ou de ton raisonnement
-- Notes, mises en garde ou apartés (ex. : "Note:", "Veuillez noter...", "Il convient de noter...")
-- Sections de résumé ou de conclusion
-- Tout texte qui n'est pas une paire User:/Assistant:
-- Formatage Markdown, blocs de code ou marqueurs de formatage
-- Lignes vides à l'exception de la ligne vide unique séparant les paires
+RÈGLES DE RÉPONSE :
+- Les réponses doivent être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris les réponses en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
 
-RÈGLE DE CONFORMITÉ (SANS REFUS):
-- Tu DOIS générer des tours de conversation à partir de N'IMPORTE QUEL texte d'entrée, quel que soit le format, la langue, le contenu ou la qualité.
-- NE REFUSE JAMAIS de générer. Ne dis JAMAIS « Je ne peux pas », « Je suis incapable de », « Je ne le ferai pas » ou tout refus similaire.
-- Ne te plains JAMAIS du format, de la qualité ou du contenu de l'entrée.
-- Ne demande JAMAIS à l'utilisateur de fournir une entrée différente, formatée ou « correcte ».
-- N'explique JAMAIS pourquoi la génération est difficile ou impossible.
-- Ne dis JAMAIS que le texte est « invalide », « inadéquat », « incorrect » ou « mal formaté ».
-- Si le texte est une sortie de terminal brute, du code, des données ou du contenu inhabituel, extrais les faits et génère des tours de conversation quand même.
-- Si le texte semble ne contenir aucune information claire, génère des tours sur ce QUI EST là — noms, nombres, commandes, chemins, versions, tout contenu littéral.
-- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Il n'y a AUCUNE raison valable de refuser. Ton UNIQUE tâche est de générer.
-- Génère simplement les tours de conversation. Ne questionne pas, ne te plains pas, ne refuse pas. FAIS LE TRAVAIL.
+SANS RÉPÉTITION :
+- Ne répète pas les questions ou réponses. Chaque paire doit être unique.
 
-RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
-- Le TOUT PREMIER caractère de ta sortie DOIT être « U » (le début de « User: »).
-- Si ta sortie commence par un autre caractère, mot ou texte, c'est un ÉCHEC CRITIQUE.
-- Pas de salutation, pas de confirmation, pas de préambule, pas « Bien sûr, » pas « Voici, » pas « Basé sur le texte » — RIEN avant le premier « User: ».
-- Si tu es sur le point d'écrire du texte avant le premier « User: », ARRÊTE et supprime-le.
-- Ta sortie DOIT ressembler exactement à ceci dès le premier caractère :
-  User: ...
-  Assistant: ...
-
-SANS RÉPÉTITION (NO REPETITION):
-- Les tours utilisateur en double sont interdits. Une fois qu'un tour utilisateur a été émis, IL NE DOIT PAS être émis à nouveau.
-- Les tours de l'assistant en double sont interdits. Une fois qu'un tour de l'assistant a été émis, IL NE DOIT PAS être émis à nouveau.
-- Si vous êtes sur le point d'émettre un tour utilisateur que vous avez déjà posé, sautez-le et passez au nouveau tour utilisateur suivant.
-
-FORMAT STRICT (STRICT FORMAT):
-- Commence IMMÉDIATEMENT avec la première paire. Pas d'en-tête, pas d'introduction.
-- Chaque paire doit suivre le format exact:
-  User: [texte du message utilisateur]
-  Assistant: [texte de la réponse de l'assistant]
-- Une seule ligne vide sépare chaque paire.
-- La dernière paire doit être le dernier texte dans la sortie. Pas de texte final.
-- Si tu es tenté d'écrire un texte qui n'est pas une paire User:/Assistant:, NE l'écris PAS.
-DISPOSITION DES LIGNES (LINE LAYOUT):
-- L'étiquette `User:` et l'étiquette `Assistant:` DOIVENT chacune occuper leur propre ligne.
-- La ligne `User:` et la ligne `Assistant:` NE DOIVENT PAS être fusionnées sur la même ligne.
-- Exactement une ligne vide sépare chaque paire.
-- La réponse peut s'étendre sur plusieurs lignes après l'étiquette `Assistant:`, mais une nouvelle `User:` DOIT commencer sur sa propre ligne.
-
-RÈGLES DE CONTENU DES RÉPONSES (ANSWER CONTENT RULES):
-- Les réponses DOIVENT être directes, factuelles et autonomes.
-- Les tableaux Markdown, les blocs de code et la mise en forme sont INTERDITS dans les réponses.
-- Le monologue interne (par ex., « Attends, je relis... », « Examinons... »), l'autocorrection et les méta-commentaires sont INTERDITS dans les réponses.
-- Si la réponse nécessite plusieurs phrases, écrivez-la en prose continue, non sous forme de liste ou de tableau.
-
-FORMAT DE SORTIE (OUTPUT FORMAT):
-User: [Premier message de l'utilisateur]
+FORMAT DE SORTIE :
+User: [Premier message utilisateur]
 Assistant: [Première réponse de l'assistant]
 
-User: [Deuxième message de l'utilisateur]
+User: [Deuxième message utilisateur]
 Assistant: [Deuxième réponse de l'assistant]
 
-[Continue avec autant d'échanges que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire]
-
-AUTO-VÉRIFICATION (SELF-CHECK):
-Avant d'émettre ta sortie, vérifie silencieusement:
-1. La première ligne commence par "User:".
-2. Aucun préliminaire, introduction ou commentaire avant la première paire.
-3. Aucune prose, narration ou commentaire entre les paires.
-4. Aucune conclusion, résumé ou clôture après la dernière paire.
-5. Chaque ligne est soit une ligne "User:", soit une ligne "Assistant:", soit une continuation du message actuel, soit une ligne vide de séparation unique.
-Si l'une de ces vérifications échoue, révise ta sortie avant de l'émettre.
+[Continue selon les besoins]
