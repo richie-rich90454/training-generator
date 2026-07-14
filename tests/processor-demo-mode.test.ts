@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import Processor from "../src/renderer/processor.js"
+import type { Provider, ProviderResult } from "../src/renderer/provider.js"
 import type { TrainingItem } from "../src/types/index.js"
 import { t } from "../src/renderer/i18n.js"
 import { clearCache } from "../src/renderer/cache.js"
@@ -63,5 +64,85 @@ describe("Processor demo mode - getDemoResponse lockdown", () => {
         expect(processor.demoMode).toBe(true)
         processor.disableDemoMode()
         expect(processor.demoMode).toBe(false)
+    })
+})
+
+describe("Processor demo mode - bypasses provider.generate", () => {
+    beforeEach(async () => {
+        vi.stubGlobal("window", { electronAPI: {} })
+        await clearCache()
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+
+    it("does not call provider.generate and produces items from demo strings", async () => {
+        let processor = new Processor()
+        // Provider whose generate throws if ever invoked — demo mode must bypass it.
+        let generateSpy = vi.fn(async (): Promise<ProviderResult> => {
+            throw new Error("provider.generate must NOT be called in demo mode")
+        })
+        let provider: Provider = {
+            name: "mock",
+            generate: generateSpy
+        }
+        processor.provider = provider
+        processor.enableDemoMode()
+        processor.concurrency = 1
+
+        let onChunkComplete = vi.fn()
+        let onChunkError = vi.fn()
+
+        let items = await processor.processChunks(
+            ["chunk1", "chunk2", "chunk3"],
+            "model",
+            "instruction",
+            generatePrompt,
+            createTrainingItem,
+            onChunkComplete,
+            onChunkError
+        )
+
+        // Demo mode must never reach the provider.
+        expect(generateSpy).not.toHaveBeenCalled()
+        // Each chunk yields one training item built from a demo string.
+        expect(items.length).toBe(3)
+        expect(onChunkComplete).toHaveBeenCalledTimes(3)
+        expect(onChunkError).not.toHaveBeenCalled()
+
+        // The produced outputs must be drawn from the instruction demo strings.
+        let allowed = [t("demoResponse.instruction.1"), t("demoResponse.instruction.2")]
+        for (let item of items) {
+            expect(allowed).toContain(item.output)
+        }
+    })
+
+    it("produces conversation demo strings when processingType='conversation'", async () => {
+        let processor = new Processor()
+        let generateSpy = vi.fn(async (): Promise<ProviderResult> => {
+            throw new Error("provider.generate must NOT be called in demo mode")
+        })
+        processor.provider = { name: "mock", generate: generateSpy }
+        processor.enableDemoMode()
+        processor.concurrency = 1
+
+        let onChunkComplete = vi.fn()
+        let items = await processor.processChunks(
+            ["a", "b"],
+            "model",
+            "conversation",
+            generatePrompt,
+            createTrainingItem,
+            onChunkComplete,
+            () => {}
+        )
+
+        expect(generateSpy).not.toHaveBeenCalled()
+        expect(items.length).toBe(2)
+        expect(onChunkComplete).toHaveBeenCalledTimes(2)
+        let expected = t("demoResponse.conversation.1")
+        for (let item of items) {
+            expect(item.output).toBe(expected)
+        }
     })
 })
