@@ -25,5 +25,8 @@ CONTENT RULES:
 - No internal monologue. No self-correction. No meta-commentary.
 - No "**SELF-CHECK PASSED**" or similar meta-text.
 
+NO REPETITION:
+- Do not repeat sentences or facts. Each piece of information must be unique.
+
 OUTPUT FORMAT:
 [Write the summary directly as continuous prose. Cover all information from the source.]

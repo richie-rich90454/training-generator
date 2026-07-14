@@ -54,8 +54,11 @@ let contentRulesTerms: string[] = [
     "内容规则",
     "內容規則",
     "コンテンツルール",
+    "要約ルール",
+    "テキストルール",
     "내용 규칙",
     "INHALTSREGELN",
+    "INHALTS-REGELN",
     "REGLAS DE CONTENIDO",
     "RÈGLES DE CONTENU",
 ]
