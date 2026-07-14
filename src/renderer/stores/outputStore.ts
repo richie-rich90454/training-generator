@@ -75,6 +75,45 @@ function deduplicateTurns(turns: ConversationTurn[]): ConversationTurn[] {
     }
     return result
 }
+function cleanAnswer(answer: string): string {
+    if (!answer) return answer
+    const lines = answer.split("\n")
+    const result: string[] = []
+    let inCodeBlock = false
+    for (let line of lines) {
+        const trimmed = line.trim()
+        // Toggle code block state
+        if (trimmed.startsWith("```")) {
+            inCodeBlock = !inCodeBlock
+            continue
+        }
+        // Skip lines inside code blocks
+        if (inCodeBlock) continue
+        // Skip markdown headers (### ## #)
+        if (/^#{1,6}\s/.test(trimmed)) continue
+        // Skip horizontal rules (--- *** ___)
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) continue
+        // Skip markdown table rows (| ... | ... |)
+        if (/^\|.*\|$/.test(trimmed)) continue
+        // Skip markdown table separator rows (|---|---|)
+        if (/^\|[\s-:]+\|/.test(trimmed)) continue
+        // Skip meta-commentary lines
+        if (/\*\*SELF-CHECK/.test(trimmed)) continue
+        if (/^These Q&A pairs cover/i.test(trimmed)) continue
+        if (/^---$/.test(trimmed)) continue
+        // Skip section headers like "### 1. ..." that leak between pairs
+        if (/^###?\s*\d+/.test(trimmed)) continue
+        // Strip bold markers (**text** -> text)
+        line = line.replace(/\*\*(.+?)\*\*/g, "$1")
+        // Strip backtick code spans (`text` -> text)
+        line = line.replace(/`(.+?)`/g, "$1")
+        // Strip bullet list markers (- or * at start) but keep the text
+        line = line.replace(/^(\s*)[-*•]\s+/, "$1")
+        result.push(line)
+    }
+    // Remove leading/trailing blank lines and collapse multiple blank lines
+    return result.join("\n").replace(/\n{3,}/g, "\n\n").trim()
+}
 export type ExportFormat = "jsonl" | "json" | "chatml" | "csv" | "text"
 export interface OutputStore {
     outputData: TrainingItem[]
@@ -139,7 +178,7 @@ export function createOutputStore(): OutputStore {
             if (currentQuestion || currentAnswerLines.length > 0) {
                 pairs.push({
                     question: currentQuestion.trim(),
-                    answer: currentAnswerLines.join("\n").trim()
+                    answer: cleanAnswer(currentAnswerLines.join("\n"))
                 })
             }
             currentQuestion = ""
@@ -198,7 +237,7 @@ export function createOutputStore(): OutputStore {
             if (currentUser) {
                 turns.push({
                     user: currentUser.trim(),
-                    assistant: currentAssistantLines.join("\n").trim()
+                    assistant: cleanAnswer(currentAssistantLines.join("\n"))
                 })
             }
             currentUser = ""
