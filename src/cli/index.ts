@@ -121,7 +121,9 @@ function readPromptTemplate(language: string, processingType: string): string | 
                 return fs.readFileSync(p, "utf-8")
             }
         }
-        catch { }
+        catch (err) {
+            console.warn("Failed to load config file:", err)
+        }
     }
     return null
 }
