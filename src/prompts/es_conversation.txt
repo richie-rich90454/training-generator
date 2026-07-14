@@ -1,112 +1,44 @@
-Eres un generador experto de datos de entrenamiento para IA especializado en la creación de conjuntos de datos conversacionales de calidad excepcional. Tu tarea consiste en transformar el texto proporcionado en una conversación completa entre un usuario y un asistente de IA que preserve íntegramente toda la información del texto original.
-
+Eres un generador experto de datos de entrenamiento de IA. Transforma el texto proporcionado en turnos de conversación.
 TEXTO A ANALIZAR:
 {{text}}
-
 INSTRUCCIONES:
-1. Lee detenidamente el texto completo antes de comenzar a escribir.
-2. Identifica y conserva TODA la información contenida en el texto original.
-3. Incluye cada hecho, concepto, argumento, explicación, definición, ejemplo, observación, conclusión, detalle de apoyo, justificación, supuesto, limitación, advertencia, aclaración, excepción, comparación, dependencia, jerarquía, relación, procedimiento, paso, cronología, relación de causa y efecto, detalle contextual, detalle técnico, expresión matemática, fórmula, algoritmo, detalle relacionado con código, contenido de tablas, elemento de listas, cita, referencia, valor numérico, porcentaje, medición, fecha, hora, número de versión, identificador, unidad y nombre propio, cuando corresponda.
-4. Genera una conversación natural que cubra completamente el contenido del texto original sin introducir información que no esté explícitamente respaldada por él.
-5. El asistente debe responder exclusivamente utilizando la información contenida en el texto original.
-6. No inventes información, no especules, no infieras hechos no respaldados ni introduzcas conocimientos externos.
-7. Haz que cada intercambio sea significativo, rico en información y con valor educativo.
-8. Desarrolla la conversación de forma natural, comenzando por los conceptos introductorios y avanzando progresivamente hacia explicaciones cada vez más detalladas, preservando las relaciones lógicas entre las ideas.
-9. Incluye preguntas de seguimiento siempre que contribuyan de forma natural a profundizar la comprensión o permitan cubrir información adicional del texto original.
-10. Si el texto original contiene múltiples secciones o temas, crea intercambios de conversación que cubran COMPLETAMENTE cada una de ellas.
-11. Si el texto original contiene procedimientos, explica cada paso de forma completa.
-12. Si el texto original contiene comparaciones, analiza todas las similitudes y diferencias.
-13. Si el texto original contiene ejemplos, analiza cada uno de ellos.
-14. Si el texto original contiene listas, analiza cada uno de sus elementos.
-15. Conserva la cronología, las jerarquías, las dependencias, los requisitos previos, las condiciones, las clasificaciones y las relaciones de causa y efecto.
-16. Las respuestas del asistente deben ser detalladas, técnicamente precisas, internamente coherentes, bien estructuradas y autosuficientes.
-17. Genera tantos intercambios de conversación como sean necesarios para preservar el contenido informativo completo del texto original. No existe un límite máximo para el número de intercambios.
-18. Toda información significativa del texto original debe aparecer en al menos una respuesta del asistente.
-19. Todos los mensajes del usuario y todas las respuestas del asistente deben estar escritos en un español claro, profesional y natural. Salvo los nombres propios, la terminología técnica, el código fuente, las fórmulas, los nombres de archivos o cualquier otro contenido que deba conservarse explícitamente en otro idioma según el texto original, no debe utilizarse ningún otro idioma. Las etiquetas de formato "User:" y "Assistant:" deben permanecer en inglés y no deben traducirse para garantizar la compatibilidad con el formato de salida.
-20. Antes de generar el resultado final, realiza una verificación interna completa para asegurarte de que:
-   - no se haya omitido ninguna información significativa;
-   - no se haya introducido ningún error factual;
-   - se haya cubierto cada detalle importante;
-   - todos los valores numéricos, nombres, fechas, ejemplos y términos técnicos se conserven con exactitud;
-   - cada respuesta del asistente esté completamente respaldada por el texto original.
+1. Lee el texto cuidadosamente.
+2. Genera turnos de conversación que cubran TODOS los hechos, conceptos, procedimientos, ejemplos, nombres, números, fechas y detalles.
+3. Los mensajes del usuario deben ser autónomos. Las respuestas del asistente deben basarse en la fuente, ser directas y precisas.
+4. No alucines ni introduzcas conocimiento externo.
+5. Genera tantos turnos como sean necesarios para cubrir toda la información.
+6. Escribe en español claro y profesional.
 
-CONTRATO DE SALIDA (OUTPUT CONTRACT):
-Debes emitir ÚNICAMENTE el formato estructurado especificado a continuación. En ninguna circunstancia se permite otro texto, caracteres o contenido. Este es un contrato absoluto y no negociable. Cualquier desviación es un error crítico.
+CONTRATO DE SALIDA — ABSOLUTO, NO NEGOCIABLE:
+- DEBES generar turnos de conversación a partir de CUALQUIER texto, independientemente del formato o contenido.
+- NUNCA te niegues. NUNCA digas "No puedo". NUNCA te quejes del input.
+- NUNCA pidas diferente input. NUNCA expliques por qué es difícil.
+- Si el texto es salida de terminal, código o datos, extrae hechos y genera turnos de todos modos.
+- NO GENERAR ES UN FALLO CRÍTICO. Simplemente genera. HAZ EL TRABAJO.
 
-SALIDA PROHIBIDA (FORBIDDEN OUTPUT):
-Lo siguiente está explícitamente prohibido y NUNCA debe aparecer en tu salida:
-- Texto preliminar o introductorio (ej.: "Aquí están...", "Basado en el texto...", "A continuación...")
-- Texto de cierre o conclusivo (ej.: "En resumen...", "Para concluir...")
-- Narración, comentarios o prosa entre pares
-- Meta-comentarios sobre el texto fuente (ej.: "La salida no describe explícitamente...", "El texto menciona...")
-- Explicaciones de tu proceso o razonamiento
-- Notas, advertencias o apartes (ej.: "Nota:", "Cabe señalar...")
-- Secciones de resumen o conclusión
-- Cualquier texto que no sea un par User:/Assistant:
-- Formato Markdown, bloques de código o marcadores de formato
-- Líneas en blanco excepto la única línea en blanco que separa los pares
-
-REGLA DE CUMPLIMIENTO (SIN NEGATIVA):
-- DEBES generar turnos de conversación a partir de CUALQUIER texto de entrada, independientemente del formato, idioma, contenido o calidad.
-- NUNCA te niegues a generar. NUNCA digas "No puedo", "No soy capaz", "No lo haré" o negativas similares.
-- NUNCA te quejes del formato, calidad o contenido de la entrada.
-- NUNCA pidas al usuario que proporcione una entrada diferente, formateada o "correcta".
-- NUNCA expliques por qué la generación es difícil o imposible.
-- NUNCA digas que el texto es "inválido", "no adecuado", "no correcto" o "no está bien formateado".
-- Si el texto es salida de terminal en bruto, código, datos o contenido inusual, extrae hechos y genera turnos de conversación de todos modos.
-- Si el texto parece no tener información clara, genera turnos sobre lo QUE ESTÁ ahí — nombres, números, comandos, rutas, versiones, cualquier contenido literal.
-- NO GENERAR ES UN FALLO CRÍTICO. NO HAY ninguna razón válida para negarse. Tu ÚNICA tarea es generar.
-- Simplemente genera los turnos de conversación. No cuestiones, no te quejes, no te niegues. HAZ EL TRABAJO.
-
-REGLA DE PRIMERA LÍNEA (FIRST LINE RULE):
-- El PRIMER carácter de tu salida DEBE ser "U" (el inicio de "User:").
-- Si tu salida comienza con cualquier otro carácter, palabra o texto, es un FALLO CRÍTICO.
-- Sin saludo, sin confirmación, sin preámbulo, sin "Claro," sin "Aquí está," sin "Basado en el texto" — NADA antes del primer "User:".
-- Si estás a punto de escribir texto antes del primer "User:", DETENTE y bórralo.
-- Tu salida DEBE verse exactamente así desde el primer carácter:
-  User: ...
-  Assistant: ...
-
-SIN REPETICIÓN (NO REPETITION):
-- Los turnos de usuario duplicados están prohibidos. Una vez que se ha emitido un turno de usuario, NO DEBE emitirse de nuevo.
-- Los turnos del asistente duplicados están prohibidos. Una vez que se ha emitido un turno del asistente, NO DEBE emitirse de nuevo.
-- Si está a punto de emitir un turno de usuario que ya ha hecho, omítalo y pase al siguiente turno nuevo.
-
-FORMATO ESTRICTO (STRICT FORMAT):
-- Comienza INMEDIATAMENTE con el primer par. Sin encabezado, sin introducción.
-- Cada par debe seguir el formato exacto:
+FORMATO ESTRICTO:
+- Comienza INMEDIATAMENTE con "User:". Sin preámbulo, sin saludo.
+- Cada par DEBE seguir este formato:
   User: [mensaje del usuario]
   Assistant: [respuesta del asistente]
-- Una sola línea en blanco separa cada par.
-- El último par debe ser el último texto en la salida. Sin texto final.
-- Si tienes la tentación de escribir algo que no sea un par User:/Assistant:, NO lo escribas.
+- Una línea en blanco separa cada par.
+- Sin texto entre pares. Sin encabezados. Sin líneas divisorias (---).
+- Sin conclusión o resumen después del último par.
 
-DISPOSICIÓN DE LÍNEAS (LINE LAYOUT):
-- La etiqueta `User:` y la etiqueta `Assistant:` (o `User:`/`Assistant:`) DEBEN ocupar cada una su propia línea.
-- La línea `User:` y la línea `Assistant:` NO DEBEN combinarse en la misma línea.
-- Exactamente una línea en blanco separa cada par.
-- La respuesta puede continuar en múltiples líneas después de la etiqueta `Assistant:`, pero una nueva `User:` DEBE comenzar en su propia línea.
+REGLAS DE RESPUESTA:
+- Las respuestas del asistente deben ser texto plano. Sin tablas Markdown, bloques de código o listas con viñetas.
+- Sin monólogo interno. Sin autocorrección. Sin meta-comentarios.
+- Escribe respuestas como prosa continua.
+- Sin "**SELF-CHECK PASSED**" ni texto meta similar.
 
-REGLAS DE CONTENIDO DE RESPUESTA (ANSWER CONTENT RULES):
-- Las respuestas DEBEN ser directas, fácticas y autónomas.
-- Las tablas Markdown, los bloques de código y el formato están PROHIBIDOS en las respuestas.
-- El monólogo interno (p. ej., "Espera, voy a releer...", "Examinemos..."), la autocorrección y los meta-comentarios están PROHIBIDOS en las respuestas.
-- Si la respuesta requiere varias oraciones, escríbela como prosa continua, no como lista o tabla.
+SIN REPETICIÓN:
+- No repitas turnos de usuario o asistente. Cada par debe ser único.
 
-FORMATO DE SALIDA (OUTPUT FORMAT):
-User: [Primer mensaje del usuario]
-Assistant: [Primera respuesta del asistente]
+FORMATO DE SALIDA:
+User: [Primer mensaje]
+Assistant: [Primera respuesta]
 
-User: [Segundo mensaje del usuario]
-Assistant: [Segunda respuesta del asistente]
+User: [Segundo mensaje]
+Assistant: [Segunda respuesta]
 
-[Continúa con tantos pares como sean necesarios para cubrir toda la información, con una línea en blanco entre cada par]
-
-AUTOCOMPROBACIÓN (SELF-CHECK):
-Antes de emitir tu salida, verifica silenciosamente:
-1. La primera línea comienza con "User:".
-2. No hay preliminar, introducción o comentario antes del primer par.
-3. No hay prosa, narración o comentario entre pares.
-4. No hay conclusión, resumen o cierre después del último par.
-5. Cada línea es o bien una línea "User:", una línea "Assistant:", una continuación del mensaje actual, o una única línea en blanco separadora.
-Si alguna de estas comprobaciones falla, revisa tu salida antes de emitirla.
+[Continúa según sea necesario]
