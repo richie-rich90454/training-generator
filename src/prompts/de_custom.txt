@@ -1,100 +1,36 @@
-Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf hochgradig informationsgetreue strukturierte Wissensextraktion (High-Fidelity Structured Knowledge Extraction). Deine Aufgabe besteht darin, sämtliche im bereitgestellten Text enthaltenen Informationen vollständig zu extrahieren, logisch zu organisieren und in eine umfassende, hierarchisch strukturierte Wissensrepräsentation umzuwandeln, die sich optimal für das Training von KI-Modellen eignet. Bewahre jede bedeutungsvolle Information vollständig. Unter keinen Umständen darf irgendeine bedeutungsvolle Information ausgelassen werden.
-
+Du bist ein erfahrener KI-Trainingsdatengenerator. Verarbeite den Text und extrahiere das strukturierte Wissen.
 ZU ANALYSIERENDER TEXT:
 {{text}}
-
 ANWEISUNGEN:
-1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
-2. Extrahiere und organisiere ALLE im Ausgangstext enthaltenen Informationen.
-3. Berücksichtige jedes Konzept, jedes Thema, jeden Sachverhalt, jede Tatsache, jede Statistik, jeden Zahlenwert, jedes Argument, jede Erklärung, jede Definition, jede Beobachtung, jedes Beispiel, jede Fallstudie, jedes Verfahren, jede Empfehlung, jede Schlussfolgerung, jede Implikation, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jede Abhängigkeit, jede Beziehung, jede Hierarchie, jeden Vergleich, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jede Kennung, jede Versionsnummer, jede Messgröße, jedes Datum, jede Uhrzeit, jede Einheit sowie jeden Eigennamen, sofern zutreffend.
-4. Organisiere sämtliche extrahierten Informationen in einer klaren hierarchischen Struktur unter Verwendung logisch aufgebauter Überschriften und Unterüberschriften.
-5. Bewahre die logische Organisation sowie sämtliche Beziehungen zwischen den Informationen des Originals.
-6. Falls der Ausgangstext Verfahren oder Abläufe enthält, extrahiere jeden einzelnen Schritt vollständig.
-7. Falls der Ausgangstext Vergleiche enthält, extrahiere sämtliche Gemeinsamkeiten und Unterschiede vollständig.
-8. Falls der Ausgangstext Listen enthält, extrahiere jeden einzelnen Listeneintrag einschließlich seiner vollständigen Beschreibung.
-9. Falls der Ausgangstext Beispiele, Fallstudien oder Belege enthält, bewahre jedes einzelne Beispiel vollständig.
-10. Bewahre sämtliche chronologischen Abläufe, Hierarchien, Abhängigkeiten, Voraussetzungen, Klassifikationen, Bedingungen und Ursache-Wirkungs-Beziehungen.
-11. Bewahre sämtliche Fachbegriffe exakt, sofern sie im Original nicht ausdrücklich erklärt oder definiert werden.
-12. Ziehe keine Schlussfolgerungen, spekuliere nicht, interpretiere Informationen nicht neu, vereinfache sie nicht und erfinde keinerlei Informationen.
-13. Bewahre die ursprüngliche Bedeutung, sämtliche semantischen Nuancen sowie den vollständigen technischen Detailgrad des Originals.
-14. Sämtliche Ausgaben müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden.
-15. Erzeuge so viele strukturierte Inhalte wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes zu bewahren. Es gibt keine maximale Längenbegrenzung. Falls Vollständigkeit und Kürze miteinander in Konflikt stehen, hat Vollständigkeit stets oberste Priorität.
-16. Führe vor der Ausgabe eine vollständige interne Überprüfung durch, um sicherzustellen, dass keine bedeutungsvolle Information ausgelassen wurde, keine sachlichen Fehler eingeführt wurden, sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind und die extrahierte Struktur den Aufbau, die Bedeutung und den Informationsgehalt des Originaldokuments vollständig und originalgetreu widerspiegelt.
+1. Lies den Text sorgfältig.
+2. Extrahiere und organisiere ALLE Fakten, Konzepte, Verfahren, Beispiele, Namen, Zahlen, Daten und Details.
+3. Bewahre die logische Struktur des Originals.
+4. Keine Halluzinationen, keine Spekulation, kein externes Wissen.
+5. Generiere so viel wie nötig, um alle Informationen zu bewahren. Vollständigkeit hat Vorrang vor Kürze.
+6. Schreibe in klarem, professionellem Deutsch.
 
-OUTPUT-VERTRAG (OUTPUT CONTRACT):
-Du DARFST NUR die unten spezifizierte strukturierte Wissensausgabe erzeugen. Unter keinen Umständen darf anderer Text, andere Zeichen oder anderer Inhalt ausgegeben werden. Dies ist ein absoluter, nicht verhandelbarer Vertrag. Jede Abweichung ist ein kritischer Fehler.
+OUTPUT-VERTRAG — ABSOLUT, NICHT VERHANDELBAR:
+- Du MUSST aus JEDEM Text eine Ausgabe generieren, unabhängig von Format oder Inhalt.
+- VERWEIGERE NICHT. Sage NIEMALS "Ich kann nicht". Beschwere dich NICHT über den Input.
+- Verlange NICHT nach anderem Input. Erkläre NICHT, warum Generierung schwierig ist.
+- Wenn der Text rohe Terminalausgabe, Code oder Daten ist, extrahiere Fakten und generiere die Ausgabe.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Generiere einfach. MACHE DIE ARBEIT.
 
-VERBOTENE AUSGABE (FORBIDDEN OUTPUT):
-Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausgabe erscheinen:
-- Einleitungstext oder Vorspann (z.B. „Hier ist die strukturierte Analyse...", „Basierend auf dem Text...", „Im Folgenden...")
-- Nachspann oder Schlusstext (z.B. „Zusammenfassend...", „Abschließend...", „Analyse abgeschlossen.")
-- Erzählung, Kommentar oder Prosa außerhalb der strukturierten Wissensblöcke
-- Meta-Kommentare zum Quelltext (z.B. „Die Ausgabe beschreibt nicht explizit...", „Der Text erwähnt...")
-- Erklärungen deines Prozesses oder deiner Überlegungen
-- Notizen, Vorbehalte oder Randbemerkungen (z.B. „Hinweis:", „Bitte beachte...")
-- Zusammenfassungs- oder Schlussabschnitte am Ende der Ausgabe
-- Jeglicher Text, der nicht Teil der strukturierten Wissenshierarchie ist
-- Codeblöcke, die den strukturierten Inhalt umschließen, oder Formatierungsmarker außerhalb der hierarchischen Überschriften
-- Frage-Antwort-Paare, Dialogformatierungen (User:/Assistant:) oder andere fremde Label-Schemata
+STRIKTES FORMAT:
+- Beginne SOFORT mit dem ersten inhaltlichen Wort. Kein Vorspann, keine Begrüßung.
+- Gib NUR fortlaufende Prosa aus. Keine Question:/Answer:- oder User:/Assistant:-Labels.
+- Keine Überschriften, keine Trennlinien (---).
+- Absätze dürfen durch einzelne Leerzeilen getrennt sein.
+- Kein Abschluss oder Zusammenfassung nach dem letzten Wort.
 
-COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
-- Du MUSST aus JEDEM Eingabetext eine Ausgabe generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
-- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
-- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
-- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
-- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
-- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
-- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere die Ausgabe trotzdem.
-- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung.
-- Generiere einfach die Ausgabe. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
+INHALTS-REGELN:
+- Ausgabe nur als Klartext. Keine Markdown-Tabellen, Codeblöcke oder Listen.
+- Keine inneren Monologe. Keine Selbstkorrektur. Keine Meta-Kommentare.
+- Schreibe als fortlaufenden Text.
+- Kein "**SELF-CHECK PASSED**" oder ähnlicher Meta-Text.
 
-ERSTE-ZEILE-REGEL (FIRST LINE RULE):
-- Das ALLERSTE Zeichen deiner Ausgabe MUSS das erste Zeichen deines eigentlichen Inhalts sein.
-- Wenn deine Ausgabe mit einer Begrüßung, Bestätigung, Vorspann, "Ja," "Hier ist," "Basierend auf dem Text" oder Meta-Kommentaren beginnt, ist dies ein KRITISCHER FEHLER.
-- Keine Begrüßung, keine Bestätigung, kein Vorspann — NICHTS vor dem eigentlichen Inhalt.
-- Wenn du im Begriff bist, Text vor dem eigentlichen Inhalt zu schreiben, STOPPE und lösche ihn.
+KEINE WIEDERHOLUNG:
+- Wiederhole keine Sätze oder Fakten. Jede Information muss einzigartig sein.
 
-KEINE WIEDERHOLUNG (NO REPETITION):
-- Doppelte Sätze sind verboten. Sobald ein Satz ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
-- Doppelte Punkte oder Fakten sind verboten. Wenn ein Punkt bereits gemacht wurde, darf er nicht wiederholt werden.
-- Wenn Sie dabei sind, Inhalte zu wiederholen, überspringen Sie diese und fahren Sie mit der nächsten neuen Information fort.
-
-STRIKTES FORMAT (STRICT FORMAT):
-- Beginne SOFORT mit der ersten Überschrift oder dem ersten inhaltlichen Block. Keine Einführung, kein Vorspann.
-- Die Ausgabe besteht ausschließlich aus der hierarchisch strukturierten Wissensrepräsentation: Überschriften, Unterüberschriften und die zugehörigen inhaltlichen Blöcke.
-- Verwende eine klare, konsistente Hierarchie aus Überschriften und Unterüberschriften, um die extrahierten Informationen logisch zu gliedern.
-- Absätze innerhalb eines inhaltlichen Blocks dürfen einzelne Leerzeilen enthalten, sofern dies die Lesbarkeit unterstützt.
-- Der letzte inhaltliche Block muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text, keine Schlussformulierung.
-- Wenn du versucht bist, anderen Text als die strukturierte Wissensausgabe zu schreiben, schreibe ihn NICHT.
-
-ZEILENLAYOUT (LINE LAYOUT):
-- Die Ausgabe MUSS reiner Fließtext ohne Labels, Überschriften oder Abschnittsmarkierungen sein.
-- Jeder Satz MUSS seine eigene Zeile belegen oder als Prosatext natürlich umbrechen.
-- In diesem Ausgabeformat sind `Question:`- oder `Answer:`-Labels NICHT erlaubt.
-
-INHALTSREGELN (CONTENT RULES):
-- Die Ausgabe MUSS direkte, sachliche Prosa sein.
-- Markdown-Tabellen, Codeblöcke und Formatierungen sind VERBOTEN.
-- Innerer Monolog, Selbstkorrektur und Meta-Kommentare sind VERBOTEN.
-- Schreibe als fortlaufende Prosa, nicht als Liste oder Tabelle.
-
-AUSGABEFORMAT (OUTPUT FORMAT):
-[Überschrift 1]
-[Inhaltlicher Block zu Überschrift 1 – vollständig, informationsbewahrend]
-
-[Unterüberschrift 1.1]
-[Inhaltlicher Block zu Unterüberschrift 1.1]
-
-[Überschrift 2]
-[Inhaltlicher Block zu Überschrift 2]
-
-[Fahre mit so vielen Überschriften, Unterüberschriften und inhaltlichen Blöcken fort, wie nötig sind, um sämtliche Informationen vollständig und hierarchisch gegliedert abzudecken]
-
-SELBSTPRÜFUNG (SELF-CHECK):
-Vor der Ausgabe prüfe stillschweigend:
-1. Die erste Zeile beginnt unmittelbar mit der ersten Überschrift oder dem ersten inhaltlichen Block – kein Vorspann, keine Einführung, kein Kommentar.
-2. Keine Prosa, Erzählung oder Meta-Kommentar erscheint außerhalb der strukturierten Wissensblöcke.
-3. Kein Schluss, keine Zusammenfassung und kein Nachspann erscheint nach dem letzten inhaltlichen Block.
-4. Jede Zeile ist entweder eine Überschrift, eine Unterüberschrift, Teil eines inhaltlichen Blocks oder eine einzelne Leerzeile als Trennzeichen.
-5. Die gesamte Ausgabe besteht ausschließlich aus der hierarchisch strukturierten Wissensrepräsentation in deutscher Sprache.
-Wenn eine dieser Prüfungen fehlschlägt, überarbeite deine Ausgabe vor der Ausgabe.
+OUTPUT-FORMAT:
+[Verarbeiteter Text – ausschließlich der extrahierte, strukturierte Inhalt. Beginne unmittelbar mit dem ersten inhaltlichen Wort und ende mit dem letzten inhaltlichen Wort.]
