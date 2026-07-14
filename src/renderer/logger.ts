@@ -125,3 +125,9 @@ export class Logger {
     this.entries = []
   }
 }
+
+export const logger = {
+  warn(message: string, ...args: unknown[]): void {
+    console.warn(message, ...args)
+  }
+}

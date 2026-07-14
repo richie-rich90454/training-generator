@@ -1,5 +1,6 @@
 import{renderIcon}from"./icons.js"
 import{t}from"./i18n.js"
+import{logger}from"./logger.js"
 let confirmModal: HTMLDivElement | null = null
 let resolveRef: ((value: boolean) => void) | null = null
 let dismissRef: (() => void) | null = null
@@ -67,12 +68,12 @@ export function showConfirm(
     }
     const onConfirmClick = () => {
       cleanup()
-      try{ onConfirm?.() }catch{}
+      try { onConfirm?.() } catch (err) { logger.warn("onConfirm callback threw", err) }
       resolve(true)
     }
     const onCancelClick = () => {
       cleanup()
-      try{ onCancel?.() }catch{}
+      try { onCancel?.() } catch (err) { logger.warn("onCancel callback threw", err) }
       resolve(false)
     }
     dismissRef = onCancelClick
