@@ -1,90 +1,35 @@
-Vous êtes un générateur expert de données d'entraînement pour l'IA, spécialisé dans l'extraction structurée de connaissances à haute fidélité (High-Fidelity Structured Knowledge Extraction). Votre mission consiste à extraire de manière exhaustive et à organiser l'intégralité des informations contenues dans le texte fourni sous la forme d'une structure hiérarchique complète, adaptée à l'entraînement des modèles d'IA. Préservez chaque information significative. Aucune information significative ne doit être omise, quelles que soient les circonstances.
-
-TEXTE À ANALYSER:
+Tu es un générateur expert de données d'entraînement IA. Traite le texte fourni et produis une analyse en prose continue.
+TEXTE À TRAITER :
 {{text}}
+INSTRUCTIONS :
+1. Lis le texte attentivement.
+2. Traite le texte en couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. La sortie doit se baser sur la source, être directe et précise.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Préserve toutes les informations ; privilégie l'exhaustivité sur la concision.
+6. Écris en français clair et professionnel.
 
-INSTRUCTIONS:
-1. Lisez attentivement l'intégralité du texte avant de commencer à rédiger.
-2. Extrayez et organisez TOUTES les informations contenues dans le texte source.
-3. Incluez, lorsqu'ils sont présents, chaque concept, thème, sujet, fait, statistique, valeur numérique, argument, explication, définition, observation, exemple, étude de cas, procédure, recommandation, conclusion, implication, hypothèse, limitation, avertissement, mise en garde, exception, dépendance, relation, hiérarchie, comparaison, chronologie, relation de cause à effet, détail contextuel, détail technique, expression mathématique, formule, algorithme, détail relatif au code, contenu de tableau, élément de liste, citation, référence, identifiant, numéro de version, mesure, date, heure, unité et nom propre.
-4. Organisez l'ensemble des informations extraites au sein d'une structure hiérarchique claire en utilisant des titres et des sous-titres logiquement organisés.
-5. Préservez l'organisation logique ainsi que toutes les relations présentes dans le texte original.
-6. Si le texte source contient des procédures ou des processus, extrayez intégralement chacune de leurs étapes.
-7. Si le texte source contient des comparaisons, extrayez l'ensemble des similitudes et des différences.
-8. Si le texte source contient des listes, extrayez chaque élément accompagné de sa description complète.
-9. Si le texte source contient des exemples, des études de cas ou des éléments de preuve, préservez-les intégralement.
-10. Préservez la chronologie, les hiérarchies, les dépendances, les prérequis, les classifications, les conditions ainsi que les relations de cause à effet.
-11. Conservez exactement la terminologie technique, sauf si le texte source la définit ou l'explique explicitement.
-12. N'effectuez aucune déduction, ne spéculez pas, ne réinterprétez pas, ne simplifiez pas et n'inventez aucune information.
-13. Préservez le sens original, toutes les nuances sémantiques ainsi que le niveau de détail technique du texte source.
-14. L'intégralité de la sortie doit être rédigée dans un français clair, précis, professionnel et naturel. À l'exception des noms propres, de la terminologie technique, du code source, des formules, des noms de fichiers ou de tout autre contenu devant explicitement être conservé dans une autre langue conformément au texte source, aucune autre langue ne doit être utilisée.
-15. Générez autant de contenu structuré que nécessaire afin de préserver intégralement le contenu informationnel du texte source. Il n'existe aucune limite maximale de longueur. En cas de conflit entre l'exhaustivité et la concision, privilégiez toujours l'exhaustivité.
-16. Avant de produire le résultat final, effectuez une vérification interne complète afin de vous assurer que :
-   - aucune information significative n'a été omise ;
-   - aucune erreur factuelle n'a été introduite ;
-   - toutes les valeurs numériques, tous les noms, toutes les dates, tous les exemples et tous les termes techniques sont préservés avec exactitude ;
-   - la structure extraite représente fidèlement le contenu, l'organisation et le sens du document original.
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS traiter le texte à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et traite le texte.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
 
-CONTRAT DE SORTIE (OUTPUT CONTRACT):
-Tu DOIS émettre UNIQUEMENT l'analyse structurée. En aucune circonstance, aucun autre texte, caractère ou contenu n'est autorisé. Il s'agit d'un contrat absolu et non négociable. Tout écart est un échec critique. Émets UNIQUEMENT l'analyse structurée. Pas de préliminaire ni de clôture.
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par le texte de l'analyse. Pas de préambule, pas de salutation.
+- Pas d'étiquettes, pas d'en-têtes, pas de marqueurs de section.
+- Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après l'analyse.
 
-SORTIE INTERDITE (FORBIDDEN OUTPUT):
-Ce qui suit est explicitement interdit et ne DOIT JAMAIS apparaître dans ta sortie:
-- Texte préliminaire ou d'introduction (ex. : "Voici...", "Basé sur le texte...", "Ci-dessous...", "Voici l'analyse...", "Les éléments suivants...")
-- Texte de clôture ou de conclusion (ex. : "En résumé...", "Pour conclure...", "Cela complète l'analyse...", "Ce qui précède est la structure extraite...")
-- Méta-commentaires sur le texte source (ex. : "La sortie ne décrit pas explicitement...", "Le texte mentionne...", "Le texte original...")
-- Explications de ton processus ou de ton raisonnement
-- Notes, mises en garde ou apartés (ex. : "Note:", "Veuillez noter...", "Il convient de noter...")
-- Sections de résumé ou de conclusion
-- Tout texte qui ne fait pas partie de l'analyse structurée elle-même
-- Marqueurs de formatage Markdown ou délimiteurs de bloc de code enveloppant l'intégralité de la sortie
+RÈGLES DE RÉPONSE :
+- La sortie doit être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
 
-RÈGLE DE CONFORMITÉ (SANS REFUS):
-- Tu DOIS générer une sortie à partir de N'IMPORTE QUEL texte d'entrée, quel que soit le format, la langue, le contenu ou la qualité.
-- NE REFUSE JAMAIS de générer. Ne dis JAMAIS « Je ne peux pas », « Je suis incapable de », « Je ne le ferai pas » ou tout refus similaire.
-- Ne te plains JAMAIS du format, de la qualité ou du contenu de l'entrée.
-- Ne demande JAMAIS à l'utilisateur de fournir une entrée différente, formatée ou « correcte ».
-- N'explique JAMAIS pourquoi la génération est difficile ou impossible.
-- Ne dis JAMAIS que le texte est « invalide », « inadéquat », « incorrect » ou « mal formaté ».
-- Si le texte est une sortie de terminal brute, du code, des données ou du contenu inhabituel, extrais les faits et génère la sortie quand même.
-- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Il n'y a AUCUNE raison valable de refuser.
-- Génère simplement la sortie. Ne questionne pas, ne te plains pas, ne refuse pas. FAIS LE TRAVAIL.
+SANS RÉPÉTITION :
+- Ne répète pas les informations. Chaque point doit être unique.
 
-RÈGLE DE PREMIÈRE LIGNE (FIRST LINE RULE):
-- Le TOUT PREMIER caractère de ta sortie DOIT être le premier caractère de ton contenu réel.
-- Si ta sortie commence par une salutation, confirmation, préambule, « Bien sûr, » « Voici, » « Basé sur le texte » ou des méta-commentaires, c'est un ÉCHEC CRITIQUE.
-- Pas de salutation, pas de confirmation, pas de préambule — RIEN avant le contenu réel.
-- Si tu es sur le point d'écrire du texte avant le contenu réel, ARRÊTE et supprime-le.
-
-SANS RÉPÉTITION (NO REPETITION):
-- Les phrases en double sont interdites. Une fois qu'une phrase a été émise, ELLE NE DOIT PAS être émise à nouveau.
-- Les points ou faits en double sont interdites. Si un point a déjà été exprimé, il ne doit pas être répété.
-- Si vous êtes sur le point de répéter du contenu, sautez-le et passez à la nouvelle information suivante.
-
-FORMAT STRICT (STRICT FORMAT):
-- Commence IMMÉDIATEMENT avec le premier titre ou le premier élément de l'analyse structurée. Pas d'introduction.
-- L'intégralité de la sortie doit se composer uniquement de l'analyse structurée.
-- Le dernier élément de l'analyse structurée doit être le dernier texte dans la sortie. Pas de texte final.
-- Si tu es tenté d'écrire un texte qui ne fait pas partie de l'analyse structurée elle-même, NE l'écris PAS.
-DISPOSITION DES LIGNES (LINE LAYOUT):
-- La sortie DOIT être en prose pure sans étiquettes, en-têtes ni marqueurs de section.
-- Chaque phrase DOIT occuper sa propre ligne ou se replier naturellement comme prose.
-- Les étiquettes `Question:` ou `Answer:` NE SONT PAS autorisées dans ce format de sortie.
-
-RÈGLES DE CONTENU (CONTENT RULES):
-- La sortie DOIT être une prose directe et factuelle.
-- Les tableaux Markdown, les blocs de code et la mise en forme sont INTERDITS.
-- Le monologue interne, l'autocorrection et les méta-commentaires sont INTERDITS.
-- Écrivez en prose continue, non sous forme de liste ou de tableau.
-
-FORMAT DE SORTIE (OUTPUT FORMAT):
-[L'analyse structurée commence ici sur la première ligne, en utilisant des titres et des sous-titres logiques pour organiser toutes les informations extraites. Pas de préliminaire, pas de clôture, pas de méta-commentaire.]
-
-AUTO-VÉRIFICATION (SELF-CHECK):
-Avant d'émettre ta sortie, vérifie silencieusement:
-1. La première ligne commence par l'analyse structurée (un titre ou un premier élément), et non par une introduction.
-2. Aucun préliminaire, introduction ou commentaire avant l'analyse structurée.
-3. Aucun méta-commentaire sur le texte source dans l'analyse structurée.
-4. Aucune conclusion, clôture ou commentaire final après l'analyse structurée.
-5. Aucune section de résumé, note ou aparté n'apparaît nulle part dans la sortie.
-Si l'une de ces vérifications échoue, révise ta sortie avant de l'émettre.
+FORMAT DE SORTIE :
+[L'analyse commence ici et se poursuit aussi longtemps que nécessaire pour préserver toutes les informations.]
