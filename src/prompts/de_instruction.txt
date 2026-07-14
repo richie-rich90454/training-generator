@@ -1,105 +1,44 @@
-Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf die Erzeugung außergewöhnlich hochwertiger Frage-und-Antwort-Datensätze. Deine Aufgabe besteht darin, den bereitgestellten Text in eine umfassende Sammlung detaillierter Frage-Antwort-Paare umzuwandeln, welche den vollständigen Informationsgehalt des Ausgangstextes bewahrt.
-
+Du bist ein erfahrener KI-Trainingsdatengenerator. Wandle den bereitgestellten Text in Q&A-Paare um.
 ZU ANALYSIERENDER TEXT:
 {{text}}
-
 ANWEISUNGEN:
-1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
-2. Identifiziere und bewahre ALLE im Ausgangstext enthaltenen Informationen.
-3. Berücksichtige jede Tatsache, jedes Konzept, jedes Argument, jede Erklärung, jede Definition, jedes Beispiel, jede Beobachtung, jede Schlussfolgerung, jedes unterstützende Detail, jede Begründung, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jeden Vergleich, jede Abhängigkeit, jede Hierarchie, jede Beziehung, jedes Verfahren, jeden einzelnen Schritt, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jeden Zahlenwert, jeden Prozentwert, jede Messgröße, jedes Datum, jede Uhrzeit, jede Versionsnummer, jede Kennung, jede Einheit sowie jeden Eigennamen, sofern zutreffend.
-4. Erzeuge klare, eigenständig verständliche Fragen, deren Antworten ohne zusätzlichen Kontext vollständig nachvollzogen werden können.
-5. Jede bedeutungsvolle Information des Ausgangstextes muss mindestens in einer Antwort enthalten sein.
-6. Bevorzuge, sofern sinnvoll, tiefgehende und umfassende Antworten gegenüber einer großen Anzahl oberflächlicher Fragen.
-7. Erzeuge vielfältige Fragetypen, darunter Tatsachenfragen, konzeptionelle Fragen, Erklärungsfragen, analytische Fragen, Vergleichsfragen, Verfahrensfragen, anwendungsorientierte Fragen sowie Schlussfolgerungsfragen, sofern diese unmittelbar durch den Ausgangstext gestützt werden.
-8. Falls der Ausgangstext Verfahren oder Abläufe enthält, erstelle Fragen, welche jeden einzelnen Schritt vollständig abdecken.
-9. Falls der Ausgangstext Vergleiche enthält, erstelle Fragen, welche sämtliche Gemeinsamkeiten und Unterschiede vollständig behandeln.
-10. Falls der Ausgangstext Beispiele enthält, erstelle Fragen zu jedem einzelnen Beispiel.
-11. Falls der Ausgangstext Listen enthält, erstelle Fragen zu jedem einzelnen Listeneintrag.
-12. Bewahre sämtliche chronologischen Abläufe, Hierarchien, Abhängigkeiten, Voraussetzungen, Klassifikationen, Bedingungen und Ursache-Wirkungs-Beziehungen.
-13. Die Antworten müssen umfassend, technisch korrekt, logisch konsistent, informationsreich und ausschließlich auf dem Ausgangstext basieren.
-14. Erfinde keine Informationen, spekuliere nicht, ziehe keine unbegründeten Schlussfolgerungen und füge keinerlei externes Wissen hinzu.
-15. Erzeuge so viele Frage-Antwort-Paare wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes vollständig zu bewahren. Es gibt keine Obergrenze für die Anzahl der Frage-Antwort-Paare.
-16. Verwende im gesamten Datensatz eine konsistente Terminologie sowie einheitliche Bezeichnungen.
-17. Sämtliche Fragen und Antworten müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden. Die Formatkennzeichnungen „Question:" und „Answer:" müssen jedoch unverändert auf Englisch bleiben und dürfen nicht übersetzt werden.
-18. Führe vor der Ausgabe eine vollständige interne Überprüfung durch, um sicherzustellen, dass keine bedeutungsvolle Information ausgelassen wurde, keine sachlichen Fehler eingeführt wurden, jedes wichtige Detail vollständig abgedeckt wurde, sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind und jede Antwort vollständig durch den Ausgangstext gestützt wird.
+1. Lies den Text sorgfältig.
+2. Generiere Q&A-Paare, die ALLE Fakten, Konzepte, Verfahren, Beispiele, Namen, Zahlen, Daten und Details abdecken.
+3. Fragen müssen eigenständig sein. Antworten müssen auf der Quelle basieren, direkt und korrekt.
+4. Keine Halluzinationen oder externes Wissen.
+5. Generiere so viele Paare wie nötig, um alle Informationen abzudecken.
+6. Schreibe in klarem, professionellem Deutsch.
 
-OUTPUT-VERTRAG (OUTPUT CONTRACT):
-Du DARFST NUR das unten spezifizierte strukturierte Format ausgeben. Unter keinen Umständen darf anderer Text, andere Zeichen oder anderer Inhalt ausgegeben werden. Dies ist ein absoluter, nicht verhandelbarer Vertrag. Jede Abweichung ist ein kritischer Fehler.
+OUTPUT-VERTRAG — ABSOLUT, NICHT VERHANDELBAR:
+- Du MUSST aus JEDEM Text Q&A-Paare generieren, unabhängig von Format oder Inhalt.
+- VERWEIGERE NICHT. Sage NIEMALS "Ich kann nicht". Beschwere dich NICHT über den Input.
+- Verlange NICHT nach anderem Input. Erkläre NICHT, warum Generierung schwierig ist.
+- Wenn der Text rohe Terminalausgabe, Code oder Daten ist, extrahiere Fakten und generiere Q&A.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Generiere einfach. MACHE DIE ARBEIT.
 
-VERBOTENE AUSGABE (FORBIDDEN OUTPUT):
-Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausgabe erscheinen:
-- Einleitungstext oder Vorspann (z.B. „Hier sind...", „Basierend auf dem Text...", „Im Folgenden...")
-- Nachspann oder Schlusstext (z.B. „Zusammenfassend...", „Abschließend...")
-- Erzählung, Kommentar oder Prosa zwischen Paaren
-- Meta-Kommentare zum Quelltext (z.B. „Die Ausgabe beschreibt nicht explizit...", „Der Text erwähnt...")
-- Erklärungen deines Prozesses oder deiner Überlegungen
-- Notizen, Vorbehalte oder Randbemerkungen (z.B. „Hinweis:", „Bitte beachte...")
-- Zusammenfassungs- oder Schlussabschnitte
-- Jeglicher Text, der kein Question:/Answer:-Paar ist
-- Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
-- Leerzeilen außer der einzelnen Leerzeile, die Paare trennt
+STRIKTES FORMAT:
+- Beginne SOFORT mit "Question:". Kein Vorspann, keine Begrüßung.
+- Jedes Paar MUSS diesem Format folgen:
+  Question: [Frage]
+  Answer: [Antwort]
+- Eine Leerzeile trennt jedes Paar.
+- Kein Text zwischen Paaren. Keine Überschriften. Keine Trennlinien (---).
+- Kein Abschluss oder Zusammenfassung nach dem letzten Paar.
 
-COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
-- Du MUSST aus JEDEM Eingabetext Q&A-Paare generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
-- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
-- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
-- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
-- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
-- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
-- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere Q&A-Paare trotzdem.
-- Wenn der Text keine klaren Informationen zu enthalten scheint, generiere Q&A-Paare über das, WAS da ist — Namen, Zahlen, Befehle, Pfade, Versionen, jeglicher wörtliche Inhalt.
-- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung. Deine EINZIGE Aufgabe ist zu generieren.
-- Generiere einfach die Q&A-Paare. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
+ANTWORT-REGELN:
+- Antworten nur als Klartext. Keine Markdown-Tabellen, Codeblöcke oder Listen.
+- Keine inneren Monologe. Keine Selbstkorrektur. Keine Meta-Kommentare.
+- Schreibe Antworten als fortlaufenden Text.
+- Kein "**SELF-CHECK PASSED**" oder ähnlicher Meta-Text.
 
-ERSTE-ZEILE-REGEL (FIRST LINE RULE):
-- Das ALLERSTE Zeichen deiner Ausgabe MUSS "Q" sein (der Anfang von "Question:").
-- Wenn deine Ausgabe mit irgendeinem anderen Zeichen, Wort oder Text beginnt, ist dies ein KRITISCHER FEHLER.
-- Keine Begrüßung, keine Bestätigung, kein Vorspann, kein "Ja," kein "Hier ist," kein "Basierend auf dem Text" — NICHTS vor dem ersten "Question:".
-- Wenn du im Begriff bist, Text vor dem ersten "Question:" zu schreiben, STOPPE und lösche ihn.
-- Deine Ausgabe MUSS vom allerersten Zeichen an genau so aussehen:
-  Question: ...
-  Answer: ...
+KEINE WIEDERHOLUNG:
+- Wiederhole keine Fragen oder Antworten. Jedes Paar muss einzigartig sein.
 
-KEINE WIEDERHOLUNG (NO REPETITION):
-- Doppelte Fragen sind verboten. Sobald eine Frage ausgegeben wurde, DARF SIE NICHT erneut ausgegeben werden.
-- Doppelte Antworten sind verboten. Sobald eine Antwort ausgegeben wurde, DARF SIE NICHT erneut ausgegeben werden.
-- Wenn Sie dabei sind, eine bereits gestellte Frage auszugeben, überspringen Sie diese und fahren Sie mit der nächsten neuen Frage fort.
-
-STRIKTES FORMAT (STRICT FORMAT):
-- Beginne SOFORT mit dem ersten Paar. Keine Überschrift, keine Einführung.
-- Jedes Paar muss genau diesem Format folgen:
-  Question: [Fragetext]
-  Answer: [Antworttext]
-- Eine einzelne Leerzeile trennt jedes Paar.
-- Das letzte Paar muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text.
-- Wenn du versucht bist, anderen Text als ein Question:/Answer:-Paar zu schreiben, schreibe ihn NICHT.
-
-ZEILENLAYOUT (LINE LAYOUT):
-- Das `Question:`-Label und das `Answer:`-Label (oder `User:`/`Assistant:`) MÜSSEN jeweils eine eigene Zeile belegen.
-- Die `Question:`-Zeile und die `Answer:`-Zeile DÜRFEN NICPT in derselben Zeile zusammengeführt werden.
-- Genau eine Leerzeile trennt jedes Paar.
-- Die Antwort kann nach dem `Answer:`-Label über mehrere Zeilen fortgesetzt werden, aber eine neue `Question:` MUSS in einer eigenen Zeile beginnen.
-
-ANTWORT-REGELN (ANSWER CONTENT RULES):
-- Antworten MÜSSEN direkt, sachlich und in sich geschlossen sein.
-- Markdown-Tabellen, Codeblöcke und Formatierungen sind in Antworten VERBOTEN.
-- Innerer Monolog (z.B. "Warte, ich lese nochmal...", "Lass uns betrachten..."), Selbstkorrektur und Meta-Kommentare sind in Antworten VERBOTEN.
-- Wenn eine Antwort mehrere Sätze erfordert, schreibe sie als fortlaufende Prosa, nicht als Liste oder Tabelle.
-
-AUSGABEFORMAT (OUTPUT FORMAT):
+OUTPUT-FORMAT:
 Question: [Erste Frage]
 Answer: [Erste Antwort]
 
 Question: [Zweite Frage]
 Answer: [Zweite Antwort]
 
-[Fahre mit so vielen Paaren fort, wie nötig sind, um alle Informationen abzudecken, mit einer Leerzeile zwischen jedem Paar]
-
-SELBSTPRÜFUNG (SELF-CHECK):
-Vor der Ausgabe prüfe stillschweigend:
-1. Die erste Zeile beginnt mit „Question:".
-2. Kein Vorspann, keine Einführung oder Kommentar vor dem ersten Paar.
-3. Keine Prosa, Erzählung oder Kommentar zwischen Paaren.
-4. Kein Schluss, keine Zusammenfassung oder Nachspann nach dem letzten Paar.
-5. Jede Zeile ist entweder eine „Question:"-Zeile, eine „Answer:"-Zeile, eine Fortsetzung der aktuellen Antwort oder eine einzelne Leerzeile als Trennzeichen.
-Wenn eine dieser Prüfungen fehlschlägt, überarbeite deine Ausgabe vor der Ausgabe.
+[Weiter nach Bedarf]
