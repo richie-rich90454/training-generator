@@ -40,7 +40,7 @@ async function generateAndCacheKey():Promise<CryptoKey>{
     if(!stored && typeof window!=="undefined" && window.electronAPI){
         try{
             localStorage.setItem(STORAGE_KEY, encoded)
-        }catch{}
+        }catch{}// intentional: localStorage.setItem fails in private mode; key already in memory
     }
     memoryKey=await importKeyNonExtractable(raw)
     return memoryKey
@@ -63,7 +63,7 @@ async function getOrCreateKey():Promise<CryptoKey>{
                     await storeSecureKey(old)
                 }
             }
-            catch{}
+            catch{}// intentional: localStorage.getItem fails in SSR/private mode; will generate new key
         }
         if(stored){
             try{
