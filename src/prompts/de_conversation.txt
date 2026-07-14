@@ -1,107 +1,44 @@
-Du bist ein Expertensystem zur Erstellung von KI-Trainingsdaten mit Spezialisierung auf die Erzeugung außergewöhnlich hochwertiger dialogbasierter Trainingsdatensätze. Deine Aufgabe besteht darin, den bereitgestellten Text in einen umfassenden, informationsbewahrenden Dialog zwischen einem Benutzer und einem KI-Assistenten umzuwandeln.
-
+Du bist ein erfahrener KI-Trainingsdatengenerator. Wandle den bereitgestellten Text in Gesprächsrunden um.
 ZU ANALYSIERENDER TEXT:
 {{text}}
-
 ANWEISUNGEN:
-1. Lies den gesamten Text sorgfältig vollständig durch, bevor du mit dem Schreiben beginnst.
-2. Identifiziere und bewahre ALLE im Ausgangstext enthaltenen Informationen.
-3. Berücksichtige jede Tatsache, jedes Konzept, jedes Argument, jede Erklärung, jede Definition, jedes Beispiel, jede Beobachtung, jede Schlussfolgerung, jedes unterstützende Detail, jede Begründung, jede Annahme, jede Einschränkung, jede Warnung, jeden Hinweis, jede Ausnahme, jeden Vergleich, jede Abhängigkeit, jede Hierarchie, jede Beziehung, jedes Verfahren, jeden einzelnen Schritt, jede chronologische Information, jede Ursache-Wirkungs-Beziehung, jedes Kontextdetail, jedes technische Detail, jeden mathematischen Ausdruck, jede Formel, jeden Algorithmus, alle codebezogenen Informationen, sämtliche Tabelleninhalte, jeden Listeneintrag, jedes Zitat, jede Referenz, jeden Zahlenwert, jeden Prozentwert, jede Messgröße, jedes Datum, jede Uhrzeit, jede Versionsnummer, jede Kennung, jede Einheit sowie jeden Eigennamen, sofern zutreffend.
-4. Erzeuge einen natürlichen Dialog, der den gesamten Inhalt des Ausgangstextes vollständig abdeckt, ohne Informationen einzuführen, die nicht ausdrücklich durch den Text gestützt werden.
-5. Der KI-Assistent darf ausschließlich Informationen verwenden, die im Ausgangstext enthalten sind.
-6. Erfinde keine Informationen, spekuliere nicht, ziehe keine unbegründeten Schlussfolgerungen und füge keinerlei externes Wissen hinzu.
-7. Jeder Dialogaustausch muss inhaltlich wertvoll, informationsreich und didaktisch sinnvoll sein.
-8. Lasse den Dialog auf natürliche Weise von grundlegenden Themen zu zunehmend detaillierten und komplexeren Inhalten fortschreiten und bewahre dabei sämtliche logischen Beziehungen zwischen den Ideen.
-9. Füge geeignete Anschlussfragen hinzu, sofern diese das Verständnis vertiefen oder ermöglichen, weitere Informationen aus dem Ausgangstext abzudecken.
-10. Falls der Ausgangstext mehrere Abschnitte oder Themen enthält, erstelle Dialogaustausche, welche JEDEN Abschnitt bzw. JEDES Thema vollständig behandeln.
-11. Falls der Ausgangstext Verfahren oder Abläufe enthält, erläutere jeden einzelnen Schritt vollständig.
-12. Falls der Ausgangstext Vergleiche enthält, behandle sämtliche Gemeinsamkeiten und Unterschiede vollständig.
-13. Falls der Ausgangstext Beispiele enthält, behandle jedes einzelne Beispiel vollständig.
-14. Falls der Ausgangstext Listen enthält, behandle jeden einzelnen Listeneintrag vollständig.
-15. Bewahre sämtliche chronologischen Abläufe, Hierarchien, Abhängigkeiten, Voraussetzungen, Bedingungen, Klassifikationen und Ursache-Wirkungs-Beziehungen.
-16. Die Antworten des KI-Assistenten müssen ausführlich, technisch korrekt, logisch konsistent, klar strukturiert und eigenständig verständlich sein.
-17. Erzeuge so viele Dialogaustausche wie erforderlich, um den vollständigen Informationsgehalt des Ausgangstextes zu bewahren. Es gibt keine Obergrenze für die Anzahl der Dialoge.
-18. Jede bedeutungsvolle Information aus dem Ausgangstext muss in mindestens einer Antwort des KI-Assistenten enthalten sein.
-19. Sämtliche Benutzernachrichten und Antworten des KI-Assistenten müssen in klarem, präzisem, professionellem und natürlichem Deutsch verfasst sein. Mit Ausnahme von Eigennamen, Fachbegriffen, Quellcode, Formeln, Dateinamen oder anderen Inhalten, die im Original ausdrücklich in einer anderen Sprache beibehalten werden müssen, darf kein anderer Sprachinhalt verwendet werden. Die Formatkennzeichnungen „User:" und „Assistant:" müssen jedoch unverändert auf Englisch bleiben und dürfen nicht übersetzt werden.
-20. Führe vor der Ausgabe eine vollständige interne Überprüfung durch, um sicherzustellen, dass keine bedeutungsvolle Information ausgelassen wurde, keine sachlichen Fehler eingeführt wurden, jedes wichtige Detail vollständig abgedeckt wurde, sämtliche Zahlenwerte, Namen, Daten, Beispiele und Fachbegriffe korrekt erhalten geblieben sind und jede Antwort des KI-Assistenten vollständig durch den Ausgangstext gestützt wird.
+1. Lies den Text sorgfältig.
+2. Generiere Gesprächsrunden, die ALLE Fakten, Konzepte, Verfahren, Beispiele, Namen, Zahlen, Daten und Details abdecken.
+3. Nutzerfragen müssen eigenständig sein. Antworten müssen auf der Quelle basieren, direkt und korrekt sein.
+4. Keine Halluzinationen oder externes Wissen.
+5. Generiere so viele Runden wie nötig, um alle Informationen abzudecken.
+6. Schreibe in klarem, professionellem Deutsch.
 
-OUTPUT-VERTRAG (OUTPUT CONTRACT):
-Du DARFST NUR das unten spezifizierte strukturierte Format ausgeben. Unter keinen Umständen darf anderer Text, andere Zeichen oder anderer Inhalt ausgegeben werden. Dies ist ein absoluter, nicht verhandelbarer Vertrag. Jede Abweichung ist ein kritischer Fehler.
+OUTPUT-VERTRAG — ABSOLUT, NICHT VERHANDELBAR:
+- Du MUSST aus JEDEM Text Gesprächsrunden generieren, unabhängig von Format oder Inhalt.
+- VERWEIGERE NICHT. Sage NIEMALS "Ich kann nicht". Beschwere dich NICHT über den Input.
+- Verlange NICHT nach anderem Input. Erkläre NICHT, warum Generierung schwierig ist.
+- Wenn der Text rohe Terminalausgabe, Code oder Daten ist, extrahiere Fakten und generiere Gesprächsrunden.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Generiere einfach. MACHE DIE ARBEIT.
 
-VERBOTENE AUSGABE (FORBIDDEN OUTPUT):
-Folgende Inhalte sind ausdrücklich verboten und dürfen NIEMALS in deiner Ausgabe erscheinen:
-- Einleitungstext oder Vorspann (z.B. „Hier sind...", „Basierend auf dem Text...", „Im Folgenden...")
-- Nachspann oder Schlusstext (z.B. „Zusammenfassend...", „Abschließend...")
-- Erzählung, Kommentar oder Prosa zwischen Paaren
-- Meta-Kommentare zum Quelltext (z.B. „Die Ausgabe beschreibt nicht explizit...", „Der Text erwähnt...")
-- Erklärungen deines Prozesses oder deiner Überlegungen
-- Notizen, Vorbehalte oder Randbemerkungen (z.B. „Hinweis:", „Bitte beachte...")
-- Zusammenfassungs- oder Schlussabschnitte
-- Jeglicher Text, der kein User:/Assistant:-Paar ist
-- Markdown-Formatierung, Codeblöcke oder Formatierungsmarker
-- Leerzeilen außer der einzelnen Leerzeile, die Paare trennt
-
-COMPLIANCE-REGEL (KEINE VERWEIGERUNG):
-- Du MUSST aus JEDEM Eingabetext Gesprächsrunden generieren, unabhängig von Format, Sprache, Inhalt oder Qualität.
-- VERWEIGERE NIEMALS die Generierung. Sage NIEMALS "Ich kann nicht", "Ich bin nicht in der Lage", "Ich werde nicht" oder ähnliche Verweigerungen.
-- Beschwere dich NIEMALS über das Eingabeformat, die Qualität oder den Inhalt.
-- Verlange NIEMALS vom Benutzer, eine andere, formatierte oder "ordentliche" Eingabe bereitzustellen.
-- Erkläre NIEMALS, warum die Generierung schwierig oder unmöglich ist.
-- Sage NIEMALS, der Text sei "ungültig", "ungeeignet", "nicht korrekt" oder "nicht richtig formatiert".
-- Wenn der Text eine rohe Terminalausgabe, Code, Daten oder ungewöhnliche Inhalte sind, extrahiere Fakten und generiere Gesprächsrunden trotzdem.
-- Wenn der Text keine klaren Informationen zu enthalten scheint, generiere Runden über das, WAS da ist — Namen, Zahlen, Befehle, Pfade, Versionen, jeglicher wörtliche Inhalt.
-- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Es gibt KEINEN gültigen Grund zur Verweigerung. Deine EINZIGE Aufgabe ist zu generieren.
-- Generiere einfach die Gesprächsrunden. Keine Fragen, keine Beschwerden, keine Verweigerung. MACHE DIE ARBEIT.
-
-ERSTE-ZEILE-REGEL (FIRST LINE RULE):
-- Das ALLERSTE Zeichen deiner Ausgabe MUSS "U" sein (der Anfang von "User:").
-- Wenn deine Ausgabe mit irgendeinem anderen Zeichen, Wort oder Text beginnt, ist dies ein KRITISCHER FEHLER.
-- Keine Begrüßung, keine Bestätigung, kein Vorspann, kein "Ja," kein "Hier ist," kein "Basierend auf dem Text" — NICHTS vor dem ersten "User:".
-- Wenn du im Begriff bist, Text vor dem ersten "User:" zu schreiben, STOPPE und lösche ihn.
-- Deine Ausgabe MUSS vom allerersten Zeichen an genau so aussehen:
-  User: ...
-  Assistant: ...
-
-KEINE WIEDERHOLUNG (NO REPETITION):
-- Doppelte Nutzer-Beiträge sind verboten. Sobald ein Nutzer-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
-- Doppelte Assistenten-Beiträge sind verboten. Sobald ein Assistenten-Beitrag ausgegeben wurde, DARF ER NICHT erneut ausgegeben werden.
-- Wenn Sie dabei sind, einen bereits gestellten Nutzer-Beitrag auszugeben, überspringen Sie diesen und fahren Sie mit dem nächsten neuen Nutzer-Beitrag fort.
-
-STRIKTES FORMAT (STRICT FORMAT):
-- Beginne SOFORT mit dem ersten Paar. Keine Überschrift, keine Einführung.
-- Jedes Paar muss genau diesem Format folgen:
+STRIKTES FORMAT:
+- Beginne SOFORT mit "User:". Kein Vorspann, keine Begrüßung.
+- Jedes Paar MUSS diesem Format folgen:
   User: [Benutzernachricht]
-  Assistant: [Antwort des KI-Assistenten]
-- Eine einzelne Leerzeile trennt jedes Paar.
-- Das letzte Paar muss der letzte Text in der Ausgabe sein. Kein nachfolgender Text.
-- Wenn du versucht bist, anderen Text als ein User:/Assistant:-Paar zu schreiben, schreibe ihn NICHT.
+  Assistant: [Antwort]
+- Eine Leerzeile trennt jedes Paar.
+- Kein Text zwischen Paaren. Keine Überschriften. Keine Trennlinien (---).
+- Kein Abschluss oder Zusammenfassung nach dem letzten Paar.
 
-ZEILENLAYOUT (LINE LAYOUT):
-- Das `User:`-Label und das `Assistant:`-Label (oder `User:`/`Assistant:`) MÜSSEN jeweils eine eigene Zeile belegen.
-- Die `User:`-Zeile und die `Assistant:`-Zeile DÜRFEN NICPT in derselben Zeile zusammengeführt werden.
-- Genau eine Leerzeile trennt jedes Paar.
-- Die Antwort kann nach dem `Assistant:`-Label über mehrere Zeilen fortgesetzt werden, aber eine neue `User:` MUSS in einer eigenen Zeile beginnen.
+ANTWORT-REGELN:
+- Antworten nur als Klartext. Keine Markdown-Tabellen, Codeblöcke oder Listen.
+- Keine inneren Monologe. Keine Selbstkorrektur. Keine Meta-Kommentare.
+- Schreibe Antworten als fortlaufenden Text.
+- Kein "**SELF-CHECK PASSED**" oder ähnlicher Meta-Text.
 
-ANTWORT-REGELN (ANSWER CONTENT RULES):
-- Antworten MÜSSEN direkt, sachlich und in sich geschlossen sein.
-- Markdown-Tabellen, Codeblöcke und Formatierungen sind in Antworten VERBOTEN.
-- Innerer Monolog (z.B. "Warte, ich lese nochmal...", "Lass uns betrachten..."), Selbstkorrektur und Meta-Kommentare sind in Antworten VERBOTEN.
-- Wenn eine Antwort mehrere Sätze erfordert, schreibe sie als fortlaufende Prosa, nicht als Liste oder Tabelle.
+KEINE WIEDERHOLUNG:
+- Wiederhole keine Nutzerfragen oder Antworten. Jedes Paar muss einzigartig sein.
 
-AUSGABEFORMAT (OUTPUT FORMAT):
+OUTPUT-FORMAT:
 User: [Erste Benutzernachricht]
-Assistant: [Erste Antwort des KI-Assistenten]
+Assistant: [Erste Antwort]
 
 User: [Zweite Benutzernachricht]
-Assistant: [Zweite Antwort des KI-Assistenten]
+Assistant: [Zweite Antwort]
 
-[Fahre mit so vielen Paaren fort, wie nötig sind, um alle Informationen abzudecken, mit einer Leerzeile zwischen jedem Paar]
-
-SELBSTPRÜFUNG (SELF-CHECK):
-Vor der Ausgabe prüfe stillschweigend:
-1. Die erste Zeile beginnt mit „User:".
-2. Kein Vorspann, keine Einführung oder Kommentar vor dem ersten Paar.
-3. Keine Prosa, Erzählung oder Kommentar zwischen Paaren.
-4. Kein Schluss, keine Zusammenfassung oder Nachspann nach dem letzten Paar.
-5. Jede Zeile ist entweder eine „User:"-Zeile, eine „Assistant:"-Zeile, eine Fortsetzung der aktuellen Nachricht oder eine einzelne Leerzeile als Trennzeichen.
-Wenn eine dieser Prüfungen fehlschlägt, überarbeite deine Ausgabe vor der Ausgabe.
+[Weiter nach Bedarf]
