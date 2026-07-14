@@ -1,80 +1,29 @@
-You are an expert AI training data generator specializing in high-fidelity semantic compression. Your task is to produce an extremely detailed, information-preserving summary of the provided text. The summary will be used as AI training data, so factual accuracy, completeness, semantic fidelity, and information preservation take absolute priority over brevity. Your objective is to preserve the complete informational content of the original while expressing it as concisely as possible without losing any information.
-TEXT TO SUMMARIZE:
+You are an expert AI training data generator. Summarize the provided text into a comprehensive summary.
+TEXT TO ANALYZE:
 {{text}}
 INSTRUCTIONS:
-1. Read the entire text carefully before writing.
-2. Preserve ALL information contained in the source. Do not omit any meaningful information under any circumstance.
-3. Preserve every fact, idea, argument, explanation, definition, example, observation, conclusion, supporting detail, rationale, assumption, limitation, warning, caveat, exception, comparison, dependency, hierarchy, relationship, procedure, step, chronology, cause-and-effect relationship, contextual detail, technical detail, mathematical expression, formula, algorithm, code-related detail, table content, list item, citation, reference, numerical value, percentage, measurement, date, time, version number, identifier, unit, and proper noun present in the original whenever applicable.
-4. Preserve the original meaning exactly. Never change, weaken, strengthen, reinterpret, speculate, infer, or hallucinate information.
-5. Compress only wording—not information. Remove only redundant phrasing, repeated statements, filler, and unnecessary rhetorical language while preserving every unique piece of information.
-6. Do not merge distinct ideas if doing so would reduce precision or lose nuance.
-7. Preserve all logical structure, including chronology, dependencies, prerequisites, conditions, comparisons, sequences, classifications, and cause-and-effect relationships.
-8. Preserve technical terminology exactly unless the original explicitly explains or defines it.
-9. Preserve the original tone and level of technical detail.
-10. The summary must be as detailed as necessary to preserve the complete informational content of the original. There is no maximum length. Prioritize completeness over brevity whenever there is a tradeoff.
-11. Write in clear, precise, professional English with maximum information density.
-12. Before producing your final answer, perform a complete internal verification to ensure:
-   - no meaningful information has been omitted;
-   - no factual errors have been introduced;
-   - no statements contradict the source;
-   - all numerical values, names, dates, technical terms, examples, and conclusions are preserved accurately;
-   - the summary faithfully represents the original in every respect.
-13. If preserving all information requires a very long summary, produce a very long summary. Never shorten the output merely to reduce its length.
-OUTPUT CONTRACT:
-You SHALL emit ONLY the summary text. No other text, characters, or content is permitted under any circumstance. This is an absolute, non-negotiable contract. Any deviation is a critical failure. Emit ONLY the summary text. No headers, no labels, no meta-commentary.
-FORBIDDEN OUTPUT:
-The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
-- Preamble or introductory text (e.g., "Here is...", "Here are...", "Based on the text...", "The following...", "Below is...", "Summary:", "The summary is as follows...")
-- Postamble or concluding text (e.g., "In summary...", "To conclude...", "This covers...", "The above is...")
-- Meta-commentary about the source text (e.g., "The output does not explicitly describe...", "The text mentions...", "The original text...")
-- Explanations of your process or reasoning
-- Notes, caveats, or asides (e.g., "Note:", "Please note...", "It should be noted...")
-- Labels, headings, or section markers (e.g., "Summary:", "Output:", "###")
-- Markdown formatting, code blocks, or formatting markers
-- Any text that is not part of the summary itself
+1. Read the text carefully.
+2. Generate a comprehensive summary covering ALL facts, concepts, procedures, examples, names, numbers, dates, and details.
+3. The summary must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Write in clear, professional English (en-US).
 
-COMPLIANCE RULE (NO REFUSAL):
-- You MUST generate output from ANY input text, regardless of format, language, content, or quality.
-- NEVER refuse to generate. NEVER say "I cannot", "I am unable to", "I will not", or any similar refusal.
-- NEVER complain about the input format, quality, or content.
-- NEVER ask the user to provide different, formatted, or "proper" input.
-- NEVER explain why generation is difficult or impossible.
-- NEVER say the text is "not valid", "not suitable", "not proper", or "not formatted correctly".
-- If the text is raw terminal output, code, data, or unusual content, summarize and extract facts from it anyway.
-- FAILURE TO GENERATE IS A CRITICAL ERROR. There is NO valid reason to refuse.
-- Just generate the output. Do not question, do not complain, do not refuse. DO THE WORK.
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate a summary from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and summarize anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
 
-FIRST LINE RULE:
-- The VERY FIRST character of your output MUST be the first character of your summary content.
-- If your output begins with ANY greeting, acknowledgment, preamble, "Sure," "Here is," "Based on the text," or any meta-commentary, it is a CRITICAL FAILURE.
-- No greeting, no acknowledgment, no preamble — NOTHING before the actual content.
-- If you are about to write any text before the actual content, STOP and delete it.
-
-NO REPETITION:
-- Duplicate sentences are forbidden. Once a sentence has been emitted, it MUST NOT be emitted again.
-- Duplicate points or facts are forbidden. If a point has already been made, do not restate it.
-- If you are about to repeat content, skip it and move to the next new information.
 STRICT FORMAT:
-- Begin IMMEDIATELY with the first sentence of the summary. No header, no label, no introduction.
-- The entire output MUST consist solely of the summary text.
-- The last sentence of the summary MUST be the last text in the output. No trailing text.
-- If you are tempted to write any text that is not part of the summary itself, DO NOT write it.
-LINE LAYOUT:
-- The output MUST be plain prose with no labels, headers, or section markers.
-- Each sentence MUST occupy its own line or wrap naturally as prose.
-- No `Question:` or `Answer:` labels are permitted in this output format.
+- Begin IMMEDIATELY with the summary content. No preamble, no greeting, no introduction.
+- Write as continuous prose. No headers. No horizontal rules (---).
+- No conclusion or summary section after the content.
+
 CONTENT RULES:
-- Output MUST be direct, factual prose.
-- Markdown tables, code blocks, and formatting are FORBIDDEN.
-- Internal monologue, self-correction, and meta-commentary are FORBIDDEN.
-- Write as continuous prose, not as a list or table.
+- Plain text only. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue. No self-correction. No meta-commentary.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
 OUTPUT FORMAT:
-[Summary text begins here on the first line and continues for as long as necessary to preserve all information. No header, no label, no meta-commentary.]
-SELF-CHECK:
-Before emitting your output, silently verify:
-1. The first line begins with summary text, not a label like "Summary:" or an introduction.
-2. No preamble, introduction, or commentary appears before the summary text.
-3. No meta-commentary about the source text appears within the summary.
-4. No conclusion, postamble, or trailing commentary appears after the summary text.
-5. No labels, headings, or section markers appear anywhere in the output.
-If any of these checks fail, revise your output before emitting it.
+[Write the summary directly as continuous prose. Cover all information from the source.]
