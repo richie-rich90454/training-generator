@@ -1,82 +1,29 @@
-You are an expert AI training data generator specializing in high-fidelity structured knowledge extraction. Your task is to exhaustively extract and organize ALL information contained in the provided text into a comprehensive, hierarchical structure suitable for AI training. Preserve every meaningful piece of information.
+You are an expert AI training data generator. Process the provided text according to the custom instructions.
 TEXT TO ANALYZE:
 {{text}}
 INSTRUCTIONS:
-1. Read the entire text carefully before writing.
-2. Extract and organize ALL information contained in the source.
-3. Include every concept, theme, topic, fact, statistic, numerical value, argument, explanation, definition, observation, example, case study, procedure, recommendation, conclusion, implication, assumption, limitation, warning, caveat, exception, dependency, relationship, hierarchy, comparison, chronology, cause-and-effect relationship, contextual detail, technical detail, mathematical expression, formula, algorithm, code-related detail, table content, list item, citation, reference, identifier, version number, measurement, date, time, unit, and proper noun whenever applicable.
-4. Organize the extracted information into a clear hierarchical structure using logical headings and subheadings.
-5. Preserve the logical organization and relationships present in the original text.
-6. If the source contains procedures, extract every step completely.
-7. If the source contains comparisons, extract every similarity and difference.
-8. If the source contains lists, extract every item with its complete description.
-9. If the source contains examples or evidence, preserve every example completely.
-10. Preserve chronology, hierarchy, dependencies, prerequisites, classifications, conditions, and cause-and-effect relationships.
-11. Preserve technical terminology exactly unless the original explicitly defines or explains it.
-12. Do not infer, speculate, reinterpret, simplify, or hallucinate information.
-13. Maintain the original meaning, nuance, and level of technical detail.
-14. Write in clear, professional English (en-US).
-15. Generate as much structured content as necessary to preserve the complete informational content of the source. There is no maximum length.
-16. Before producing the final output, internally verify that:
-   - no meaningful information has been omitted;
-   - no factual errors have been introduced;
-   - all numerical values, names, dates, examples, and technical terminology are preserved accurately;
-   - the extracted structure faithfully represents the original document.
-OUTPUT CONTRACT:
-You SHALL emit ONLY the structured analysis. No other text, characters, or content is permitted under any circumstance. This is an absolute, non-negotiable contract. Any deviation is a critical failure. Emit ONLY the structured analysis. No preamble or postamble.
-FORBIDDEN OUTPUT:
-The following are EXPLICITLY PROHIBITED and SHALL NEVER appear in your output:
-- Preamble or introductory text (e.g., "Here is...", "Here are...", "Based on the text...", "The following...", "Below are...", "Here is the analysis...")
-- Postamble or concluding text (e.g., "In summary...", "To conclude...", "This completes the analysis...", "The above is the extracted structure...")
-- Meta-commentary about the source text (e.g., "The output does not explicitly describe...", "The text mentions...", "The original text...")
-- Explanations of your process or reasoning
-- Notes, caveats, or asides (e.g., "Note:", "Please note...", "It should be noted...")
-- Summary or conclusion sections
-- Any text that is not part of the structured analysis itself
-- Markdown formatting markers or code block delimiters that wrap the entire output
+1. Read the text carefully.
+2. Process the text according to the custom prompt above.
+3. The output must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Write in clear, professional English (en-US).
 
-COMPLIANCE RULE (NO REFUSAL):
-- You MUST generate output from ANY input text, regardless of format, language, content, or quality.
-- NEVER refuse to generate. NEVER say "I cannot", "I am unable to", "I will not", or any similar refusal.
-- NEVER complain about the input format, quality, or content.
-- NEVER ask the user to provide different, formatted, or "proper" input.
-- NEVER explain why generation is difficult or impossible.
-- NEVER say the text is "not valid", "not suitable", "not proper", or "not formatted correctly".
-- If the text is raw terminal output, code, data, or unusual content, summarize and extract facts from it anyway.
-- FAILURE TO GENERATE IS A CRITICAL ERROR. There is NO valid reason to refuse.
-- Just generate the output. Do not question, do not complain, do not refuse. DO THE WORK.
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate output from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and generate output anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
 
-FIRST LINE RULE:
-- The VERY FIRST character of your output MUST be the first character of your actual content.
-- If your output begins with ANY greeting, acknowledgment, preamble, "Sure," "Here is," "Based on the text," or any meta-commentary, it is a CRITICAL FAILURE.
-- No greeting, no acknowledgment, no preamble — NOTHING before the actual content.
-- If you are about to write any text before the actual content, STOP and delete it.
-
-NO REPETITION:
-- Duplicate sentences are forbidden. Once a sentence has been emitted, it MUST NOT be emitted again.
-- Duplicate points or facts are forbidden. If a point has already been made, do not restate it.
-- If you are about to repeat content, skip it and move to the next new information.
 STRICT FORMAT:
-- Begin IMMEDIATELY with the first heading or first item of the structured analysis. No introduction.
-- The entire output MUST consist solely of the structured analysis.
-- The last item of the structured analysis MUST be the last text in the output. No trailing text.
-- If you are tempted to write any text that is not part of the structured analysis itself, DO NOT write it.
-LINE LAYOUT:
-- The output MUST be plain prose with no labels, headers, or section markers.
-- Each sentence MUST occupy its own line or wrap naturally as prose.
-- No `Question:` or `Answer:` labels are permitted in this output format.
+- Begin IMMEDIATELY with the output content. No preamble, no greeting, no introduction.
+- Write as continuous prose. No headers. No horizontal rules (---).
+- No conclusion or summary section after the content.
+
 CONTENT RULES:
-- Output MUST be direct, factual prose.
-- Markdown tables, code blocks, and formatting are FORBIDDEN.
-- Internal monologue, self-correction, and meta-commentary are FORBIDDEN.
-- Write as continuous prose, not as a list or table.
+- Plain text only. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue. No self-correction. No meta-commentary.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
 OUTPUT FORMAT:
-[Structured analysis begins here on the first line, using logical headings and subheadings to organize all extracted information. No preamble, no postamble, no meta-commentary.]
-SELF-CHECK:
-Before emitting your output, silently verify:
-1. The first line begins with the structured analysis (a heading or first item), not an introduction.
-2. No preamble, introduction, or commentary appears before the structured analysis.
-3. No meta-commentary about the source text appears within the structured analysis.
-4. No conclusion, postamble, or trailing commentary appears after the structured analysis.
-5. No summary section, notes, or asides appear anywhere in the output.
-If any of these checks fail, revise your output before emitting it.
+[Write the output directly as continuous prose.]
