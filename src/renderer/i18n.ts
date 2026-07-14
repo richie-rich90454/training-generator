@@ -2141,11 +2141,11 @@ export function applyLanguage(lang?: string): void{
   let storedLang=""
   try{
     storedLang=localStorage.getItem("train-generator-ui-lang") || ""
-  }catch{}
+  }catch{}// intentional: localStorage unavailable in SSR/private mode
   currentLang=lang || storedLang || detectLocale()
   try{
     localStorage.setItem("train-generator-ui-lang",currentLang)
-  }catch{}
+  }catch{}// intentional: localStorage unavailable in SSR/private mode
   let elements=document.querySelectorAll("[data-i18n]")
   elements.forEach((el)=>{
     let key=el.getAttribute("data-i18n")
