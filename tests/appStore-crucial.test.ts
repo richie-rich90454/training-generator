@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAppStore, type AppStore } from "../src/renderer/stores/appStore.js"
+import { t } from "../src/renderer/i18n.js"
 import { withRoot } from "./setup.js"
 let disposes: Array<() => void> = []
 beforeEach(() => {
@@ -157,6 +158,21 @@ describe("AppStore demo mode", () => {
         app.toggleDemoMode()
         expect(app.processor.demoMode).toBe(false)
         expect(app.fileStore.demoActive()).toBe(false)
+    })
+    it("logs demoModeEnabled when toggled on and demoModeDisabled when toggled off", () => {
+        let app: AppStore = makeAppStore()
+        let enabledMsg = t("log.demoModeEnabled")
+        let disabledMsg = t("log.demoModeDisabled")
+
+        app.toggleDemoMode()
+        expect(app.processor.demoMode).toBe(true)
+        expect(app.uiStore.logs.some(l => l.message === enabledMsg && l.type === "info")).toBe(true)
+
+        app.toggleDemoMode()
+        expect(app.processor.demoMode).toBe(false)
+        expect(app.uiStore.logs.some(l => l.message === disabledMsg && l.type === "info")).toBe(true)
+
+        app.dispose()
     })
     it("allows processing in demo mode without ollama", async() => {
         let app: AppStore = makeAppStore()
