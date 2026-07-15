@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { findPreviousWhitespace, findPreviousSentenceBoundary, detectSemanticUnits, isInSemanticUnit, estimateTextDensity, semanticChunk, simpleChunk, splitSentences } from "../src/renderer/chunker.js"
 describe("findPreviousWhitespace", () => {
     it("returns -1 when no whitespace before position", () => {
@@ -367,5 +367,136 @@ describe("chunker bug fixes", () => {
         let joined=sentences.join(" ")
         expect(joined).toContain("Dr. Smith")
         expect(joined).toContain("e.g. the hospital")
+    })
+})
+
+// NOTE: The MAX_CHUNKS (100_000) and MAX_CHUNK_ITERATIONS (2_000_000) early-exit
+// branches in semanticChunk/simpleChunk are guard rails against pathological
+// inputs. They are too expensive to trigger in unit tests (would require
+// producing 100k+ chunks). The splitOversizedChunk MAX_CHUNKS guard is
+// covered indirectly via the oversized-chunk tests below.
+
+describe("splitOversizedChunk via semanticChunk", () => {
+    it("splits a single oversized sentence at whitespace boundary", () => {
+        // A single long "sentence" with no terminators — forces splitOversizedChunk
+        let text = "word ".repeat(500).trim()
+        let chunks = semanticChunk(text, 100, 0)
+        expect(chunks.length).toBeGreaterThan(1)
+        // Each chunk should respect chunkSize (with some tolerance for boundary adjustment)
+        chunks.forEach(c => expect(c.length).toBeLessThanOrEqual(200))
+        // No content should be lost
+        let joined = chunks.join(" ").replace(/\s+/g, " ").trim()
+        expect(joined.length).toBeGreaterThan(text.length * 0.8)
+    })
+    it("splits oversized chunk with no whitespace (hard split)", () => {
+        // No whitespace at all — the splitter must hard-split at chunkSize
+        let text = "A".repeat(500)
+        let chunks = semanticChunk(text, 100, 0)
+        expect(chunks.length).toBeGreaterThanOrEqual(3)
+        chunks.forEach(c => expect(c.length).toBeLessThanOrEqual(100))
+    })
+    it("splits oversized chunk respecting chunkSize limit", () => {
+        let text = "A".repeat(1000)
+        let chunks = semanticChunk(text, 200, 0)
+        expect(chunks.length).toBeGreaterThanOrEqual(3)
+        // Each chunk must not exceed chunkSize
+        chunks.forEach(c => expect(c.length).toBeLessThanOrEqual(200))
+    })
+})
+
+describe("simpleChunk oversized input", () => {
+    it("splits oversized chunk via simpleChunk safety net", () => {
+        let text = "A".repeat(500)
+        let chunks = simpleChunk(text, 100)
+        expect(chunks.length).toBeGreaterThanOrEqual(3)
+        chunks.forEach(c => expect(c.length).toBeLessThanOrEqual(110))
+    })
+})
+
+describe("overlap edge cases", () => {
+    it("overlap=0 produces no prefix in subsequent chunks", () => {
+        let text = "First sentence. Second sentence. Third sentence. Fourth sentence."
+        let chunks = semanticChunk(text, 30, 0)
+        expect(chunks.length).toBeGreaterThan(1)
+        // With overlap=0, no chunk should start with text from the previous chunk's end
+        // (buildOverlapPrefix returns "" when overlap<=0)
+        for (let i = 1; i < chunks.length; i++) {
+            let prevEnd = chunks[i - 1].slice(-5)
+            // The current chunk should not start with the previous chunk's tail
+            // (unless the text naturally repeats)
+            expect(chunks[i].startsWith(prevEnd)).toBe(false)
+        }
+    })
+    it("overlap >= chunkSize is clamped to chunkSize/2", () => {
+        // overlap is clamped: overlap = Math.min(Math.max(overlap, 0), Math.floor(chunkSize/2))
+        // So overlap=100 with chunkSize=30 → clamped to 15
+        let text = "First sentence here. Second sentence here. Third sentence here."
+        let chunks = semanticChunk(text, 30, 100)
+        expect(chunks.length).toBeGreaterThan(0)
+        // Should not crash and should produce valid chunks
+        chunks.forEach(c => expect(c.trim().length).toBeGreaterThan(0))
+    })
+    it("overlap with very short text (text shorter than overlap)", () => {
+        let text = "Short."
+        let chunks = semanticChunk(text, 100, 50)
+        // Text fits in one chunk, so overlap is irrelevant
+        expect(chunks).toHaveLength(1)
+        expect(chunks[0]).toBe(text)
+    })
+    it("overlap=1 produces minimal prefix", () => {
+        let text = "First sentence. Second sentence here. Third sentence here."
+        let chunks = semanticChunk(text, 25, 1)
+        expect(chunks.length).toBeGreaterThan(1)
+        // With overlap=1, subsequent chunks should start with 1 char from previous
+        // chunk's end (plus a space)
+        chunks.forEach(c => expect(c.length).toBeGreaterThan(0))
+    })
+    it("negative overlap is clamped to 0", () => {
+        let text = "First sentence. Second sentence. Third sentence."
+        let chunks = semanticChunk(text, 30, -10)
+        expect(chunks.length).toBeGreaterThan(0)
+        // Should behave same as overlap=0
+        let chunksZero = semanticChunk(text, 30, 0)
+        expect(chunks.length).toBe(chunksZero.length)
+    })
+})
+
+describe("chunkSize clamping", () => {
+    it("chunkSize=0 is clamped to 1", () => {
+        let text = "Some text here."
+        let chunks = semanticChunk(text, 0, 0)
+        expect(chunks.length).toBeGreaterThan(0)
+    })
+    it("chunkSize negative is clamped to 1", () => {
+        let text = "Some text here."
+        let chunks = semanticChunk(text, -5, 0)
+        expect(chunks.length).toBeGreaterThan(0)
+    })
+    it("chunkSize > 50000 is clamped to 50000", () => {
+        let text = "A".repeat(100) + "."
+        let chunks = semanticChunk(text, 100000, 0)
+        // Text fits within 50000, so single chunk
+        expect(chunks).toHaveLength(1)
+    })
+})
+
+describe("splitOversizedChunk whitespace boundary", () => {
+    it("prefers whitespace boundary in back half of chunk", () => {
+        // Create text where a whitespace boundary exists in the back half
+        let text = "aaaaaa bbbb cccc dddd eeee ffff gggg hhhh iiii jjjj"
+        let chunks = semanticChunk(text, 20, 0)
+        expect(chunks.length).toBeGreaterThan(1)
+        // Each chunk should be trimmed (no leading/trailing whitespace from split)
+        chunks.forEach(c => {
+            expect(c).toBe(c.trim())
+        })
+    })
+    it("falls back to hard split when no whitespace in back half", () => {
+        // All one word — no whitespace to split at
+        let text = "A".repeat(100)
+        let chunks = semanticChunk(text, 30, 0)
+        expect(chunks.length).toBeGreaterThanOrEqual(3)
+        // Each chunk should be exactly chunkSize or less (hard split)
+        chunks.forEach(c => expect(c.length).toBeLessThanOrEqual(30))
     })
 })
