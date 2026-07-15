@@ -11,6 +11,57 @@ vi.mock("axios",()=>{
     }
 })
 
+vi.mock("electron",()=>{
+    return{
+        app:{
+            getPath:vi.fn(()=>process.cwd()),
+            setPath:vi.fn(),
+            getAppPath:vi.fn(()=>process.cwd()),
+            commandLine:{appendSwitch:vi.fn()},
+            whenReady:vi.fn(()=>Promise.resolve()),
+            on:vi.fn(),
+            getVersion:vi.fn(()=>"1.0.0"),
+            quit:vi.fn()
+        },
+        BrowserWindow:vi.fn(function(){
+            return{
+                loadFile:vi.fn(()=>Promise.resolve()),
+                loadURL:vi.fn(()=>Promise.resolve()),
+                on:vi.fn(),
+                once:vi.fn(),
+                show:vi.fn(),
+                hide:vi.fn(),
+                focus:vi.fn(),
+                close:vi.fn(),
+                center:vi.fn(),
+                restore:vi.fn(),
+                setMenu:vi.fn(),
+                setBackgroundMaterial:vi.fn(),
+                isDestroyed:vi.fn(()=>false),
+                isMinimized:vi.fn(()=>false),
+                isVisible:vi.fn(()=>true),
+                isFocused:vi.fn(()=>true),
+                webContents:{
+                    executeJavaScript:vi.fn(()=>Promise.resolve()),
+                    openDevTools:vi.fn(),
+                    setWindowOpenHandler:vi.fn(),
+                    on:vi.fn(),
+                    once:vi.fn(),
+                    send:vi.fn()
+                }
+            }
+        }),
+        ipcMain:{handle:vi.fn()},
+        dialog:{showOpenDialog:vi.fn(),showSaveDialog:vi.fn(),showErrorBox:vi.fn()},
+        protocol:{registerSchemesAsPrivileged:vi.fn(),handle:vi.fn()},
+        nativeImage:{createFromPath:vi.fn(()=>({isEmpty:vi.fn(()=>false)}))},
+        Tray:vi.fn(function(){return{setToolTip:vi.fn(),setContextMenu:vi.fn(),on:vi.fn(),setImage:vi.fn()}}),
+        Menu:{buildFromTemplate:vi.fn(()=>({on:vi.fn(),popup:vi.fn()}))}
+    }
+})
+
+vi.mock("../src/core/fileParserLazy.js",()=>({default:vi.fn()}))
+
 describe("Ollama API interaction patterns",()=>{
     beforeEach(()=>{
         vi.clearAllMocks()
@@ -373,5 +424,64 @@ describe("App version and platform",()=>{
     test("platform is a valid string",()=>{
         let platform=process.platform
         expect(["win32","darwin","linux"]).toContain(platform)
+    })
+})
+
+describe("buildOllamaBaseUrl — custom host/port forwarding",()=>{
+    let buildOllamaBaseUrl:any
+    beforeEach(async()=>{
+        let mainModule=await import("../src/main.js")
+        buildOllamaBaseUrl=mainModule.buildOllamaBaseUrl
+    })
+
+    test("uses default localhost:11434 when host and port are omitted",()=>{
+        expect(buildOllamaBaseUrl()).toBe("http://localhost:11434")
+        expect(buildOllamaBaseUrl(undefined,undefined)).toBe("http://localhost:11434")
+    })
+
+    test("forwards a custom host to the request URL",()=>{
+        expect(buildOllamaBaseUrl("192.168.1.10")).toBe("http://192.168.1.10:11434")
+    })
+
+    test("forwards a custom port to the request URL",()=>{
+        expect(buildOllamaBaseUrl(undefined,8080)).toBe("http://localhost:8080")
+    })
+
+    test("forwards both custom host and custom port together",()=>{
+        expect(buildOllamaBaseUrl("ollama.example.com",9000)).toBe("http://ollama.example.com:9000")
+    })
+
+    test("falls back to default host when host is empty or whitespace",()=>{
+        expect(buildOllamaBaseUrl("")).toBe("http://localhost:11434")
+        expect(buildOllamaBaseUrl("   ")).toBe("http://localhost:11434")
+    })
+
+    test("falls back to default port when port is below the valid range",()=>{
+        expect(buildOllamaBaseUrl(undefined,0)).toBe("http://localhost:11434")
+        expect(buildOllamaBaseUrl(undefined,-1)).toBe("http://localhost:11434")
+    })
+
+    test("falls back to default port when port is above the valid range",()=>{
+        expect(buildOllamaBaseUrl(undefined,65536)).toBe("http://localhost:11434")
+    })
+
+    test("accepts the lower boundary port 1",()=>{
+        expect(buildOllamaBaseUrl(undefined,1)).toBe("http://localhost:1")
+    })
+
+    test("accepts the upper boundary port 65535",()=>{
+        expect(buildOllamaBaseUrl(undefined,65535)).toBe("http://localhost:65535")
+    })
+
+    test("strips an https:// prefix from host and switches to https protocol",()=>{
+        expect(buildOllamaBaseUrl("https://ollama.secure.local",11434)).toBe("https://ollama.secure.local:11434")
+    })
+
+    test("strips an http:// prefix from host and keeps http protocol",()=>{
+        expect(buildOllamaBaseUrl("http://ollama.local",8080)).toBe("http://ollama.local:8080")
+    })
+
+    test("falls back to default port when port is not a number",()=>{
+        expect(buildOllamaBaseUrl(undefined,"8080" as unknown as number)).toBe("http://localhost:11434")
     })
 })

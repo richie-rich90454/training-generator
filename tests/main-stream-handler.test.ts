@@ -209,4 +209,90 @@ describe("handleOllamaGenerateStream",()=>{
         expect(result.success).toBe(false)
         expect(result.error).toBe("Failed to generate response from Ollama: Network error")
     })
+
+    it("forwards custom ollamaHost and ollamaPort to the stream request URL",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        axios.post.mockResolvedValue({data:mockStream})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test",ollamaHost:"192.168.1.50",ollamaPort:9000})
+        await tick()
+        expect(axios.post).toHaveBeenCalledWith(
+            "http://192.168.1.50:9000/api/generate",
+            expect.any(Object),
+            expect.any(Object)
+        )
+        mockStream.emit("data",Buffer.from('{"response":"ok","done":true}\n'))
+        await promise
+    })
+
+    it("cleans up stream resources (destroy + removeAllListeners) when the stream errors",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        let removeAllListenersSpy=vi.spyOn(mockStream,"removeAllListeners")
+        axios.post.mockResolvedValue({data:mockStream})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
+        await tick()
+        mockStream.emit("error",new Error("aborted"))
+        await promise
+        expect(mockStream.destroy).toHaveBeenCalled()
+        expect(removeAllListenersSpy).toHaveBeenCalled()
+    })
+
+    it("cleans up stream resources when the stream completes normally",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        let removeAllListenersSpy=vi.spyOn(mockStream,"removeAllListeners")
+        axios.post.mockResolvedValue({data:mockStream})
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
+        await tick()
+        mockStream.emit("data",Buffer.from('{"response":"ok","done":true}\n'))
+        let result=await promise
+        expect(result.success).toBe(true)
+        expect(mockStream.destroy).toHaveBeenCalled()
+        expect(removeAllListenersSpy).toHaveBeenCalled()
+    })
+
+    it("tears down the no-data watchdog timer when data arrives",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        axios.post.mockResolvedValue({data:mockStream})
+        let clearTimeoutSpy=vi.spyOn(globalThis,"clearTimeout")
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
+        await tick()
+        clearTimeoutSpy.mockClear()
+        mockStream.emit("data",Buffer.from('{"response":"ok","done":true}\n'))
+        await promise
+        expect(clearTimeoutSpy).toHaveBeenCalled()
+        clearTimeoutSpy.mockRestore()
+    })
+
+    it("tears down the no-data watchdog timer when the stream ends without data",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        axios.post.mockResolvedValue({data:mockStream})
+        let clearTimeoutSpy=vi.spyOn(globalThis,"clearTimeout")
+        let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test"})
+        await tick()
+        clearTimeoutSpy.mockClear()
+        mockStream.emit("end")
+        await promise
+        expect(clearTimeoutSpy).toHaveBeenCalled()
+        clearTimeoutSpy.mockRestore()
+    })
+
+    it("does not crash when sender.send throws during token/done forwarding (destroyed renderer)",async()=>{
+        let mockStream=new EventEmitter()
+        mockStream.destroy=vi.fn()
+        axios.post.mockResolvedValue({data:mockStream})
+        let destroyedSender={send:vi.fn(()=>{throw new Error("Object has been destroyed")})}
+        let event={sender:destroyedSender}
+        let promise=handleOllamaGenerateStream(event,{model:"llama2",prompt:"test",options:{_requestId:"req-destroyed"}})
+        await tick()
+        mockStream.emit("data",Buffer.from('{"response":"Hi","done":true}\n'))
+        let result=await promise
+        expect(result.success).toBe(true)
+        expect(result.response).toBe("Hi")
+        expect(destroyedSender.send).toHaveBeenCalledWith("ollama:stream-token",{requestId:"req-destroyed",token:"Hi"})
+        expect(destroyedSender.send).toHaveBeenCalledWith("ollama:stream-done",{requestId:"req-destroyed"})
+    })
 })
