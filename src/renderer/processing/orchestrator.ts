@@ -6,6 +6,7 @@ import type Processor from "../processor.js"
 import type PromptManager from "../promptManager.js"
 import { chunkInWorker, dedupInWorker } from "../workers/workerPool.js"
 import { t } from "../i18n.js"
+import { logger } from "../logger.js"
 export interface OrchestratorSettings {
     model: string
     processingType: string
@@ -163,7 +164,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             }
             const MAX_TEXT_CHARS = 10 * 1024 * 1024
             if (textContent.length > MAX_TEXT_CHARS) {
-                console.warn(`Truncating file text from ${textContent.length} to ${MAX_TEXT_CHARS} characters`)
+                logger.warn(`Truncating file text from ${textContent.length} to ${MAX_TEXT_CHARS} characters`)
                 textContent = textContent.slice(0, MAX_TEXT_CHARS)
             }
             const chunkSize = Math.min(10000, Math.max(500, settings.chunkSize || 8000))
@@ -172,7 +173,7 @@ export function createOrchestrator(deps: OrchestratorDeps) {
                 chunks = await chunkInWorker(textContent, chunkSize, 100, settings.smartSizing)
             }
             catch (workerError) {
-                console.warn("Chunk worker failed, falling back to main thread:", (workerError as Error).message)
+                logger.warn("Chunk worker failed, falling back to main thread:", (workerError as Error).message)
                 const { simpleChunk } = await import("../chunker.js")
                 chunks = simpleChunk(textContent, chunkSize)
             }
@@ -183,12 +184,12 @@ export function createOrchestrator(deps: OrchestratorDeps) {
             if (settings.maxChunks != null && settings.maxChunks > 0 && chunks.length > settings.maxChunks) {
                 const truncatedCount = chunks.length - settings.maxChunks
                 chunks.length = settings.maxChunks
-                console.warn(`[orchestrator] ${fileObj.name}: truncated ${truncatedCount} chunks (max: ${settings.maxChunks})`)
+                logger.warn(`[orchestrator] ${fileObj.name}: truncated ${truncatedCount} chunks (max: ${settings.maxChunks})`)
             }
             if (chunks.length === 0) {
                 throw new Error(t("error.noChunksCreated"))
             }
-            console.log(`[orchestrator] ${fileObj.name}: ${chunks.length} chunks, ${textContent.length} chars`)
+            logger.info(`[orchestrator] ${fileObj.name}: ${chunks.length} chunks, ${textContent.length} chars`)
             callbacks?.onFileStart?.(chunks.length)
             const model = settings.model || ""
             let processingType = settings.processingType || "instruction"
