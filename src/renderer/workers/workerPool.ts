@@ -1,4 +1,5 @@
 import type { TrainingItem } from "../../types/index.js"
+import { logger } from "../logger.js"
 
 let chunkWorker: Worker | null = null
 let dedupWorker: Worker | null = null
@@ -166,7 +167,7 @@ export async function chunkInWorker(
     return Promise.reject(new Error("Too many pending worker requests"))
   }
   if (text.length > MAX_WORKER_PAYLOAD_CHARS) {
-    console.warn(`chunkInWorker: payload too large (${text.length} chars); truncating to ${MAX_WORKER_PAYLOAD_CHARS}`)
+    logger.warn(`chunkInWorker: payload too large (${text.length} chars); truncating to ${MAX_WORKER_PAYLOAD_CHARS}`)
     text = text.slice(0, MAX_WORKER_PAYLOAD_CHARS)
   }
 
