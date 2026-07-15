@@ -143,7 +143,7 @@ export async function clearCache():Promise<void>{
         }
     }
     catch(error){
-        console.error("Cache: failed to clear cache",(error as Error).message)
+        logger.error("Cache: failed to clear cache",(error as Error).message)
     }
 }
 
