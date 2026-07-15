@@ -168,6 +168,47 @@ describe("CliRunner.run",()=>{
         expect(captured?.format).toBe("jsonl")
         expect(captured?.output).toBe("default.jsonl")
     })
+    it("loads profile and applies settings without overrides",async ()=>{
+        let config=JSON.stringify({profiles:{default:{format:"json",output:"out.json",input:["a.txt","b.txt"]}}})
+        let captured: CliOptions|undefined
+        let runner=new CliRunner({readFile:()=>config,processFn:async (args: CliOptions)=>{captured=args;return {items:[],errors:[]}}})
+        await runner.run(["--profile","default","--config","cfg.json"])
+        expect(captured?.format).toBe("json")
+        expect(captured?.output).toBe("out.json")
+        expect(captured?.input).toEqual(["a.txt","b.txt"])
+    })
+    it("CLI flag takes precedence over profile setting",async ()=>{
+        let config=JSON.stringify({profiles:{default:{format:"json",output:"out.json"}}})
+        let captured: CliOptions|undefined
+        let runner=new CliRunner({readFile:()=>config,processFn:async (args: CliOptions)=>{captured=args;return {items:[],errors:[]}}})
+        await runner.run(["--profile","default","--config","cfg.json","--format","csv"])
+        expect(captured?.format).toBe("csv")
+        expect(captured?.output).toBe("out.json")
+    })
+    it("dry-run prints merged profile and override config",async ()=>{
+        let output=""
+        let stdout={write:(chunk: string)=>{output+=chunk}} as NodeJS.WritableStream
+        let config=JSON.stringify({profiles:{default:{format:"json",output:"out.json"}}})
+        let runner=new CliRunner({stdout:stdout,readFile:()=>config,processFn:async ()=>{throw new Error("should not run")}})
+        let code=await runner.run(["--dry-run","--profile","default","--config","cfg.json","--override","format=csv"])
+        expect(code).toBe(CliExitCode.SUCCESS)
+        expect(output).toContain("Plan:")
+        expect(output).toContain("dry-run")
+        expect(output).toContain("csv")
+        expect(output).toContain("out.json")
+    })
+})
+describe("CliRunner DI defaults",()=>{
+    it("default readFile throws when loadProfile is called",()=>{
+        let runner=new CliRunner()
+        expect(()=>runner.loadProfile("default","cfg.json")).toThrow("readFile not implemented")
+    })
+    it("default writeFile throws when output is written",async ()=>{
+        let items: TrainingItem[]=[{format:"text",text:"hello"}]
+        let runner=new CliRunner({processFn:async ()=>{return {items,errors:[]}}})
+        let code=await runner.run(["--output","out.jsonl","--format","jsonl"])
+        expect(code).toBe(CliExitCode.ABORT)
+    })
 })
 describe("readStdin",()=>{
     it("reads stream content",async ()=>{
