@@ -9,6 +9,8 @@ const MAX_CHUNKS = 100_000
 const MAX_SENTENCES = 1_000_000
 const MAX_CHUNK_ITERATIONS = Math.max(MAX_SENTENCES, MAX_CHUNKS) * 2
 
+import { logger } from "./logger.js"
+
 // --- Exported helper functions ---
 
 export function findPreviousWhitespace(text: string, position: number): number {
@@ -238,7 +240,7 @@ function splitOversizedChunk(chunk: string, chunkSize: number): string[] {
     let start = 0
     while (start < chunk.length) {
         if (parts.length >= MAX_CHUNKS) {
-            console.warn(`splitOversizedChunk: exceeded ${MAX_CHUNKS} parts; stopping early`)
+            logger.warn(`splitOversizedChunk: exceeded ${MAX_CHUNKS} parts; stopping early`)
             break
         }
         let end = Math.min(start + chunkSize, chunk.length)
@@ -324,11 +326,11 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
     while (i < effectiveSentences.length) {
         iterations++
         if (iterations > MAX_CHUNK_ITERATIONS) {
-            console.warn(`semanticChunk: exceeded ${MAX_CHUNK_ITERATIONS} iterations; stopping early`)
+            logger.warn(`semanticChunk: exceeded ${MAX_CHUNK_ITERATIONS} iterations; stopping early`)
             break
         }
         if (chunks.length >= MAX_CHUNKS) {
-            console.warn(`semanticChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
+            logger.warn(`semanticChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
             break
         }
 
@@ -477,7 +479,7 @@ export function simpleChunk(text: string, chunkSize: number = 2000): string[] {
 
     while (start < text.length) {
         if (chunks.length >= MAX_CHUNKS) {
-            console.warn(`simpleChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
+            logger.warn(`simpleChunk: exceeded ${MAX_CHUNKS} chunks; stopping early`)
             break
         }
         let end = start + chunkSize
