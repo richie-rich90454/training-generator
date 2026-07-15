@@ -19,6 +19,8 @@
  * Each registry key is the original fa-<name> (with the `fa-` prefix preserved).
  * Design reference: Lucide / Tabler (MIT-licensed, stroke-based, 24x24 viewBox).
  */
+import { logger } from "./logger.js"
+
 export const iconRegistry: Record<string, string>={
     "fa-chevron-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>`,
     "fa-chevron-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="18 15 12 9 6 15"/></svg>`,
@@ -100,7 +102,7 @@ export function hasIcon(name: string): boolean{
 export function renderIcon(name: string, size: number=16): string{
     let svg=iconRegistry[name]
     if(!svg){
-        console.warn(`Icon "${name}" not found in registry`)
+        logger.warn(`Icon "${name}" not found in registry`)
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>`
     }
     let sanitized=sanitizeSvg(svg)
