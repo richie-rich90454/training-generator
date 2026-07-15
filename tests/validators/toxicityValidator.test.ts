@@ -1,6 +1,9 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import type { TrainingItem } from "../../src/types/index.js"
 import { ToxicityValidator, RuleBasedToxicityScorer, TensorFlowToxicityScorer, DEFAULT_TOXICITY_WORDS, type ToxicityLabel, type ToxicityScorer } from "../../src/renderer/validators/toxicityValidator.js"
+vi.mock("@tensorflow-models/toxicity", () => {
+    throw new Error("mocked: module unavailable")
+})
 function makeItemWithOutput(output: string): TrainingItem{
     return { format: "instruction", instruction: "What?", input: "", output }
 }
@@ -79,9 +82,64 @@ describe("RuleBasedToxicityScorer",()=>{
         expect(severe?.match).toBe(true)
     })
 })
+describe("RuleBasedToxicityScorer word-list override branch",()=>{
+    test("custom list completely replaces defaults for unprovided labels", async ()=>{
+        let scorer=new RuleBasedToxicityScorer({ wordLists: { toxicity: ["foo"] } as Record<ToxicityLabel, string[]> })
+        let results=await scorer.classify(["You idiot"])
+        let insult=results[0].find(p => p.label==="insult")
+        expect(insult).toBeUndefined()
+    })
+    test("custom list overrides default words for same label", async ()=>{
+        let scorer=new RuleBasedToxicityScorer({ wordLists: { insult: ["foo"] } as Record<ToxicityLabel, string[]> })
+        let results=await scorer.classify(["You idiot"])
+        let insult=results[0].find(p => p.label==="insult")
+        expect(insult?.match).toBe(false)
+    })
+    test("custom list with all labels works", async ()=>{
+        let customLists: Record<ToxicityLabel, string[]>={
+            identity_attack: ["bigot"],
+            insult: ["fool"],
+            obscene: ["darn"],
+            severe_toxicity: ["perish"],
+            sexual_explicit: ["xxx"],
+            threat: ["hurt"],
+            toxicity: ["bad"]
+        }
+        let scorer=new RuleBasedToxicityScorer({ wordLists: customLists })
+        let results=await scorer.classify(["You fool bigot"])
+        let insult=results[0].find(p => p.label==="insult")
+        let identity=results[0].find(p => p.label==="identity_attack")
+        expect(insult?.match).toBe(true)
+        expect(identity?.match).toBe(true)
+    })
+    test("custom list with empty array means no matches for that label", async ()=>{
+        let scorer=new RuleBasedToxicityScorer({ wordLists: { insult: [] } as Record<ToxicityLabel, string[]> })
+        let results=await scorer.classify(["You idiot fool"])
+        let insult=results[0].find(p => p.label==="insult")
+        expect(insult?.match).toBe(false)
+    })
+})
 describe("TensorFlowToxicityScorer",()=>{
     test("throws when package missing", async ()=>{
         let scorer=new TensorFlowToxicityScorer()
+        await expect(scorer.classify(["text"])).rejects.toThrow("@tensorflow-models/toxicity not installed")
+    })
+})
+describe("TensorFlowToxicityScorer module-missing branch",()=>{
+    test("throws Error instance when module unavailable", async ()=>{
+        let scorer=new TensorFlowToxicityScorer()
+        await expect(scorer.classify(["text"])).rejects.toBeInstanceOf(Error)
+    })
+    test("throws even for empty input array", async ()=>{
+        let scorer=new TensorFlowToxicityScorer()
+        await expect(scorer.classify([])).rejects.toThrow("@tensorflow-models/toxicity not installed")
+    })
+    test("throws for multiple inputs", async ()=>{
+        let scorer=new TensorFlowToxicityScorer()
+        await expect(scorer.classify(["one", "two", "three"])).rejects.toThrow("@tensorflow-models/toxicity not installed")
+    })
+    test("throws regardless of threshold option", async ()=>{
+        let scorer=new TensorFlowToxicityScorer({ threshold: 0.9 })
         await expect(scorer.classify(["text"])).rejects.toThrow("@tensorflow-models/toxicity not installed")
     })
 })
