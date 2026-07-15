@@ -1,3 +1,5 @@
+import { logger } from "./logger.js"
+
 interface CacheEntry{
     response:string
     tokens:number
@@ -47,7 +49,7 @@ async function loadCache():Promise<void>{
             }
         }
         catch(error){
-            console.error("Cache: failed to load cache",(error as Error).message)
+            logger.error("Cache: failed to load cache",(error as Error).message)
         }
         cacheLoaded=true
     })()
@@ -122,7 +124,7 @@ export async function setCachedResult(chunk:string,model:string,prompt:string,re
     saveTimeout=setTimeout(()=>{
         saveTimeout=null
         persistCache().catch((error:unknown)=>{
-            console.error("Cache: failed to save cache entry",(error as Error).message)
+            logger.error("Cache: failed to save cache entry",(error as Error).message)
         })
     },500)
 }
@@ -180,7 +182,7 @@ export async function warmCache(outputItems:Array<{instruction?:string;input?:st
         }
     }
     catch(error){
-        console.error("Cache: failed to save warmed cache entries",(error as Error).message)
+        logger.error("Cache: failed to save warmed cache entries",(error as Error).message)
     }
     return warmed
 }
