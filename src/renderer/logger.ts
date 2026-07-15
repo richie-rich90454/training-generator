@@ -126,8 +126,30 @@ export class Logger {
   }
 }
 
+/**
+ * Lightweight console-style logger facade for renderer code.
+ *
+ * Renderer modules SHOULD import `logger` and call `logger.warn(...)`,
+ * `logger.error(...)`, etc. instead of `console.*` directly, so that future
+ * improvements (forwarding to the structured `Logger` class, redaction,
+ * telemetry) have a single seam. CLI (`src/cli/**`), Electron main
+ * (`src/main.ts`), and `src/workers/**` are explicitly exempt and may continue
+ * to use `console.*`.
+ */
 export const logger = {
+  log(message: string, ...args: unknown[]): void {
+    console.log(message, ...args)
+  },
+  debug(message: string, ...args: unknown[]): void {
+    console.debug(message, ...args)
+  },
+  info(message: string, ...args: unknown[]): void {
+    console.info(message, ...args)
+  },
   warn(message: string, ...args: unknown[]): void {
     console.warn(message, ...args)
+  },
+  error(message: string, ...args: unknown[]): void {
+    console.error(message, ...args)
   }
 }
