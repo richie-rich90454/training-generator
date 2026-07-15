@@ -1,6 +1,7 @@
 import type{Provider, ProviderOptions, ProviderResult}from"./provider.js"
 import type{GradeResult}from"./adversarialFilter.js"
 import{parseGradeResponse, GRADING_PROMPT}from"./adversarialFilter.js"
+import { logger } from "./logger.js"
 export interface RegenerationConfig{
     maxAttempts:number
     qualityThreshold:number
@@ -102,7 +103,7 @@ export async function autoRegenerate(
             }
         }
         catch(error){
-            console.warn(`autoRegenerate: attempt ${attempt} failed:`, (error as Error).message)
+            logger.warn(`autoRegenerate: attempt ${attempt} failed:`, (error as Error).message)
         }
     }
     return{
