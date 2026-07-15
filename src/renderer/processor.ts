@@ -5,6 +5,7 @@ import{getCachedResult,setCachedResult}from"./cache.js"
 import type{ProvenanceData}from"./provenance.js"
 import{tagItem}from"./provenance.js"
 import{t}from"./i18n.js"
+import { logger } from "./logger.js"
 class Processor{
     private abortController:AbortController|null=null
     private aborted:boolean=false
@@ -99,7 +100,7 @@ class Processor{
             }
             catch(err){
                 if(!signal.aborted){
-                    console.error("Batch processing failed:",(err as Error).message)
+                    logger.error("Batch processing failed:",(err as Error).message)
                     for(let item of batch){
                         stats.recordChunkFailure()
                         onChunkError(item.index,t("log.batchProcessingFailed",undefined,{error:(err as Error).message}))
@@ -202,7 +203,7 @@ class Processor{
                 }
                 catch(err){
                     if(!signal.aborted){
-                        console.error("Batch processing failed, falling back to individual:",(err as Error).message)
+                        logger.error("Batch processing failed, falling back to individual:",(err as Error).message)
                         for(let sc of smallChunks){
                             queue.push(sc)
                         }
@@ -276,7 +277,7 @@ class Processor{
                 }
                 else{
                     if(!provider)throw new Error(t("error.noProvider"))
-                    console.log(`[processor] starting chunk ${idx}/${total} (${chunk.length} chars) with ${provider.name}`)
+                    logger.log(`[processor] starting chunk ${idx}/${total} (${chunk.length} chars) with ${provider.name}`)
                     let chunkStart = Date.now()
                     let responsePromise=provider.generate(prompt,model,{
                         max_tokens:16384,
@@ -291,7 +292,7 @@ class Processor{
                     response=result.text
                     let latencyMs = Date.now() - chunkStart
                     stats.recordLatency(latencyMs)
-                    console.log(`[processor] chunk ${idx}/${total} completed (${response.length} chars response, ${latencyMs}ms)`)
+                    logger.log(`[processor] chunk ${idx}/${total} completed (${response.length} chars response, ${latencyMs}ms)`)
                 }
                 if(sig.aborted)return
                 streamChunk?.(`\n--- Chunk ${idx+1}/${total} ---\n${response}\n`)
@@ -309,7 +310,7 @@ class Processor{
             catch(err){
                 stats.recordChunkFailure()
                 if(!sig.aborted){
-                    console.error(`Processor: chunk ${idx} failed for model ${model}`,(err as Error).message)
+                    logger.error(`Processor: chunk ${idx} failed for model ${model}`,(err as Error).message)
                     onError(idx,(err as Error).message)
                 }
             }
