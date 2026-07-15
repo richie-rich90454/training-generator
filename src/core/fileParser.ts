@@ -17,6 +17,7 @@ class FileParser{
             let stats=await fs.promises.stat(filePath)
             let fileSize=stats.size
             if(fileSize>10*1024*1024){
+                // intentional: main-process/CLI module uses stdout for diagnostics
                 console.log(`Large file detected(${(fileSize/(1024*1024)).toFixed(2)}MB),parsing in memory...`)
                 return await this.parseLargeFile(filePath,fileType)
             }
@@ -40,6 +41,7 @@ class FileParser{
             }
         }
         catch(error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error(`Error parsing file ${filePath}:`,error)
             throw error
         }
@@ -114,6 +116,7 @@ class FileParser{
             return data.text
         }
         catch(error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("PDF parsing error:",error)
             throw error
         }
@@ -134,6 +137,7 @@ class FileParser{
             return text
         }
         catch(error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("DOC parsing error:",error)
             throw error
         }
@@ -144,6 +148,7 @@ class FileParser{
             return await this.parseRTFText(rtfText)
         }
         catch(error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("RTF parsing error:",error)
             throw error
         }

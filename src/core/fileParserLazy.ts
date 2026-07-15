@@ -69,6 +69,7 @@ class FileParserLazy{
             let stats=await fs.promises.stat(filePath);
             let fileSize=stats.size;
             if (fileSize>10*1024*1024){
+                // intentional: main-process/CLI module uses stdout for diagnostics
                 console.log(`Large file detected (${(fileSize/(1024*1024)).toFixed(2)}MB), parsing in memory...`);
                 return await this.parseLargeFile(filePath, fileType);
             }
@@ -76,6 +77,7 @@ class FileParserLazy{
             return await this.parseFileBuffer(buffer, fileType);
         }
         catch (error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error(`Error parsing file ${filePath}:`, error);
             throw error;
         }
@@ -158,6 +160,7 @@ class FileParserLazy{
                 return await this.parsePDFWithWorker(buffer, true);
             }
             catch (workerError){
+                // intentional: main-process/CLI module uses stderr for diagnostics
                 console.warn("PDF Worker failed, falling back to main thread:", workerError);
             }
         }
@@ -167,6 +170,7 @@ class FileParserLazy{
             return data.text;
         }
         catch (error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("PDF parsing error:", error);
             throw error;
         }
@@ -220,6 +224,7 @@ class FileParserLazy{
             return result.value;
         }
         catch (error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("DOCX parsing error:", error);
             throw error;
         }
@@ -231,6 +236,7 @@ class FileParserLazy{
             return text;
         }
         catch (error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("DOC parsing error:", error);
             throw error;
         }
@@ -241,6 +247,7 @@ class FileParserLazy{
             return await this.parseRTFText(rtfText);
         }
         catch (error){
+            // intentional: main-process/CLI module uses stderr for diagnostics
             console.error("RTF parsing error:", error);
             throw error;
         }

@@ -36,6 +36,7 @@ class MmapReader{
                 }
             }
             catch (error){
+                // intentional: main-process utility uses stderr for diagnostics
                 console.warn("mmap-io not available or failed, falling back to fs.readFile:", error);
                 return await fs.promises.readFile(this.filePath);
             }
