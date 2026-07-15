@@ -411,3 +411,139 @@ describe("UIStore log icons", () => {
         expect(store.getLogIcon("unknown" as any)).toBe("fa-info-circle")
     })
 })
+describe("UIStore dashboard derived fields", () => {
+    it("elapsed zero branch yields zero chunksPerSecond and tokensPerSecond", () => {
+        store.startDashboard()
+        store.setDashboardMetrics({ chunksDone: 5, chunksTotal: 10, totalTokens: 100 })
+        // No time advance — elapsed == 0 takes the false branch of `elapsed > 0`
+        store.tickDashboard()
+        expect(store.dashboardMetrics().chunksPerSecond).toBe(0)
+        expect(store.dashboardMetrics().tokensPerSecond).toBe(0)
+        // chunksPerSecond == 0 means eta stays "--"
+        expect(store.dashboardMetrics().eta).toBe("--")
+    })
+    it("tokensPerSecond is zero when totalTokens is zero", () => {
+        store.startDashboard()
+        store.setDashboardMetrics({ chunksDone: 5, chunksTotal: 10, totalTokens: 0 })
+        vi.advanceTimersByTime(1000)
+        store.tickDashboard()
+        // elapsed > 0 and chunksDone > 0 ⇒ chunksPerSecond > 0
+        expect(store.dashboardMetrics().chunksPerSecond).toBeGreaterThan(0)
+        // totalTokens == 0 takes the false branch of `metrics.totalTokens > 0`
+        expect(store.dashboardMetrics().tokensPerSecond).toBe(0)
+    })
+    it("eta stays -- when chunksPerSecond is zero (chunksDone == 0)", () => {
+        store.startDashboard()
+        store.setDashboardMetrics({ chunksDone: 0, chunksTotal: 10 })
+        vi.advanceTimersByTime(1000)
+        store.tickDashboard()
+        expect(store.dashboardMetrics().chunksPerSecond).toBe(0)
+        // chunksPerSecond == 0 takes the false branch of the eta `if`
+        expect(store.dashboardMetrics().eta).toBe("--")
+    })
+    it("eta stays -- when chunksTotal is zero", () => {
+        store.startDashboard()
+        store.setDashboardMetrics({ chunksDone: 5, chunksTotal: 0, totalTokens: 100 })
+        vi.advanceTimersByTime(1000)
+        store.tickDashboard()
+        // chunksPerSecond > 0 but chunksTotal == 0 ⇒ false branch
+        expect(store.dashboardMetrics().chunksPerSecond).toBeGreaterThan(0)
+        expect(store.dashboardMetrics().eta).toBe("--")
+    })
+    it("tick after dispose with no dashboard running is a no-op for derived fields", () => {
+        // No startDashboard — dashboardStartTime stays 0; tick should not throw
+        // and derived rates stay at their defaults.
+        expect(() => store.tickDashboard()).not.toThrow()
+        expect(store.dashboardMetrics().chunksPerSecond).toBe(0)
+        expect(store.dashboardMetrics().tokensPerSecond).toBe(0)
+    })
+})
+describe("UIStore dispose cleanup", () => {
+    it("clears dashboard interval on dispose", () => {
+        store.startDashboard()
+        expect(intervals.length).toBe(1)
+        store.dispose()
+        expect(intervals.length).toBe(0)
+    })
+    it("clears preview timer on dispose", () => {
+        store.updateOutputPreviewDebounced("delayed")
+        expect(timeouts.length).toBe(1)
+        store.dispose()
+        expect(timeouts.length).toBe(0)
+    })
+    it("dispose is safe when nothing is scheduled", () => {
+        expect(() => store.dispose()).not.toThrow()
+    })
+    it("dispose is idempotent", () => {
+        store.startDashboard()
+        store.updateOutputPreviewDebounced("delayed")
+        store.dispose()
+        // Second call should be a no-op and not throw
+        expect(() => store.dispose()).not.toThrow()
+        expect(intervals.length).toBe(0)
+        expect(timeouts.length).toBe(0)
+    })
+    it("stopDashboard also clears the interval without dispose", () => {
+        store.startDashboard()
+        expect(intervals.length).toBe(1)
+        store.stopDashboard()
+        expect(intervals.length).toBe(0)
+    })
+})
+describe("UIStore live stream buffer", () => {
+    it("starts empty", () => {
+        expect(store.liveStreamText()).toBe("")
+    })
+    it("appends text", () => {
+        store.appendLiveStream("hello")
+        expect(store.liveStreamText()).toBe("hello")
+        store.appendLiveStream(" world")
+        expect(store.liveStreamText()).toBe("hello world")
+    })
+    it("clears text", () => {
+        store.appendLiveStream("some data")
+        store.clearLiveStream()
+        expect(store.liveStreamText()).toBe("")
+    })
+    it("does not truncate under 5000 chars", () => {
+        store.appendLiveStream("a".repeat(4999))
+        expect(store.liveStreamText().length).toBe(4999)
+        store.appendLiveStream("x")
+        expect(store.liveStreamText().length).toBe(5000)
+        expect(store.liveStreamText()).toBe("a".repeat(4999) + "x")
+    })
+    it("truncates to the last 5000 chars when buffer overflows", () => {
+        const chunk = "a".repeat(3000)
+        store.appendLiveStream(chunk)
+        store.appendLiveStream(chunk) // total 6000 > 5000
+        expect(store.liveStreamText().length).toBe(5000)
+        expect(store.liveStreamText()).toBe("a".repeat(5000))
+    })
+    it("preserves most recent content in rolling buffer", () => {
+        // Prepend a marker that should be evicted once the buffer rolls past 5000.
+        store.appendLiveStream("HEAD|")
+        store.appendLiveStream("b".repeat(5000)) // total 5005
+        expect(store.liveStreamText().length).toBe(5000)
+        expect(store.liveStreamText().startsWith("HEAD|")).toBe(false)
+        expect(store.liveStreamText()).toBe("b".repeat(5000))
+    })
+    it("rolling buffer keeps only the tail across many appends", () => {
+        // Append 10 chunks of 1000 distinct chars each (total 10000).
+        // After truncation the last 5000 chars (chunks 6..10) should remain.
+        const chunks: string[] = []
+        for (let i = 0; i < 10; i++) {
+            // Use a marker char per chunk so we can assert which chunk survived.
+            const marker = String.fromCharCode(65 + i) // 'A'..'J'
+            const chunk = marker.repeat(1000)
+            chunks.push(chunk)
+            store.appendLiveStream(chunk)
+        }
+        const text = store.liveStreamText()
+        expect(text.length).toBe(5000)
+        // Chunks 0..4 ('A'..'E') should have been evicted; chunk 5 ('F') starts the tail.
+        expect(text.startsWith("A")).toBe(false)
+        expect(text.startsWith("B")).toBe(false)
+        expect(text.startsWith("F")).toBe(true)
+        expect(text.endsWith("J")).toBe(true)
+    })
+})
