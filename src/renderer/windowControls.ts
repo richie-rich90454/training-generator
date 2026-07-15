@@ -1,26 +1,28 @@
+import { logger } from "./logger.js"
+
 let unsubscribe:(()=>void)|null=null
 let buttonCleanups:(()=>void)[]=[]
 function ensureApi():NonNullable<typeof window.electronAPI>|null{
     let api=window.electronAPI
     if(!api){
-        console.warn("[windowControls] window.electronAPI is not available")
+        logger.warn("[windowControls] window.electronAPI is not available")
         return null
     }
     return api
 }
 function handleWindowBtn(btn:HTMLButtonElement|null,action:()=>void,label:string):void{
     if(!btn){
-        console.warn(`[windowControls] ${label} button not found`)
+        logger.warn(`[windowControls] ${label} button not found`)
         return
     }
     let safeAction=()=>{
         try{
             let result=action() as void|Promise<void>
             if(result&&typeof (result as Promise<void>).then==="function"){
-                (result as Promise<void>).catch((e:unknown)=>console.error(`[windowControls] ${label} failed:`,e))
+                (result as Promise<void>).catch((e:unknown)=>logger.error(`[windowControls] ${label} failed:`,e))
             }
         }catch(e){
-            console.error(`[windowControls] ${label} failed:`,e)
+            logger.error(`[windowControls] ${label} failed:`,e)
         }
     }
     let clickHandler=(e:MouseEvent)=>{
