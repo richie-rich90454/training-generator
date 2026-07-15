@@ -5,6 +5,7 @@ import { applyLanguage } from "../i18n.js"
 import { encryptKey, decryptKey } from "../security.js"
 import { listProfiles, saveProfile, loadProfile, deleteProfile } from "../configProfiles.js"
 import type { ConfigProfile } from "../configProfiles.js"
+import { logger } from "../logger.js"
 const SETTINGS_KEY = "train-generator-settings"
 const APP_SETTINGS_KEY = "training-generator-app-settings"
 const UI_LANG_KEY = "train-generator-ui-lang"
@@ -200,7 +201,7 @@ export function createSettingsStore(): SettingsStore {
             }
         }
         catch (error) {
-            console.error("Failed to load settings:", error)
+            logger.error("Failed to load settings:", error)
         }
     }
     async function savePreset(): Promise<void> {
@@ -227,7 +228,7 @@ export function createSettingsStore(): SettingsStore {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(toSave))
         }
         catch (error) {
-            console.error("Error in savePreset:", error)
+            logger.error("Error in savePreset:", error)
         }
     }
     function loadAppSettings(): void {
@@ -271,7 +272,7 @@ export function createSettingsStore(): SettingsStore {
             }
         }
         catch (error) {
-            console.error("Failed to load application settings:", error)
+            logger.error("Failed to load application settings:", error)
         }
     }
     function saveAppSettings(): void {
@@ -281,7 +282,7 @@ export function createSettingsStore(): SettingsStore {
             localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(appSettings))
         }
         catch (error) {
-            console.error("Failed to save application settings:", error)
+            logger.error("Failed to save application settings:", error)
         }
     }
     function resetAppSettings(): void {
