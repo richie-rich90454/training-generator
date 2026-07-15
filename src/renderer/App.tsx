@@ -126,5 +126,8 @@ if (root) {
     render(() => <App />, root)
 }
 else {
+    // Intentional: bootstrap diagnostic runs before the renderer logger
+    // facade is reliably available in the SolidJS test harness; this is
+    // the equivalent of the CLI/main.ts console.* exemption.
     console.error(t("error.missingRequiredParameters"))
 }
