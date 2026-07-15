@@ -13,7 +13,7 @@ import { createProvider, ProviderManager } from "../provider.js"
 import PromptManager from "../promptManager.js"
 import { t } from "../i18n.js"
 import { type ToastType } from "./uiStore.js"
-import { Logger, logger, type LogLevel, type LogEntry } from "../logger.js"
+import { Logger, type LogLevel, type LogEntry } from "../logger.js"
 import { saveCheckpoint, loadCheckpoint, clearCheckpoint } from "../checkpoint.js"
 import { getCacheStats, warmCache } from "../cache.js"
 import { validateItems, type QualityReport } from "../qualityValidator.js"
@@ -689,7 +689,7 @@ export function createAppStore(): AppStore {
         await window.electronAPI.exportLogs(data)
       }
     } catch (error) {
-      logger.error(t("log.exportLogsConsole"), error)
+      logger.error("app", t("log.exportLogsConsole"), { error: (error as Error).message })
     }
   }
 
