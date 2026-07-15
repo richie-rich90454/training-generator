@@ -1,3 +1,5 @@
+import { logger } from "./logger.js"
+
 class PromptManager{
     private cache:Map<string,string>=new Map()
     private negativeCache:Map<string,number>=new Map()
@@ -78,7 +80,7 @@ class PromptManager{
                 }
             }
             catch(error){
-                console.error(`PromptManager: IPC getPrompt failed for ${fileName}`,(error as Error).message)
+                logger.error(`PromptManager: IPC getPrompt failed for ${fileName}`,(error as Error).message)
             }
         }
         let possiblePaths=[
@@ -96,7 +98,7 @@ class PromptManager{
                     }
                 }
                 catch(error){
-                    console.error(`PromptManager: failed to read prompt file ${filePath}`,(error as Error).message)
+                    logger.error(`PromptManager: failed to read prompt file ${filePath}`,(error as Error).message)
                 }
             }
         }
@@ -108,7 +110,7 @@ class PromptManager{
                 }
             }
             catch(error){
-                console.error(`PromptManager: failed to fetch prompt file ${filePath}`,(error as Error).message)
+                logger.error(`PromptManager: failed to fetch prompt file ${filePath}`,(error as Error).message)
             }
         }
         return null
