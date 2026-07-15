@@ -478,3 +478,126 @@ describe("Parser normalization and deduplication", () => {
         expect(turns[0].user).toBe("Hello")
     })
 })
+describe("OutputStore appendOutput clears staging", () => {
+    it("clears staging data after appending items", () => {
+        store.stageItems([item({ format: "text", text: "staged" })])
+        expect(store.stagingData.length).toBe(1)
+        store.appendOutput([item({ format: "text", text: "appended" })])
+        expect(store.stagingData).toEqual([])
+        expect(store.outputData.length).toBe(1)
+        expect(store.outputData[0].text).toBe("appended")
+    })
+    it("clears staging even with multiple staged items", () => {
+        store.stageItems([
+            item({ format: "text", text: "staged1" }),
+            item({ format: "text", text: "staged2" })
+        ])
+        expect(store.stagingData.length).toBe(2)
+        store.appendOutput([item({ format: "text", text: "appended" })])
+        expect(store.stagingData).toEqual([])
+        expect(store.outputData.length).toBe(1)
+    })
+    it("does not clear staging when appending empty items array (early return)", () => {
+        store.stageItems([item({ format: "text", text: "staged" })])
+        store.appendOutput([])
+        // Early-return branch: empty items does not clear staging
+        expect(store.stagingData.length).toBe(1)
+        expect(store.outputData).toEqual([])
+    })
+})
+// NOTE: "stageItems dedup" branch does NOT exist in the source. stageItems()
+// (outputStore.ts lines 394-397) simply appends items to staging without any
+// deduplication logic. Deduplication only happens inside the parsers
+// (parseQuestionAnswerPairs / parseConversationTurns), not in stageItems.
+// Skipped per task instructions ("If a branch doesn't exist, skip and note it").
+describe("OutputStore stageItems accumulates without dedup", () => {
+    it("appends duplicate items without deduplicating (documents actual behavior)", () => {
+        const dup = item({ format: "text", text: "same" })
+        store.stageItems([dup, dup])
+        // stageItems does not dedup — both duplicates are kept
+        expect(store.stagingData.length).toBe(2)
+    })
+    it("does nothing for empty items array (early return)", () => {
+        store.stageItems([])
+        expect(store.stagingData).toEqual([])
+    })
+})
+describe("OutputStore exportOutput format dispatch", () => {
+    beforeEach(() => {
+        vi.stubGlobal("window", {
+            electronAPI: {
+                saveFileDialog: vi.fn(async(name: string) => `/path/${name}`),
+                saveFile: vi.fn(async() => ({ success: true }))
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("dispatches to jsonl exporter", async() => {
+        store.appendOutput([item({ format: "instruction", input: "q", output: "a" })])
+        await store.exportOutput("jsonl")
+        const content = (window.electronAPI!.saveFile as unknown as { mock: { calls: string[][] } }).mock.calls[0][1]
+        // jsonl: each line is a compact JSON object, no leading '[', trailing newline
+        expect(content).toContain('"input":"q"')
+        expect(content.startsWith("[")).toBe(false)
+        expect(content.endsWith("\n")).toBe(true)
+    })
+    it("dispatches to json array exporter", async() => {
+        store.appendOutput([item({ format: "instruction", input: "q", output: "a" })])
+        await store.exportOutput("json")
+        const content = (window.electronAPI!.saveFile as unknown as { mock: { calls: string[][] } }).mock.calls[0][1]
+        // json: pretty-printed JSON array starting with '['
+        expect(content.startsWith("[")).toBe(true)
+        expect(content).toContain('"input": "q"')
+    })
+    it("dispatches to csv exporter", async() => {
+        store.appendOutput([item({ format: "instruction", instruction: "inst", input: "q", output: "a" })])
+        await store.exportOutput("csv")
+        const content = (window.electronAPI!.saveFile as unknown as { mock: { calls: string[][] } }).mock.calls[0][1]
+        // csv: BOM prefix + instruction,input,output header
+        expect(content.startsWith("\uFEFF")).toBe(true)
+        expect(content).toContain("instruction,input,output")
+    })
+    it("dispatches to chatml exporter and filters to chatml items", async() => {
+        store.appendOutput([
+            item({ format: "chatml", messages: [{ role: "user", content: "hi" }] }),
+            item({ format: "instruction", input: "in", output: "out" })
+        ])
+        await store.exportOutput("chatml")
+        const content = (window.electronAPI!.saveFile as unknown as { mock: { calls: string[][] } }).mock.calls[0][1]
+        // chatml: JSON array filtered to chatml-format items only
+        expect(content.startsWith("[")).toBe(true)
+        expect(content).toContain('"messages"')
+        expect(content).not.toContain('"input"')
+    })
+    it("dispatches to text exporter", async() => {
+        store.appendOutput([item({ format: "text", text: "hello world" })])
+        await store.exportOutput("text")
+        const content = (window.electronAPI!.saveFile as unknown as { mock: { calls: string[][] } }).mock.calls[0][1]
+        // text: raw item text joined by '\n\n'
+        expect(content).toBe("hello world")
+    })
+})
+// NOTE: copyOutput() does NOT handle clipboard failures gracefully — there is
+// no try/catch around navigator.clipboard.writeText. When the clipboard API
+// rejects, the error propagates to the caller. The test below documents this
+// actual behavior (error propagates) since the "graceful handling" branch
+// does not exist in the source.
+describe("OutputStore copyOutput clipboard failure", () => {
+    beforeEach(() => {
+        vi.stubGlobal("navigator", {
+            clipboard: {
+                writeText: vi.fn(async() => { throw new Error("clipboard denied") })
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("propagates clipboard error (no graceful handling in source)", async() => {
+        store.appendOutput([item({ format: "text", text: "hello" })])
+        await expect(store.copyOutput()).rejects.toThrow("clipboard denied")
+        expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1)
+    })
+})
