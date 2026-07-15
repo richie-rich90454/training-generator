@@ -58,6 +58,12 @@ describe("t", () => {
         let result = t("toast.ollamaNotRunning")
         expect(result).toBe("Ollama is not running")
     })
+    it("falls back to english when target language does not exist", () => {
+        expect(t("app.title", "xx-YY")).toBe("Training Generator")
+    })
+    it("falls back to english when key exists in en but target locale is unsupported", () => {
+        expect(t("config.model", "ar")).toBe("Ollama Model")
+    })
 })
 describe("getCurrentLang", () => {
     beforeEach(() => {
@@ -143,6 +149,62 @@ describe("applyLanguage", () => {
         applyLanguage("zh-Hans")
         expect(el.firstChild?.textContent).toBe("训练生成器")
         expect(el.querySelector("span")).toBeTruthy()
+    })
+})
+describe("applyLanguage localStorage-missing branch", () => {
+    let originalLocalStorage: Storage | undefined
+    beforeEach(() => {
+        originalLocalStorage = (global as { localStorage?: Storage }).localStorage
+        document.documentElement.innerHTML = ""
+        document.documentElement.lang = "en"
+    })
+    afterEach(() => {
+        vi.stubGlobal("localStorage", originalLocalStorage)
+        originalLocalStorage?.clear()
+        document.documentElement.innerHTML = ""
+        document.documentElement.lang = "en"
+    })
+    it("does not crash when localStorage is unavailable (SSR/private mode)", () => {
+        const throwingStorage = {
+            getItem: () => { throw new Error("localStorage unavailable") },
+            setItem: () => { throw new Error("localStorage unavailable") },
+            removeItem: () => { throw new Error("localStorage unavailable") },
+            clear: () => { throw new Error("localStorage unavailable") },
+            key: () => { throw new Error("localStorage unavailable") },
+            length: 0,
+        }
+        vi.stubGlobal("localStorage", throwingStorage)
+        expect(() => applyLanguage("zh-Hans")).not.toThrow()
+        expect(getCurrentLang()).toBe("zh-Hans")
+        expect(document.documentElement.lang).toBe("zh-Hans")
+    })
+    it("catches error from localStorage.getItem without crashing", () => {
+        const base = originalLocalStorage
+        const stub = {
+            getItem: () => { throw new Error("unavailable") },
+            setItem: base ? base.setItem.bind(base) : () => {},
+            removeItem: base ? base.removeItem.bind(base) : () => {},
+            clear: base ? base.clear.bind(base) : () => {},
+            key: base ? base.key.bind(base) : () => null,
+            length: 0,
+        }
+        vi.stubGlobal("localStorage", stub)
+        expect(() => applyLanguage("zh-Hant")).not.toThrow()
+        expect(getCurrentLang()).toBe("zh-Hant")
+    })
+    it("catches error from localStorage.setItem without crashing", () => {
+        const base = originalLocalStorage
+        const stub = {
+            getItem: base ? base.getItem.bind(base) : (() => null),
+            setItem: () => { throw new Error("unavailable") },
+            removeItem: base ? base.removeItem.bind(base) : () => {},
+            clear: base ? base.clear.bind(base) : () => {},
+            key: base ? base.key.bind(base) : () => null,
+            length: 0,
+        }
+        vi.stubGlobal("localStorage", stub)
+        expect(() => applyLanguage("ja")).not.toThrow()
+        expect(getCurrentLang()).toBe("ja")
     })
 })
 describe("detectLocale", () => {
