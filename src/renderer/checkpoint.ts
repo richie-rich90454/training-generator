@@ -1,4 +1,5 @@
 import type{SelectedFile,TrainingItem}from "../types/index.js"
+import { logger } from "./logger.js"
 export const CHECKPOINT_VERSION=1
 export interface CheckpointData{
     version?: number
@@ -40,7 +41,7 @@ export async function saveCheckpoint(data: CheckpointData): Promise<boolean>{
         return true
     }
     catch(error){
-        console.error("Failed to save checkpoint:",error)
+        logger.error("Failed to save checkpoint:",error)
         return false
     }
 }
@@ -52,7 +53,7 @@ export async function loadCheckpoint(): Promise<CheckpointData|null>{
         }
     }
     catch(error){
-        console.error("Failed to load checkpoint:",error)
+        logger.error("Failed to load checkpoint:",error)
     }
     return null
 }
@@ -63,6 +64,6 @@ export async function clearCheckpoint(): Promise<void>{
         }
     }
     catch(error){
-        console.error("Failed to clear checkpoint:",error)
+        logger.error("Failed to clear checkpoint:",error)
     }
 }
