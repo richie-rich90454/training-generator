@@ -6,6 +6,7 @@ import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
 import { showToast } from "../toast.js"
+import { logger } from "../logger.js"
 import templateEditorStyles from "./styles/TemplateEditor.module.css"
 import modalStyles from "./styles/Modal.module.css"
 const styles = { ...templateEditorStyles, ...modalStyles }
@@ -82,7 +83,7 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
                 input.remove()
             }
             reader.onerror=()=>{
-                console.error("Failed to read template file")
+                logger.error("Failed to read template file")
                 showToast(t("toast.templateLoadFailed"),"error")
                 input.remove()
             }

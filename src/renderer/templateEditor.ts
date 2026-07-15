@@ -1,6 +1,7 @@
 import{showToast}from"./toast.js"
 import{renderIcon}from"./icons.js"
 import{t}from"./i18n.js"
+import{logger}from"./logger.js"
 export class TemplateEditor{
     private overlay:HTMLDivElement
     private modal:HTMLDivElement
@@ -199,7 +200,7 @@ export class TemplateEditor{
                 input.remove()
             }
             reader.onerror=()=>{
-                console.error("Failed to read template file")
+                logger.error("Failed to read template file")
                 showToast(t("toast.templateLoadFailed"),"error")
                 input.remove()
             }
