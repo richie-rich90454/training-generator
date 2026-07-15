@@ -3,6 +3,7 @@ import { createSignal, createMemo } from "solid-js"
 import type { TrainingItem, QAPair, ConversationTurn, ChatMessage } from "../../types/index.js"
 import { exportJSONL, exportJSONArray, exportCSV } from "../exportFormats.js"
 import { t } from "../i18n.js"
+import { logger } from "../logger.js"
 const SPLIT_THRESHOLD = 100000
 const MAX_CLIPBOARD_SIZE = 5 * 1024 * 1024
 function trimBlockFiller(block: string, answerLabel: string): string {
@@ -165,7 +166,7 @@ export function createOutputStore(): OutputStore {
     }
     function parseQuestionAnswerPairs(text: string): QAPair[] {
         if (!text || typeof text !== "string") {
-            console.warn("parseQuestionAnswerPairs: text is not a string", text)
+            logger.warn("parseQuestionAnswerPairs: text is not a string", text)
             return []
         }
         text = normalizePairSeparators(text)
@@ -223,7 +224,7 @@ export function createOutputStore(): OutputStore {
     }
     function parseConversationTurns(text: string): ConversationTurn[] {
         if (!text || typeof text !== "string") {
-            console.warn("parseConversationTurns: text is not a string", text)
+            logger.warn("parseConversationTurns: text is not a string", text)
             return []
         }
         text = normalizePairSeparators(text)
