@@ -453,3 +453,161 @@ describe("AppStore checkpoint", () => {
         app.dispose()
     })
 })
+describe("AppStore reset between runs", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        stubWindow({
+            electronAPI: {
+                getPlatform: vi.fn(async() => "windows"),
+                checkOllama: vi.fn(async() => ({ running: true, models: [{ name: "llama2" }], version: "0.1.0" })),
+                loadProgress: vi.fn(async() => ({ success: false })),
+                loadCheckpoint: vi.fn(async() => ({ success: false })),
+                writeLog: vi.fn()
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("resets processor state before processing starts", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        app.toggleDemoMode()
+        let resetSpy = vi.spyOn(app.processor, 'reset')
+        let resetStatsSpy = vi.spyOn(app.processor, 'resetStats')
+        app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
+        await app.processFiles()
+        expect(resetSpy).toHaveBeenCalled()
+        expect(resetStatsSpy).toHaveBeenCalled()
+        app.dispose()
+    })
+    it("clears previous output when processing restarts", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        app.toggleDemoMode()
+        app.outputStore.appendOutput([{ format: "text", text: "PREVIOUS_OUTPUT_MARKER" }])
+        expect(app.outputStore.outputData.some(i => i.text === "PREVIOUS_OUTPUT_MARKER")).toBe(true)
+        app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
+        await app.processFiles()
+        expect(app.outputStore.outputData.some(i => i.text === "PREVIOUS_OUTPUT_MARKER")).toBe(false)
+        app.dispose()
+    })
+})
+describe("AppStore ollama offline warning (non-blocking)", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        stubWindow({
+            electronAPI: {
+                getPlatform: vi.fn(async() => "windows"),
+                checkOllama: vi.fn(async() => ({ running: false, models: [], version: "" })),
+                loadProgress: vi.fn(async() => ({ success: false })),
+                loadCheckpoint: vi.fn(async() => ({ success: false })),
+                writeLog: vi.fn()
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("warns but does not block processing when ollama is offline", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        app.settingsStore.setModel("some-model")
+        app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
+        await app.processFiles()
+        let warnMsg = t("log.cannotProcessOllamaOffline")
+        let startMsg = t("log.startingProcessing", undefined, { count: "1" })
+        expect(app.uiStore.logs.some(l => l.message === warnMsg && l.type === "warning")).toBe(true)
+        expect(app.uiStore.logs.some(l => l.message === startMsg && l.type === "info")).toBe(true)
+        app.dispose()
+    })
+})
+describe("AppStore custom model allowed", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        stubWindow({
+            electronAPI: {
+                getPlatform: vi.fn(async() => "windows"),
+                checkOllama: vi.fn(async() => ({ running: true, models: [{ name: "llama2" }], version: "0.1.0" })),
+                loadProgress: vi.fn(async() => ({ success: false })),
+                loadCheckpoint: vi.fn(async() => ({ success: false })),
+                writeLog: vi.fn()
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("accepts a custom model not in the ollama model list", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        app.settingsStore.setModel("custom-model")
+        app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
+        await app.processFiles()
+        let warnMsg = t("log.modelNotAvailable", undefined, { model: "custom-model" })
+        let startMsg = t("log.startingProcessing", undefined, { count: "1" })
+        expect(app.uiStore.logs.some(l => l.message === warnMsg && l.type === "warning")).toBe(true)
+        expect(app.uiStore.logs.some(l => l.message === startMsg && l.type === "info")).toBe(true)
+        app.dispose()
+    })
+})
+describe("AppStore staging clear", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        stubWindow({
+            electronAPI: {
+                getPlatform: vi.fn(async() => "windows"),
+                checkOllama: vi.fn(async() => ({ running: true, models: [{ name: "llama2" }], version: "0.1.0" })),
+                loadProgress: vi.fn(async() => ({ success: false })),
+                loadCheckpoint: vi.fn(async() => ({ success: false })),
+                writeLog: vi.fn()
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("clears staging after processing completes", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        app.toggleDemoMode()
+        let clearStagingSpy = vi.spyOn(app.outputStore, 'clearStaging')
+        app.fileStore.addFiles([createTestFile("a.txt", "This is a test file with enough text to produce a chunk. ".repeat(20))])
+        await app.processFiles()
+        expect(clearStagingSpy).toHaveBeenCalled()
+        expect(app.outputStore.stagingData.length).toBe(0)
+        app.dispose()
+    })
+})
+describe("AppStore abort in finally", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        stubWindow({
+            electronAPI: {
+                getPlatform: vi.fn(async() => "windows"),
+                checkOllama: vi.fn(async() => ({ running: true, models: [], version: "0.1.0" })),
+                loadProgress: vi.fn(async() => ({ success: false })),
+                loadCheckpoint: vi.fn(async() => ({ success: false })),
+                writeLog: vi.fn()
+            }
+        })
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+    it("runs finally cleanup when processing fails", async() => {
+        let app: AppStore = makeAppStore()
+        await app.init()
+        let abortSpy = vi.spyOn(app.processor, 'abort')
+        app.settingsStore.setModel("some-model")
+        // Empty file causes orchestrator to fail (noTextContent), so
+        // runSucceeded stays false and the finally block calls processor.abort()
+        app.fileStore.addFiles([createTestFile("empty.txt", "")])
+        await app.processFiles()
+        expect(app.isProcessing()).toBe(false)
+        expect(app.uiStore.dashboardOpen()).toBe(false)
+        expect(app.outputStore.stagingData.length).toBe(0)
+        expect(abortSpy).toHaveBeenCalled()
+        app.dispose()
+    })
+})
