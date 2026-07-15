@@ -213,3 +213,63 @@ describe("cache failures", () => {
     await expect(clearCache()).resolves.not.toThrow()
   })
 })
+describe("cache error branch coverage", () => {
+  beforeEach(async () => {
+    vi.stubGlobal("window", {
+      electronAPI: {
+        loadCache: vi.fn(async () => ({ success: true, data: {} })),
+        saveCache: vi.fn(async () => ({ success: true })),
+        clearCache: vi.fn(async () => ({ success: true })),
+      },
+    })
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    await clearCache()
+    resetCacheStats()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  // Load-failure: the catch block in loadCache should log the error.
+  it("should log error when load fails", async () => {
+    window.electronAPI!.loadCache = vi.fn(async () => { throw new Error("parse error") })
+    await getCachedResult("chunk1", "model1", "prompt1")
+    expect(console.error).toHaveBeenCalledWith("Cache: failed to load cache", "parse error")
+  })
+
+  // Load-failure: cacheLoaded is still set after a failure so load is not retried.
+  it("should not retry load after a failure", async () => {
+    let loadFn = vi.fn(async () => { throw new Error("parse error") })
+    window.electronAPI!.loadCache = loadFn
+    await getCachedResult("chunk1", "model1", "prompt1")
+    await getCachedResult("chunk2", "model1", "prompt2")
+    expect(loadFn).toHaveBeenCalledTimes(1)
+  })
+
+  // Save-failure: the debounced save in setCachedResult should catch and log.
+  it("should catch and log error when debounced save fails", async () => {
+    vi.useFakeTimers()
+    window.electronAPI!.saveCache = vi.fn(async () => { throw new Error("quota exceeded") })
+    await setCachedResult("chunk1", "model1", "prompt1", "response", 10)
+    await vi.advanceTimersByTimeAsync(500)
+    expect(console.error).toHaveBeenCalledWith("Cache: failed to save cache entry", "quota exceeded")
+  })
+
+  // Clear-failure: the catch block in clearCache should log the error.
+  it("should log error when clear fails", async () => {
+    window.electronAPI!.clearCache = vi.fn(async () => { throw new Error("ipc error") })
+    await clearCache()
+    expect(console.error).toHaveBeenCalledWith("Cache: failed to clear cache", "ipc error")
+  })
+
+  // Warm-failure: a save error during warm should be handled gracefully.
+  it("should handle warm save failure gracefully and return warmed count", async () => {
+    window.electronAPI!.saveCache = vi.fn(async () => { throw new Error("warm save failed") })
+    let items = [{ instruction: "What is X?", output: "X is a variable." }]
+    let warmed = await warmCache(items, "model1", "prompt1")
+    expect(warmed).toBe(1)
+    expect(console.error).toHaveBeenCalledWith("Cache: failed to save warmed cache entries", "warm save failed")
+  })
+})
