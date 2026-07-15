@@ -2,6 +2,7 @@ import{RateLimiter}from"./rateLimiter.js"
 import type{ProviderConfig}from"../types/interfaces.js"
 import{ProviderScopeEnforcer, ScopeError}from"../core/providerScopes.js"
 import type{ProviderScopesConfig}from"../core/providerScopes.js"
+import{logger}from"./logger.js"
 
 export interface ProviderOptions{
     temperature?:number
@@ -95,7 +96,7 @@ export async function retryWithBackoff<T>(
             }
         }
     }
-    console.error("retryWithBackoff: all retries exhausted",lastError?.message||"unknown error")
+    logger.error("retryWithBackoff: all retries exhausted",lastError?.message||"unknown error")
     throw lastError||new Error("retryWithBackoff: all retries exhausted")
 }
 
@@ -123,7 +124,7 @@ export class OllamaProvider implements Provider{
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
-        console.log(`[ollama-provider] request start: model=${model}, prompt=${prompt.length} chars`)
+        logger.info(`[ollama-provider] request start: model=${model}, prompt=${prompt.length} chars`)
         const onToken=options?.onToken
         const signal=options?.signal
         if(signal?.aborted)throw new Error("Aborted")
@@ -169,11 +170,11 @@ export class OllamaProvider implements Provider{
                 return r
             },3,1000)
             let text=result.response!
-            console.log(`[ollama-provider] request complete: ${text.length} chars response`)
+            logger.info(`[ollama-provider] request complete: ${text.length} chars response`)
             return{text,tokens:Math.ceil(text.length/4),provider:"ollama"}
         }
         catch(error){
-            console.error("OllamaProvider.generate failed:",(error as Error).message)
+            logger.error("OllamaProvider.generate failed:",(error as Error).message)
             throw error
         }
         finally{
@@ -234,7 +235,7 @@ export class OpenAIProvider implements Provider{
             }
         }
         catch(error){
-            console.error("OpenAIProvider.generate failed:",(error as Error).message)
+            logger.error("OpenAIProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -269,11 +270,11 @@ export class ProviderManager implements Provider{
         for(let i=0;i<this.providers.length;i++){
             this.currentIndex=(this.currentIndex+1)%this.providers.length
             if(this.providers[this.currentIndex].isHealthy){
-                console.log(`ProviderManager: failed over to ${this.providers[this.currentIndex].provider.name}`)
+                logger.info(`ProviderManager: failed over to ${this.providers[this.currentIndex].provider.name}`)
                 return this.providers[this.currentIndex].provider
             }
         }
-        console.error("ProviderManager: no healthy providers available")
+        logger.error("ProviderManager: no healthy providers available")
         return null
     }
 
@@ -325,9 +326,9 @@ export class ProviderManager implements Provider{
         }
         catch(error){
             health.consecutiveFailures++
-            console.warn(`ProviderManager: ${health.provider.name} failed (${health.consecutiveFailures}/3 consecutive)`,(error as Error).message)
+            logger.warn(`ProviderManager: ${health.provider.name} failed (${health.consecutiveFailures}/3 consecutive)`,(error as Error).message)
             if(health.consecutiveFailures>=3){
-                console.warn(`ProviderManager: ${health.provider.name} marked unhealthy after 3 consecutive failures`)
+                logger.warn(`ProviderManager: ${health.provider.name} marked unhealthy after 3 consecutive failures`)
                 let next=this.failover()
                 if(next){
                     // Retry with the new provider
@@ -389,7 +390,7 @@ export class AnthropicProvider implements Provider{
             }
         }
         catch(error){
-            console.error("AnthropicProvider.generate failed:",(error as Error).message)
+            logger.error("AnthropicProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -436,7 +437,7 @@ export class GeminiProvider implements Provider{
             }
         }
         catch(error){
-            console.error("GeminiProvider.generate failed:",(error as Error).message)
+            logger.error("GeminiProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -566,10 +567,10 @@ export class ProviderRegistry{
                 if(h.consecutiveFailures>=3){
                     h.isHealthy=false
                     this.failoverLog.push({provider:config.id, reason, timestamp:Date.now()})
-                    console.warn(`ProviderRegistry: ${config.id} marked unhealthy after 3 consecutive failures: ${reason}`)
+                    logger.warn(`ProviderRegistry: ${config.id} marked unhealthy after 3 consecutive failures: ${reason}`)
                 }
                 else{
-                    console.warn(`ProviderRegistry: ${config.id} failed (${h.consecutiveFailures}/3): ${reason}`)
+                    logger.warn(`ProviderRegistry: ${config.id} failed (${h.consecutiveFailures}/3): ${reason}`)
                 }
             }
         }
@@ -636,7 +637,7 @@ export class OpenAICompatibleProvider implements Provider{
             }
         }
         catch(error){
-            console.error(`${this.name}.generate failed:`,(error as Error).message)
+            logger.error(`${this.name}.generate failed:`,(error as Error).message)
             throw error
         }
     }
@@ -739,7 +740,7 @@ export class AzureOpenAIProvider implements Provider{
             return{text,tokens:data.usage?.total_tokens??Math.ceil(text.length/4),provider:"azure-openai"}
         }
         catch(error){
-            console.error("AzureOpenAIProvider.generate failed:",(error as Error).message)
+            logger.error("AzureOpenAIProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -790,7 +791,7 @@ export class CohereProvider implements Provider{
             return{text,tokens:Math.ceil(text.length/4),provider:"cohere"}
         }
         catch(error){
-            console.error("CohereProvider.generate failed:",(error as Error).message)
+            logger.error("CohereProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -844,7 +845,7 @@ export class HuggingFaceProvider implements Provider{
             return{text,tokens:Math.ceil(text.length/4),provider:"huggingface"}
         }
         catch(error){
-            console.error("HuggingFaceProvider.generate failed:",(error as Error).message)
+            logger.error("HuggingFaceProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
@@ -914,7 +915,7 @@ export class ReplicateProvider implements Provider{
             throw new Error("Replicate prediction timed out after 120s")
         }
         catch(error){
-            console.error("ReplicateProvider.generate failed:",(error as Error).message)
+            logger.error("ReplicateProvider.generate failed:",(error as Error).message)
             throw error
         }
     }
