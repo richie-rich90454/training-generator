@@ -1,3 +1,5 @@
+import { logger } from "./logger.js"
+
 export interface ConfigProfile{
     name: string
     model: string
@@ -79,7 +81,7 @@ function writeBackups(backups: ConfigProfile[]): void{
 export function saveProfile(profile: ConfigProfile): void{
     let nameCheck=validateProfileName(profile.name)
     if(!nameCheck.valid){
-        console.error(nameCheck.reason)
+        logger.error(nameCheck.reason)
         return
     }
     let store=readStore()
@@ -96,7 +98,7 @@ export function saveProfile(profile: ConfigProfile): void{
             writeBackups(backups)
         }
         catch{
-            console.error("Failed to save profile backup")
+            logger.error("Failed to save profile backup")
         }
         profiles[existing]=toSave
     }
@@ -107,7 +109,7 @@ export function saveProfile(profile: ConfigProfile): void{
         writeStore(store)
     }
     catch{
-        console.error("Failed to save profile")
+        logger.error("Failed to save profile")
     }
 }
 export function loadProfile(name: string): ConfigProfile|null{
@@ -126,7 +128,7 @@ export function deleteProfile(name: string): void{
         writeStore(store)
     }
     catch{
-        console.error("Failed to delete profile")
+        logger.error("Failed to delete profile")
     }
 }
 export function getProfileBackup(name: string): ConfigProfile|null{
