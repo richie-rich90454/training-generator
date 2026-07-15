@@ -218,3 +218,154 @@ describe("createProvider", () => {
         expect(manager.getCurrentProvider().name).toBe("openai")
     })
 })
+describe("retryWithBackoff additional branches", () => {
+    it("does not retry on 403 forbidden errors", async() => {
+        let fn=vi.fn(async()=>{ throw new Error("403 Forbidden") })
+        await expect(retryWithBackoff(fn, 3, 1)).rejects.toThrow("403 Forbidden")
+        expect(fn).toHaveBeenCalledTimes(1)
+    })
+    it("does not retry on invalid api key errors", async() => {
+        let fn=vi.fn(async()=>{ throw new Error("invalid api key") })
+        await expect(retryWithBackoff(fn, 3, 1)).rejects.toThrow("invalid api key")
+        expect(fn).toHaveBeenCalledTimes(1)
+    })
+    it("uses exponential backoff delays between retries", async() => {
+        let delays:number[]=[]
+        vi.stubGlobal("setTimeout", (fn:()=>void, delay?:number)=>{
+            delays.push(delay??0)
+            fn()
+            return 0
+        })
+        try{
+            let fn=vi.fn(async()=>{ throw new Error("fail") })
+            await expect(retryWithBackoff(fn, 3, 100, undefined)).rejects.toThrow("fail")
+        }
+        finally{
+            vi.unstubAllGlobals()
+        }
+        // 3 retries: base*2^0, base*2^1, base*2^2
+        expect(delays).toEqual([100, 200, 400])
+    })
+})
+describe("OllamaProvider abort handling", () => {
+    beforeEach(()=>{
+        vi.stubGlobal("window", {
+            electronAPI: {
+                generateWithOllamaStream: vi.fn(async()=>({ success: true, response: "response" })),
+            },
+        })
+        vi.stubGlobal("setTimeout", (fn:()=>void)=>{ fn(); return 0 })
+    })
+    afterEach(()=>{
+        vi.unstubAllGlobals()
+    })
+    it("throws Aborted when signal is already aborted before call", async() => {
+        let provider=new OllamaProvider()
+        let controller=new AbortController()
+        controller.abort()
+        await expect(provider.generate("prompt", "model", { signal: controller.signal })).rejects.toThrow("Aborted")
+        expect(window.electronAPI!.generateWithOllamaStream).not.toHaveBeenCalled()
+    })
+    it("throws Aborted when signal aborts during IPC call", async() => {
+        window.electronAPI!.generateWithOllamaStream=vi.fn(()=>new Promise(()=>{}))
+        let provider=new OllamaProvider()
+        let controller=new AbortController()
+        let promise=provider.generate("prompt", "model", { signal: controller.signal })
+        controller.abort()
+        await expect(promise).rejects.toThrow("Aborted")
+    })
+})
+describe("OllamaProvider streaming", () => {
+    beforeEach(()=>{
+        vi.stubGlobal("window", {
+            electronAPI: {
+                generateWithOllamaStream: vi.fn(async()=>({ success: true, response: "response" })),
+            },
+        })
+        vi.stubGlobal("setTimeout", (fn:()=>void)=>{ fn(); return 0 })
+    })
+    afterEach(()=>{
+        vi.unstubAllGlobals()
+    })
+    it("wires up onOllamaStreamToken when onToken is provided", async() => {
+        let unsub=vi.fn()
+        let onOllamaStreamToken=vi.fn(()=>unsub)
+        window.electronAPI!.onOllamaStreamToken=onOllamaStreamToken
+        let onToken=vi.fn()
+        let provider=new OllamaProvider()
+        await provider.generate("prompt", "model", { onToken })
+        expect(onOllamaStreamToken).toHaveBeenCalledTimes(1)
+        expect(onOllamaStreamToken).toHaveBeenCalledWith(expect.stringMatching(/^ollama-/), onToken)
+        expect(unsub).toHaveBeenCalledTimes(1)
+    })
+    it("does not wire streaming when onToken is absent", async() => {
+        let onOllamaStreamToken=vi.fn(()=>()=>{})
+        window.electronAPI!.onOllamaStreamToken=onOllamaStreamToken
+        let provider=new OllamaProvider()
+        await provider.generate("prompt", "model")
+        expect(onOllamaStreamToken).not.toHaveBeenCalled()
+    })
+    it("delivers tokens to the onToken callback", async() => {
+        let capturedCb:((token:string)=>void)|null=null
+        window.electronAPI!.onOllamaStreamToken=vi.fn((_id:string, cb:(t:string)=>void)=>{
+            capturedCb=cb
+            return ()=>{}
+        })
+        window.electronAPI!.generateWithOllamaStream=vi.fn(async()=>{
+            if(capturedCb){ capturedCb("Hello"); capturedCb(" world") }
+            return { success: true, response: "Hello world" }
+        })
+        let received:string[]=[]
+        let provider=new OllamaProvider()
+        let result=await provider.generate("prompt", "model", { onToken:(t)=>{ received.push(t) } })
+        expect(received).toEqual(["Hello", " world"])
+        expect(result.text).toBe("Hello world")
+        expect(result.provider).toBe("ollama")
+    })
+    it("calls unsub in finally even when generation fails", async() => {
+        let unsub=vi.fn()
+        window.electronAPI!.onOllamaStreamToken=vi.fn(()=>unsub)
+        window.electronAPI!.generateWithOllamaStream=vi.fn(async()=>({ success: false, error: "boom" }))
+        let provider=new OllamaProvider()
+        await expect(provider.generate("prompt", "model", { onToken:()=>{} })).rejects.toThrow("boom")
+        expect(unsub).toHaveBeenCalledTimes(1)
+    })
+})
+describe("OpenAIProvider base URL construction", () => {
+    beforeEach(()=>{
+        vi.stubGlobal("window", {
+            electronAPI: {
+                generateWithOpenAI: vi.fn(async(_apiKey:string, _baseUrl:string, _model:string, _prompt:string, _options:any)=>({ success: true, response: "ok", usage: { total_tokens: 1 } })),
+            },
+        })
+        vi.stubGlobal("setTimeout", (fn:()=>void)=>{ fn(); return 0 })
+    })
+    afterEach(()=>{
+        vi.unstubAllGlobals()
+    })
+    it("passes custom baseUrl to generateWithOpenAI", async() => {
+        let provider=new OpenAIProvider("key", "https://my.proxy.com")
+        await provider.generate("prompt", "gpt-4")
+        expect(window.electronAPI!.generateWithOpenAI).toHaveBeenCalledWith("key", "https://my.proxy.com", "gpt-4", "prompt", expect.any(Object))
+    })
+    it("constructs health check URL from baseUrl with Bearer auth", async() => {
+        let fetchMock=vi.fn(async()=>({ ok: true }))
+        vi.stubGlobal("fetch", fetchMock)
+        let provider=new OpenAIProvider("key", "https://my.proxy.com")
+        await provider.healthCheck()
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        expect(fetchMock).toHaveBeenCalledWith("https://my.proxy.com/v1/models", expect.objectContaining({
+            headers: expect.objectContaining({
+                "Authorization": "Bearer key",
+                "Content-Type": "application/json"
+            })
+        }))
+    })
+    it("constructs default health check URL when no custom baseUrl", async() => {
+        let fetchMock=vi.fn(async()=>({ ok: true }))
+        vi.stubGlobal("fetch", fetchMock)
+        let provider=new OpenAIProvider("key")
+        await provider.healthCheck()
+        expect(fetchMock).toHaveBeenCalledWith("https://api.openai.com/v1/models", expect.any(Object))
+    })
+})
