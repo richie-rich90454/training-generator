@@ -104,3 +104,85 @@ describe("Security key rotation", () => {
         expect(decrypted).toBe("d")
     })
 })
+describe("Security previous-key fallback", () => {
+    it("decrypts old ciphertext using previous key after rekey", async() => {
+        vi.stubGlobal("process", { env: { TRAINING_GENERATOR_REKEY_THRESHOLD: "3" } })
+        let store: Record<string, string> = {}
+        stubSecureKey(store)
+        await loadSecurity()
+        let oldEncrypted = await encryptKey("old-secret")
+        let keyBefore = store.key
+        await encryptKey("filler1")
+        await encryptKey("filler2")
+        expect(store.key).not.toBe(keyBefore)
+        let decrypted = await decryptKey(oldEncrypted)
+        expect(decrypted).toBe("old-secret")
+    })
+})
+describe("Security localStorage failure handling", () => {
+    it("handles localStorage.setItem failure without crashing", async() => {
+        vi.stubGlobal("window", {
+            ...window,
+            electronAPI: {
+                setSecureKey: vi.fn(async() => false),
+                getSecureKey: vi.fn(async() => null)
+            }
+        } as unknown as Window & typeof globalThis)
+        let setItemMock = vi.fn(() => { throw new Error("private mode") })
+        vi.stubGlobal("localStorage", {
+            getItem: vi.fn(() => null),
+            setItem: setItemMock,
+            removeItem: vi.fn(),
+            clear: vi.fn(),
+            key: vi.fn(() => null),
+            length: 0
+        } as unknown as Storage)
+        await loadSecurity()
+        let encrypted = await encryptKey("private-mode-secret")
+        expect(encrypted.length).toBeGreaterThan(0)
+        let decrypted = await decryptKey(encrypted)
+        expect(decrypted).toBe("private-mode-secret")
+        expect(setItemMock).toHaveBeenCalled()
+    })
+    it("handles localStorage.getItem failure without crashing", async() => {
+        vi.stubGlobal("window", {
+            ...window,
+            electronAPI: {
+                setSecureKey: vi.fn(async() => true),
+                getSecureKey: vi.fn(async() => null)
+            }
+        } as unknown as Window & typeof globalThis)
+        let getItemMock = vi.fn(() => { throw new Error("private mode") })
+        vi.stubGlobal("localStorage", {
+            getItem: getItemMock,
+            setItem: vi.fn(),
+            removeItem: vi.fn(),
+            clear: vi.fn(),
+            key: vi.fn(() => null),
+            length: 0
+        } as unknown as Storage)
+        await loadSecurity()
+        let encrypted = await encryptKey("ssr-secret")
+        expect(encrypted.length).toBeGreaterThan(0)
+        let decrypted = await decryptKey(encrypted)
+        expect(decrypted).toBe("ssr-secret")
+        expect(getItemMock).toHaveBeenCalled()
+    })
+})
+describe("Security decrypt failure", () => {
+    it("returns null when decryption fails with no previous keys", async() => {
+        let fakeCiphertext = btoa(String.fromCharCode(...new Uint8Array(32)))
+        let result = await decryptKey(fakeCiphertext)
+        expect(result).toBeNull()
+    })
+    it("returns null when current and all previous keys fail to decrypt", async() => {
+        vi.stubGlobal("process", { env: { TRAINING_GENERATOR_REKEY_THRESHOLD: "1" } })
+        let store: Record<string, string> = {}
+        stubSecureKey(store)
+        await loadSecurity()
+        await encryptKey("trigger-rekey")
+        let fakeCiphertext = btoa(String.fromCharCode(...new Uint8Array(32)))
+        let result = await decryptKey(fakeCiphertext)
+        expect(result).toBeNull()
+    })
+})
