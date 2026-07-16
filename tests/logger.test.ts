@@ -2,6 +2,7 @@
 import{describe, test, expect, vi, beforeEach}from"vitest"
 import fs from"fs"
 import{Logger, LogLevel, LogEntry, levelToNumber, formatLogEntry}from"../src/core/logger.js"
+import{Logger as RendererLogger, logger as rendererLoggerFacade}from"../src/renderer/logger.js"
 let fsState=vi.hoisted(()=>({
     files: {} as Record<string, string>,
     join(...parts: string[]): string{
@@ -267,6 +268,57 @@ describe("Logger console output", ()=>{
         let call=spy.mock.calls[0][0] as string
         expect(call).toContain("INFO")
         expect(call).toContain("msg")
+        spy.mockRestore()
+    })
+})
+describe("renderer Logger edge cases", ()=>{
+    // redactContext else-branch: non-string context values are passed through
+    // unchanged (renderer/logger.ts line 41).
+    test("preserves non-string context values", ()=>{
+        let log=new RendererLogger()
+        log.info("mod", "msg", {count: 42, name: "alice@example.com", active: true, nested: {a: 1}})
+        let entry=log.getEntries()[0]
+        expect(entry.context).toEqual({count: 42, name: "[REDACTED_EMAIL]", active: true, nested: {a: 1}})
+    })
+    // maxEntries cap: pushing past maxEntries (10000) shifts the oldest entry
+    // out (renderer/logger.ts line 58).
+    test("shifts oldest entry when exceeding maxEntries", ()=>{
+        let log=new RendererLogger()
+        for(let i=0; i<10001; i++){
+            log.info("mod", `msg${i}`)
+        }
+        let entries=log.getEntries()
+        expect(entries.length).toBe(10000)
+        expect(entries[0].message).toBe("msg1")
+        expect(entries[entries.length - 1].message).toBe("msg10000")
+    })
+    // setLevel updates the minimum emitted level (renderer/logger.ts line 87).
+    test("setLevel changes the minimum emitted level", ()=>{
+        let log=new RendererLogger()
+        log.setLevel("warn")
+        log.info("mod", "filtered")
+        log.warn("mod", "kept")
+        let entries=log.getEntries()
+        expect(entries.length).toBe(1)
+        expect(entries[0].message).toBe("kept")
+    })
+    // maxListeners cap: adding past maxListeners (100) drops the oldest listener
+    // (renderer/logger.ts line 108).
+    test("addListener drops oldest listener when at capacity", ()=>{
+        let log=new RendererLogger()
+        let first=vi.fn()
+        log.addListener(first)
+        for(let i=0; i<100; i++){
+            log.addListener(vi.fn())
+        }
+        log.info("mod", "msg")
+        expect(first).not.toHaveBeenCalled()
+    })
+    // logger.log facade forwards to console.log (renderer/logger.ts line 144).
+    test("facade log forwards to console.log", ()=>{
+        let spy=vi.spyOn(console, "log").mockImplementation(()=>{})
+        rendererLoggerFacade.log("hello", "a", 1)
+        expect(spy).toHaveBeenCalledWith("hello", "a", 1)
         spy.mockRestore()
     })
 })

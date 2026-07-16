@@ -273,3 +273,50 @@ describe("cache error branch coverage", () => {
     expect(console.error).toHaveBeenCalledWith("Cache: failed to save warmed cache entries", "warm save failed")
   })
 })
+describe("cache TTL and eviction", () => {
+  beforeEach(async () => {
+    vi.stubGlobal("window", {
+      electronAPI: {
+        loadCache: vi.fn(async () => ({ success: true, data: {} })),
+        saveCache: vi.fn(async () => ({ success: true })),
+        clearCache: vi.fn(async () => ({ success: true })),
+      },
+    })
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2024-01-01T00:00:00Z"))
+    await clearCache()
+    resetCacheStats()
+  })
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  })
+
+  // TTL expiry: an entry older than CACHE_TTL_MS (7 days) is treated as a miss
+  // and removed from the cache (cache.ts lines 82-84).
+  it("treats expired entries as misses and deletes them", async () => {
+    await setCachedResult("chunk1", "model1", "prompt1", "response", 10)
+    // Advance past the 7-day TTL (7 * 24 * 60 * 60 * 1000 ms).
+    vi.setSystemTime(new Date("2024-01-08T00:00:01Z"))
+    let r = await getCachedResult("chunk1", "model1", "prompt1")
+    expect(r).toBeNull()
+    // The expired entry should have been removed; a second lookup is also a miss.
+    let r2 = await getCachedResult("chunk1", "model1", "prompt1")
+    expect(r2).toBeNull()
+  })
+
+  // Eviction: once the cache exceeds MAX_CACHE_SIZE (10000), the oldest entries
+  // are removed (cache.ts lines 106-110).
+  it("evicts oldest entries when cache exceeds max size", async () => {
+    // Insert 10001 unique entries to trigger eviction on the final insert.
+    for (let i = 0; i < 10001; i++) {
+      await setCachedResult(`chunk${i}`, "model1", "prompt1", `response${i}`, i)
+    }
+    // The oldest entry (chunk0) should have been evicted.
+    let r0 = await getCachedResult("chunk0", "model1", "prompt1")
+    expect(r0).toBeNull()
+    // A recent entry should still be present.
+    let rLast = await getCachedResult("chunk10000", "model1", "prompt1")
+    expect(rLast).not.toBeNull()
+  }, 30000)
+})
