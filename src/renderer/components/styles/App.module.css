@@ -28,7 +28,7 @@
 }
 @media (min-width:900px){
     .content-grid{
-        grid-template-columns:minmax(0, 1fr) 4px minmax(340px, 0.65fr);
+        grid-template-columns:minmax(0, 1fr) 4px minmax(300px, 0.65fr);
     }
 }
 .left-column,.right-column{

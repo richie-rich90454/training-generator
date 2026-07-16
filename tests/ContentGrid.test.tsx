@@ -264,7 +264,7 @@ describe("ContentGrid", () => {
         document.dispatchEvent(new MouseEvent("mousemove", { clientX: 2000 }))
         await Promise.resolve()
         expect(localStorage.getItem(SPLITTER_KEY)).not.toBeNull()
-        // total=1200, MIN_RIGHT_WIDTH=340, splitter=4 => max left = 1200-340-4 = 856
-        expect(Number(localStorage.getItem(SPLITTER_KEY))).toBeLessThanOrEqual(856)
+        // total=1200, MIN_RIGHT_WIDTH=280, splitter=4 => max left = 1200-280-4 = 916
+        expect(Number(localStorage.getItem(SPLITTER_KEY))).toBeLessThanOrEqual(916)
     })
 })
