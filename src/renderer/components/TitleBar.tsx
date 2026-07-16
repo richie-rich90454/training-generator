@@ -45,16 +45,6 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
             <div class={styles["title-bar-actions"]}>
                 <button
                     class="btn-icon"
-                    title={t("header.editTemplates")}
-                    aria-label={t("header.editTemplates")}
-                    data-i18n-title="header.editTemplates"
-                    data-i18n-aria-label="header.editTemplates"
-                    onClick={() => props.appStore.uiStore.openModal("template")}
-                >
-                    <Icon html={renderIcon("fa-edit")} />
-                </button>
-                <button
-                    class="btn-icon"
                     title={t("header.settings")}
                     aria-label={t("header.settings")}
                     data-i18n-title="header.settings"
@@ -64,6 +54,7 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
                     <Icon html={renderIcon("fa-cog")} />
                 </button>
                 <button
+                    id="help-btn"
                     class="btn-icon"
                     title={t("header.help")}
                     aria-label={t("header.help")}

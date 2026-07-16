@@ -58,6 +58,7 @@ export interface AppStore {
   showHelp: () => void
   showShortcutsHelp: () => void
   updateOutputPreview: () => void
+  startTour: (force?: boolean) => void
   maybeStartTour: () => void
   saveProgress: () => Promise<void>
   checkForProgress: () => Promise<void>
@@ -607,7 +608,7 @@ export function createAppStore(): AppStore {
 
   function showHelp(): void {
     addLog(t("log.openingHelp"), "info")
-    uiStore.openModal("help")
+    startTour(true)
     addLog(t("log.helpOpened"), "success")
   }
 
@@ -615,9 +616,9 @@ export function createAppStore(): AppStore {
     uiStore.openModal("shortcuts")
   }
 
-  function maybeStartTour(): void {
+  function startTour(force = false): void {
     try {
-      if (typeof localStorage !== "undefined" && localStorage.getItem(TOUR_STORAGE_KEY) === "true") {
+      if (!force && typeof localStorage !== "undefined" && localStorage.getItem(TOUR_STORAGE_KEY) === "true") {
         return
       }
       const tour = new OnboardingTour({ steps: DEFAULT_TOUR_STEPS })
@@ -625,6 +626,10 @@ export function createAppStore(): AppStore {
     } catch (error) {
       logger.error("app", t("log.tourStartFailed"), { error: (error as Error).message })
     }
+  }
+
+  function maybeStartTour(): void {
+    startTour(false)
   }
 
   async function saveProgress(): Promise<void> {
@@ -880,6 +885,7 @@ export function createAppStore(): AppStore {
     showHelp,
     showShortcutsHelp,
     updateOutputPreview,
+    startTour,
     maybeStartTour,
     saveProgress,
     checkForProgress,
