@@ -180,7 +180,7 @@ describe("pdfWorker", () => {
 
         // Trigger the handler — should call process.exit(1)
         try {
-            lastHandler(new Error("test uncaught"))
+            lastHandler(new Error("test uncaught"), "uncaughtException")
         } catch {
             // Some handlers rethrow
         }
