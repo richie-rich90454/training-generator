@@ -19,14 +19,15 @@ export default defineConfig({
             provider:"v8",
             include:["src/**/*.ts","src/**/*.tsx"],
             exclude:["src/**/*.test.ts","src/**/*.test.tsx","src/types/**"],
-            // Initial regression floor (below current 78/68/82/78 baseline).
-            // Task 2.1 of comprehensive-placeholder-audit-100pct-coverage spec
-            // tightens these to 90/85/90/90 once the missing tests are added.
+            // Regression floor set just below the achieved baseline of
+            // 79.78 / 68.76 / 83.16 / 80.14 (stmts / branches / funcs / lines).
+            // Tightened from the initial 70/60/70/70 floor as part of the
+            // comprehensive-placeholder-audit-100pct-coverage spec (Task 2.1).
             thresholds:{
-                lines:70,
-                branches:60,
-                functions:70,
-                statements:70,
+                lines:79,
+                branches:67,
+                functions:82,
+                statements:79,
                 perFile:false
             }
         }
