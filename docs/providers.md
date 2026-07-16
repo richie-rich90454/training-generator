@@ -188,7 +188,7 @@ When a cloud provider is selected, Training Generator always keeps Ollama regist
 
 ## Provider Quick Reference
 
-| Provider | Base URL | Key Source | Typical Models |
+| Provider | Base URL | Key Source | Typical Models (could change) |
 |----------|----------|------------|----------------|
 | Ollama | `http://localhost:11434` (default) | None (local) | `llama3.1`, `qwen2.5`, `mistral`, `phi4` |
 | OpenAI | `https://api.openai.com` | OpenAI API dashboard | `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo` |
@@ -196,13 +196,3 @@ When a cloud provider is selected, Training Generator always keeps Ollama regist
 | Gemini | `https://generativelanguage.googleapis.com` | Google AI Studio | `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` |
 
 ---
-
-## Choosing a Provider
-
-| Priority | Recommended Provider |
-|----------|---------------------|
-| Privacy / offline | Ollama |
-| Highest output quality | OpenAI GPT-4o or Anthropic Claude 3.5 Sonnet |
-| Low cost | Ollama or Gemini Flash |
-| Long-context documents | Anthropic Claude or Gemini 1.5 Pro |
-| Fast iteration / testing | Ollama with a small model or OpenAI GPT-4o-mini |

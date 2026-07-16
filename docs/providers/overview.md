@@ -10,19 +10,12 @@ Training Generator supports four AI providers. Ollama runs locally by default; O
 
 ## Provider quick reference
 
-| Provider | Mode | Base URL | Key source | Typical models |
+| Provider | Mode | Base URL | Key source | Typical models (could change) |
 | --- | --- | --- | --- | --- |
 | Ollama | Local | `http://localhost:11434` | None | `llama3.1`, `qwen2.5`, `mistral`, `phi4` |
 | OpenAI | Cloud | `https://api.openai.com` | OpenAI dashboard | `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo` |
 | Anthropic | Cloud | `https://api.anthropic.com` | Anthropic console | `claude-3-5-sonnet-latest`, `claude-3-opus-latest` |
 | Gemini | Cloud | `https://generativelanguage.googleapis.com` | Google AI Studio | `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` |
-
-::: tip Choosing a provider
-- **Privacy / offline** → Ollama
-- **Highest quality** → OpenAI GPT-4o or Anthropic Claude 3.5 Sonnet
-- **Low cost** → Ollama or Gemini Flash
-- **Long-context documents** → Anthropic Claude or Gemini 1.5 Pro
-:::
 
 ## Ollama (local, default)
 
