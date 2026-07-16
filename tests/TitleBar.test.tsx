@@ -109,6 +109,11 @@ describe("TitleBar", () => {
             const btn = screen.getByLabelText("Help")
             expect(btn.id).toBe("help-btn")
         })
+        test("settings button has id='settings-btn' for tour targeting", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Settings")
+            expect(btn.id).toBe("settings-btn")
+        })
         test("clicking settings button calls appStore.showSettings", () => {
             const store = makeAppStore()
             render(() => <TitleBar appStore={store} />)
