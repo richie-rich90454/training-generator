@@ -14,7 +14,7 @@ export interface ContentGridProps {
 }
 const SPLITTER_KEY = "tg-splitter-left-width"
 const MIN_LEFT_WIDTH = 320
-const MIN_RIGHT_WIDTH = 280
+const MIN_RIGHT_WIDTH = 340
 export function ContentGrid(props: ContentGridProps): JSX.Element {
     const [isDragging, setIsDragging] = createSignal(false)
     let gridRef: HTMLDivElement | undefined
@@ -43,9 +43,10 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             return
         }
         const total = gridRef.clientWidth
-        const rightWidth = Math.max(MIN_RIGHT_WIDTH, total - width - 4)
-        const leftWidth = total - rightWidth - 4
-        gridRef.style.gridTemplateColumns = `${Math.max(MIN_LEFT_WIDTH, leftWidth)}px 4px ${rightWidth}px`
+        const maxLeft = total - MIN_RIGHT_WIDTH - 4
+        const leftWidth = Math.max(MIN_LEFT_WIDTH, Math.min(width, maxLeft))
+        const rightWidth = total - leftWidth - 4
+        gridRef.style.gridTemplateColumns = `${leftWidth}px 4px ${rightWidth}px`
     }
     function resetToDefault(): void {
         if (!gridRef) {
