@@ -38,11 +38,30 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             // ignore storage errors
         }
     }
+    function getContentWidth(): number {
+        if (!gridRef) {
+            return 0
+        }
+        const style = window.getComputedStyle(gridRef)
+        const pl = parseFloat(style.paddingLeft) || 0
+        const pr = parseFloat(style.paddingRight) || 0
+        return Math.max(0, gridRef.clientWidth - pl - pr)
+    }
+    function getContentLeft(): number {
+        if (!gridRef) {
+            return 0
+        }
+        const rect = gridRef.getBoundingClientRect()
+        const style = window.getComputedStyle(gridRef)
+        const bl = parseFloat(style.borderLeftWidth) || 0
+        const pl = parseFloat(style.paddingLeft) || 0
+        return rect.left + bl + pl
+    }
     function applyWidth(width: number): void {
         if (!gridRef) {
             return
         }
-        const total = gridRef.clientWidth
+        const total = getContentWidth()
         const rightWidth = Math.max(MIN_RIGHT_WIDTH, total - width - 4)
         const leftWidth = total - rightWidth - 4
         gridRef.style.gridTemplateColumns = `${Math.max(MIN_LEFT_WIDTH, leftWidth)}px 4px ${rightWidth}px`
@@ -57,9 +76,8 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!isDragging() || !gridRef) {
             return
         }
-        const rect = gridRef.getBoundingClientRect()
-        let width = e.clientX - rect.left
-        const total = rect.width
+        const total = getContentWidth()
+        let width = e.clientX - getContentLeft()
         width = Math.max(MIN_LEFT_WIDTH, Math.min(width, total - MIN_RIGHT_WIDTH - 4))
         applyWidth(width)
         saveWidth(width)
@@ -73,16 +91,16 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!gridRef || e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
             return
         }
-        const rect = gridRef.getBoundingClientRect()
+        const total = getContentWidth()
         const computed = window.getComputedStyle(gridRef)
         const cols = computed.gridTemplateColumns.split(" ")
-        let left = cols[0] ? parseInt(cols[0], 10) : rect.width * 0.6
+        let left = cols[0] ? parseInt(cols[0], 10) : total * 0.6
         if (isNaN(left)) {
-            left = rect.width * 0.6
+            left = total * 0.6
         }
         const step = e.shiftKey ? 20 : 5
         const next = e.key === "ArrowLeft" ? left - step : left + step
-        const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, rect.width - MIN_RIGHT_WIDTH - 4))
+        const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, total - MIN_RIGHT_WIDTH - 4))
         applyWidth(clamped)
         saveWidth(clamped)
         e.preventDefault()
