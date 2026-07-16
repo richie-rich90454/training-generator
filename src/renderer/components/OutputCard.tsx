@@ -107,6 +107,7 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
                 <span class={styles["output-progress-text"]}>{uiStore.progressPercent() + t("common.percent")}</span>
             </div>
             <div
+                id="output-preview"
                 class={styles["output-preview"]}
                 role="region"
                 aria-label={t("output.previewAria")}

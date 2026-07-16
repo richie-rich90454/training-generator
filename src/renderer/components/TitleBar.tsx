@@ -44,6 +44,7 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
             </div>
             <div class={styles["title-bar-actions"]}>
                 <button
+                    id="settings-btn"
                     class="btn-icon"
                     title={t("header.settings")}
                     aria-label={t("header.settings")}
