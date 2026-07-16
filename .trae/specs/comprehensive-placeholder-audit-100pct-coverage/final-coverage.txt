@@ -1,0 +1,232 @@
+# Final Coverage Summary
+
+Spec: comprehensive-placeholder-audit-100pct-coverage
+Task: 7.3
+Captured: 2026-07-16 (Asia/Shanghai)
+
+## Run configuration
+
+- Command: `npm run test:coverage` (vitest run --coverage)
+- Vitest: 4.1.10
+- Coverage provider: v8
+- Pool: forks (singleFork: true)
+- Environment: happy-dom
+- Threshold gate (perFile: false): statements 79 / branches 67 / functions 82 / lines 79
+- Exit code: 0 (thresholds satisfied)
+
+## Test result
+
+ Test Files  183 passed | 1 skipped (184)
+      Tests  4867 passed | 5 skipped (4872)
+   Start at  21:39:47
+   Duration  319.09s (transform 26.57s, setup 5.50s, import 66.95s, tests 133.32s, environment 4164.33s)
+
+## Aggregate coverage
+
+Statements   : 84.24% ( 14431/17129 )   [threshold 79 -> PASS +5.24]
+Branches     : 73.09% ( 6405/8762  )   [threshold 67 -> PASS +6.09]
+Functions    : 86.47% ( 2640/3053 )    [threshold 82 -> PASS +4.47]
+Lines        : 84.78% ( 13018/15355 )   [threshold 79 -> PASS +5.78]
+
+## Per-file coverage report
+
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   84.24 |    73.09 |   86.47 |   84.78 |
+ src               |    27.6 |    14.69 |   20.25 |   28.83 |
+  ipcMain.ts       |      20 |        0 |   28.57 |    23.8 | ...28,32-33,36-38
+  main.ts          |   27.82 |    15.19 |   20.18 |   29.09 | ...1577,1581-1583
+  preload.ts       |   24.48 |        0 |   17.07 |    23.4 | 8-9,16-46,59-61
+ src/cli           |   86.74 |    77.58 |   82.35 |   86.49 |
+  index.ts         |   79.79 |    61.38 |      60 |   77.05 | ...47,365-368,375
+  parsers.ts       |   92.72 |       84 |     100 |   94.33 | 49,63,66
+  provider.ts      |   97.87 |    93.82 |     100 |     100 | 19,24-30,36
+ src/core          |   88.26 |    77.72 |   92.02 |   88.47 |
+  a11yAnnouncer.ts |    95.4 |    83.92 |    90.9 |    95.4 | 54,80,83-84
+  ...references.ts |     100 |    84.21 |     100 |     100 | 81-97
+  apiServer.ts     |   89.39 |    82.29 |     100 |   89.23 | ...96,199,210-214
+  appLock.ts       |   85.71 |    70.58 |     100 |   85.22 | ...,97-99,119,137
+  ...ranscriber.ts |   83.83 |    55.71 |      80 |   83.83 | ...71,183-186,214
+  auditLog.ts      |   95.65 |    95.45 |     100 |   95.55 | 91,133
+  cliRunner.ts     |   92.81 |    78.12 |      90 |   96.42 | ...56,111,254,276
+  codeParser.ts    |   82.97 |    77.71 |     100 |   82.52 | ...83,419-420,451
+  configManager.ts |   96.96 |    88.23 |     100 |   96.96 | 40,66
+  crashReporter.ts |   86.41 |    77.35 |   82.35 |   86.07 | ...12,124-132,162
+  cronScheduler.ts |   97.02 |    88.63 |     100 |   96.93 | 54,98,213
+  ...sification.ts |   85.83 |    74.66 |     100 |   85.83 | ...26,228-230,245
+  dataResidency.ts |   97.95 |    92.85 |     100 |   97.91 | 75
+  diagnostics.ts   |      75 |       80 |      55 |   76.38 | ...63,179-196,250
+  ...dProcessor.ts |   82.02 |    65.21 |   86.48 |   81.92 | ...85,295-311,316
+  epubParser.ts    |   86.31 |    65.55 |     100 |   85.86 | ...33,237,240,282
+  fileParser.ts    |   46.95 |    30.76 |      50 |   49.07 | ...60-161,170,206
+  ...ParserLazy.ts |    63.9 |    44.06 |   65.85 |   65.83 | ...52,260-261,298
+  focusManager.ts  |   94.38 |    82.75 |     100 |   94.31 | 17,56,85,90,98
+  folderWatcher.ts |   92.45 |    76.92 |     100 |   92.45 | 33,98-101
+  gdprManager.ts   |   95.69 |    76.92 |     100 |   95.69 | 59,117,129,132
+  graphQLServer.ts |    80.9 |    61.29 |   85.71 |   80.73 | ...69,196-206,225
+  healthChecker.ts |   93.82 |    84.44 |   85.71 |   94.87 | 19-21,116
+  hookRunner.ts    |   95.52 |       85 |   93.33 |   95.52 | 33-34,106
+  i18n.ts          |   88.77 |     73.1 |      96 |   88.52 | ...55,265,290,294
+  idleProcessor.ts |   90.14 |       80 |   94.73 |   90.14 | ...93,103,140-141
+  issueReporter.ts |   83.87 |    73.33 |     100 |   83.69 | ...74,177,180,190
+  jsonCsvParser.ts |   83.59 |    78.97 |     100 |   83.06 | ...72,478-484,490
+  logger.ts        |   94.89 |    85.33 |     100 |   94.84 | 28,98,162,172-173
+  ...matParsers.ts |   89.23 |    77.31 |     100 |   89.06 | ...60,663,666,672
+  ocrParser.ts     |   94.82 |       68 |     100 |   94.82 | 37,69,73
+  ...ardingTour.ts |   93.15 |    80.21 |   81.48 |   94.44 | ...88,224,284-286
+  ...chestrator.ts |   98.33 |    72.72 |     100 |    98.3 | 129
+  pluginSandbox.ts |   73.68 |    96.42 |   65.38 |   75.47 | 51-66,70,80-81
+  pluginSdk.ts     |   93.97 |    82.85 |    90.9 |   96.29 | 105,180,187
+  pptxParser.ts    |   92.63 |    75.86 |     100 |   91.95 | 54,76-79,109,113
+  ...iderScopes.ts |   89.47 |    84.61 |     100 |   94.44 | 31
+  proxyManager.ts  |    90.1 |    87.14 |     100 |    90.1 | ...39,153,160,168
+  ...tDashboard.ts |   98.76 |    90.56 |     100 |   98.68 | 74
+  ...rceMonitor.ts |   90.24 |    91.89 |     100 |   89.61 | 57-65
+  rtlSupport.ts    |      72 |    48.97 |     100 |   71.23 | ...6,70,75-84,151
+  ...oryManager.ts |   96.82 |      100 |     100 |   96.61 | 101,149
+  smartCache.ts    |    94.5 |       95 |     100 |   94.44 | 47-51,59,163
+  ...mProcessor.ts |     100 |    96.29 |     100 |     100 | 41
+  telemetry.ts     |   98.33 |    93.61 |     100 |   98.27 | 113
+  ...ghputStore.ts |   95.78 |    93.18 |     100 |    95.6 | 8,106,122,125
+  tieredStorage.ts |   89.84 |     75.6 |     100 |   89.84 | ...93,215,222,234
+  ...teNotifier.ts |   96.61 |     93.4 |   91.66 |   96.58 | 76,114,140,195
+  vaultProvider.ts |   97.18 |       90 |     100 |   97.18 | 130,137
+  ...ranscriber.ts |   95.74 |    95.65 |      90 |   95.65 | 51,59
+  webFetcher.ts    |   90.76 |    73.46 |     100 |   90.76 | ...0,64,70,92,117
+  webhooks.ts      |   91.13 |    74.76 |   95.65 |   90.96 | ...10,232,260,281
+  xlsxParser.ts    |   84.37 |    59.37 |     100 |   83.42 | ...24,228,242,247
+  ...Transcript.ts |   86.75 |    77.17 |     100 |   86.66 | ...89,194,213,223
+ src/renderer      |   84.35 |    75.98 |   87.52 |   86.14 |
+  App.tsx          |   76.82 |    86.36 |   27.27 |   82.43 | 25-34,45-46,126
+  ...rialFilter.ts |   85.24 |    85.29 |   86.66 |      86 | 107-114
+  audit.ts         |   76.31 |       60 |    87.5 |   79.41 | 57-64
+  ...egenerator.ts |   97.91 |       95 |     100 |   97.67 | 92
+  cache.ts         |   97.47 |    83.67 |     100 |   97.24 | 44-45,111
+  checkpoint.ts    |   92.85 |    93.61 |     100 |     100 | 19,24,27
+  chunker.ts       |   68.47 |    60.26 |   91.66 |   71.62 | ...88,599-606,619
+  ...nExtractor.ts |   79.59 |    70.58 |     100 |   78.57 | ...70-190,211-221
+  ...igProfiles.ts |   74.68 |    64.86 |   76.47 |   77.14 | ...01,112,131-140
+  confirm.ts       |     100 |    92.85 |     100 |     100 | 65,90
+  ...tProcessor.ts |   98.38 |    92.68 |     100 |     100 | 81,90,116
+  dashboard.ts     |   99.19 |    90.56 |     100 |     100 | ...25,140,170,177
+  deduplicator.ts  |    93.9 |    79.41 |     100 |     100 | ...62,180,187-190
+  devtools.ts      |       0 |        0 |       0 |       0 | 4-279
+  ...eProcessor.ts |    87.3 |    79.06 |     100 |   90.19 | 27,43,48,64,97
+  exportFormats.ts |    87.6 |    76.25 |     100 |   87.17 | ...54,157,188-194
+  ...otInjector.ts |   89.09 |    81.63 |     100 |     100 | ...29,37,40-43,75
+  i18n.ts          |   95.16 |    72.22 |     100 |   94.91 | 2120-2121,2125
+  logger.ts        |   98.14 |    91.66 |   96.29 |   97.87 | 144
+  ...dataTagger.ts |   91.08 |    84.21 |     100 |    97.4 | 156-157
+  modelSelector.ts |    91.3 |     92.3 |     100 |   90.32 | ...,84-85,100-101
+  ...pGenerator.ts |   96.36 |    91.89 |     100 |   95.91 | 65,81
+  processor.ts     |   93.15 |    90.19 |   88.46 |   95.33 | ...04-305,339-341
+  promptChain.ts   |      98 |    93.33 |     100 |   97.82 | 53
+  promptManager.ts |   84.33 |    75.47 |     100 |      85 | ...09-113,122-125
+  provider.ts      |   86.07 |     70.6 |   90.41 |   88.83 | ...18,905-906,915
+  ...rBenchmark.ts |   96.96 |    78.57 |     100 |   96.15 | 70
+  rateLimiter.ts   |   96.15 |    92.59 |     100 |     100 | 36,51
+  security.ts      |   96.51 |    94.44 |     100 |   96.42 | 9,75,81
+  ...onsistency.ts |   91.37 |       84 |     100 |      92 | 32,83,92,104
+  statsTracker.ts  |   77.77 |    79.16 |    92.3 |    79.1 | ...,68,98,121-122
+  ...lateEditor.ts |   96.73 |       90 |   89.65 |    99.4 | 141
+  toast.ts         |   79.34 |    58.82 |   76.47 |   81.17 | ...66,101-107,140
+  tokenBudgeter.ts |   84.46 |    65.62 |     100 |   92.77 | ...13-114,120-121
+  ...rFramework.ts |    92.1 |    82.35 |     100 |   91.42 | 43,76-85
+  ...owControls.ts |   83.63 |    58.33 |   73.33 |   84.31 | 22-25,33-35,57-59
+ ...rer/components |   89.19 |    70.57 |   88.52 |   88.91 |
+  ...Dashboard.tsx |   87.73 |    68.65 |   86.07 |   87.35 | ...,45,50,278-305
+  ...ndPalette.tsx |     100 |    84.37 |     100 |     100 | 45,51,58-62,80
+  ConfigPanel.tsx  |   98.57 |    86.11 |   96.15 |   99.37 | 57
+  ContentGrid.tsx  |   87.65 |    78.78 |   66.66 |   92.85 | 43,51-54,81
+  Dashboard.tsx    |   88.13 |    57.14 |     100 |   81.08 | 30,38-50,78-79
+  ...etPreview.tsx |   90.56 |    74.19 |   92.59 |   90.09 | ...55-157,163,170
+  Devtools.tsx     |   85.59 |    76.47 |   87.23 |   88.07 | ...,91-95,176-183
+  Footer.tsx       |     100 |       50 |     100 |     100 | 44
+  ...lCombobox.tsx |   79.86 |    69.56 |   76.92 |   80.86 | ...93-104,198-203
+  OutputCard.tsx   |     100 |    92.85 |     100 |     100 | 122
+  ...ssingCard.tsx |     100 |    90.62 |     100 |     100 | 33,113,123
+  PromptEditor.tsx |   84.34 |    60.37 |   86.07 |    83.7 | ...30,135,241-268
+  ...ingsModal.tsx |   90.49 |     43.9 |   84.76 |   93.42 | ...64,76-78,84,90
+  ...ateEditor.tsx |   81.94 |    64.28 |   86.48 |   75.96 | 64-92,112
+  ...Container.tsx |       0 |        0 |       0 |       0 | 8-47
+  UploadCard.tsx   |   88.97 |    58.33 |    87.5 |   84.52 | ...,52-54,103-104
+ ...er/composables |   96.49 |    93.47 |     100 |   96.42 |
+  ...dShortcuts.ts |   96.49 |    93.47 |     100 |   96.42 | 36,57
+ ...erer/exporters |   92.38 |    79.25 |   96.61 |   92.51 |
+  ...mlExporter.ts |   98.71 |    95.16 |     100 |    98.7 | 32
+  ...eExporters.ts |   92.85 |    78.22 |     100 |   92.66 | ...27-134,152,177
+  ...tExporters.ts |   94.28 |    71.15 |     100 |   94.11 | 30,93-94,112
+  ...ceExporter.ts |   87.59 |    75.75 |     100 |   87.59 | ...92-197,220-225
+  ...maExporter.ts |     100 |     90.9 |     100 |     100 | 53-70
+  ...etExporter.ts |    87.2 |       70 |   89.47 |   88.31 | ...06,109,119-124
+ ...rer/generation |   98.64 |       68 |      90 |   98.61 |
+  pipeline.ts      |   98.64 |       68 |      90 |   98.61 | 113
+ ...rer/processing |   85.71 |    76.84 |   94.44 |   86.77 |
+  orchestrator.ts  |   85.71 |    76.84 |   94.44 |   86.77 | ...81-182,190,197
+ ...enderer/stores |   94.41 |     82.2 |   95.85 |   95.73 |
+  appStore.ts      |   94.32 |    74.75 |   91.07 |   94.72 | ...06-807,810,860
+  fileStore.ts     |     100 |    93.33 |     100 |     100 | 44,128,131
+  outputStore.ts   |   93.92 |    87.11 |     100 |   98.49 | 23,88-89,422
+  settingsStore.ts |   90.86 |    79.16 |   93.75 |   91.25 | ...75,285,387-388
+  uiStore.ts       |   97.24 |       92 |   98.18 |   96.94 | 221-222,231,240
+ ...rer/validators |      93 |    86.73 |   97.77 |   93.18 |
+  biasValidator.ts |   92.77 |    88.09 |     100 |   92.68 | 82,148,159-163
+  ...yValidator.ts |   96.29 |     92.3 |     100 |   96.07 | 62,133-134,138
+  ...nValidator.ts |   96.87 |    95.83 |     100 |    96.8 | 52,108,153
+  ...Validators.ts |   89.36 |    80.18 |     100 |   89.05 | ...81-183,193-194
+  ...nValidator.ts |   95.04 |    86.11 |     100 |   95.72 | 40,43,92-95
+  ...yValidator.ts |   90.12 |    86.84 |     100 |   89.87 | ...67,110,115,119
+  piiValidator.ts  |    93.4 |     73.8 |     100 |   93.25 | 55,76,109,134-136
+  ...yValidator.ts |   89.23 |    94.44 |   81.81 |   92.06 | 70-73,98
+ ...nderer/workers |   36.66 |    46.59 |      36 |   37.64 |
+  workerPool.ts    |   21.91 |    16.07 |   30.43 |   22.05 | ...02-203,215-242
+ src/workers       |   90.62 |    89.47 |     100 |   90.62 |
+  pdfWorker.ts     |   90.62 |    89.47 |     100 |   90.62 | 5-6,46
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 84.24% ( 14431/17129 )
+Branches     : 73.09% ( 6405/8762 )
+Functions    : 86.47% ( 2640/3053 )
+Lines        : 84.78% ( 13018/15355 )
+================================================================================
+
+## Threshold verification
+
+The configured gate (vitest.config.ts) is `perFile: false` with thresholds
+statements 79 / branches 67 / functions 82 / lines 79. All four aggregates
+exceed the floor:
+
+  statements 84.24 >= 79  PASS
+  branches   73.09 >= 67  PASS
+  functions  86.47 >= 82  PASS
+  lines      84.78 >= 79  PASS
+
+vitest exited with code 0 (threshold gate satisfied).
+
+## Known residual low-coverage modules (out of scope for this audit)
+
+These files remain below 90% line coverage but are intentionally out of scope
+for the comprehensive-placeholder-audit-100pct-coverage spec, which targeted
+silent failures, placeholder code, and missing component tests rather than
+exhaustive line coverage of every module. They are tracked as future work:
+
+- src/main.ts (27.82%) — Electron main-process entrypoint; heavy IPC handlers
+  that require electron runtime mocks not yet scaffolded.
+- src/preload.ts (24.48%) — Electron preload bridge; same constraint as main.ts.
+- src/ipcMain.ts (20%) — IPC registration; same constraint.
+- src/core/fileParser.ts (46.95%) — Main-process file parser; logger migration
+  applied but full branch coverage requires electron runtime.
+- src/core/fileParserLazy.ts (63.9%) — Lazy variant of fileParser; same.
+- src/renderer/devtools.ts (0%) — Devtools panel module; component test
+  Devtools.test.tsx covers the component but the underlying module init path
+  requires DevtoolsWindow mock.
+- src/renderer/components/TranslationContainer.tsx (0%) — Component never
+  rendered in tests; translation flow is exercised via i18n tests instead.
+- src/renderer/workers/workerPool.ts (21.91%) — Worker pool manager; requires
+  worker_threads + parentPort mocking across multiple workers.
+- src/renderer/chunker.ts (68.47%) — MAX_CHUNKS/MAX_CHUNK_ITERATIONS early-exit
+  branches added in Task 6.7 but several defensive guards remain unhit.
+
+These are tracked as future coverage work and do not regress the audit floor.
