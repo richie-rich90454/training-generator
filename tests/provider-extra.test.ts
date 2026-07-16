@@ -267,7 +267,7 @@ describe("OllamaProvider abort handling", () => {
         expect(window.electronAPI!.generateWithOllamaStream).not.toHaveBeenCalled()
     })
     it("throws Aborted when signal aborts during IPC call", async() => {
-        window.electronAPI!.generateWithOllamaStream=vi.fn(()=>new Promise(()=>{}))
+        window.electronAPI!.generateWithOllamaStream=vi.fn(()=>new Promise(()=>{})) as any
         let provider=new OllamaProvider()
         let controller=new AbortController()
         let promise=provider.generate("prompt", "model", { signal: controller.signal })

@@ -113,7 +113,7 @@ describe("RuleBasedToxicityScorer word-list override branch",()=>{
         expect(identity?.match).toBe(true)
     })
     test("custom list with empty array means no matches for that label", async ()=>{
-        let scorer=new RuleBasedToxicityScorer({ wordLists: { insult: [] } as Record<ToxicityLabel, string[]> })
+        let scorer=new RuleBasedToxicityScorer({ wordLists: { insult: [] } as unknown as Record<ToxicityLabel, string[]> })
         let results=await scorer.classify(["You idiot fool"])
         let insult=results[0].find(p => p.label==="insult")
         expect(insult?.match).toBe(false)

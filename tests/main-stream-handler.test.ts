@@ -211,7 +211,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("forwards custom ollamaHost and ollamaPort to the stream request URL",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         axios.post.mockResolvedValue({data:mockStream})
         let promise=handleOllamaGenerateStream(mockEvent,{model:"llama2",prompt:"test",ollamaHost:"192.168.1.50",ollamaPort:9000})
@@ -226,7 +226,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("cleans up stream resources (destroy + removeAllListeners) when the stream errors",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         let removeAllListenersSpy=vi.spyOn(mockStream,"removeAllListeners")
         axios.post.mockResolvedValue({data:mockStream})
@@ -239,7 +239,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("cleans up stream resources when the stream completes normally",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         let removeAllListenersSpy=vi.spyOn(mockStream,"removeAllListeners")
         axios.post.mockResolvedValue({data:mockStream})
@@ -253,7 +253,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("tears down the no-data watchdog timer when data arrives",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         axios.post.mockResolvedValue({data:mockStream})
         let clearTimeoutSpy=vi.spyOn(globalThis,"clearTimeout")
@@ -267,7 +267,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("tears down the no-data watchdog timer when the stream ends without data",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         axios.post.mockResolvedValue({data:mockStream})
         let clearTimeoutSpy=vi.spyOn(globalThis,"clearTimeout")
@@ -281,7 +281,7 @@ describe("handleOllamaGenerateStream",()=>{
     })
 
     it("does not crash when sender.send throws during token/done forwarding (destroyed renderer)",async()=>{
-        let mockStream=new EventEmitter()
+        let mockStream=new EventEmitter() as any
         mockStream.destroy=vi.fn()
         axios.post.mockResolvedValue({data:mockStream})
         let destroyedSender={send:vi.fn(()=>{throw new Error("Object has been destroyed")})}
