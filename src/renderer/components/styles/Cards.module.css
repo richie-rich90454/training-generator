@@ -21,6 +21,13 @@
     gap:var(--spacing-sm);
     font-size:1rem;
     font-weight:600;
+    min-width:0;
+    overflow:hidden;
+}
+.card-title > span{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 .section-actions{
     display:flex;
@@ -28,4 +35,5 @@
     align-items:center;
     flex-wrap:wrap;
     justify-content:flex-end;
+    flex-shrink:0;
 }
