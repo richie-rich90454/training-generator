@@ -267,4 +267,35 @@ describe("ContentGrid", () => {
         // total=1200, MIN_RIGHT_WIDTH=280, splitter=4 => max left = 1200-280-4 = 916
         expect(Number(localStorage.getItem(SPLITTER_KEY))).toBeLessThanOrEqual(916)
     })
+    test("drag accounts for grid gap and padding so tracks never overflow content box", async () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        // Simulate real CSS: 24px padding, 24px gap, 0 border
+        // clientWidth=1200 → contentWidth=1152 → available=1152-4-48=1100 → maxLeft=1100-280=820
+        setupRect(main, 1200)
+        const original = window.getComputedStyle
+        window.getComputedStyle = (() => ({
+            gridTemplateColumns: "",
+            getPropertyValue: () => "",
+            paddingLeft: "24px",
+            paddingRight: "24px",
+            borderLeftWidth: "0px",
+            columnGap: "24px"
+        })) as any
+        fireEvent.mouseDown(splitter)
+        await Promise.resolve()
+        // clientX=900 → width = 900 - contentLeft(24) - gap(24) = 852 → clamped to 820
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 900 }))
+        await Promise.resolve()
+        const saved = Number(localStorage.getItem(SPLITTER_KEY))
+        expect(saved).toBe(820)
+        // Verify tracks + splitter + gaps = contentWidth (no overflow)
+        const cols = main.style.gridTemplateColumns.split(" ")
+        const leftTrack = parseInt(cols[0], 10)
+        const rightTrack = parseInt(cols[2], 10)
+        // leftTrack + 4 + rightTrack + 2*24 + 2*24 = 1200 (clientWidth)
+        expect(leftTrack + 4 + rightTrack + 48 + 48).toBe(1200)
+        window.getComputedStyle = original
+    })
 })

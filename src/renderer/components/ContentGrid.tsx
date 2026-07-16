@@ -38,32 +38,28 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             // ignore storage errors
         }
     }
-    function getContentWidth(): number {
+    function getLayoutMetrics(): { contentLeft: number; gap: number; available: number } {
         if (!gridRef) {
-            return 0
-        }
-        const style = window.getComputedStyle(gridRef)
-        const pl = parseFloat(style.paddingLeft) || 0
-        const pr = parseFloat(style.paddingRight) || 0
-        return Math.max(0, gridRef.clientWidth - pl - pr)
-    }
-    function getContentLeft(): number {
-        if (!gridRef) {
-            return 0
+            return { contentLeft: 0, gap: 0, available: 0 }
         }
         const rect = gridRef.getBoundingClientRect()
         const style = window.getComputedStyle(gridRef)
         const bl = parseFloat(style.borderLeftWidth) || 0
         const pl = parseFloat(style.paddingLeft) || 0
-        return rect.left + bl + pl
+        const pr = parseFloat(style.paddingRight) || 0
+        const gap = parseFloat(style.columnGap) || 0
+        const contentWidth = Math.max(0, gridRef.clientWidth - pl - pr)
+        const contentLeft = rect.left + bl + pl
+        const available = Math.max(0, contentWidth - 4 - 2 * gap)
+        return { contentLeft, gap, available }
     }
     function applyWidth(width: number): void {
         if (!gridRef) {
             return
         }
-        const total = getContentWidth()
-        const rightWidth = Math.max(MIN_RIGHT_WIDTH, total - width - 4)
-        const leftWidth = total - rightWidth - 4
+        const { available } = getLayoutMetrics()
+        const rightWidth = Math.max(MIN_RIGHT_WIDTH, available - width)
+        const leftWidth = available - rightWidth
         gridRef.style.gridTemplateColumns = `${Math.max(MIN_LEFT_WIDTH, leftWidth)}px 4px ${rightWidth}px`
     }
     function resetToDefault(): void {
@@ -76,9 +72,9 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!isDragging() || !gridRef) {
             return
         }
-        const total = getContentWidth()
-        let width = e.clientX - getContentLeft()
-        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, total - MIN_RIGHT_WIDTH - 4))
+        const { contentLeft, gap, available } = getLayoutMetrics()
+        let width = e.clientX - contentLeft - gap
+        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, available - MIN_RIGHT_WIDTH))
         applyWidth(width)
         saveWidth(width)
     }
@@ -91,16 +87,16 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!gridRef || e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
             return
         }
-        const total = getContentWidth()
+        const { available } = getLayoutMetrics()
         const computed = window.getComputedStyle(gridRef)
         const cols = computed.gridTemplateColumns.split(" ")
-        let left = cols[0] ? parseInt(cols[0], 10) : total * 0.6
+        let left = cols[0] ? parseInt(cols[0], 10) : available * 0.6
         if (isNaN(left)) {
-            left = total * 0.6
+            left = available * 0.6
         }
         const step = e.shiftKey ? 20 : 5
         const next = e.key === "ArrowLeft" ? left - step : left + step
-        const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, total - MIN_RIGHT_WIDTH - 4))
+        const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, available - MIN_RIGHT_WIDTH))
         applyWidth(clamped)
         saveWidth(clamped)
         e.preventDefault()
