@@ -354,11 +354,13 @@ describe("AppStore settings integration", () => {
         expect(app.uiStore.settingsOpen()).toBe(false)
         app.dispose()
     })
-    it("opens help modal", async() => {
+    it("showHelp starts the onboarding tour", async() => {
         let app: AppStore = makeAppStore()
+        const timeoutSpy = vi.spyOn(window, "setTimeout")
         app.showHelp()
-        expect(app.uiStore.helpOpen()).toBe(true)
+        expect(timeoutSpy).toHaveBeenCalled()
         app.dispose()
+        timeoutSpy.mockRestore()
     })
     it("opens shortcuts modal", async() => {
         let app: AppStore = makeAppStore()

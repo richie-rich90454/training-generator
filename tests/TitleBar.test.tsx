@@ -79,11 +79,11 @@ describe("TitleBar", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             expect(document.querySelector('[class*="window-controls"]')).not.toBeNull()
         })
-        test("renders three action buttons", () => {
+        test("renders two action buttons", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             const actions = document.querySelector('[class*="title-bar-actions"]')
             const buttons = actions?.querySelectorAll("button.btn-icon")
-            expect(buttons?.length).toBe(3)
+            expect(buttons?.length).toBe(2)
         })
         test("renders three window control buttons", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
@@ -94,11 +94,6 @@ describe("TitleBar", () => {
     })
 
     describe("action buttons", () => {
-        test("edit templates button has correct aria-label", () => {
-            render(() => <TitleBar appStore={makeAppStore()} />)
-            const btn = screen.getByLabelText("Edit Prompt Templates")
-            expect(btn).not.toBeNull()
-        })
         test("settings button has correct aria-label", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             const btn = screen.getByLabelText("Settings")
@@ -109,12 +104,10 @@ describe("TitleBar", () => {
             const btn = screen.getByLabelText("Help")
             expect(btn).not.toBeNull()
         })
-        test("clicking edit templates button calls uiStore.openModal('template')", () => {
-            const store = makeAppStore()
-            render(() => <TitleBar appStore={store} />)
-            const btn = screen.getByLabelText("Edit Prompt Templates")
-            fireEvent.click(btn)
-            expect(store.uiStore.openModal).toHaveBeenCalledWith("template")
+        test("help button has id='help-btn' for tour targeting", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Help")
+            expect(btn.id).toBe("help-btn")
         })
         test("clicking settings button calls appStore.showSettings", () => {
             const store = makeAppStore()
@@ -138,6 +131,10 @@ describe("TitleBar", () => {
                 const svg = btn.querySelector("svg")
                 expect(svg).not.toBeNull()
             }
+        })
+        test("edit templates button is not rendered", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            expect(screen.queryByLabelText("Edit Prompt Templates")).toBeNull()
         })
     })
 
@@ -309,10 +306,6 @@ describe("TitleBar", () => {
         test("title span has data-i18n='app.title'", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             expect(document.querySelector('[data-i18n="app.title"]')).not.toBeNull()
-        })
-        test("edit templates button has data-i18n-title='header.editTemplates'", () => {
-            render(() => <TitleBar appStore={makeAppStore()} />)
-            expect(document.querySelector('[data-i18n-title="header.editTemplates"]')).not.toBeNull()
         })
         test("settings button has data-i18n-title='header.settings'", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
