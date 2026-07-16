@@ -1,0 +1,276 @@
+/**
+ * Training Generator — VitePress theme overrides.
+ *
+ * Brand colors and typography mirror the desktop application
+ * (see src/styles/tokens.css). Light theme variables live under :root and
+ * dark theme overrides live under .dark, matching the app's Material palette.
+ */
+
+:root {
+  /* Brand colors — light theme */
+  --vp-c-brand-1: #1A73E8; /* primary */
+  --vp-c-brand-2: #1557B0; /* primary hover */
+  --vp-c-brand-3: #8AB4F8; /* dark theme primary, used for soft accents */
+  --vp-c-brand-soft: rgba(26, 115, 232, 0.14);
+
+  /* Backgrounds */
+  --vp-c-bg: #FAFAFA;
+  --vp-c-bg-alt: #FFFFFF;
+  --vp-c-bg-soft: #F3F3F3;
+
+  /* Text */
+  --vp-c-text-1: #202124;
+  --vp-c-text-2: #5F6368;
+  --vp-c-text-3: #9AA0A6;
+
+  /* Borders & dividers */
+  --vp-c-divider: #EDEBE9;
+  --vp-c-divider-light: #F3F3F3;
+  --vp-c-gutter: #EDEBE9;
+
+  /* Component tokens */
+  --vp-c-bg-blur: rgba(255, 255, 255, 0.7);
+  --vp-c-brand-1-dark: #8AB4F8;
+  --vp-c-brand-tit: #1A73E8;
+  --vp-button-brand-bg: #1A73E8;
+  --vp-button-brand-hover-bg: #1557B0;
+  --vp-button-brand-active-bg: #1557B0;
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #FFFFFF;
+  --vp-button-brand-hover-text: #FFFFFF;
+  --vp-button-brand-active-text: #FFFFFF;
+
+  /* Typography */
+  --vp-font-family-base: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --vp-font-family-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Layout */
+  --vp-layout-max-width: 1440px;
+
+  /* Home hero image: subtle brand gradient instead of a logo asset */
+  --vp-home-hero-image-background-image: linear-gradient(135deg, #1A73E8 0%, #8AB4F8 100%);
+  --vp-home-hero-image-filter: blur(72px);
+
+  /* Borders & radius — match app radius-medium (4px) */
+  --vp-border-radius: 4px;
+  --vp-border: 1px solid var(--vp-c-divider);
+
+  /* Code blocks */
+  --vp-code-line-height: 1.6;
+  --vp-code-line-number-color: #5F6368;
+
+  /* Custom container accents aligned to the app palette */
+  --vp-custom-block-tip-border: #1A73E8;
+  --vp-custom-block-tip-text: #1A73E8;
+  --vp-custom-block-tip-bg: rgba(26, 115, 232, 0.08);
+  --vp-custom-block-info-bg: rgba(26, 115, 232, 0.06);
+  --vp-custom-block-warning-border: #FBBC05;
+  --vp-custom-block-warning-text: #B06000;
+  --vp-custom-block-warning-bg: rgba(251, 188, 5, 0.12);
+  --vp-custom-block-danger-border: #EA4335;
+  --vp-custom-block-danger-text: #EA4335;
+  --vp-custom-block-danger-bg: rgba(234, 67, 53, 0.08);
+}
+
+.dark {
+  /* Brand colors — dark theme */
+  --vp-c-brand-1: #8AB4F8;
+  --vp-c-brand-2: #AECBFA;
+  --vp-c-brand-3: #1A73E8;
+  --vp-c-brand-soft: rgba(138, 180, 248, 0.16);
+
+  /* Backgrounds — match app dark theme */
+  --vp-c-bg: #1A1A1A;
+  --vp-c-bg-alt: #202124;
+  --vp-c-bg-soft: #2D2E30;
+
+  /* Text */
+  --vp-c-text-1: #E8EAED;
+  --vp-c-text-2: #9AA0A6;
+  --vp-c-text-3: #5F6368;
+
+  /* Borders & dividers */
+  --vp-c-divider: #404040;
+  --vp-c-divider-light: #2D2E30;
+  --vp-c-gutter: #404040;
+
+  /* Component tokens */
+  --vp-c-bg-blur: rgba(26, 26, 26, 0.7);
+  --vp-button-brand-bg: #8AB4F8;
+  --vp-button-brand-hover-bg: #AECBFA;
+  --vp-button-brand-active-bg: #AECBFA;
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #202124;
+  --vp-button-brand-hover-text: #202124;
+  --vp-button-brand-active-text: #202124;
+
+  /* Home hero image */
+  --vp-home-hero-image-background-image: linear-gradient(135deg, #1A73E8 0%, #8AB4F8 100%);
+
+  /* Custom container accents for dark mode */
+  --vp-custom-block-tip-border: #8AB4F8;
+  --vp-custom-block-tip-text: #8AB4F8;
+  --vp-custom-block-tip-bg: rgba(138, 180, 248, 0.12);
+  --vp-custom-block-info-bg: rgba(138, 180, 248, 0.08);
+  --vp-custom-block-warning-border: #FDD663;
+  --vp-custom-block-warning-text: #FDD663;
+  --vp-custom-block-warning-bg: rgba(253, 214, 99, 0.14);
+  --vp-custom-block-danger-border: #F28B82;
+  --vp-custom-block-danger-text: #F28B82;
+  --vp-custom-block-danger-bg: rgba(242, 139, 130, 0.12);
+}
+
+/* ---------- Global typography ---------- */
+html {
+  font-family: var(--vp-font-family-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--vp-font-family-base);
+}
+
+/* ---------- Buttons & links ---------- */
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+}
+
+.vp-doc a:hover {
+  color: var(--vp-c-brand-2);
+}
+
+.VPButton {
+  border-radius: var(--vp-border-radius) !important;
+  font-family: var(--vp-font-family-base) !important;
+  font-weight: 500 !important;
+}
+
+/* ---------- Brand buttons use app shadow tokens ---------- */
+.vp-button.brand {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vp-button.brand:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Cards / containers ---------- */
+.vp-doc .vp-code-group .tabs,
+.vp-doc div[class*='language-'],
+.VPNavBar,
+.VPSidebar,
+.VPLocalNav,
+.VPFooter {
+  border-radius: 0;
+}
+
+.vp-code-group .tabs {
+  border-radius: var(--vp-border-radius) var(--vp-border-radius) 0 0;
+}
+
+.vp-doc div[class*='language-'] {
+  border-radius: var(--vp-border-radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.vp-doc .custom-block {
+  border-radius: var(--vp-border-radius);
+  border-left-width: 3px;
+}
+
+/* ---------- Home hero ---------- */
+.VPHero .name {
+  background: linear-gradient(135deg, #1A73E8 0%, #8AB4F8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- Feature cards ---------- */
+.VPFeatures .VPFeature {
+  border-radius: var(--vp-border-radius);
+  border: 1px solid var(--vp-c-divider);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPFeatures .VPFeature:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
+  border-color: var(--vp-c-brand-1);
+}
+
+.VPFeatures .VPFeature .title {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+/* ---------- Sidebar / nav active link ---------- */
+.VPSidebar .link.active {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.VPLocalNav .item .link:hover,
+.VPNavBarMenuLink.active {
+  color: var(--vp-c-brand-1);
+}
+
+/* ---------- Code inline ---------- */
+.vp-doc :not(pre) > code {
+  border-radius: 3px;
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+.dark .vp-doc :not(pre) > code {
+  color: var(--vp-c-brand-1);
+}
+
+/* ---------- Tables ---------- */
+.vp-doc table {
+  border-radius: var(--vp-border-radius);
+  overflow: hidden;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 600;
+}
+
+/* ---------- Scrollbar (mirror app tokens) ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
