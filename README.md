@@ -1775,6 +1775,39 @@ and everyone who contributes to these projects.
 
 ---
 
+# Disclaimer
+
+Training Generator is provided **"as is"**, without warranties or guarantees of any kind, express or implied.
+
+By using this software, you acknowledge and agree that:
+
+- You are solely responsible for reviewing, validating, and using any generated output.
+- The authors and contributors are **not liable** for any direct, indirect, incidental, consequential, or special damages arising from the use or inability to use this software.
+- AI-generated content may contain inaccuracies, omissions, or hallucinations and should be reviewed before being relied upon.
+- You are responsible for ensuring your use of this software complies with all applicable laws, regulations, licenses, contracts, and organizational policies.
+
+## Third-Party AI Services
+
+Training Generator supports both local and third-party AI providers, including but not limited to Ollama, OpenAI, Anthropic, and Google Gemini.
+
+When using third-party providers:
+
+- You are solely responsible for any API usage charges, subscription fees, token costs, or other expenses incurred.
+- The authors and contributors do **not** monitor, control, reimburse, or accept liability for any charges generated through your use of external AI services.
+- You are responsible for understanding the pricing, rate limits, privacy policies, and terms of service of any provider you choose to use.
+
+## Data Responsibility
+
+When using cloud AI providers, documents and prompts may be transmitted to external services depending on your configuration.
+
+It is your responsibility to determine whether the information you process is appropriate to send to the selected provider and whether doing so complies with your organization's policies and applicable laws.
+
+## No Affiliation
+
+Training Generator is an independent open-source project and is not affiliated with, endorsed by, or sponsored by OpenAI, Anthropic, Google, Ollama, Electron, Microsoft, or any other third-party service or trademark owner unless explicitly stated.
+
+---
+
 # Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=richie-rich90454/training-generator&type=Date)](https://star-history.com/#richie-rich90454/training-generator&Date)
