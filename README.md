@@ -1769,6 +1769,7 @@ Special thanks to the maintainers of:
 - PDF-Parse
 - OfficeParser
 - Axios
+- etc.
 
 and everyone who contributes to these projects.
 
