@@ -249,6 +249,17 @@ Perfect for:
 - OpenAI fine-tuning
 - Custom pipelines
 
+### Output mode (v2.0.1)
+
+The `outputFileMode` setting controls how items are grouped at export time:
+
+| Mode | Behavior |
+|------|----------|
+| `combined` (default) | All items from every file merge into one export (or numbered parts past the 100,000-item threshold). v2.0.0 behavior. |
+| `perFile` | Each input file produces its own export named after the source. Pick a destination directory once; sources with zero items are skipped with a warning. |
+
+Per-file mode supports filename templates with `{source}`, `{format}`, `{date}`, `{timestamp}`, and `{index}` placeholders, plus per-source splitting via `maxItemsPerFile`. See the [Output Mode guide](docs/configuration/output-mode.md) and the [Settings Reference](docs/configuration/settings-reference.md) for the full field list.
+
 ---
 
 ## Local First
