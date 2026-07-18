@@ -65,9 +65,29 @@ Caps how many training items a single file can produce.
 
 ## Export Behavior
 
+### Output mode (v2.0.1)
+
+The `outputFileMode` setting controls how items are grouped at export time. See [Output Mode](/configuration/output-mode.md) for the full guide.
+
+| Mode | Behavior |
+| --- | --- |
+| `combined` (default) | All items from every file are merged into one export (or numbered parts when the 100,000-item threshold is exceeded). v2.0.0 behavior. |
+| `perFile` | Each input file produces its own export file named after the source. You pick a destination directory once. Sources with zero items are skipped with a warning. |
+
+Related settings exposed in the Settings modal Export section:
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `outputFilenameTemplate` | `{source}` | Filename template for per-file exports. Placeholders: `{source}`, `{format}`, `{date}`, `{timestamp}`, `{index}`. |
+| `maxItemsPerFile` | `50,000` | Splits each per-source output into numbered parts when exceeded. |
+| `confirmBeforeExport` | `false` | Shows a confirmation dialog before writing exports. |
+| `autoExportOnCompletion` | `false` | Triggers export automatically after a run completes. |
+| `stripPiiBeforeExport` | `false` | Tags items for PII stripping by the exporter pipeline. |
+| `includeSourceMetadata` | `false` | Includes `sourceFile`, `sourceFileIndex`, and `generatedAt` in exported items. Per-file mode always uses `sourceFile` for grouping but strips it unless this is true. |
+
 ### Automatic file splitting
 
-When an export exceeds `100,000` items, the output is split across multiple files:
+When an export exceeds `100,000` items in combined mode, the output is split across multiple files:
 
 ```
 training_data-1.jsonl
@@ -76,17 +96,17 @@ training_data-3.jsonl
 ...
 ```
 
-You will be prompted for a save location for each part.
+You will be prompted for a save location for each part. In per-file mode, each source file's output is split independently when it exceeds `maxItemsPerFile`.
 
 ### Export actions
 
 Available once at least one file has been processed successfully:
 
-- **Copy to clipboard** — copies the generated output using the selected format.
-- **Export to file** — opens a save dialog and writes the output via the main process.
+- **Copy to clipboard** — copies the generated output using the selected format. Copy always uses combined mode regardless of `outputFileMode`.
+- **Export to file** — in combined mode, opens a save dialog and writes the output via the main process. In per-file mode, opens a directory chooser and writes one file per source.
 
 ::: danger Permissions
-Choose a folder where you have write permission. Cancelling the save dialog stops the export with an "Export cancelled" message.
+Choose a folder where you have write permission. Cancelling the save dialog (or directory chooser) stops the export with an "Export cancelled" message.
 :::
 
 ## Provenance & Quality
