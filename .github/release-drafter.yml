@@ -1,0 +1,88 @@
+# Release Drafter configuration.
+# https://github.com/release-drafter/release-drafter
+#
+# Categorizes merged pull requests by their Conventional Commit type prefix
+# (feat:, fix:, docs:, refactor:, perf:, chore:) and drafts a release notes
+# body with contributor credit.
+
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  ## Contributors
+
+  Thanks to the following contributors for making this release possible:
+
+  $CONTRIBUTORS
+
+  **Full Changelog**: https://github.com/richie-rich90454/training-generator/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+change-title-escapes: '\<*_&`'
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bug'
+  - title: '📚 Documentation'
+    labels:
+      - 'docs'
+      - 'documentation'
+  - title: '♻️ Refactors'
+    labels:
+      - 'refactor'
+  - title: '⚡ Performance'
+    labels:
+      - 'perf'
+      - 'performance'
+  - title: '🔧 Maintenance & Chores'
+    labels:
+      - 'chore'
+      - 'ci'
+
+autolabeler:
+  - label: 'feature'
+    title:
+      - '/^feat(\(.*\))?:/'
+  - label: 'fix'
+    title:
+      - '/^fix(\(.*\))?:/'
+  - label: 'docs'
+    title:
+      - '/^docs(\(.*\))?:/'
+  - label: 'refactor'
+    title:
+      - '/^refactor(\(.*\))?:/'
+  - label: 'perf'
+    title:
+      - '/^perf(\(.*\))?:/'
+  - label: 'chore'
+    title:
+      - '/^chore(\(.*\))?:/'
+  - label: 'ci'
+    title:
+      - '/^ci(\(.*\))?:/'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'patch'
+      - 'fix'
+      - 'bug'
+  default: patch
