@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Run every Monday at 06:00 UTC.
+    # Run weekly, every Monday at 06:00 UTC.
     - cron: "0 6 * * 1"
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     strategy:
       fail-fast: false
