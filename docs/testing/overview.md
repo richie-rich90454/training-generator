@@ -1,12 +1,12 @@
 ---
 title: Testing
-description: Test strategy, tooling, and running the 3300+ test suite for Training Generator.
+description: Test strategy, tooling, and running the 4,868-test suite for Training Generator.
 outline: [2, 3]
 ---
 
 # Testing
 
-Training Generator uses **Vitest** with `@solidjs/testing-library` for component testing. The suite contains 139 test files and 3300+ tests covering unit, integration, and system-level behavior, with full TypeScript strict-mode type checking.
+Training Generator uses **Vitest** with `@solidjs/testing-library` for component testing. The v2.0.1 suite contains 184 test files and 4,868 tests covering unit, integration, and system-level behavior, with full TypeScript strict-mode type checking.
 
 ## Toolchain
 
@@ -23,7 +23,7 @@ Configuration lives in `vitest.config.ts` and the global setup in `tests/setup.t
 ## Commands
 
 ```bash
-npm test                # Run the full suite once (3300+ tests)
+npm test                # Run the full suite once (4,868 tests across 184 files)
 npm run test:watch      # Watch mode for iterative development
 npm run test:coverage   # Coverage report via V8
 npm run typecheck       # tsc --noEmit (strict mode)
@@ -86,6 +86,8 @@ describe('semanticChunk', () => {
 ## CI
 
 Continuous integration runs the full suite and type check on every push and pull request via GitHub Actions (`.github/workflows/ci.yml`). Releases are packaged via `.github/workflows/release.yml`.
+
+<!-- v2.0.1 grew the suite from 3,300+ to 4,868 tests — one test per bug, deliberately. -->
 
 ## Next steps
 
