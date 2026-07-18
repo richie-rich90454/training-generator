@@ -41,9 +41,20 @@ export function showConfirm(
 ): Promise<boolean> {
   return new Promise((resolve) => {
     if (resolveRef) {
-      resolveRef(false)
+      // Supersede: dismiss the pending dialog so its event listeners are
+      // removed from the reused modal element. Without this, the previous
+      // dialog's OK/cancel/backdrop/keydown listeners linger and fire
+      // alongside the new ones, incorrectly invoking the previous
+      // onConfirm/onCancel callbacks when the new dialog is interacted with.
+      const previousDismiss = dismissRef
+      const previousResolve = resolveRef
       resolveRef = null
       dismissRef = null
+      if (previousDismiss) {
+        previousDismiss()
+      } else {
+        previousResolve(false)
+      }
     }
     resolveRef = resolve
     const modal = getConfirmModal()
