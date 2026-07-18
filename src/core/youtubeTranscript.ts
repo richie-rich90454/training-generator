@@ -1,4 +1,5 @@
 import axios from"axios";
+const HTTP_TIMEOUT_MS: number=30000;
 export interface TranscriptSegment{
     startMs: number
     durationMs: number
@@ -152,7 +153,8 @@ export async function listAvailableLanguages(videoId: string): Promise<string[]>
     try{
         response=await axios.get(url, {
             headers: {"User-Agent": "Mozilla/5.0"},
-            responseType: "text"
+            responseType: "text",
+            timeout: HTTP_TIMEOUT_MS
         });
     }
     catch(error){
@@ -182,7 +184,8 @@ export async function fetchTranscript(videoId: string, options?: {language?: str
     try{
         response=await axios.get(url, {
             headers: {"User-Agent": "Mozilla/5.0"},
-            responseType: "text"
+            responseType: "text",
+            timeout: HTTP_TIMEOUT_MS
         });
     }
     catch(error){
@@ -216,7 +219,8 @@ export async function fetchTranscript(videoId: string, options?: {language?: str
     try{
         captionResponse=await axios.get(baseUrl, {
             headers: {"User-Agent": "Mozilla/5.0"},
-            responseType: "text"
+            responseType: "text",
+            timeout: HTTP_TIMEOUT_MS
         });
     }
     catch(error){

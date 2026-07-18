@@ -122,6 +122,16 @@ describe("listAvailableLanguages", ()=>{
         let langs=await listAvailableLanguages("dQw4w9WgXcQ");
         expect(langs).toEqual([]);
     });
+    test("sets timeout on axios request", async()=>{
+        let html=makeHtml([
+            {languageCode: "en", baseUrl: "https://example.com/en"}
+        ]);
+        (axios.get as any).mockResolvedValue({data: html});
+        await listAvailableLanguages("dQw4w9WgXcQ");
+        let callArgs=(axios.get as any).mock.calls[0];
+        let config=callArgs[1];
+        expect(config.timeout).toBeGreaterThan(0);
+    });
 });
 describe("fetchTranscript", ()=>{
     test("returns transcript", async()=>{
