@@ -83,6 +83,7 @@ export class StatsTracker {
   }
 
   get elapsed(): number {
+    if (this.startTime === 0) return 0
     return this.endTime ? this.endTime - this.startTime : Date.now() - this.startTime
   }
 
