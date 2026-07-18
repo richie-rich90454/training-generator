@@ -1,0 +1,34 @@
+# Build outputs
+dist/
+dist-main/
+dist-ts/
+release/
+out/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Generated artifacts
+*.min.js
+*.min.css
+package-lock.json
+
+# Vite/Vitest caches
+.cache/
+.parcel-cache/
+.vitepress/cache/
+.vitepress/dist/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docs build
+docs/.vitepress/dist/
