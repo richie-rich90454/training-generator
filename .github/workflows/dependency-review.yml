@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Dependency Review
+      - name: Review dependency changes
         uses: actions/dependency-review-action@v4
         with:
           # Fail the check on moderate or higher severity vulnerabilities.
