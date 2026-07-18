@@ -110,6 +110,9 @@ class FileParser{
         }
     }
     async parsePDF(buffer:Buffer):Promise<string>{
+        if(buffer.length===0){
+            return ""
+        }
         try{
             let parser=new PDFParse({data:buffer})
             let data=await parser.getText()
@@ -122,6 +125,9 @@ class FileParser{
         }
     }
     async parseDOCX(buffer:Buffer):Promise<string>{
+        if(buffer.length===0){
+            return ""
+        }
         try{
             let result=await mammoth.extractRawText({buffer})
             return result.value
@@ -132,6 +138,9 @@ class FileParser{
         }
     }
     async parseDOC(buffer:Buffer):Promise<string>{
+        if(buffer.length===0){
+            return ""
+        }
         try{
             let text=await officeParser.parseOfficeAsync(buffer)
             return text
@@ -143,6 +152,9 @@ class FileParser{
         }
     }
     async parseRTF(buffer:Buffer):Promise<string>{
+        if(buffer.length===0){
+            return ""
+        }
         try{
             let rtfText=this.normalizeLineEndings(this.stripBom(buffer.toString("utf-8")))
             return await this.parseRTFText(rtfText)

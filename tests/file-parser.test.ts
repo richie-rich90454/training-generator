@@ -85,6 +85,34 @@ describe("FileParser",()=>{
             expect(text).toBe("")
         })
 
+        test("returns empty string for empty .pdf file",async()=>{
+            let filePath:string=path.join(testDir,"empty.pdf")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+        })
+
+        test("returns empty string for empty .docx file",async()=>{
+            let filePath:string=path.join(testDir,"empty.docx")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+        })
+
+        test("returns empty string for empty .doc file",async()=>{
+            let filePath:string=path.join(testDir,"empty.doc")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+        })
+
+        test("returns empty string for empty .rtf file",async()=>{
+            let filePath:string=path.join(testDir,"empty.rtf")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+        })
+
         test("extracts text from file with unicode content",async()=>{
             let filePath:string=path.join(testDir,"unicode.txt")
             fs.writeFileSync(filePath,"Hello 世界 🌍")

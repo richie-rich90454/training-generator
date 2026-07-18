@@ -158,6 +158,9 @@ class FileParserLazy{
         }
     }
     async parsePDF(buffer:Buffer):Promise<string>{
+        if (buffer.length===0){
+            return "";
+        }
         if (buffer.length>1*1024*1024){
             try{
                 return await this.parsePDFWithWorker(buffer, true);
@@ -221,6 +224,9 @@ class FileParserLazy{
         });
     }
     async parseDOCX(buffer:Buffer):Promise<string>{
+        if (buffer.length===0){
+            return "";
+        }
         try{
             let mammoth=await this.loadDependency("mammoth") as any;
             let result=await mammoth.extractRawText({ buffer });
@@ -233,6 +239,9 @@ class FileParserLazy{
         }
     }
     async parseDOC(buffer:Buffer):Promise<string>{
+        if (buffer.length===0){
+            return "";
+        }
         try{
             let officeParser=await this.loadDependency("officeParser") as any;
             let text=await officeParser.parseOfficeAsync(buffer);
@@ -245,6 +254,9 @@ class FileParserLazy{
         }
     }
     async parseRTF(buffer:Buffer):Promise<string>{
+        if (buffer.length===0){
+            return "";
+        }
         try{
             let rtfText=this.normalizeLineEndings(this.stripBom(buffer.toString("utf-8")));
             return await this.parseRTFText(rtfText);

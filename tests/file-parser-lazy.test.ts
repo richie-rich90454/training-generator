@@ -92,6 +92,38 @@ describe("FileParserLazy",()=>{
             expect(text).toBe("")
         })
 
+        test("returns empty string for empty .pdf file without loading deps",async()=>{
+            let filePath:string=path.join(testDir,"empty.pdf")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+            expect(parser.dependencies.pdfParse).toBeNull()
+        })
+
+        test("returns empty string for empty .docx file without loading deps",async()=>{
+            let filePath:string=path.join(testDir,"empty.docx")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+            expect(parser.dependencies.mammoth).toBeNull()
+        })
+
+        test("returns empty string for empty .doc file without loading deps",async()=>{
+            let filePath:string=path.join(testDir,"empty.doc")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+            expect(parser.dependencies.officeParser).toBeNull()
+        })
+
+        test("returns empty string for empty .rtf file without loading deps",async()=>{
+            let filePath:string=path.join(testDir,"empty.rtf")
+            fs.writeFileSync(filePath,"")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("")
+            expect(parser.dependencies.RtfParser).toBeNull()
+        })
+
         test("extracts unicode content",async()=>{
             let filePath:string=path.join(testDir,"unicode.txt")
             fs.writeFileSync(filePath,"こんにちは 世界 🌍")
