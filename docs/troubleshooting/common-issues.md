@@ -115,6 +115,29 @@ Copying uses the system clipboard. It can fail when there is no output data, the
 
 The **Export** dropdown determines how the output is saved or copied. See [Output Formats](/output/formats.md).
 
+### Per-file export writes fewer files than I uploaded (v2.0.1)
+
+In per-file mode (`outputFileMode: 'perFile'`), sources that produced **zero training items** are skipped with a warning rather than written as empty files. This is intentional. If you expected items from a source:
+
+- Check the processing log for that file — parsing may have extracted no text (see [No text extracted from a PDF](#no-text-extracted-from-a-pdf)) or every chunk may have failed.
+- Re-run with **Concurrency** lowered and a smaller **Chunk Size** if the model timed out.
+- Switch to `combined` mode to confirm the items exist at all.
+
+### Per-file filenames do not match my template
+
+The `outputFilenameTemplate` setting supports five placeholders: `{source}`, `{format}`, `{date}`, `{timestamp}`, `{index}`. If a literal shows up in the filename instead of a substituted value:
+
+- Confirm the placeholder spelling and casing — placeholders are case-sensitive and must use lowercase (`{source}`, not `{Source}`).
+- Unknown placeholders (including format specifiers like `{index:02d}`) are left in the filename verbatim by design so you can spot typos. There is no zero-padding support; pre-pad the source filename itself if you need it.
+- `{index}` is the 1-based queue position of the source file (the third source file gets `3`), not a part number. When a single source is split into numbered parts because it exceeds `maxItemsPerFile`, the part suffix `-1`, `-2`, … is appended after the template is expanded.
+- Unsafe path characters in the source filename (`/`, `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`, and the NUL byte) are sanitized to `_` before substitution.
+
+See [Output Mode](/configuration/output-mode.md) for the full template reference.
+
+### Copy to clipboard ignores per-file mode
+
+Copy always uses combined mode regardless of `outputFileMode`. Per-file mode only affects **Export to file**. To copy a single source's items, switch to `combined` mode or filter the preview before copying.
+
 ## Performance and crashes
 
 ### Processing is very slow
