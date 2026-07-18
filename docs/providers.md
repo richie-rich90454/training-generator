@@ -100,7 +100,7 @@ The app sends requests to `/v1/chat/completions` (via the main process) and vali
 ### Cost and Rate Limits
 
 - OpenAI charges per token. Large documents with many chunks can become expensive.
-- The built-in rate limiter allows up to 60 requests per 10 seconds by default.
+- The built-in rate limiter allows up to 60 requests per minute with a burst of 10 by default.
 - If you hit rate limits, reduce **Concurrency** and **Max Parallel Files**.
 
 ---
