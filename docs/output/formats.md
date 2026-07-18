@@ -88,6 +88,24 @@ training_data-3.jsonl
 
 You will be prompted for a save location for each part. The split threshold keeps individual files manageable and avoids memory pressure during export.
 
+## Output mode (v2.0.1)
+
+The `outputFileMode` setting controls how items are grouped at export time. See [Output Mode](/configuration/output-mode.md) for the full guide.
+
+- **`combined`** (default) — all items from every file in the work queue are merged into one export (or the numbered parts above when the 100,000-item threshold is exceeded).
+- **`perFile`** — each input file produces its own export file named after the source, for example `report.pdf` becomes `report.jsonl`. You pick a destination directory once, and the app writes one file per source. The per-source filename is controlled by the `outputFilenameTemplate` setting (default `{source}`; placeholders `{source}`, `{format}`, `{date}`, `{timestamp}`, `{index}`). Each per-source output is split into numbered parts when it exceeds `maxItemsPerFile` (default 50,000). Sources that produced zero items are skipped with a warning.
+
+```text
+Work queue: [a.pdf, b.docx, c.txt]
+                 |      |       |
+                 v      v       v
+            a.jsonl  b.jsonl  c.jsonl   <- perFile mode
+                 +------+-------+
+                        |
+                        v
+              training_data.jsonl        <- combined mode
+```
+
 ## CLI output selection
 
 When running headlessly, the output format is inferred from the output file extension:
