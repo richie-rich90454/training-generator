@@ -138,7 +138,7 @@ Packaged installers are written to the `release/` directory.
 
 ```bash
 npm run typecheck       # tsc --noEmit (strict mode)
-npm test                # Run the full test suite (3300+ tests)
+npm test                # Run the full test suite (4,868 tests across 184 files)
 npm run test:watch      # Watch mode
 npm run test:coverage   # Coverage report
 ```
