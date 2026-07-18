@@ -699,27 +699,30 @@ Example
 ```bash
 npm run cli -- \
   --input ./documents \
-  --output ./datasets \
+  --output ./datasets/training_data.jsonl \
   --model llama3.2 \
-  --format jsonl
+  --type instruction
 ```
+
+The output format is inferred from the `--output` file extension (`.jsonl`, `.json`, `.csv`; anything else defaults to JSONL).
 
 ---
 
 # CLI Options
 
-| Option | Description |
-|---------|-------------|
-| `--input` | Input file or directory |
-| `--output` | Output directory |
-| `--model` | LLM model |
-| `--provider` | AI provider |
-| `--type` | Processing mode |
-| `--format` | Export format |
-| `--chunk-size` | Chunk size |
-| `--temperature` | Sampling temperature |
-| `--language` | Output language |
-| `--config` | Configuration profile |
+| Option | Default | Description |
+|---------|---------|-------------|
+| `--input` | _(required)_ | Directory of source documents. |
+| `--output` | _(required)_ | Output file path. Format is inferred from the extension. |
+| `--type` | `instruction` | Processing type: `instruction`, `conversation`, `chunking`, `custom`. |
+| `--model` | `llama3` | Model name (Ollama model or cloud model identifier). |
+| `--provider` | `ollama` | Provider: `ollama`, `openai`, `anthropic`, `gemini`. |
+| `--config` | — | Path to a JSON config file. CLI flags override file values. |
+| `--chunk-size` | `8000` | Characters per chunk. |
+| `--concurrency` | `3` | Parallel chunk requests per file. |
+| `--proxy` | — | Outbound proxy URL (e.g. `http://user:pass@host:port`). |
+
+The CLI always runs in combined output mode and writes a single file. Per-file output mode is a desktop-app feature. See the [CLI guide](docs/cli/usage.md) for details.
 
 ---
 
