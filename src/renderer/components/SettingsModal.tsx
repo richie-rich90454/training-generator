@@ -392,6 +392,121 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                 </label>
                             </div>
                         </section>
+                        <section class={styles["settings-section"]}>
+                            <h3>
+                                <Icon html={renderIcon("fa-file-export")} />
+                                <span data-i18n="settings.outputMode">{t("settings.outputMode")}</span>
+                            </h3>
+                            <div class={styles["settings-field"]}>
+                                <label class={styles["settings-field__label"]} for="settings-output-file-mode-combined">
+                                    <input
+                                        id="settings-output-file-mode-combined"
+                                        class={styles["form-checkbox"]}
+                                        type="radio"
+                                        name="settings-output-file-mode"
+                                        value="combined"
+                                        checked={settingsStore.appSettings.outputFileMode === "combined"}
+                                        onChange={() => settingsStore.setAppSetting("outputFileMode", "combined")}
+                                    />
+                                    <span data-i18n="settings.outputMode.combined">{t("settings.outputMode.combined")}</span>
+                                </label>
+                            </div>
+                            <div class={styles["settings-field"]}>
+                                <label class={styles["settings-field__label"]} for="settings-output-file-mode-perFile">
+                                    <input
+                                        id="settings-output-file-mode-perFile"
+                                        class={styles["form-checkbox"]}
+                                        type="radio"
+                                        name="settings-output-file-mode"
+                                        value="perFile"
+                                        checked={settingsStore.appSettings.outputFileMode === "perFile"}
+                                        onChange={() => settingsStore.setAppSetting("outputFileMode", "perFile")}
+                                    />
+                                    <span data-i18n="settings.outputMode.perFile">{t("settings.outputMode.perFile")}</span>
+                                </label>
+                            </div>
+                            <Show when={settingsStore.appSettings.outputFileMode === "perFile"}>
+                                <div class={styles["settings-field"]}>
+                                    <label class={styles["settings-field__label"]} for="settings-output-filename-template">
+                                        <Icon html={renderIcon("fa-file-signature")} />
+                                        <span data-i18n="settings.outputFilenameTemplate">{t("settings.outputFilenameTemplate")}</span>
+                                    </label>
+                                    <input
+                                        id="settings-output-filename-template"
+                                        class={styles["form-control"]}
+                                        type="text"
+                                        value={settingsStore.appSettings.outputFilenameTemplate ?? "{source}"}
+                                        placeholder={t("config.outputFilenameTemplate.placeholder")}
+                                        data-i18n-placeholder="config.outputFilenameTemplate.placeholder"
+                                        onInput={(e) => settingsStore.setAppSetting("outputFilenameTemplate", e.currentTarget.value)}
+                                    />
+                                </div>
+                                <div class={styles["settings-field"]}>
+                                    <label class={styles["settings-field__label"]} for="settings-max-items-per-file">
+                                        <Icon html={renderIcon("fa-list-ol")} />
+                                        <span data-i18n="settings.maxItemsPerFile">{t("settings.maxItemsPerFile")}</span>
+                                    </label>
+                                    <input
+                                        id="settings-max-items-per-file"
+                                        class={styles["form-control"]}
+                                        type="number"
+                                        min="100"
+                                        max="1000000"
+                                        step="100"
+                                        value={settingsStore.appSettings.maxItemsPerFile ?? 50000}
+                                        onChange={(e) => settingsStore.setAppSetting("maxItemsPerFile", parseInt(e.currentTarget.value, 10) || 50000)}
+                                    />
+                                </div>
+                                <div class={styles["settings-field"]}>
+                                    <label class={styles["settings-field__label"]} for="settings-include-source-metadata">
+                                        <input
+                                            id="settings-include-source-metadata"
+                                            class={styles["form-checkbox"]}
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.includeSourceMetadata ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("includeSourceMetadata", e.currentTarget.checked)}
+                                        />
+                                        <span data-i18n="settings.includeSourceMetadata">{t("settings.includeSourceMetadata")}</span>
+                                    </label>
+                                </div>
+                                <div class={styles["settings-field"]}>
+                                    <label class={styles["settings-field__label"]} for="settings-strip-pii-before-export">
+                                        <input
+                                            id="settings-strip-pii-before-export"
+                                            class={styles["form-checkbox"]}
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.stripPiiBeforeExport ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("stripPiiBeforeExport", e.currentTarget.checked)}
+                                        />
+                                        <span data-i18n="settings.stripPiiBeforeExport">{t("settings.stripPiiBeforeExport")}</span>
+                                    </label>
+                                </div>
+                            </Show>
+                            <div class={styles["settings-field"]}>
+                                <label class={styles["settings-field__label"]} for="settings-confirm-before-export">
+                                    <input
+                                        id="settings-confirm-before-export"
+                                        class={styles["form-checkbox"]}
+                                        type="checkbox"
+                                        checked={settingsStore.appSettings.confirmBeforeExport ?? false}
+                                        onChange={(e) => settingsStore.setAppSetting("confirmBeforeExport", e.currentTarget.checked)}
+                                    />
+                                    <span data-i18n="settings.confirmBeforeExport">{t("settings.confirmBeforeExport")}</span>
+                                </label>
+                            </div>
+                            <div class={styles["settings-field"]}>
+                                <label class={styles["settings-field__label"]} for="settings-auto-export-on-completion">
+                                    <input
+                                        id="settings-auto-export-on-completion"
+                                        class={styles["form-checkbox"]}
+                                        type="checkbox"
+                                        checked={settingsStore.appSettings.autoExportOnCompletion ?? false}
+                                        onChange={(e) => settingsStore.setAppSetting("autoExportOnCompletion", e.currentTarget.checked)}
+                                    />
+                                    <span data-i18n="settings.autoExportOnCompletion">{t("settings.autoExportOnCompletion")}</span>
+                                </label>
+                            </div>
+                        </section>
                         <div class={styles["settings-actions"]}>
                             <button
                                 class={`${styles["btn"]} ${styles["btn-secondary"]}`}
