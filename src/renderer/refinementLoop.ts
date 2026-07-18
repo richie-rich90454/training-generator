@@ -48,11 +48,17 @@ export function parseCritiqueResponse(response:string):CritiqueResult{
         return{score, issues:[], suggestions:[], rawResponse:response}
     }
     return{
-        score:Math.max(0, Math.min(1, parsed.score??0.5)),
+        score:clampScore(parsed.score),
         issues:parsed.issues||[],
         suggestions:parsed.suggestions||[],
         rawResponse:response
     }
+}
+function clampScore(value: unknown): number {
+    let raw = value ?? 0.5
+    let numeric = typeof raw === "number" ? raw : Number(raw)
+    if (isNaN(numeric)) return 0.5
+    return Math.max(0, Math.min(1, numeric))
 }
 export async function critiqueItem(
     provider:Provider,
