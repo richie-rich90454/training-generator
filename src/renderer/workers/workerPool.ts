@@ -323,3 +323,22 @@ export function terminateWorkers(): void {
     dedupWorker = null
   }
 }
+
+// Terminate workers when the page is being closed to avoid orphaned worker
+// threads in Electron. Both `pagehide` (standard) and `beforeunload` (legacy
+// fallback) are registered so the cleanup fires reliably across browsers.
+// `pagehide` is preferred for modern browsers (it fires reliably on bfcache
+// navigation); `beforeunload` is a safety net for older browsers/Electron
+// versions that may not fire `pagehide` on window close.
+if (typeof window !== "undefined") {
+  const cleanup = (): void => {
+    try {
+      terminateWorkers()
+    } catch {
+      // Swallow errors during page teardown — the page is going away anyway,
+      // and throwing here could prevent other unload handlers from running.
+    }
+  }
+  window.addEventListener("pagehide", cleanup)
+  window.addEventListener("beforeunload", cleanup)
+}
