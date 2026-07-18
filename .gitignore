@@ -155,3 +155,14 @@ tmp_*/
 test-files/
 test-complete-files/
 scripts/i18n-missing.log
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
