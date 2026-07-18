@@ -102,7 +102,7 @@ Generation is delegated to a provider object from `src/renderer/provider.ts` (Ol
 
 ### Output
 
-`src/renderer/stores/outputStore.ts` parses Q&A pairs and conversation turns, normalizes items into the selected format (Alpaca, ChatML, text, CSV), and handles export with automatic multi-file splitting.
+`src/renderer/stores/outputStore.ts` parses Q&A pairs and conversation turns, normalizes items into the selected format (Alpaca, ChatML, text, CSV), and handles export with automatic multi-file splitting. In v2.0.1, `exportOutput` branches on the `outputFileMode` setting: `combined` writes all items to one file (or threshold-split parts), while `perFile` groups items by `sourceFile` metadata and writes one file per source using the configured filename template. See [Output Mode](/configuration/output-mode.md).
 
 ## Data flow
 
