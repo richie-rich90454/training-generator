@@ -246,4 +246,14 @@ describe("transcribeVideo", ()=>{
             temperature: 0.5
         }));
     });
+    test("cleans up temp audio file when transcription fails", async()=>{
+        (transcribe as any).mockRejectedValueOnce(new Error("transcription failed"));
+        await expect(transcribeVideo("/path/to/video.mp4", {whisperModel: "base", provider: "local"})).rejects.toThrow("transcription failed");
+        expect(fs.unlinkSync).toHaveBeenCalled();
+    });
+    test("does not clean up temp audio file when transcription fails and keepAudioFile=true", async()=>{
+        (transcribe as any).mockRejectedValueOnce(new Error("transcription failed"));
+        await expect(transcribeVideo("/path/to/video.mp4", {keepAudioFile: true, whisperModel: "base", provider: "local"})).rejects.toThrow("transcription failed");
+        expect(fs.unlinkSync).not.toHaveBeenCalled();
+    });
 });

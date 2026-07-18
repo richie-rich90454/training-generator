@@ -78,17 +78,26 @@ export async function transcribeVideo(videoPath: string, options?: VideoTranscri
         throw new Error("File is not a supported video format: "+videoPath);
     }
     let {audioPath}=await extractAudio(videoPath, options);
-    let buffer=fs.readFileSync(audioPath);
-    let transcript=await transcribe(buffer, audioPath, options);
-    let durationSec=await getVideoDuration(videoPath, options?.ffmpegPath);
-    if(!options?.keepAudioFile){
-        fs.unlinkSync(audioPath);
+    try{
+        let buffer=fs.readFileSync(audioPath);
+        let transcript=await transcribe(buffer, audioPath, options);
+        let durationSec=await getVideoDuration(videoPath, options?.ffmpegPath);
+        return{
+            videoPath: videoPath,
+            audioPath: options?.keepAudioFile?audioPath:undefined,
+            transcript: transcript,
+            durationSec: durationSec,
+            extractedAt: Date.now()
+        };
     }
-    return{
-        videoPath: videoPath,
-        audioPath: options?.keepAudioFile?audioPath:undefined,
-        transcript: transcript,
-        durationSec: durationSec,
-        extractedAt: Date.now()
-    };
+    finally{
+        if(!options?.keepAudioFile){
+            try{
+                fs.unlinkSync(audioPath);
+            }
+            catch{
+                // intentional: best-effort cleanup of temp file; ignore errors if file was already removed
+            }
+        }
+    }
 }
