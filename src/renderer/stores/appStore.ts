@@ -75,8 +75,14 @@ const OLLAMA_MONITOR_INTERVAL = 30000
 
 export function createAppStore(): AppStore {
   const fileStore = createFileStore()
-  const outputStore = createOutputStore()
   const settingsStore = createSettingsStore()
+  const outputStore = createOutputStore({
+    getOutputFileMode: () => (settingsStore.appSettings.outputFileMode as 'combined' | 'perFile') || 'combined',
+    getOutputFilenameTemplate: () => settingsStore.appSettings.outputFilenameTemplate || '{source}',
+    getMaxItemsPerFile: () => settingsStore.appSettings.maxItemsPerFile || 50000,
+    getIncludeSourceMetadata: () => settingsStore.appSettings.includeSourceMetadata || false,
+    getStripPiiBeforeExport: () => settingsStore.appSettings.stripPiiBeforeExport || false
+  })
   const uiStore = createUIStore()
   const processor = new Processor()
   const promptManager = new PromptManager()

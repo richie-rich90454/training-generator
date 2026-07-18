@@ -906,6 +906,25 @@ function registerCriticalIpcHandlers():void{
             return null
         }
     })
+    handle("dialog:chooseDirectory",async(_event,{defaultPath}:{defaultPath?:string}):Promise<string|null>=>{
+        try{
+            const result=await dialog.showOpenDialog((mainWindow??undefined) as unknown as Electron.BaseWindow,{
+                title:"Choose Output Directory",
+                defaultPath:defaultPath||undefined,
+                properties:["openDirectory","createDirectory"]
+            })
+            if(result.canceled||result.filePaths.length===0)return null
+            const dirPath=result.filePaths[0]
+            if(!dirPath||dirPath.includes("\x00"))return null
+            if(!isPathSafeForWrite(dirPath))return null
+            allowSavePath(dirPath)
+            return dirPath
+        }
+        catch(error){
+            console.error("dialog:chooseDirectory failed:",error)
+            return null
+        }
+    })
     handle("secureKey:getKey",async():Promise<string|null>=>{
         return getSecureKey()
     })

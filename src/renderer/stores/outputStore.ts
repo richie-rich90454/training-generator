@@ -136,7 +136,57 @@ export interface OutputStore {
     formatData: (data: TrainingItem[], format: string) => string
     getItemText: (item: TrainingItem) => string
 }
-export function createOutputStore(): OutputStore {
+export interface OutputStoreOptions {
+    getOutputFileMode?: () => 'combined' | 'perFile'
+    getOutputFilenameTemplate?: () => string
+    getMaxItemsPerFile?: () => number
+    getIncludeSourceMetadata?: () => boolean
+    getStripPiiBeforeExport?: () => boolean
+}
+function defaultOptions(): OutputStoreOptions {
+    return {
+        getOutputFileMode: () => 'combined',
+        getOutputFilenameTemplate: () => '{source}',
+        getMaxItemsPerFile: () => 50000,
+        getIncludeSourceMetadata: () => false,
+        getStripPiiBeforeExport: () => false
+    }
+}
+function getSourceFileStem(sourceFile: string): string {
+    if (!sourceFile) return 'output'
+    const baseName = sourceFile.lastIndexOf('/') > sourceFile.lastIndexOf('\\')
+        ? sourceFile.slice(sourceFile.lastIndexOf('/') + 1)
+        : sourceFile.slice(sourceFile.lastIndexOf('\\') + 1)
+    const dotIdx = baseName.lastIndexOf('.')
+    return dotIdx > 0 ? baseName.slice(0, dotIdx) : baseName
+}
+function expandFilenameTemplate(template: string, ctx: {
+    source: string
+    format: string
+    index: number
+}): string {
+    const date = new Date()
+    const yyyy = date.getFullYear().toString()
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0')
+    const dd = date.getDate().toString().padStart(2, '0')
+    const dateStr = `${yyyy}${mm}${dd}`
+    const timestamp = date.getTime().toString()
+    return template
+        .replace(/\{source\}/g, ctx.source || 'output')
+        .replace(/\{format\}/g, ctx.format)
+        .replace(/\{date\}/g, dateStr)
+        .replace(/\{timestamp\}/g, timestamp)
+        .replace(/\{index\}/g, String(ctx.index))
+        .replace(/[<>:"/\\|?*\x00]/g, '_')
+        .trim() || 'output'
+}
+function stripSourceMetadata(item: TrainingItem): TrainingItem {
+    if (!item.metadata) return item
+    const { sourceFile: _sf, sourceFileIndex: _sfi, generatedAt: _ga, ...rest } = item.metadata
+    return { ...item, metadata: { ...rest } }
+}
+export function createOutputStore(options?: OutputStoreOptions): OutputStore {
+    const opts = { ...defaultOptions(), ...(options || {}) }
     const [outputData, setOutputData] = createStore<TrainingItem[]>([])
     const [stagingData, setStagingData] = createStore<TrainingItem[]>([])
     const [exportFormat, setExportFormat] = createSignal<ExportFormat>("jsonl")
@@ -434,6 +484,11 @@ export function createOutputStore(): OutputStore {
         const allData = [...outputData, ...stagingData]
         if (allData.length === 0) return
         const format = exportFormatParam || exportFormat()
+        const mode = opts.getOutputFileMode?.() || 'combined'
+        if (mode === 'perFile') {
+            await exportPerFile(allData, format)
+            return
+        }
         if (allData.length > SPLIT_THRESHOLD) {
             const partCount = Math.ceil(allData.length / SPLIT_THRESHOLD)
             const firstPath = await window.electronAPI.saveFileDialog(`${t("output.defaultFilename")}-1${extensionForFormat(format)}`)
@@ -456,6 +511,65 @@ export function createOutputStore(): OutputStore {
         const savePath = await window.electronAPI.saveFileDialog(defaultFilename)
         if (!savePath) return
         await window.electronAPI.saveFile(savePath, content)
+    }
+    async function exportPerFile(allData: TrainingItem[], format: string): Promise<void> {
+        if (!window.electronAPI) return
+        const template = opts.getOutputFilenameTemplate?.() || '{source}'
+        const maxItems = opts.getMaxItemsPerFile?.() || 50000
+        const includeMeta = opts.getIncludeSourceMetadata?.() || false
+        const stripPii = opts.getStripPiiBeforeExport?.() || false
+        // Group items by sourceFile
+        const groups = new Map<string, TrainingItem[]>()
+        let unknownIndex = 0
+        for (const item of allData) {
+            const source = item.metadata?.sourceFile || `unknown-${++unknownIndex}`
+            if (!groups.has(source)) groups.set(source, [])
+            groups.get(source)!.push(item)
+        }
+        const dirPath = await window.electronAPI.chooseDirectory?.()
+        if (!dirPath) return
+        const sep = dirPath.includes("\\") ? "\\" : "/"
+        const skipped: string[] = []
+        let fileIndex = 0
+        for (const [sourceFile, items] of groups) {
+            fileIndex++
+            if (items.length === 0) {
+                skipped.push(sourceFile)
+                continue
+            }
+            const sourceStem = getSourceFileStem(sourceFile)
+            const baseName = expandFilenameTemplate(template, {
+                source: sourceStem,
+                format,
+                index: fileIndex
+            })
+            // Split into parts if exceeding maxItems
+            const partCount = Math.ceil(items.length / maxItems)
+            for (let part = 0; part < partCount; part++) {
+                const start = part * maxItems
+                const end = Math.min((part + 1) * maxItems, items.length)
+                const partItems = items.slice(start, end)
+                let processedItems = partItems
+                if (!includeMeta) {
+                    processedItems = processedItems.map(stripSourceMetadata)
+                }
+                // PII stripping is delegated to exporters/validators; here we only tag
+                if (stripPii) {
+                    processedItems = processedItems.map(item => ({
+                        ...item,
+                        metadata: { ...item.metadata, piiFlags: [] }
+                    }))
+                }
+                const content = formatData(processedItems, format)
+                const partSuffix = partCount > 1 ? `-${part + 1}` : ''
+                const filename = `${baseName}${partSuffix}${extensionForFormat(format)}`
+                const savePath = `${dirPath}${sep}${filename}`
+                await window.electronAPI.saveFile(savePath, content)
+            }
+        }
+        if (skipped.length > 0) {
+            logger.warn(`Per-file export: skipped ${skipped.length} source(s) with no items: ${skipped.join(', ')}`)
+        }
     }
     async function copyOutput(): Promise<boolean> {
         const allData = [...outputData, ...stagingData]

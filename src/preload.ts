@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("electronAPI",{
     parseFilesBatch:(files:FileObj[])=>invoke("file:parseBatch",{files}),
     saveFile:(filePath:string,content:string)=>invoke("file:save",{filePath,content}),
     saveFileDialog:(defaultFilename?:string)=>invoke("dialog:saveFile",{defaultFilename}),
+    chooseDirectory:(defaultPath?:string)=>invoke("dialog:chooseDirectory",{defaultPath}),
     checkOllama:(ollamaHost?:string,ollamaPort?:number)=>invoke("ollama:check",{ollamaHost,ollamaPort}),
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>invoke("ollama:generate",{model,prompt,options,ollamaHost,ollamaPort}),
     generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>invoke("ollama:generateStream",{model,prompt,options,ollamaHost,ollamaPort}),

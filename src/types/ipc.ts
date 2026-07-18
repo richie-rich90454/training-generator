@@ -37,6 +37,10 @@ export interface IpcChannels{
         request:{defaultFilename?:string}
         response:string|null
     }
+    'dialog:chooseDirectory':{
+        request:{defaultPath?:string}
+        response:string|null
+    }
     'ollama:check':{
         request:{ollamaHost?:string;ollamaPort?:number}
         response:OllamaStatus

@@ -9,6 +9,7 @@ export interface ElectronAPI{
     parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
     saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>
     saveFileDialog:(defaultFilename?:string)=>Promise<string|null>
+    chooseDirectory:(defaultPath?:string)=>Promise<string|null>
     checkOllama:(ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaStatus>
     generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
     generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
