@@ -1,0 +1,28 @@
+name: "Stale"
+
+on:
+  schedule:
+    # Run daily at 06:00 UTC.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    name: Mark stale issues and PRs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Run stale bot
+        uses: actions/stale@v9
+        with:
+          config-file: .github/stale.yml
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
