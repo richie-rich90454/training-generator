@@ -1368,17 +1368,20 @@ This allows switching between workflows with a single click.
 
 # Keyboard Shortcuts
 
+On macOS, use **Cmd** where Windows/Linux use **Ctrl**. Global shortcuts are ignored while focused in a text input.
+
 | Shortcut | Action |
 |----------|--------|
-| Ctrl + O | Open Files |
-| Ctrl + Shift + O | Open Folder |
-| Ctrl + S | Export Dataset |
-| Ctrl + R | Start Processing |
-| Ctrl + P | Command Palette |
-| Ctrl + , | Settings |
-| Ctrl + L | Clear Log |
-| Ctrl + Shift + D | Developer Tools |
-| F11 | Toggle Fullscreen |
+| `Ctrl/Cmd + O` | Open the file dialog to select documents. |
+| `Ctrl/Cmd + Enter` | Start processing the selected files. If processing is running, stop it. |
+| `Ctrl/Cmd + E` | Export the current output using the selected export format. |
+| `Ctrl/Cmd + Shift + C` | Copy the current output to the clipboard. |
+| `Ctrl/Cmd + Shift + D` | Toggle the developer tools panel. |
+| `Ctrl/Cmd + Shift + P` | Open the command palette. |
+| `Ctrl/Cmd + K` | Show the keyboard shortcuts help overlay. |
+| `Escape` | Stop processing if it is running; otherwise close the topmost open modal. |
+
+See [Keyboard Shortcuts](docs/keyboard-shortcuts.md) for the full reference, including accessibility and focus behavior.
 
 ---
 
