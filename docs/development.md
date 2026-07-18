@@ -24,7 +24,7 @@ This guide covers local development setup, scripts, code style, testing, build a
 
 | Requirement | Minimum | Recommended | Notes |
 | --- | --- | --- | --- |
-| Node.js | 18+ | 24 LTS | Required for the build toolchain and CLI. |
+| Node.js | 20+ | 24 LTS | Required for the build toolchain and CLI. |
 | npm | 9+ | 10+ | Ships with Node.js. |
 | Git | any | latest | Required to clone the repository. |
 | Ollama | — | latest | Required for local model inference. [Download](https://ollama.com/) |
@@ -185,7 +185,7 @@ The i18n test suite asserts 100% key coverage across all eight locales. Missing 
 
 ## Testing
 
-Training Generator uses **Vitest** with `@solidjs/testing-library` and `happy-dom`. The suite contains 4,868 tests across 139 files with 100% coverage as the target.
+Training Generator uses **Vitest** with `@solidjs/testing-library` and `happy-dom`. The suite contains 4,868 tests across 184 files with 100% coverage as the target.
 
 ```bash
 npm test                # Full suite (4,868 tests)
