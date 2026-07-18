@@ -127,7 +127,8 @@ export class AuditLog{
         }
         else{
             try{
-                this.entries=JSON.parse(raw) as AuditEntry[]
+                let parsed=JSON.parse(raw)
+                this.entries=Array.isArray(parsed)?parsed as AuditEntry[]:[]
             }
             catch{
                 this.entries=[]
