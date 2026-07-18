@@ -43,7 +43,7 @@ If GitHub Security Advisories are unavailable, email the maintainer at
 
 | Stage                                | Target                  |
 | ------------------------------------ | ----------------------- |
-| Acknowledge receipt of report        | Within 72 hours         |
+| Acknowledge receipt of report        | Within 48 hours         |
 | Initial triage and severity rating   | Within 7 days           |
 | Mitigation plan / fix ETA            | Within 14 days          |
 | Fix for critical/high severity issues| Within 90 days          |
