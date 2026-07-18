@@ -1,0 +1,37 @@
+# Welcome configuration.
+#
+# These messages are posted to first-time contributors. They are consumed by
+# the welcome workflow at .github/workflows/welcome.yml.
+#
+# Schema follows the probot welcome format used by the Welcome GitHub App and
+# welcome actions, so the same messages can be reused by any welcome bot that
+# reads this file.
+
+# Posted the first time someone opens an issue in this repository.
+newIssueWelcomeComment: >
+  Thanks for opening your first issue in Training Generator! 🎉
+
+  Please make sure you've included enough detail for us to reproduce or
+  understand the problem. While you wait, feel free to check the
+  [documentation](https://github.com/richie-rich90454/training-generator/tree/main/docs)
+  and the [troubleshooting guide](https://github.com/richie-rich90454/training-generator/blob/main/docs/troubleshooting/common-issues.md).
+  A maintainer will take a look soon.
+
+# Posted the first time someone opens a pull request in this repository.
+newPRWelcomeComment: >
+  Thanks for opening your first pull request in Training Generator! 🎉
+
+  A maintainer will review your changes shortly. In the meantime, please make
+  sure you've read [CONTRIBUTING.md](https://github.com/richie-rich90454/training-generator/blob/main/CONTRIBUTING.md)
+  and that `npm run typecheck` and `npm test` pass locally. We appreciate your
+  contribution!
+
+# Posted the first time a contributor's pull request is merged.
+firstPRMergeWelcomeComment: >
+  Congrats on merging your first pull request into Training Generator! 🎉🚀
+
+  Thank you for helping improve the project. We'd love to see you contribute
+  again — take a look at issues labeled
+  [`good first issue`](https://github.com/richie-rich90454/training-generator/labels/good%20first%20issue)
+  or [`help wanted`](https://github.com/richie-rich90454/training-generator/labels/help%20wanted)
+  if you're looking for more to do.
