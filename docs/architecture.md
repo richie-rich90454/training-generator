@@ -73,6 +73,8 @@ The actual generation is delegated to a provider object created by `src/renderer
 
 It also handles exporting to JSONL, JSON, CSV, or TXT and splits large outputs into multiple files when a threshold is exceeded.
 
+In v2.0.1, `exportOutput` branches on the `outputFileMode` setting. In `combined` mode (the v2.0.0 default), all items are written to a single file (or threshold-split parts). In `perFile` mode, items are grouped by their `sourceFile` metadata and one file is written per source using the configured filename template (`expandFilenameTemplate`). Sources that produced zero items are skipped with a logged warning. See [Output Mode](/configuration/output-mode.md) for the full behavior.
+
 ## Data Flow
 
 The following steps describe the journey from file selection to exported training data:
