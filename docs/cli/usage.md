@@ -105,6 +105,10 @@ For each file in the input directory, the CLI:
 5. Deduplicates items with simhash (merging provenance).
 6. Aggregates results across all files and writes the output.
 
+::: warning v2.0.1 output mode
+The CLI always runs in **combined** mode and writes a single file at the path passed to `--output`. The `outputFileMode`, `outputFilenameTemplate`, and `maxItemsPerFile` settings from the desktop Settings modal are **not** exposed as CLI flags. If you need per-file exports, run the desktop app or post-process the combined output. See [Output Mode](/configuration/output-mode.md#cli-behavior).
+:::
+
 Progress is written to stdout; the final summary is written to stderr so you can redirect the output file cleanly:
 
 ```
