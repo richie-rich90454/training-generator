@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Training Generator
   text: AI Training Data Generator
-  tagline: A local-first Electron + SolidJS desktop app that converts documents into instruction, conversation, and custom training datasets using Ollama or cloud LLMs.
+  tagline: A local-first Electron + SolidJS desktop app that converts documents into instruction, conversation, and custom training datasets using Ollama or cloud LLMs. v2.0.1 adds per-file output mode and ~50 new settings.
   image:
     src: /favicon.svg
     alt: Training Generator
@@ -16,8 +16,8 @@ hero:
       text: Installation
       link: /getting-started/installation
     - theme: alt
-      text: GitHub
-      link: https://github.com/richie-rich90454/training-generator
+      text: What's new in v2.0.1
+      link: /configuration/output-mode.md
 
 features:
   - icon: 📄
@@ -35,6 +35,9 @@ features:
   - icon: 📦
     title: Multiple export formats
     details: Export to JSONL (Alpaca), ChatML, CSV, JSON, or plain text. Large outputs are automatically split into multiple files.
+  - icon: 🗃️
+    title: Per-file output mode (v2.0.1)
+    details: Group exports by source file with filename templates ({source}, {format}, {date}, {timestamp}, {index}) and per-source splitting. Toggle in the Settings modal or read the Output Mode guide.
   - icon: ⚡
     title: Web Worker offloading
     details: Chunking and deduplication run in background workers. SolidJS fine-grained reactivity keeps updates minimal and memory usage low.
