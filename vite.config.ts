@@ -153,6 +153,13 @@ export default defineConfig({
             generateScopedName:"[local]"
         }
     },
+    worker:{
+        // Workers under src/renderer/workers are constructed with
+        // `new Worker(new URL("./x.worker.js", import.meta.url), { type: "module" })`.
+        // Output ES module worker bundles so the build format matches the
+        // runtime `type: "module"` option used by workerPool.ts.
+        format:"es"
+    },
     clearScreen:false,
     plugins:[
         solid(),
