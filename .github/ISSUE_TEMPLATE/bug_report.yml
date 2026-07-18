@@ -1,0 +1,122 @@
+name: 🐛 Bug report
+description: Report something that isn't working as expected in Training Generator
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out a bug report!
+
+        The more detail you provide, the faster we can reproduce and fix the
+        issue. Please redact any API keys, tokens, or secrets before pasting
+        logs.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: "What happened? What were you trying to do?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the behavior. Include as much detail as possible.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened.
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots or screen recordings. You can drag files into this box.
+    validations:
+      required: false
+
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: |
+        Find the version under **Help → About** (or **Settings → About**).
+        You can also check the version in `package.json` or run `npm run cli -- --version`.
+      placeholder: "e.g., 2.0.1"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      description: The OS you are running Training Generator on.
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Linux
+      default: 0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider used
+      description: Which AI provider were you using when the bug occurred?
+      options:
+        - Ollama
+        - OpenAI
+        - Anthropic
+        - Gemini
+      default: 0
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Relevant log output. Open Developer Tools (**Ctrl + Shift + D**) and copy
+        any errors from the Console. Paste between the backticks below.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Bug report checklist
+      description: Please confirm the following before submitting.
+      options:
+        - label: I have searched the existing issues for a duplicate report.
+          required: true
+        - label: I am running the latest release of Training Generator.
+          required: false
+        - label: I have redacted any API keys, tokens, or secrets from the logs above.
+          required: true
