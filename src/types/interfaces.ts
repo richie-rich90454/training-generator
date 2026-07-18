@@ -151,6 +151,69 @@ export interface AppSettings{
     otlpEndpoint?:string
     maxSessionTokens?:number
     incremental?:boolean
+    // v2.0.1 — Output mode and export controls
+    outputFileMode?:'combined'|'perFile'
+    outputFilenameTemplate?:string
+    confirmBeforeExport?:boolean
+    autoExportOnCompletion?:boolean
+    maxItemsPerFile?:number
+    stripPiiBeforeExport?:boolean
+    includeSourceMetadata?:boolean
+    // v2.0.1 — Appearance & accessibility
+    fontScale?:number
+    compactMode?:boolean
+    reducedMotion?:boolean
+    highContrast?:boolean
+    customCssPath?:string
+    verboseDashboard?:boolean
+    // v2.0.1 — Telemetry & updates
+    disableTelemetry?:boolean
+    disableCrashReports?:boolean
+    disableAutoUpdate?:boolean
+    updateCheckIntervalHours?:number
+    // v2.0.1 — System & window
+    gpuAcceleration?:boolean
+    sendToTrayOnClose?:boolean
+    startOnLogin?:boolean
+    // v2.0.1 — Cache
+    cacheDir?:string
+    cacheMaxSizeMB?:number
+    cacheTtlSeconds?:number
+    clearCacheOnExit?:boolean
+    // v2.0.1 — Generation tuning
+    retryCount?:number
+    retryBackoffStrategy?:'fixed'|'linear'|'exponential'
+    requestTimeoutMs?:number
+    streamTimeoutMs?:number
+    abortOnError?:boolean
+    topP?:number
+    topK?:number
+    repeatPenalty?:number
+    seed?:number
+    systemPromptOverride?:string
+    stopSequences?:string[]
+    bannedPhrases?:string[]
+    requiredPhrases?:string[]
+    // v2.0.1 — Chunking
+    minChunkLength?:number
+    maxChunkLength?:number
+    chunkOverlap?:number
+    sentenceAwareChunking?:boolean
+    preserveCodeBlocks?:boolean
+    languageDetection?:boolean
+    outputLanguageOverride?:string
+    // v2.0.1 — Validation
+    skipDedup?:boolean
+    dedupSimilarityThreshold?:number
+    minQaPairsPerFile?:number
+    maxQaPairsPerFile?:number
+    validationStrictness?:'lenient'|'normal'|'strict'
+    autoRegenerateOnLowQuality?:boolean
+    regenerateThreshold?:number
+    maxRegenerationAttempts?:number
+    // v2.0.1 — Logging
+    logToFile?:boolean
+    logFilePath?:string
 }
 export interface FullAppSettings{
     theme?:string
@@ -187,6 +250,69 @@ export interface FullAppSettings{
     telemetryEnabled?:boolean
     crashReportsEnabled?:boolean
     autoUpdate?:boolean
+    // v2.0.1 — Output mode and export controls
+    outputFileMode?:'combined'|'perFile'
+    outputFilenameTemplate?:string
+    confirmBeforeExport?:boolean
+    autoExportOnCompletion?:boolean
+    maxItemsPerFile?:number
+    stripPiiBeforeExport?:boolean
+    includeSourceMetadata?:boolean
+    // v2.0.1 — Appearance & accessibility
+    fontScale?:number
+    compactMode?:boolean
+    reducedMotion?:boolean
+    highContrast?:boolean
+    customCssPath?:string
+    verboseDashboard?:boolean
+    // v2.0.1 — Telemetry & updates
+    disableTelemetry?:boolean
+    disableCrashReports?:boolean
+    disableAutoUpdate?:boolean
+    updateCheckIntervalHours?:number
+    // v2.0.1 — System & window
+    gpuAcceleration?:boolean
+    sendToTrayOnClose?:boolean
+    startOnLogin?:boolean
+    // v2.0.1 — Cache
+    cacheDir?:string
+    cacheMaxSizeMB?:number
+    cacheTtlSeconds?:number
+    clearCacheOnExit?:boolean
+    // v2.0.1 — Generation tuning
+    retryCount?:number
+    retryBackoffStrategy?:'fixed'|'linear'|'exponential'
+    requestTimeoutMs?:number
+    streamTimeoutMs?:number
+    abortOnError?:boolean
+    topP?:number
+    topK?:number
+    repeatPenalty?:number
+    seed?:number
+    systemPromptOverride?:string
+    stopSequences?:string[]
+    bannedPhrases?:string[]
+    requiredPhrases?:string[]
+    // v2.0.1 — Chunking
+    minChunkLength?:number
+    maxChunkLength?:number
+    chunkOverlap?:number
+    sentenceAwareChunking?:boolean
+    preserveCodeBlocks?:boolean
+    languageDetection?:boolean
+    outputLanguageOverride?:string
+    // v2.0.1 — Validation
+    skipDedup?:boolean
+    dedupSimilarityThreshold?:number
+    minQaPairsPerFile?:number
+    maxQaPairsPerFile?:number
+    validationStrictness?:'lenient'|'normal'|'strict'
+    autoRegenerateOnLowQuality?:boolean
+    regenerateThreshold?:number
+    maxRegenerationAttempts?:number
+    // v2.0.1 — Logging
+    logToFile?:boolean
+    logFilePath?:string
 }
 export interface LogEntry{
     timestamp:string
@@ -231,6 +357,9 @@ export interface TrainingItemMetadata{
     bookmarked?:boolean
     deletedAt?:number|null
     sensitive?:boolean
+    sourceFile?:string
+    sourceFileIndex?:number
+    generatedAt?:number
 }
 export interface ProviderConfig{
     id:string
