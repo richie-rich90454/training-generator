@@ -177,6 +177,10 @@ describe("xhtmlToText", ()=>{
         let result: string=xhtmlToText("<p>Tom &amp; Jerry &lt;tag&gt;</p>");
         expect(result).toBe("Tom & Jerry <tag>");
     });
+    test("xhtmlToText decodes &apos; entity", ()=>{
+        let result: string=xhtmlToText("<p>It&apos;s &lt;tag&gt;</p>");
+        expect(result).toBe("It's <tag>");
+    });
     test("xhtmlToText collapses multiple newlines", ()=>{
         let result: string=xhtmlToText("<p>one</p><br><br><br><p>two</p>");
         expect(result).toBe("one\ntwo");
