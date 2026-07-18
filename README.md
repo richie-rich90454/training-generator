@@ -1616,6 +1616,11 @@ The following roadmap reflects planned long-term development.
 - CLI mode
 - Automated releases
 - Extensive automated testing
+- v2.0.1: Per-file output mode with filename templates
+- v2.0.1: Training item provenance metadata (`sourceFile`, `sourceFileIndex`, `generatedAt`)
+- v2.0.1: ~50 new togglable settings fields across appearance, telemetry, system, cache, generation, chunking, validation, and logging
+- v2.0.1: 1,000+ bug fixes across UI/UX, i18n, runtime, generation, parsing, exporters, stores, IPC, workers, and core modules
+- v2.0.1: Test suite expanded to 4,868 tests across 184 files
 
 ---
 
