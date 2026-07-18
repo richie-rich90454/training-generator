@@ -135,7 +135,9 @@ export function parseJson(text: string): ParseResult{
                 }
             }
             else{
-                flattenedRows.push({});
+                let wrapped: Record<string, unknown>={value: item};
+                flattenedRows.push(wrapped);
+                keysSet.add("value");
             }
         }
         let headers: string[]=Array.from(keysSet);

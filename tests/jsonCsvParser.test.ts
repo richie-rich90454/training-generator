@@ -118,6 +118,35 @@ describe("JsonCsvParser", ()=>{
             expect(result.schema.find(f=>f.path==="a")?.type).toBe("number")
             expect(result.schema.find(f=>f.path==="b")?.type).toBe("string")
         })
+        test("parseJson array of primitives wraps in value column", ()=>{
+            let result: ParseResult=parseJson('[1,2,3]')
+            expect(result.format).toBe("json")
+            expect(result.rowCount).toBe(3)
+            expect(result.text).toContain("| value |")
+            expect(result.text).toContain("| 1 |")
+            expect(result.text).toContain("| 2 |")
+            expect(result.text).toContain("| 3 |")
+        })
+        test("parseJson array of mixed primitives and objects", ()=>{
+            let result: ParseResult=parseJson('[{"a":1},2,{"b":3}]')
+            expect(result.rowCount).toBe(3)
+            expect(result.text).toContain("a")
+            expect(result.text).toContain("b")
+            expect(result.text).toContain("value")
+        })
+        test("parseJson array of strings wraps in value column", ()=>{
+            let result: ParseResult=parseJson('["hello","world"]')
+            expect(result.rowCount).toBe(2)
+            expect(result.text).toContain("| value |")
+            expect(result.text).toContain("hello")
+            expect(result.text).toContain("world")
+        })
+        test("parseJson array of nulls wraps in value column", ()=>{
+            let result: ParseResult=parseJson('[null,null]')
+            expect(result.rowCount).toBe(2)
+            expect(result.text).toContain("| value |")
+            expect(result.text).toContain("null")
+        })
     })
     describe("parseNdjson", ()=>{
         test("parseNdjson parses multiple lines", ()=>{
