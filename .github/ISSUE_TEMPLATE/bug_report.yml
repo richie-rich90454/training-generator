@@ -1,4 +1,4 @@
-name: 🐛 Bug report
+name: Bug report
 description: Report something that isn't working as expected in Training Generator
 title: "[Bug]: "
 labels: ["bug", "triage"]
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out a bug report!
+        Thanks for taking the time to fill out a bug report.
 
         The more detail you provide, the faster we can reproduce and fix the
         issue. Please redact any API keys, tokens, or secrets before pasting
@@ -40,7 +40,7 @@ body:
       label: Expected behavior
       description: What you expected to happen.
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: actual
@@ -48,7 +48,7 @@ body:
       label: Actual behavior
       description: What actually happened.
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: screenshots
@@ -63,11 +63,11 @@ body:
     attributes:
       label: App version
       description: |
-        Find the version under **Help → About** (or **Settings → About**).
+        Find the version under Help > About (or Settings > About).
         You can also check the version in `package.json` or run `npm run cli -- --version`.
       placeholder: "e.g., 2.0.1"
     validations:
-      required: false
+      required: true
 
   - type: dropdown
     id: os
@@ -81,7 +81,19 @@ body:
         - Linux
       default: 0
     validations:
-      required: false
+      required: true
+
+  - type: input
+    id: ollama-version
+    attributes:
+      label: Ollama version
+      description: |
+        If you are using the Ollama provider, run `ollama --version` in a
+        terminal and paste the output here. Enter "N/A" if you are not using
+        Ollama.
+      placeholder: "e.g., 0.3.14 or N/A"
+    validations:
+      required: true
 
   - type: dropdown
     id: provider
@@ -102,11 +114,11 @@ body:
     attributes:
       label: Logs
       description: |
-        Relevant log output. Open Developer Tools (**Ctrl + Shift + D**) and copy
+        Relevant log output. Open Developer Tools (Ctrl + Shift + D) and copy
         any errors from the Console. Paste between the backticks below.
       render: shell
     validations:
-      required: false
+      required: true
 
   - type: checkboxes
     id: checklist
