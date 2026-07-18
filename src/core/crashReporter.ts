@@ -81,7 +81,7 @@ export class CrashReporter{
         event.exception={
             type: error.name,
             value: redactPiiInString(error.message),
-            stack: error.stack
+            stack: error.stack?redactPiiInString(error.stack):undefined
         }
         if (context){
             let contextTags=this.contextToTags(context)
@@ -137,8 +137,8 @@ export class CrashReporter{
             timestamp: Date.now(),
             level,
             message: redactPiiInString(message),
-            breadcrumbs: this.breadcrumbs.length>0 ? this.breadcrumbs.slice() : undefined,
-            tags: Object.keys(this.tags).length>0 ? {...this.tags} : undefined
+            breadcrumbs: this.breadcrumbs.length>0 ? this.breadcrumbs.map((b)=>({...b, message: redactPiiInString(b.message)})) : undefined,
+            tags: this.filterTags(this.tags)
         }
         if (this.config.beforeSend){
             let result=this.config.beforeSend(event)
@@ -148,6 +148,15 @@ export class CrashReporter{
             event=result
         }
         return event
+    }
+    private filterTags(tags: Record<string, string>): Record<string, string> | undefined{
+        let result: Record<string, string>={}
+        for(let key of Object.keys(tags)){
+            if(!isCrashPiiKey(key)){
+                result[key]=tags[key]
+            }
+        }
+        return Object.keys(result).length>0 ? result : undefined
     }
     private enqueue(event: CrashEvent): void{
         if (Math.random()>(this.config.sampleRate??1)){
