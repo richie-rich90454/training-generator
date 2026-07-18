@@ -57,6 +57,16 @@
 ![Node.js](https://img.shields.io/badge/Node.js-24%20LTS-339933?style=flat-square&logo=node.js)
 ![VitePress](https://img.shields.io/badge/VitePress-1.6-5C73E7?style=flat-square)
 
+### Used by
+
+Training Generator is new. If your team or project uses it to build training datasets, open a PR adding your name and a link below.
+
+<!-- Add adopters as a simple list:
+- Org/Project Name — short use-case description (link)
+-->
+
+- _Be the first to list your team here._
+
 ---
 
 # What is Training Generator?
