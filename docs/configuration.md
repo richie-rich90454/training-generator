@@ -2,6 +2,8 @@
 
 This guide explains every setting available in Training Generator, from the right-side configuration panel to the settings modal and saved profiles. Use it to tune processing behavior, manage application preferences, and reuse configurations across sessions.
 
+For the authoritative field-by-field reference covering every setting in `AppSettings` and `FullAppSettings` (including the roughly fifty new fields introduced in v2.0.1), see [Settings Reference](/configuration/settings-reference.md). For the per-file output mode feature added in v2.0.1, see [Output Mode](/configuration/output-mode.md).
+
 ---
 
 ## Configuration Panel
@@ -61,6 +63,14 @@ The configuration panel is the main place to choose how documents are converted 
   - `csv`: Comma-separated values.
 - **Description**: The serialization format used for the generated training items.
 - **Recommendation**: `jsonl` is the most common format for training pipelines. `chatml` is useful for chat-tuned models.
+
+### Output File Mode (v2.0.1)
+
+- **Control**: `output-file-mode` radio
+- **Options**: `combined` (default), `perFile`
+- **Description**: Controls how items are grouped at export time. `combined` writes all items to a single file (v2.0.0 behavior). `perFile` writes one file per source document, named after the source.
+- **Recommendation**: Use `combined` for a single downstream dataset. Use `perFile` to preserve per-source lineage, audit quality per source, or reprocess a single source without touching the others.
+- **See also**: [Output Mode](/configuration/output-mode.md) for the filename template, splitting, and empty-source behavior.
 
 ### Output Language
 
