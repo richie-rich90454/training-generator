@@ -70,18 +70,22 @@ export function decodeHtmlEntities(text: string): string{
 }
 export function parseTranscriptXml(xml: string): TranscriptSegment[]{
     let segments: TranscriptSegment[]=[];
-    let regex=/<text\s+start="([^"]+)"\s+dur="([^"]+)"[^>]*>([\s\S]*?)<\/text>/g;
+    let tagRegex=/<text\b([^>]*)>([\s\S]*?)<\/text>/g;
     let match: RegExpExecArray|null;
-    while((match=regex.exec(xml))!==null){
-        let startStr=match[1];
-        let durStr=match[2];
-        let rawText=match[3];
-        let text=decodeHtmlEntities(rawText).trim();
+    while((match=tagRegex.exec(xml))!==null){
+        let attrs: string=match[1];
+        let rawText: string=match[2];
+        let startMatch: RegExpMatchArray|null=attrs.match(/\bstart="([^"]+)"/);
+        let durMatch: RegExpMatchArray|null=attrs.match(/\bdur="([^"]+)"/);
+        if(!startMatch||!durMatch){
+            continue;
+        }
+        let text: string=decodeHtmlEntities(rawText).trim();
         if(text===""){
             continue;
         }
-        let startMs=Math.round(parseFloat(startStr)*1000);
-        let durationMs=Math.round(parseFloat(durStr)*1000);
+        let startMs: number=Math.round(parseFloat(startMatch[1])*1000);
+        let durationMs: number=Math.round(parseFloat(durMatch[1])*1000);
         segments.push({startMs: startMs, durationMs: durationMs, text: text});
     }
     return segments;

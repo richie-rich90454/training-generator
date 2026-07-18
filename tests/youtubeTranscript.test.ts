@@ -77,6 +77,32 @@ describe("parseTranscriptXml", ()=>{
         expect(segments[0].startMs).toBe(12345);
         expect(segments[0].durationMs).toBe(6789);
     });
+    test("parses attributes when dur precedes start", ()=>{
+        let xml='<transcript><text dur="2.0" start="1.5">Hello world</text></transcript>';
+        let segments=parseTranscriptXml(xml);
+        expect(segments).toHaveLength(1);
+        expect(segments[0].text).toBe("Hello world");
+        expect(segments[0].startMs).toBe(1500);
+        expect(segments[0].durationMs).toBe(2000);
+    });
+    test("parses attributes with extra attributes between", ()=>{
+        let xml='<transcript><text start="1.5" id="42" dur="2.0">Hello</text></transcript>';
+        let segments=parseTranscriptXml(xml);
+        expect(segments).toHaveLength(1);
+        expect(segments[0].text).toBe("Hello");
+        expect(segments[0].startMs).toBe(1500);
+        expect(segments[0].durationMs).toBe(2000);
+    });
+    test("skips tag missing start attribute", ()=>{
+        let xml='<transcript><text dur="2.0">Hello</text></transcript>';
+        let segments=parseTranscriptXml(xml);
+        expect(segments).toHaveLength(0);
+    });
+    test("skips tag missing dur attribute", ()=>{
+        let xml='<transcript><text start="1.5">Hello</text></transcript>';
+        let segments=parseTranscriptXml(xml);
+        expect(segments).toHaveLength(0);
+    });
 });
 describe("decodeHtmlEntities", ()=>{
     test("replaces common entities", ()=>{
