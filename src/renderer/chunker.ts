@@ -286,7 +286,16 @@ function buildContextPrefix(previousChunkText: string): string {
 
 function buildOverlapPrefix(previousChunkText: string, overlap: number): string {
     if (!previousChunkText || overlap <= 0) return ""
-    return previousChunkText.slice(-overlap) + " "
+    let start = Math.max(0, previousChunkText.length - overlap)
+    // Avoid splitting a surrogate pair: if the slice starts on a low surrogate,
+    // back up one position to include its high surrogate partner.
+    if (start > 0) {
+        const code = previousChunkText.charCodeAt(start)
+        if (code >= 0xDC00 && code <= 0xDFFF) {
+            start -= 1
+        }
+    }
+    return previousChunkText.slice(start) + " "
 }
 
 function buildPrefix(previousChunkText: string, overlap: number): string {
