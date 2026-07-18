@@ -92,6 +92,9 @@ export class Telemetry{
     }
     setEnabled(enabled: boolean): void{
         this.enabled=enabled
+        if(!enabled){
+            this.buffer=[]
+        }
     }
     isEnabled(): boolean{
         return this.enabled
