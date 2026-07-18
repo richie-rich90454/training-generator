@@ -113,7 +113,7 @@ Each prompt enforces:
 
 `StatsTracker` records per-run metrics: total chunks, successes, failures, success rate, prompt tokens, response tokens, and elapsed time. The dashboard surfaces these live.
 
-Each item carries **provenance** metadata recording its source file and chunk index, enabling traceability from generated output back to the source document.
+Each item carries **provenance** metadata recording its source file and chunk index, enabling traceability from generated output back to the source document. As of v2.0.1, the `TrainingItem` metadata object exposes three fields: `sourceFile` (the originating file name), `sourceFileIndex` (its position in the input batch), and `generatedAt` (an ISO timestamp). These power per-file export grouping, the Analytics dashboard, and the optional `includeSourceMetadata` export flag (see [Output Mode](/configuration/output-mode.md)).
 
 ## Next steps
 
