@@ -41,6 +41,9 @@
   "author": "richie-rich90454",
   "license": "MIT",
   "description": "Desktop application to convert documents into AI training data using Ollama (SolidJS UI)",
+  "engines": {
+    "node": ">=20"
+  },
   "build": {
     "appId": "com.training.generator",
     "productName": "Training Generator",
