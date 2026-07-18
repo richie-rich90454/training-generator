@@ -56,6 +56,7 @@ Inside a modal, `Tab` and `Shift + Tab` cycle focus through the focusable elemen
 ### Developer tools
 
 - `Ctrl/Cmd + Shift + D` opens a panel with additional diagnostic information. This is mainly useful for debugging.
+- The devtools panel is the app's idea of a secret handshake — most users never need it, but if you are reading this footnote, you now know it exists. ;)
 
 ### Closing modals
 
