@@ -1,0 +1,30 @@
+# Dependabot configuration.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "richie-rich90454"
+    assignees:
+      - "richie-rich90454"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    # Group minor and patch updates together so they land in a single PR.
+    # Major updates still open their own PR so they can be reviewed carefully.
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
