@@ -95,7 +95,8 @@ export class RunHistoryManager{
         }
         else{
             try{
-                this.history=JSON.parse(raw) as RunRecord[]
+                let parsed=JSON.parse(raw)
+                this.history=Array.isArray(parsed)?parsed as RunRecord[]:[]
             }
             catch{
                 this.history=[]
