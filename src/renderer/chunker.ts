@@ -396,7 +396,10 @@ export function semanticChunk(text: string, chunkSize: number = 2000, overlap: n
                         previousChunkText = currentChunk.trim()
                         currentChunk = buildPrefix(previousChunkText, overlap) + row
                     } else {
-                        currentChunk += (currentChunk ? " " : "") + row
+                        // Rows come from code blocks, tables, and lists — multi-line
+                        // structures that must stay newline-separated. Joining with a
+                        // space would collapse code lines and table rows onto one line.
+                        currentChunk += (currentChunk ? "\n" : "") + row
                     }
                 }
 
