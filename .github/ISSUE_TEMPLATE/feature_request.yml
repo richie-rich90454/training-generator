@@ -1,4 +1,4 @@
-name: ✨ Feature request
+name: Feature request
 description: Suggest an idea for Training Generator
 title: "[Feature]: "
 labels: ["enhancement", "triage"]
@@ -7,9 +7,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to suggest a feature!
+        Thanks for taking the time to suggest a feature.
 
-        Great feature requests explain the **problem** first and the **solution**
+        Great feature requests explain the problem first and the solution
         second. Please search existing issues before submitting to avoid duplicates.
 
   - type: textarea
@@ -36,7 +36,7 @@ body:
       label: Alternatives considered
       description: A clear and concise description of any alternative solutions or features you've considered.
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: additional-context
@@ -44,4 +44,4 @@ body:
       label: Additional context
       description: Add any other context, screenshots, or links about the feature request here.
     validations:
-      required: false
+      required: true
