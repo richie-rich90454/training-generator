@@ -115,9 +115,14 @@ export class UpdateNotifier{
             setItem: ()=>{}
         };
         this.fetchFn=options.fetch??fetch;
-        this.lastCheck=0;
+        let stored=this.storage.getItem(LAST_CHECK_KEY);
+        let parsed=stored!==null?Number(stored):0;
+        this.lastCheck=!isNaN(parsed)&&parsed>0?parsed:0;
     }
     async check(): Promise<UpdateInfo|undefined>{
+        if (this.lastCheck>0 && Date.now()-this.lastCheck<this.checkIntervalMs){
+            return undefined;
+        }
         let response: Response;
         try{
             response=await this.fetchFn(this.updateUrl, {
