@@ -25,11 +25,14 @@ const MAX_WORKER_RESTARTS: number = 3
 const MAX_PENDING: number = 100
 const MAX_WORKER_PAYLOAD_CHARS: number = 10 * 1024 * 1024
 const RESTART_BACKOFF_MS: number = 1000
+const IDLE_TIMEOUT_MS: number = 60000
 
 let chunkRestarts: number = 0
 let dedupRestarts: number = 0
 let chunkBackoffUntil: number = 0
 let dedupBackoffUntil: number = 0
+let chunkIdleTimer: ReturnType<typeof setTimeout> | null = null
+let dedupIdleTimer: ReturnType<typeof setTimeout> | null = null
 
 function supportsWorkers(): boolean {
   return typeof Worker !== "undefined"
@@ -53,6 +56,7 @@ function rejectAllDedupPending(error: Error): void {
 
 function recreateChunkWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
   if (chunkWorker !== worker || !worker) return
+  cancelChunkIdleTermination()
   worker.terminate()
   chunkWorker = null
   // Reject every pending request bound to this worker. The worker is dead, so
@@ -70,6 +74,7 @@ function recreateChunkWorker(worker: Worker | null, reason: string = "Worker ter
 
 function recreateDedupWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
   if (dedupWorker !== worker || !worker) return
+  cancelDedupIdleTermination()
   worker.terminate()
   dedupWorker = null
   if (dedupRestarts < MAX_WORKER_RESTARTS) {
@@ -79,6 +84,51 @@ function recreateDedupWorker(worker: Worker | null, reason: string = "Worker ter
   } else {
     dedupBackoffUntil = 0
     rejectAllDedupPending(new Error("Dedup worker failed permanently after maximum restart attempts"))
+  }
+}
+
+// Idle termination: shut down a worker that has been idle (no pending requests)
+// for IDLE_TIMEOUT_MS. This is a clean shutdown — the worker is healthy, just
+// unused. It does NOT increment the restart counter or set backoff, so the next
+// request will lazily recreate the worker via getChunkWorker()/getDedupWorker().
+// This prevents workers from staying alive forever after processing finishes.
+function scheduleChunkIdleTermination(): void {
+  if (chunkIdleTimer) return
+  if (!chunkWorker || chunkPending.size > 0) return
+  chunkIdleTimer = setTimeout(() => {
+    chunkIdleTimer = null
+    // Re-check at fire time: a request may have arrived between scheduling
+    // and firing. If so, keep the worker alive.
+    if (chunkWorker && chunkPending.size === 0) {
+      chunkWorker.terminate()
+      chunkWorker = null
+    }
+  }, IDLE_TIMEOUT_MS)
+}
+
+function cancelChunkIdleTermination(): void {
+  if (chunkIdleTimer) {
+    clearTimeout(chunkIdleTimer)
+    chunkIdleTimer = null
+  }
+}
+
+function scheduleDedupIdleTermination(): void {
+  if (dedupIdleTimer) return
+  if (!dedupWorker || dedupPending.size > 0) return
+  dedupIdleTimer = setTimeout(() => {
+    dedupIdleTimer = null
+    if (dedupWorker && dedupPending.size === 0) {
+      dedupWorker.terminate()
+      dedupWorker = null
+    }
+  }, IDLE_TIMEOUT_MS)
+}
+
+function cancelDedupIdleTermination(): void {
+  if (dedupIdleTimer) {
+    clearTimeout(dedupIdleTimer)
+    dedupIdleTimer = null
   }
 }
 
@@ -96,6 +146,11 @@ function createChunkWorker(): Worker | null {
         chunkRestarts = 0
         chunkBackoffUntil = 0
         pending.resolve(e.data.chunks)
+      }
+      // When the last pending request resolves, arm the idle timer so the
+      // worker doesn't stay alive forever after processing finishes.
+      if (chunkPending.size === 0) {
+        scheduleChunkIdleTermination()
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
@@ -124,6 +179,9 @@ function createDedupWorker(): Worker | null {
         dedupRestarts = 0
         dedupBackoffUntil = 0
         pending.resolve(e.data)
+      }
+      if (dedupPending.size === 0) {
+        scheduleDedupIdleTermination()
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
@@ -179,6 +237,10 @@ export async function chunkInWorker(
     return semanticChunk(text, chunkSize, overlap, smartSizing)
   }
 
+  // A new request is about to be registered — cancel any pending idle
+  // termination so the worker isn't torn down while we're using it.
+  cancelChunkIdleTermination()
+
   return new Promise((resolve, reject) => {
     const id = ++requestCounter
     const timer = setTimeout(() => {
@@ -220,6 +282,8 @@ export function dedupInWorker(
       return
     }
 
+    cancelDedupIdleTermination()
+
     const id = ++requestCounter
     const timer = setTimeout(() => {
       dedupPending.delete(id)
@@ -242,6 +306,8 @@ export function dedupInWorker(
 }
 
 export function terminateWorkers(): void {
+  cancelChunkIdleTermination()
+  cancelDedupIdleTermination()
   chunkRestarts = 0
   dedupRestarts = 0
   chunkBackoffUntil = 0
