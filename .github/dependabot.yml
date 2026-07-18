@@ -14,17 +14,8 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "richie-rich90454"
-    assignees:
-      - "richie-rich90454"
     labels:
       - "dependencies"
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Group minor and patch updates together so they land in a single PR.
-    # Major updates still open their own PR so they can be reviewed carefully.
-    groups:
-      minor-and-patch:
-        update-types:
-          - "minor"
-          - "patch"
