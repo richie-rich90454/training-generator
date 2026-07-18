@@ -24,11 +24,12 @@ operationsPerRun: 30
 markComment: >
   This issue has been automatically marked as stale because it has not had
   recent activity in the last 60 days. It will be closed in 14 days if no
-  further activity occurs. To keep it open, leave a comment or remove the
-  `stale` label. Thank you for your contributions!
+  further activity occurs. To keep it open, leave a comment, remove the
+  `stale` label, or add the `pinned` label. Thank you for your contributions!
 
 # Comment to post when closing a stale issue or PR.
 closeComment: >
   This issue has been automatically closed because it has not had recent
   activity. If the issue is still relevant, please reopen it or open a new
-  one with up-to-date details. Thank you!
+  one with up-to-date details, including the version of Training Generator
+  you are using. Thank you!
