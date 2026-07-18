@@ -85,10 +85,10 @@ The `outputFilenameTemplate` setting controls the basename of each per-file expo
 | `{source}` | `report.pdf` → `report.jsonl` | `report.jsonl` |
 | `{source}-{format}` | `notes.md` → `notes-jsonl.jsonl` | `notes-jsonl.jsonl` |
 | `{date}-{source}` | `slides.pptx` on 2026-07-18 | `20260718-slides.jsonl` |
-| `{index:02d}-{source}` (manual zero-pad) | `chapter1.txt` | `1-chapter1.jsonl` |
+| `{index}-{source}` | `chapter1.txt` as the 3rd source | `3-chapter1.jsonl` |
 
 ::: warning Sanitization
-Characters that are invalid in filenames (`< > : " / \ | ? *` and the NUL byte) are replaced with `_`. An empty result after substitution falls back to `output`.
+Characters that are invalid in filenames (`< > : " / \ | ? *` and the NUL byte) are replaced with `_`. An empty result after substitution falls back to `output`. Format specifiers like `{index:02d}` are **not** supported — the literal `{index:02d}` would appear in the filename unchanged.
 :::
 
 ---
@@ -150,7 +150,7 @@ This prevents cluttering your output directory with empty `.jsonl` files.
 
 ## CLI behavior
 
-The CLI infers its output behavior from the `--output` path. When you point `--output` at a directory and pass multiple input files, per-file semantics apply. See [CLI Usage](/cli/usage.md) for the flag reference.
+The CLI does **not** support per-file mode. It always runs in combined mode and writes a single file at the path passed to `--output`. The `outputFileMode`, `outputFilenameTemplate`, and `maxItemsPerFile` settings are not exposed as CLI flags. If you need per-source exports, run the desktop app or post-process the combined CLI output. See [CLI Usage](/cli/usage.md) for the full flag reference.
 
 ---
 
