@@ -1,5 +1,13 @@
 # Training Generator - Generate High-Quality AI Training Datasets from Your Documents
 
+<!--
+  SEO keywords (hidden from rendered view): AI training data generator, instruction tuning dataset,
+  fine-tuning dataset, JSONL generator, ChatML exporter, Alpaca format, LLM dataset creation,
+  document-to-dataset, PDF to JSONL, DOCX to training data, Ollama GUI, SolidJS desktop app,
+  Electron AI tool, synthetic data generation, RAG dataset, conversation dataset, per-file export,
+  local-first AI, offline LLM dataset, training data pipeline, Supervised fine-tuning, SFT dataset.
+-->
+
 **A modern desktop application for converting PDFs, Word documents, Markdown, HTML, and text files into high-quality instruction datasets, conversations, ChatML, and JSONL using local or cloud Large Language Models.**
 
 <p>
@@ -25,6 +33,16 @@
 •
 <a href="https://github.com/richie-rich90454/training-generator/releases">Downloads</a>
 
+</p>
+
+<p>
+  <a href="https://twitter.com/intent/tweet?text=Training%20Generator%20%E2%80%94%20turn%20documents%20into%20AI%20training%20datasets%20locally%20with%20Ollama&url=https://github.com/richie-rich90454/training-generator" target="_blank" rel="noopener">Share on X</a>
+  •
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://github.com/richie-rich90454/training-generator" target="_blank" rel="noopener">Share on LinkedIn</a>
+  •
+  <a href="https://news.ycombinator.com/submitlink?u=https://github.com/richie-rich90454/training-generator&t=Training%20Generator%20%E2%80%94%20local-first%20AI%20dataset%20creation" target="_blank" rel="noopener">Submit to HN</a>
+  •
+  <a href="https://www.reddit.com/submit?url=https://github.com/richie-rich90454/training-generator&title=Training%20Generator%20%E2%80%94%20local-first%20AI%20dataset%20creation" target="_blank" rel="noopener">Share on Reddit</a>
 </p>
 
 ---
