@@ -137,6 +137,8 @@ Run `npm run test:watch` during development for fast feedback on the test suite.
 
 ## Code style
 
+All source files follow a dense, consistent formatting style defined in `AGENTS.md`. When contributing, keep the following rules in mind:
+
 - **TypeScript strict mode** is enforced. `npm run typecheck` must pass.
 - **SolidJS patterns** only in the renderer. Use `createSignal`, `createStore`, and `createMemo` for reactivity. Do not import React or Vue patterns.
 - **CSS Modules** (`*.module.css`) with global class names so the rendered DOM matches the original design. No per-component magic numbers; use the design-token system.
@@ -145,6 +147,39 @@ Run `npm run test:watch` during development for fast feedback on the test suite.
 - **Readable code over clever code.** Keep functions focused on a single responsibility. Add tests for new behavior.
 - **Preserve backwards compatibility** when practical. Settings migrations seed sensible defaults for new fields.
 - **Conventional Commits** for every commit (see below).
+
+### Formatting conventions
+
+1. **No blank lines** — remove empty lines between imports, functions, variables, and within code blocks.
+2. **Indentation** — use four spaces per nesting level.
+3. **Brace placement** — opening braces stay on the same line as the preceding keyword; closing braces start on a new line aligned with the opening statement.
+4. **Conditionals** — write `if (condition){` on one line, and put `else if` and `else` on separate lines with their own opening braces.
+5. **Operator spacing** — do not add spaces around `=`, arithmetic, or comparison operators. Add one space after colons in type annotations, after commas in argument lists, and around the `as` keyword.
+6. **Function declarations and calls** — no space between the function name and the opening parenthesis.
+7. **Variable declarations** — prefer `let`, with one declaration per line.
+8. **Object literals** — keep opening braces on the same line; use a space after colons in key-value pairs.
+9. **String concatenation** — preserve existing `+`-based concatenation style.
+10. **Semicolons** — end statements with semicolons.
+11. **Switch statements** — `switch (value){` on one line; indent `case` labels one level and case bodies another level.
+12. **Comments** — keep `//` comments as they appear; preserve multi-line `/* ... */` comments.
+13. **Imports** — list imports at the top, each on its own line, with no blank lines between them.
+14. **No trailing spaces** — ensure every line ends cleanly.
+
+Following these conventions keeps the codebase uniform and matches the formatting applied to the existing TypeScript files.
+
+## Internationalization (i18n)
+
+Every user-facing string must be translatable. The source of truth is `src/renderer/i18n.ts`, which exports a `t(key, options?)` helper.
+
+When adding or changing UI text:
+
+1. Add a unique key to `src/renderer/i18n.ts` for each supported language: `en`, `zh-Hans`, `zh-Hant`, `ja`, `ko`, `es`, `fr`, `de`.
+2. Use `t('your.key')` in TypeScript modules, SolidJS components, exporters, and the splash screen instead of literal strings.
+3. For dynamic values, pass replacements through the third argument: `t('error.unsupportedFileFormat', undefined, { format })`.
+4. Run `npm run typecheck` after changing keys to catch missing imports or type mismatches.
+5. Update `docs/user-guide.md` and `docs/configuration.md` if the new option changes user-facing behavior.
+
+The i18n test suite asserts 100% key coverage across all eight locales. Missing keys fall back to English.
 
 ---
 
