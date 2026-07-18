@@ -21,29 +21,35 @@ template: |
 
   **Full Changelog**: https://github.com/richie-rich90454/training-generator/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
+# Labels whose PRs are excluded from the draft release entirely.
+exclude-labels:
+  - duplicate
+  - invalid
+  - wontfix
+
 change-title-escapes: '\<*_&`'
 
 categories:
-  - title: '🚀 Features'
+  - title: 'Features'
     labels:
       - 'feature'
       - 'enhancement'
-  - title: '🐛 Bug Fixes'
+  - title: 'Bug Fixes'
     labels:
       - 'fix'
       - 'bug'
-  - title: '📚 Documentation'
+  - title: 'Documentation'
     labels:
       - 'docs'
       - 'documentation'
-  - title: '♻️ Refactors'
+  - title: 'Refactors'
     labels:
       - 'refactor'
-  - title: '⚡ Performance'
+  - title: 'Performance'
     labels:
       - 'perf'
       - 'performance'
-  - title: '🔧 Maintenance & Chores'
+  - title: 'Maintenance & Chores'
     labels:
       - 'chore'
       - 'ci'
