@@ -59,7 +59,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Model Settings', link: '/configuration/model-settings' },
-            { text: 'Output Settings', link: '/configuration/output-settings' }
+            { text: 'Output Settings', link: '/configuration/output-settings' },
+            { text: 'Output Mode (v2.0.1)', link: '/configuration/output-mode' },
+            { text: 'Settings Reference (v2.0.1)', link: '/configuration/settings-reference' }
           ]
         }
       ],
