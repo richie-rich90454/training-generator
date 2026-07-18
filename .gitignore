@@ -166,3 +166,15 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 $RECYCLE.BIN/
+
+# Release build artifacts (defense-in-depth; release/ dir is already ignored)
+*.exe
+*.msi
+*.rpm
+*.dmg
+*.zip
+*.AppImage
+*.deb
+*.snap
+*.app
+*.blockmap
