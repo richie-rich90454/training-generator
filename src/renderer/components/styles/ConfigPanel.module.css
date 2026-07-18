@@ -193,3 +193,79 @@
     font-variant-numeric:tabular-nums;
     transition:background var(--transition-fast), box-shadow var(--transition-fast);
 }
+.config-section{
+    margin-block:var(--spacing-md);
+    padding:var(--spacing-md);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    background:var(--surface-variant);
+}
+.config-section__title{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    margin:0 0 var(--spacing-sm) 0;
+    font-size:.95rem;
+    font-weight:600;
+    color:var(--text-primary);
+}
+.config-section__title > svg{
+    width:16px;
+    height:16px;
+    color:var(--text-secondary);
+}
+.config-section__description{
+    margin:0 0 var(--spacing-md) 0;
+    font-size:.8rem;
+    color:var(--text-secondary);
+    line-height:1.4;
+}
+.radio-group{
+    display:flex;
+    flex-direction:column;
+    gap:var(--spacing-xs);
+}
+.radio-group__option{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    cursor:pointer;
+    min-height:24px;
+}
+.radio-group__option input[type="radio"]{
+    width:18px;
+    height:18px;
+    margin:0;
+    cursor:pointer;
+    accent-color:var(--primary-color);
+}
+.radio-group__option span{
+    color:var(--text-primary);
+    font-size:.85rem;
+}
+.config-field__help{
+    font-size:.75rem;
+    color:var(--text-secondary);
+    line-height:1.4;
+    margin-top:var(--spacing-xs);
+}
+.checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    margin-bottom:var(--spacing-sm);
+    min-height:24px;
+}
+.checkbox-field:last-child{
+    margin-bottom:0;
+}
+.checkbox-field label{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    cursor:pointer;
+    color:var(--text-primary);
+    font-size:.85rem;
+    margin:0;
+    width:100%;
+}
