@@ -51,26 +51,31 @@ function rejectAllDedupPending(error: Error): void {
   dedupPending.clear()
 }
 
-function recreateChunkWorker(worker: Worker | null): void {
+function recreateChunkWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
   if (chunkWorker !== worker || !worker) return
   worker.terminate()
   chunkWorker = null
+  // Reject every pending request bound to this worker. The worker is dead, so
+  // none of them can ever receive a response — leaving them pending would make
+  // callers wait up to TIMEOUT_MS per request for an error that already happened.
   if (chunkRestarts < MAX_WORKER_RESTARTS) {
     chunkRestarts++
     chunkBackoffUntil = Date.now() + RESTART_BACKOFF_MS * chunkRestarts
+    rejectAllChunkPending(new Error(reason))
   } else {
     chunkBackoffUntil = 0
     rejectAllChunkPending(new Error("Chunk worker failed permanently after maximum restart attempts"))
   }
 }
 
-function recreateDedupWorker(worker: Worker | null): void {
+function recreateDedupWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
   if (dedupWorker !== worker || !worker) return
   worker.terminate()
   dedupWorker = null
   if (dedupRestarts < MAX_WORKER_RESTARTS) {
     dedupRestarts++
     dedupBackoffUntil = Date.now() + RESTART_BACKOFF_MS * dedupRestarts
+    rejectAllDedupPending(new Error(reason))
   } else {
     dedupBackoffUntil = 0
     rejectAllDedupPending(new Error("Dedup worker failed permanently after maximum restart attempts"))
@@ -94,12 +99,10 @@ function createChunkWorker(): Worker | null {
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
-      recreateChunkWorker(worker)
-      rejectAllChunkPending(new Error(e.message || "Worker error"))
+      recreateChunkWorker(worker, e.message || "Worker error")
     })
     worker.addEventListener("messageerror", () => {
-      recreateChunkWorker(worker)
-      rejectAllChunkPending(new Error("Failed to deserialize message"))
+      recreateChunkWorker(worker, "Failed to deserialize message")
     })
     return worker
   } catch {
@@ -124,12 +127,10 @@ function createDedupWorker(): Worker | null {
       }
     })
     worker.addEventListener("error", (e: ErrorEvent) => {
-      recreateDedupWorker(worker)
-      rejectAllDedupPending(new Error(e.message || "Worker error"))
+      recreateDedupWorker(worker, e.message || "Worker error")
     })
     worker.addEventListener("messageerror", () => {
-      recreateDedupWorker(worker)
-      rejectAllDedupPending(new Error("Failed to deserialize message"))
+      recreateDedupWorker(worker, "Failed to deserialize message")
     })
     return worker
   } catch {
@@ -183,7 +184,7 @@ export async function chunkInWorker(
     const timer = setTimeout(() => {
       chunkPending.delete(id)
       reject(new Error("Worker timeout"))
-      recreateChunkWorker(worker)
+      recreateChunkWorker(worker, "Worker terminated due to timeout")
     }, TIMEOUT_MS)
 
     chunkPending.set(id, { resolve, reject, timer })
@@ -216,7 +217,7 @@ export function dedupInWorker(
     const timer = setTimeout(() => {
       dedupPending.delete(id)
       reject(new Error("Worker timeout"))
-      recreateDedupWorker(worker)
+      recreateDedupWorker(worker, "Worker terminated due to timeout")
     }, TIMEOUT_MS)
 
     dedupPending.set(id, { resolve, reject, timer })
