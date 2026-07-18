@@ -1,5 +1,8 @@
 name: "Labeler"
 
+# Auto-labels pull requests based on the path globs defined in
+# .github/labeler.yml using actions/labeler v5.
+
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
