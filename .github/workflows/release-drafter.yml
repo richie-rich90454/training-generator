@@ -1,5 +1,8 @@
 name: "Release Drafter"
 
+# Drafts the next release notes on every push to main, categorizing merged
+# pull requests according to .github/release-drafter.yml.
+
 on:
   push:
     branches: [main]
