@@ -1543,6 +1543,18 @@ Large documents are automatically chunked before processing.
 
 ---
 
+## Can I export one file per source document? (v2.0.1)
+
+Yes. Set **Output File Mode** to `perFile` in the Settings modal (Export section). On export you pick a destination directory once, and each input file becomes its own dataset named after the source. Use the filename template to control naming (`{source}`, `{format}`, `{date}`, `{timestamp}`, `{index}`). See the [Output Mode guide](docs/configuration/output-mode.md).
+
+---
+
+## Does the CLI support per-file output?
+
+No. The CLI always writes a single combined file to the path passed to `--output`. Per-file mode is a desktop-app feature.
+
+---
+
 ## Is this suitable for RAG?
 
 Yes.
