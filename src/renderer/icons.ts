@@ -8,6 +8,7 @@
  *   fa-tachometer-alt, fa-info-circle, fa-file-code, fa-download, fa-copy,
  *   fa-terminal, fa-chart-bar,
  *   fa-sliders-h, fa-brain, fa-cloud, fa-key, fa-link, fa-file-export,
+ *   fa-file-signature,
  *   fa-language, fa-cut, fa-bolt, fa-thermometer-half, fa-save, fa-server,
  *   fa-database, fa-clock, fa-book, fa-bug, fa-star, fa-display, fa-palette,
  *   fa-text-height, fa-list-ol, fa-puzzle-piece, fa-layer-group, fa-window-restore,
