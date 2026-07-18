@@ -1,5 +1,8 @@
 name: "Stale"
 
+# Runs daily to mark inactive issues and PRs as stale, then closes them after
+# a grace period. Behavior is configured in .github/stale.yml.
+
 on:
   schedule:
     # Run daily at 06:00 UTC.
