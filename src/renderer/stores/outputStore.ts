@@ -127,9 +127,9 @@ export interface OutputStore {
     createTrainingItem: (input: string, output: string, processingType: string, outputFormat: string) => TrainingItem[]
     parseQuestionAnswerPairs: (text: string) => QAPair[]
     parseConversationTurns: (text: string) => ConversationTurn[]
-    appendOutput: (items: TrainingItem[]) => void
+    appendOutput: (items: TrainingItem[], sourceFile?: string) => void
     clearOutput: () => void
-    stageItems: (items: TrainingItem[]) => void
+    stageItems: (items: TrainingItem[], sourceFile?: string) => void
     clearStaging: () => void
     exportOutput: (exportFormat?: string) => Promise<void>
     copyOutput: () => Promise<boolean>
@@ -436,14 +436,34 @@ export function createOutputStore(options?: OutputStoreOptions): OutputStore {
         }
         return items
     }
-    function appendOutput(items: TrainingItem[]): void {
+    function appendOutput(items: TrainingItem[], sourceFile?: string): void {
         if (items.length === 0) return
-        setOutputData(outputData => [...outputData, ...items])
+        const stamped = sourceFile
+            ? items.map(item => ({
+                ...item,
+                metadata: {
+                    ...item.metadata,
+                    sourceFile: item.metadata?.sourceFile || sourceFile,
+                    generatedAt: item.metadata?.generatedAt || Date.now()
+                }
+            }))
+            : items
+        setOutputData(outputData => [...outputData, ...stamped])
         setStagingData([])
     }
-    function stageItems(items: TrainingItem[]): void {
+    function stageItems(items: TrainingItem[], sourceFile?: string): void {
         if (items.length === 0) return
-        setStagingData(stagingData => [...stagingData, ...items])
+        const stamped = sourceFile
+            ? items.map(item => ({
+                ...item,
+                metadata: {
+                    ...item.metadata,
+                    sourceFile: item.metadata?.sourceFile || sourceFile,
+                    generatedAt: item.metadata?.generatedAt || Date.now()
+                }
+            }))
+            : items
+        setStagingData(stagingData => [...stagingData, ...stamped])
     }
     function clearStaging(): void {
         setStagingData([])

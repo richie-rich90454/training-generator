@@ -334,16 +334,18 @@ export function createAppStore(): AppStore {
     // Incremental token estimate accumulated from onStreamChunk calls so the
     // dashboard reflects live throughput during long streams (before chunks complete).
     let streamedTokensEstimate = 0
+    let currentSourceFile: string = ""
 
     const pipelineEvents: PipelineEvents = {
-      onFileStart: (_fileName: string, chunkCount: number) => {
+      onFileStart: (fileName: string, chunkCount: number) => {
         chunksTotal += chunkCount
+        currentSourceFile = fileName
         uiStore.setDashboardMetrics({ chunksTotal, chunksDone, activeProvider: settingsStore.settings.provider || "--" })
       },
       onChunkProcessed: (event) => {
         chunksDone++
         totalItemsGenerated += event.items.length
-        outputStore.stageItems(event.items)
+        outputStore.stageItems(event.items, currentSourceFile || undefined)
         const cs = getCacheStats()
         const hitRate = cs.totalRequests > 0 ? Math.round((cs.hits / cs.totalRequests) * 100) : 0
         uiStore.setDashboardMetrics({
@@ -388,13 +390,14 @@ export function createAppStore(): AppStore {
       },
       onFileComplete: (event) => {
         if (event.success) {
-          outputStore.appendOutput(event.items)
+          outputStore.appendOutput(event.items, event.fileName || currentSourceFile || undefined)
           successfulFiles++
           fileStore.setFileStatus(event.fileName, "completed")
         } else {
           failedFiles++
           fileStore.setFileStatus(event.fileName, "failed")
         }
+        currentSourceFile = ""
         outputStore.clearStaging()
         updateOutputPreview()
       },
