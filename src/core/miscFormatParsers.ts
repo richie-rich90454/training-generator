@@ -13,6 +13,7 @@ function decodeXmlEntities(text: string): string{
     result=result.replace(/&gt;/g, ">");
     result=result.replace(/&quot;/g, '"');
     result=result.replace(/&#39;/g, "'");
+    result=result.replace(/&apos;/g, "'");
     result=result.replace(/&nbsp;/g, " ");
     result=result.replace(/&amp;/g, "&");
     return result;

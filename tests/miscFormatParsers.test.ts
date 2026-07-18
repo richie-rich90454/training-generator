@@ -256,6 +256,19 @@ describe("parseRss", ()=>{
         expect(results[0].metadata.link).toBe("http://b");
         expect(results[0].text).toBe("Summary");
     });
+    test("decodes &apos; entity in RSS content", ()=>{
+        let xml: string='<rss><channel><item><title>It&apos;s a test</title><description>Don&apos;t worry</description></item></channel></rss>';
+        let results: ParsedTextResult[]=parseRss(xml);
+        expect(results.length).toBe(1);
+        expect(results[0].title).toBe("It's a test");
+        expect(results[0].text).toBe("Don't worry");
+    });
+    test("decodes all standard XML entities in ODT content", ()=>{
+        let content: string='<office:document-content><text:p>Test &lt;tag&gt; &quot;quote&quot; &apos;apos&apos; &amp;amp</text:p></office:document-content>';
+        let zip: Buffer=makeZip([{path: "content.xml", content: content}]);
+        let result: ParsedTextResult=parseOdt(zip);
+        expect(result.text).toContain("Test <tag> \"quote\" 'apos' &amp");
+    });
 });
 describe("parseSrt", ()=>{
     test("strips timecodes", ()=>{
