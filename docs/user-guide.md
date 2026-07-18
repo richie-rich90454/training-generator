@@ -77,9 +77,8 @@ Download the file for your platform, run the installer, and open **Training Gene
 
 When the app opens you will see the main window with the title **Training Generator** and subtitle **Convert documents to AI training data using Ollama**.
 
-In the top-right corner of the header are three icon buttons:
+In the top-right corner of the header are two icon buttons:
 
-- **Edit Prompt Templates** — Open the visual template editor.
 - **Settings** — Open the settings modal.
 - **Help** — Show a quick help overlay.
 
