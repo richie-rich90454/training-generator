@@ -50,6 +50,8 @@ export interface SettingsStore {
     setMaxChunks: (count: number) => void
     setMaxParallelFiles: (count: number) => void
     setEnableThinking: (value: boolean) => void
+    setAppSetting: <K extends keyof FullAppSettings>(key: K, value: FullAppSettings[K]) => void
+    setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void
     loadSettings: () => Promise<void>
     savePreset: () => Promise<void>
     loadAppSettings: () => void
@@ -79,7 +81,70 @@ export function createSettingsStore(): SettingsStore {
         temperature: 0.7,
         customPrompt: "",
         ollamaHost: "localhost",
-        ollamaPort: 11434
+        ollamaPort: 11434,
+        // v2.0.1 defaults — output mode & export
+        outputFileMode: "combined",
+        outputFilenameTemplate: "{source}",
+        confirmBeforeExport: false,
+        autoExportOnCompletion: false,
+        maxItemsPerFile: 50000,
+        stripPiiBeforeExport: false,
+        includeSourceMetadata: false,
+        // v2.0.1 defaults — appearance & accessibility
+        fontScale: 100,
+        compactMode: false,
+        reducedMotion: false,
+        highContrast: false,
+        customCssPath: "",
+        verboseDashboard: false,
+        // v2.0.1 defaults — telemetry & updates
+        disableTelemetry: false,
+        disableCrashReports: false,
+        disableAutoUpdate: false,
+        updateCheckIntervalHours: 24,
+        // v2.0.1 defaults — system & window
+        gpuAcceleration: true,
+        sendToTrayOnClose: false,
+        startOnLogin: false,
+        // v2.0.1 defaults — cache
+        cacheDir: "",
+        cacheMaxSizeMB: 500,
+        cacheTtlSeconds: 86400,
+        clearCacheOnExit: false,
+        // v2.0.1 defaults — generation tuning
+        retryCount: 3,
+        retryBackoffStrategy: "exponential",
+        requestTimeoutMs: 60000,
+        streamTimeoutMs: 600000,
+        abortOnError: false,
+        topP: 0.9,
+        topK: 40,
+        repeatPenalty: 1.1,
+        seed: -1,
+        systemPromptOverride: "",
+        stopSequences: [],
+        bannedPhrases: [],
+        requiredPhrases: [],
+        // v2.0.1 defaults — chunking
+        minChunkLength: 200,
+        maxChunkLength: 8000,
+        chunkOverlap: 100,
+        sentenceAwareChunking: true,
+        preserveCodeBlocks: true,
+        languageDetection: false,
+        outputLanguageOverride: "",
+        // v2.0.1 defaults — validation
+        skipDedup: false,
+        dedupSimilarityThreshold: 0.92,
+        minQaPairsPerFile: 1,
+        maxQaPairsPerFile: 1000,
+        validationStrictness: "normal",
+        autoRegenerateOnLowQuality: false,
+        regenerateThreshold: 0.6,
+        maxRegenerationAttempts: 2,
+        // v2.0.1 defaults — logging
+        logToFile: false,
+        logFilePath: ""
     })
     const [appSettings, setAppSettings] = createStore<FullAppSettings>({
         theme: "auto",
@@ -93,7 +158,70 @@ export function createSettingsStore(): SettingsStore {
         maxOutputItems: 100000,
         maxChunks: 500,
         maxParallelFiles: 1,
-        enableThinking: false
+        enableThinking: false,
+        // v2.0.1 defaults — output mode & export
+        outputFileMode: "combined",
+        outputFilenameTemplate: "{source}",
+        confirmBeforeExport: false,
+        autoExportOnCompletion: false,
+        maxItemsPerFile: 50000,
+        stripPiiBeforeExport: false,
+        includeSourceMetadata: false,
+        // v2.0.1 defaults — appearance & accessibility
+        fontScale: 100,
+        compactMode: false,
+        reducedMotion: false,
+        highContrast: false,
+        customCssPath: "",
+        verboseDashboard: false,
+        // v2.0.1 defaults — telemetry & updates
+        disableTelemetry: false,
+        disableCrashReports: false,
+        disableAutoUpdate: false,
+        updateCheckIntervalHours: 24,
+        // v2.0.1 defaults — system & window
+        gpuAcceleration: true,
+        sendToTrayOnClose: false,
+        startOnLogin: false,
+        // v2.0.1 defaults — cache
+        cacheDir: "",
+        cacheMaxSizeMB: 500,
+        cacheTtlSeconds: 86400,
+        clearCacheOnExit: false,
+        // v2.0.1 defaults — generation tuning
+        retryCount: 3,
+        retryBackoffStrategy: "exponential",
+        requestTimeoutMs: 60000,
+        streamTimeoutMs: 600000,
+        abortOnError: false,
+        topP: 0.9,
+        topK: 40,
+        repeatPenalty: 1.1,
+        seed: -1,
+        systemPromptOverride: "",
+        stopSequences: [],
+        bannedPhrases: [],
+        requiredPhrases: [],
+        // v2.0.1 defaults — chunking
+        minChunkLength: 200,
+        maxChunkLength: 8000,
+        chunkOverlap: 100,
+        sentenceAwareChunking: true,
+        preserveCodeBlocks: true,
+        languageDetection: false,
+        outputLanguageOverride: "",
+        // v2.0.1 defaults — validation
+        skipDedup: false,
+        dedupSimilarityThreshold: 0.92,
+        minQaPairsPerFile: 1,
+        maxQaPairsPerFile: 1000,
+        validationStrictness: "normal",
+        autoRegenerateOnLowQuality: false,
+        regenerateThreshold: 0.6,
+        maxRegenerationAttempts: 2,
+        // v2.0.1 defaults — logging
+        logToFile: false,
+        logFilePath: ""
     })
     const [profiles, setProfiles] = createStore<ConfigProfile[]>([])
     const [selectedProfile, setSelectedProfile] = createSignal<string>("")
@@ -243,7 +371,27 @@ export function createSettingsStore(): SettingsStore {
                 setAppSettings("fontSize", saved.fontSize)
                 applyFontSize(saved.fontSize)
             }
-            const boolKeys: Array<keyof FullAppSettings> = ["autoSave", "autoCheckOllama", "startMaximized", "rememberWindowSize", "smartSizing", "enableThinking"]
+            const boolKeys: Array<keyof FullAppSettings> = [
+                "autoSave", "autoCheckOllama", "startMaximized", "rememberWindowSize", "smartSizing", "enableThinking",
+                // v2.0.1 — output mode & export
+                "confirmBeforeExport", "autoExportOnCompletion", "stripPiiBeforeExport", "includeSourceMetadata",
+                // v2.0.1 — appearance & accessibility
+                "compactMode", "reducedMotion", "highContrast", "verboseDashboard",
+                // v2.0.1 — telemetry & updates
+                "disableTelemetry", "disableCrashReports", "disableAutoUpdate",
+                // v2.0.1 — system & window
+                "gpuAcceleration", "sendToTrayOnClose", "startOnLogin",
+                // v2.0.1 — cache
+                "clearCacheOnExit",
+                // v2.0.1 — generation tuning
+                "abortOnError",
+                // v2.0.1 — chunking
+                "sentenceAwareChunking", "preserveCodeBlocks", "languageDetection",
+                // v2.0.1 — validation
+                "skipDedup", "autoRegenerateOnLowQuality",
+                // v2.0.1 — logging
+                "logToFile"
+            ]
             for (const key of boolKeys) {
                 if (saved[key] !== undefined) {
                     setAppSettings(key, saved[key] as boolean)
@@ -253,7 +401,34 @@ export function createSettingsStore(): SettingsStore {
                 { key: "maxFileSize", min: 10, max: 1000, def: 100 },
                 { key: "maxOutputItems", min: 1000, max: 1000000, def: 100000 },
                 { key: "maxChunks", min: 10, max: 5000, def: 500 },
-                { key: "maxParallelFiles", min: 1, max: 10, def: 1 }
+                { key: "maxParallelFiles", min: 1, max: 10, def: 1 },
+                // v2.0.1 — output mode & export
+                { key: "maxItemsPerFile", min: 100, max: 1000000, def: 50000 },
+                // v2.0.1 — appearance & accessibility
+                { key: "fontScale", min: 50, max: 200, def: 100 },
+                // v2.0.1 — telemetry & updates
+                { key: "updateCheckIntervalHours", min: 1, max: 720, def: 24 },
+                // v2.0.1 — cache
+                { key: "cacheMaxSizeMB", min: 10, max: 10000, def: 500 },
+                { key: "cacheTtlSeconds", min: 60, max: 604800, def: 86400 },
+                // v2.0.1 — generation tuning
+                { key: "retryCount", min: 0, max: 10, def: 3 },
+                { key: "requestTimeoutMs", min: 1000, max: 600000, def: 60000 },
+                { key: "streamTimeoutMs", min: 1000, max: 3600000, def: 600000 },
+                { key: "topP", min: 0, max: 1, def: 0.9 },
+                { key: "topK", min: 1, max: 1000, def: 40 },
+                { key: "repeatPenalty", min: 0.5, max: 2, def: 1.1 },
+                { key: "seed", min: -1, max: 2147483647, def: -1 },
+                // v2.0.1 — chunking
+                { key: "minChunkLength", min: 50, max: 10000, def: 200 },
+                { key: "maxChunkLength", min: 500, max: 100000, def: 8000 },
+                { key: "chunkOverlap", min: 0, max: 1000, def: 100 },
+                // v2.0.1 — validation
+                { key: "dedupSimilarityThreshold", min: 0.5, max: 1, def: 0.92 },
+                { key: "minQaPairsPerFile", min: 1, max: 10000, def: 1 },
+                { key: "maxQaPairsPerFile", min: 1, max: 100000, def: 1000 },
+                { key: "regenerateThreshold", min: 0, max: 1, def: 0.6 },
+                { key: "maxRegenerationAttempts", min: 0, max: 10, def: 2 }
             ]
             for (const { key, min, max, def } of numKeys) {
                 if (saved[key] !== undefined) {
@@ -266,6 +441,30 @@ export function createSettingsStore(): SettingsStore {
                     }
                 }
             }
+            // v2.0.1 — string fields
+            const strKeys: Array<keyof FullAppSettings> = [
+                "customCssPath", "cacheDir", "systemPromptOverride", "outputLanguageOverride", "logFilePath", "outputFilenameTemplate"
+            ]
+            for (const key of strKeys) {
+                if (typeof saved[key] === "string") {
+                    setAppSettings(key, saved[key] as string)
+                }
+            }
+            // v2.0.1 — enum fields
+            if (saved.outputFileMode === "combined" || saved.outputFileMode === "perFile") {
+                setAppSettings("outputFileMode", saved.outputFileMode)
+            }
+            if (saved.retryBackoffStrategy === "fixed" || saved.retryBackoffStrategy === "linear" || saved.retryBackoffStrategy === "exponential") {
+                setAppSettings("retryBackoffStrategy", saved.retryBackoffStrategy)
+            }
+            if (saved.validationStrictness === "lenient" || saved.validationStrictness === "normal" || saved.validationStrictness === "strict") {
+                setAppSettings("validationStrictness", saved.validationStrictness)
+            }
+            // v2.0.1 — array fields
+            if (Array.isArray(saved.stopSequences)) setAppSettings("stopSequences", saved.stopSequences)
+            if (Array.isArray(saved.bannedPhrases)) setAppSettings("bannedPhrases", saved.bannedPhrases)
+            if (Array.isArray(saved.requiredPhrases)) setAppSettings("requiredPhrases", saved.requiredPhrases)
+            // Migration: if v2.0.0 settings had no outputFileMode, default to "combined" (already the createStore default)
             const savedLang = localStorage.getItem(UI_LANG_KEY)
             if (savedLang) {
                 applyLanguageLocal(savedLang)
@@ -298,7 +497,70 @@ export function createSettingsStore(): SettingsStore {
             maxOutputItems: 100000,
             maxChunks: 500,
             maxParallelFiles: 1,
-            enableThinking: false
+            enableThinking: false,
+            // v2.0.1 — output mode & export
+            outputFileMode: "combined",
+            outputFilenameTemplate: "{source}",
+            confirmBeforeExport: false,
+            autoExportOnCompletion: false,
+            maxItemsPerFile: 50000,
+            stripPiiBeforeExport: false,
+            includeSourceMetadata: false,
+            // v2.0.1 — appearance & accessibility
+            fontScale: 100,
+            compactMode: false,
+            reducedMotion: false,
+            highContrast: false,
+            customCssPath: "",
+            verboseDashboard: false,
+            // v2.0.1 — telemetry & updates
+            disableTelemetry: false,
+            disableCrashReports: false,
+            disableAutoUpdate: false,
+            updateCheckIntervalHours: 24,
+            // v2.0.1 — system & window
+            gpuAcceleration: true,
+            sendToTrayOnClose: false,
+            startOnLogin: false,
+            // v2.0.1 — cache
+            cacheDir: "",
+            cacheMaxSizeMB: 500,
+            cacheTtlSeconds: 86400,
+            clearCacheOnExit: false,
+            // v2.0.1 — generation tuning
+            retryCount: 3,
+            retryBackoffStrategy: "exponential",
+            requestTimeoutMs: 60000,
+            streamTimeoutMs: 600000,
+            abortOnError: false,
+            topP: 0.9,
+            topK: 40,
+            repeatPenalty: 1.1,
+            seed: -1,
+            systemPromptOverride: "",
+            stopSequences: [],
+            bannedPhrases: [],
+            requiredPhrases: [],
+            // v2.0.1 — chunking
+            minChunkLength: 200,
+            maxChunkLength: 8000,
+            chunkOverlap: 100,
+            sentenceAwareChunking: true,
+            preserveCodeBlocks: true,
+            languageDetection: false,
+            outputLanguageOverride: "",
+            // v2.0.1 — validation
+            skipDedup: false,
+            dedupSimilarityThreshold: 0.92,
+            minQaPairsPerFile: 1,
+            maxQaPairsPerFile: 1000,
+            validationStrictness: "normal",
+            autoRegenerateOnLowQuality: false,
+            regenerateThreshold: 0.6,
+            maxRegenerationAttempts: 2,
+            // v2.0.1 — logging
+            logToFile: false,
+            logFilePath: ""
         })
         saveAppSettings()
         applyTheme("auto")
@@ -398,6 +660,8 @@ export function createSettingsStore(): SettingsStore {
         setMaxChunks: (count: number) => setAppSettings("maxChunks", clamp(count, 10, 5000, 500)),
         setMaxParallelFiles: (count: number) => setAppSettings("maxParallelFiles", clamp(count, 1, 10, 1)),
         setEnableThinking: (value: boolean) => setAppSettings("enableThinking", value),
+        setAppSetting: <K extends keyof FullAppSettings>(key: K, value: FullAppSettings[K]) => setAppSettings(key, value as any),
+        setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => setSettings(key, value as any),
         loadSettings,
         savePreset,
         loadAppSettings,
