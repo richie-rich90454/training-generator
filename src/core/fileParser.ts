@@ -82,7 +82,7 @@ class FileParser{
                 }
             })
             readStream.on("end",()=>{
-                settle(()=>resolve(this.stripBom(content)))
+                settle(()=>resolve(this.normalizeLineEndings(this.stripBom(content))))
             })
             readStream.on("error",(error)=>{
                 settle(()=>reject(error))
@@ -144,7 +144,7 @@ class FileParser{
     }
     async parseRTF(buffer:Buffer):Promise<string>{
         try{
-            let rtfText=this.stripBom(buffer.toString("utf-8"))
+            let rtfText=this.normalizeLineEndings(this.stripBom(buffer.toString("utf-8")))
             return await this.parseRTFText(rtfText)
         }
         catch(error){
@@ -171,11 +171,14 @@ class FileParser{
         }
         return text
     }
+    private normalizeLineEndings(text:string):string{
+        return text.replace(/\r\n/g,"\n").replace(/\r/g,"\n")
+    }
     async parseText(buffer:Buffer):Promise<string>{
-        return this.stripBom(buffer.toString("utf-8"))
+        return this.normalizeLineEndings(this.stripBom(buffer.toString("utf-8")))
     }
     async parseHTML(buffer:Buffer):Promise<string>{
-        let html=this.stripBom(buffer.toString("utf-8"))
+        let html=this.normalizeLineEndings(this.stripBom(buffer.toString("utf-8")))
         return htmlToText(html,{
             wordwrap:false,
             selectors:[

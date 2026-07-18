@@ -34,10 +34,22 @@ function scrubContextKeys(ctx: Record<string, unknown>): Record<string, unknown>
     let result: Record<string, unknown>={}
     for(let key of Object.keys(ctx)){
         if(!isLogPiiKey(key)){
-            result[key]=ctx[key]
+            result[key]=redactPiiInValue(ctx[key])
         }
     }
     return result
+}
+function redactPiiInValue(value: unknown): unknown{
+    if(typeof value==="string"){
+        return redactPiiInString(value)
+    }
+    if(Array.isArray(value)){
+        return value.map(redactPiiInValue)
+    }
+    if(value && typeof value==="object"){
+        return scrubContextKeys(value as Record<string, unknown>)
+    }
+    return value
 }
 export interface LoggerOptions{
     level?: LogLevel

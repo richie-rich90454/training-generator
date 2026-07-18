@@ -210,6 +210,20 @@ describe("FileParserLazy",()=>{
             expect(text).toContain("line1")
             expect(text).toContain("line2")
         })
+
+        test("normalizes CRLF to LF",async()=>{
+            let filePath:string=path.join(testDir,"crlf-normalize.txt")
+            fs.writeFileSync(filePath,"line1\r\nline2\r\nline3")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("line1\nline2\nline3")
+        })
+
+        test("normalizes lone CR to LF",async()=>{
+            let filePath:string=path.join(testDir,"cr-only.txt")
+            fs.writeFileSync(filePath,"line1\rline2\rline3")
+            let text:string=await parser.extractTextFromFile(filePath)
+            expect(text).toBe("line1\nline2\nline3")
+        })
     })
 
     describe("parseHTML",()=>{
