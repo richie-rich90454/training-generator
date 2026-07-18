@@ -35,6 +35,17 @@ function createDefaultConfig(): AppConfig{
         uiSettings: {}
     }
 }
+function isPlainObject(value: unknown): value is Record<string, unknown>{
+    return typeof value==="object"&&value!==null&&!Array.isArray(value)
+}
+function mergeWithDefaults(parsed: Partial<AppConfig>|null|undefined): AppConfig{
+    return {
+        apiKeys: isPlainObject(parsed?.apiKeys)?parsed!.apiKeys as Record<string, string>:{},
+        providerSettings: isPlainObject(parsed?.providerSettings)?parsed!.providerSettings as Record<string, Record<string, unknown>>:{},
+        pipelinePresets: isPlainObject(parsed?.pipelinePresets)?parsed!.pipelinePresets as Record<string, PipelinePreset>:{},
+        uiSettings: isPlainObject(parsed?.uiSettings)?parsed!.uiSettings as Record<string, unknown>:{}
+    }
+}
 function createDefaultStorage(): Storage{
     if (typeof localStorage!=="undefined"){
         return localStorage as unknown as Storage
@@ -60,7 +71,8 @@ export class ConfigManager{
         else{
             try{
                 let data=this.encryptionKey?this.decrypt(raw, this.encryptionKey):raw
-                loaded=JSON.parse(data) as AppConfig
+                let parsed=JSON.parse(data) as Partial<AppConfig>
+                loaded=mergeWithDefaults(parsed)
             }
             catch{
                 loaded=createDefaultConfig()
