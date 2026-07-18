@@ -15,6 +15,7 @@ Training Generator supports keyboard navigation and shortcuts for the most commo
 | `Ctrl/Cmd + E` | Anywhere except text inputs | Export the current output using the selected export format. |
 | `Ctrl/Cmd + Shift + C` | Anywhere except text inputs | Copy the current output to the clipboard. |
 | `Ctrl/Cmd + Shift + D` | Anywhere except text inputs | Toggle the developer tools panel. |
+| `Ctrl/Cmd + Shift + P` | Anywhere except text inputs | Open the command palette. |
 | `Ctrl/Cmd + K` | Anywhere except text inputs | Show the keyboard shortcuts help overlay. |
 | `Escape` | Anywhere | Stop processing if it is running; otherwise close the topmost open modal. |
 
