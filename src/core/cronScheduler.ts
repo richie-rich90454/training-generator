@@ -47,11 +47,55 @@ function matchesField(field: string, value: number): boolean{
     if(field==="*"){
         return true;
     }
-    let exact=parseInt(field, 10);
-    if(!isNaN(exact)){
-        return exact===value;
+    for(let part of field.split(",")){
+        if(matchesSingleField(part, value)){
+            return true;
+        }
     }
     return false;
+}
+function matchesSingleField(part: string, value: number): boolean{
+    if(part==="*"){
+        return true;
+    }
+    let range=part;
+    let step=1;
+    let slashIdx=part.indexOf("/");
+    if(slashIdx!==-1){
+        range=part.slice(0, slashIdx);
+        step=parseInt(part.slice(slashIdx+1), 10);
+        if(isNaN(step)||step<=0){
+            return false;
+        }
+    }
+    let start: number;
+    let end: number;
+    if(range==="*"){
+        start=0;
+        end=59;
+    }
+    else if(range.includes("-")){
+        let parts=range.split("-");
+        start=parseInt(parts[0], 10);
+        end=parseInt(parts[1], 10);
+        if(isNaN(start)||isNaN(end)){
+            return false;
+        }
+    }
+    else{
+        start=parseInt(range, 10);
+        if(isNaN(start)){
+            return false;
+        }
+        end=start;
+    }
+    if(value<start||value>end){
+        return false;
+    }
+    if(step===1){
+        return true;
+    }
+    return (value-start)%step===0;
 }
 function getComponentsInTimezone(date: Date, timezone: string): {year: number, month: number, day: number, hour: number, minute: number, dayOfWeek: number}{
     let s=date.toLocaleString("en-US", {timeZone: timezone, hour12: false});
