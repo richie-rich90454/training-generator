@@ -239,21 +239,37 @@ If processing is interrupted, the app saves a checkpoint every 30 seconds. On th
 
 After processing completes, the **Export** and **Copy** buttons become active in the **Output Preview** card.
 
+### Output mode (v2.0.1)
+
+Training Generator supports two output modes, controlled by the **Output File Mode** setting in the configuration panel and the Settings modal:
+
+- **Combined** (default) — all items from every file in the work queue are merged into a single export file. If the total exceeds 100,000 items, the output is split into numbered parts.
+- **Per-file** — each input file produces its own export file, named after the source file (for example `report.pdf` becomes `report.jsonl`). You pick a destination directory once, and the app writes one file per source. Sources that produced zero items are skipped with a warning instead of writing empty files.
+
+The per-file filename is controlled by the **Output Filename Template** setting in the Settings modal. The default template is `{source}`. Supported placeholders: `{source}`, `{format}`, `{date}`, `{timestamp}`, `{index}`. See [Output Mode](/configuration/output-mode.md) for the full guide.
+
+The choice takes effect immediately and persists across restarts.
+
 ### Export to File
 
 1. Choose a format from the **Export Format** dropdown: JSONL, JSON Array, or CSV.
-2. Click **Export** or press `Ctrl+E`.
-3. Choose a save location in the file dialog.
+2. Choose an output mode if you want per-file exports.
+3. Click **Export** or press `Ctrl+E`.
+4. In combined mode, choose a save location in the file dialog. In per-file mode, choose a destination directory.
 
-If the output contains more than 100,000 items, it is automatically split into multiple files.
+If the output contains more than 100,000 items in combined mode, it is automatically split into multiple files. In per-file mode, each source file's output is split independently when it exceeds the `maxItemsPerFile` setting (default 50,000).
 
 ### Copy to Clipboard
 
-Click **Copy** or press `Ctrl+Shift+C` to copy the current output to the clipboard in the selected export format.
+Click **Copy** or press `Ctrl+Shift+C` to copy the current output to the clipboard in the selected export format. Copy always uses combined mode regardless of the `outputFileMode` setting.
 
 ### Output Preview
 
 The preview pane shows the last few generated items. When there are more than 100 items, a virtual scrolling list is used for performance.
+
+::: details Did you know?
+Every generated training item carries hidden `sourceFile` metadata so per-file export can group items by their origin. In combined mode this metadata is stripped from the export unless you enable **Include Source Metadata** in the Settings modal. Enable it when you want to audit which source document produced each item — useful for regression testing or for proving dataset provenance to a reviewer.
+:::
 
 ---
 
