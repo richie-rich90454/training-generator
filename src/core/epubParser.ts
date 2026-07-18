@@ -1,4 +1,7 @@
 import zlib from "zlib";
+const MAX_ZIP_ENTRIES: number=10000;
+const MAX_ENTRY_DECOMPRESSED_SIZE: number=50*1024*1024;
+const MAX_TOTAL_DECOMPRESSED_SIZE: number=200*1024*1024;
 export interface EpubChapter{
     id: string;
     title: string;
@@ -38,8 +41,12 @@ export function extractZipEntries(buffer: Buffer): Map<string, Buffer>{
         throw new Error("End of Central Directory record not found");
     }
     let cdCount: number=buffer.readUInt16LE(eocdOffset+10);
+    if(cdCount>MAX_ZIP_ENTRIES){
+        throw new Error("ZIP archive has too many entries: "+cdCount+" (max "+MAX_ZIP_ENTRIES+")");
+    }
     let cdOffset: number=buffer.readUInt32LE(eocdOffset+16);
     let pos: number=cdOffset;
+    let totalDecompressedSize: number=0;
     for(let i: number=0;i<cdCount;i++){
         if(pos+46>buffer.length){
             break;
@@ -64,6 +71,9 @@ export function extractZipEntries(buffer: Buffer): Map<string, Buffer>{
         let localFilenameLen: number=buffer.readUInt16LE(localOffset+26);
         let localExtraLen: number=buffer.readUInt16LE(localOffset+28);
         let dataOffset: number=localOffset+30+localFilenameLen+localExtraLen;
+        if(compressedSize>buffer.length-dataOffset){
+            continue;
+        }
         let compressedData: Buffer=buffer.subarray(dataOffset, dataOffset+compressedSize);
         let content: Buffer;
         if(method===0){
@@ -74,6 +84,13 @@ export function extractZipEntries(buffer: Buffer): Map<string, Buffer>{
         }
         else{
             throw new Error("Unsupported compression method: "+method);
+        }
+        if(content.length>MAX_ENTRY_DECOMPRESSED_SIZE){
+            throw new Error("ZIP entry too large after decompression: "+filename+" ("+content.length+" bytes, max "+MAX_ENTRY_DECOMPRESSED_SIZE+")");
+        }
+        totalDecompressedSize+=content.length;
+        if(totalDecompressedSize>MAX_TOTAL_DECOMPRESSED_SIZE){
+            throw new Error("ZIP archive exceeds total decompressed size limit ("+MAX_TOTAL_DECOMPRESSED_SIZE+" bytes)");
         }
         entries.set(filename, content);
     }

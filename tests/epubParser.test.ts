@@ -209,6 +209,20 @@ describe("extractZipEntries", ()=>{
         let entries: Map<string, Buffer>=extractZipEntries(zip);
         expect(entries.get("data.txt")?.toString("utf8")).toBe("compressed content here");
     });
+    test("rejects archive claiming too many entries", ()=>{
+        let zip: Buffer=makeEpub([{path: "data.txt", content: Buffer.from("x", "utf8")}]);
+        let eocdOffset: number=zip.length-22;
+        zip.writeUInt16LE(65535, eocdOffset+10);
+        expect(()=>extractZipEntries(zip)).toThrow(/too many entries/);
+    });
+    test("rejects entry with oversized compressedSize", ()=>{
+        let zip: Buffer=makeEpub([{path: "data.txt", content: Buffer.from("x", "utf8")}]);
+        let eocdOffset: number=zip.length-22;
+        let cdOffset: number=zip.readUInt32LE(eocdOffset+16);
+        zip.writeUInt32LE(0xffffffff, cdOffset+20);
+        let entries: Map<string, Buffer>=extractZipEntries(zip);
+        expect(entries.has("data.txt")).toBe(false);
+    });
 });
 describe("parseEpub", ()=>{
     test("parseEpub returns metadata and chapters", async ()=>{
