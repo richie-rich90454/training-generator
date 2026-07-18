@@ -2,15 +2,10 @@
 # Maps labels to changed-file path globs.
 # https://github.com/actions/labeler
 
-renderer:
+ui:
   - changed-files:
     - any-glob-to-any-file:
-      - 'src/renderer/**'
-
-main:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/main.ts'
+      - 'src/renderer/components/**'
 
 core:
   - changed-files:
@@ -43,10 +38,3 @@ dependencies:
     - any-glob-to-any-file:
       - 'package.json'
       - 'package-lock.json'
-
-config:
-  - changed-files:
-    - any-glob-to-any-file:
-      - '*.json'
-      - '*.config.ts'
-      - 'tsconfig.json'
