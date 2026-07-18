@@ -23,7 +23,7 @@ This guide covers installation, first launch, uploading files, configuring a pro
 
 ### Prerequisites
 
-- **Node.js 18 or later** (Node.js 24+ recommended).
+- **Node.js 20 or later** (Node.js 24+ recommended).
 - **Ollama** if you want to process files locally. Download it from [ollama.com](https://ollama.com/).
 
 ### Install from Source
