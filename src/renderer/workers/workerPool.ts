@@ -190,7 +190,14 @@ export async function chunkInWorker(
     chunkPending.set(id, { resolve, reject, timer })
     // Transferable objects not applicable here: all data is text (strings/objects),
     // not ArrayBuffer, so structured clone is the correct transfer mechanism.
-    worker.postMessage({ id, text, chunkSize, overlap, smartSizing })
+    try {
+      worker.postMessage({ id, text, chunkSize, overlap, smartSizing })
+    } catch (err) {
+      clearTimeout(timer)
+      chunkPending.delete(id)
+      reject(err instanceof Error ? err : new Error(String(err)))
+      recreateChunkWorker(worker, "Failed to post message to worker")
+    }
   })
 }
 
@@ -223,7 +230,14 @@ export function dedupInWorker(
     dedupPending.set(id, { resolve, reject, timer })
     // Transferable objects not applicable here: data is JSON-serializable objects (items array),
     // not ArrayBuffer, so structured clone is the correct transfer mechanism.
-    worker.postMessage({ id, items, threshold })
+    try {
+      worker.postMessage({ id, items, threshold })
+    } catch (err) {
+      clearTimeout(timer)
+      dedupPending.delete(id)
+      reject(err instanceof Error ? err : new Error(String(err)))
+      recreateDedupWorker(worker, "Failed to post message to worker")
+    }
   })
 }
 
