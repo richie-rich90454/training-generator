@@ -72,9 +72,9 @@ These fields control document parsing, chunking, and run limits.
 | `language` | `string` | `'en'` | 2.0.0 | ConfigPanel | Output language code. Selects the prompt template from `src/prompts/<lang>_<type>.txt`. |
 | `outputLanguageOverride` | `string` | `''` | 2.0.1 | Modal | Overrides the output language without changing the prompt template language. Empty disables the override. |
 | `chunkSize` | `number` | `2000` | 2.0.0 | ConfigPanel | Maximum characters per text chunk. Range `500`–`10,000`. |
-| `minChunkLength` | `number` | `0` | 2.0.1 | Modal | Minimum chunk length. Chunks shorter than this are merged with neighbors when possible. |
-| `maxChunkLength` | `number` | `0` | 2.0.1 | Modal | Hard cap on chunk length. Zero disables the cap. |
-| `chunkOverlap` | `number` | `0` | 2.0.1 | Modal | Number of characters of overlap between adjacent chunks to preserve context. |
+| `minChunkLength` | `number` | `200` | 2.0.1 | Modal | Minimum chunk length. Chunks shorter than this are merged with neighbors when possible. |
+| `maxChunkLength` | `number` | `8000` | 2.0.1 | Modal | Hard cap on chunk length. |
+| `chunkOverlap` | `number` | `100` | 2.0.1 | Modal | Number of characters of overlap between adjacent chunks to preserve context. |
 | `sentenceAwareChunking` | `boolean` | `true` | 2.0.1 | Modal | When true, chunk boundaries snap to sentence endings. |
 | `preserveCodeBlocks` | `boolean` | `true` | 2.0.1 | Modal | When true, fenced code blocks are never split across chunks. |
 | `languageDetection` | `boolean` | `false` | 2.0.1 | Modal | When true, detects the dominant language of each chunk and may override `language` for that chunk. |
@@ -107,13 +107,13 @@ These fields control how the model is prompted and how failures are retried.
 | --- | --- | --- | --- | --- | --- |
 | `retryCount` | `number` | `3` | 2.0.1 | Modal | Maximum retry attempts per chunk on failure. |
 | `retryBackoffStrategy` | `'fixed' \| 'linear' \| 'exponential'` | `'exponential'` | 2.0.1 | Modal | Backoff curve between retries. |
-| `requestTimeoutMs` | `number` | `300000` | 2.0.1 | Modal | Total request timeout in milliseconds. Defaults to 5 minutes; large prompts use 10 minutes. |
-| `streamTimeoutMs` | `number` | `0` | 2.0.1 | Modal | Inactivity timeout for streaming responses. Zero disables the inactivity check. |
+| `requestTimeoutMs` | `number` | `60000` | 2.0.1 | Modal | Total request timeout in milliseconds. Defaults to 1 minute. |
+| `streamTimeoutMs` | `number` | `600000` | 2.0.1 | Modal | Inactivity timeout for streaming responses. Defaults to 10 minutes. |
 | `abortOnError` | `boolean` | `false` | 2.0.1 | Modal | When true, aborts the entire run on the first unrecoverable error instead of continuing. |
-| `topP` | `number` | `0` | 2.0.1 | Modal | Nucleus sampling probability mass. Zero lets the provider default apply. |
-| `topK` | `number` | `0` | 2.0.1 | Modal | Top-K sampling. Zero lets the provider default apply. |
-| `repeatPenalty` | `number` | `0` | 2.0.1 | Modal | Penalty applied to repeated tokens. Zero disables the penalty. |
-| `seed` | `number` | `0` | 2.0.1 | Modal | Random seed for reproducible generation. Zero disables deterministic seeding. |
+| `topP` | `number` | `0.9` | 2.0.1 | Modal | Nucleus sampling probability mass. |
+| `topK` | `number` | `40` | 2.0.1 | Modal | Top-K sampling. |
+| `repeatPenalty` | `number` | `1.1` | 2.0.1 | Modal | Penalty applied to repeated tokens. |
+| `seed` | `number` | `-1` | 2.0.1 | Modal | Random seed for reproducible generation. Negative values disable deterministic seeding. |
 | `systemPromptOverride` | `string` | `''` | 2.0.1 | Modal | Replaces the built-in system prompt. Empty uses the default. |
 | `stopSequences` | `string[]` | `[]` | 2.0.1 | Modal | Generation stops when any sequence is emitted. |
 | `bannedPhrases` | `string[]` | `[]` | 2.0.1 | Modal | Items containing any banned phrase are flagged by the validator. |
@@ -127,8 +127,8 @@ These fields control how the model is prompted and how failures are retried.
 | --- | --- | --- | --- | --- | --- |
 | `skipDedup` | `boolean` | `false` | 2.0.1 | Modal | When true, disables simhash near-duplicate removal. |
 | `dedupSimilarityThreshold` | `number` | `0.92` | 2.0.1 | Modal | Hamming-distance ratio above which two items are considered duplicates. |
-| `minQaPairsPerFile` | `number` | `0` | 2.0.1 | Modal | Minimum Q&A pairs expected per file. Files below this trigger a warning. |
-| `maxQaPairsPerFile` | `number` | `0` | 2.0.1 | Modal | Maximum Q&A pairs retained per file. Zero means unlimited. |
+| `minQaPairsPerFile` | `number` | `1` | 2.0.1 | Modal | Minimum Q&A pairs expected per file. Files below this trigger a warning. |
+| `maxQaPairsPerFile` | `number` | `1000` | 2.0.1 | Modal | Maximum Q&A pairs retained per file. |
 | `validationStrictness` | `'lenient' \| 'normal' \| 'strict'` | `'normal'` | 2.0.1 | Modal | Controls validator threshold sensitivity and reporting verbosity. |
 | `autoRegenerateOnLowQuality` | `boolean` | `false` | 2.0.1 | Modal | When true, regenerates chunks whose items score below `regenerateThreshold`. |
 | `regenerateThreshold` | `number` | `0.6` | 2.0.1 | Modal | Quality score below which `autoRegenerateOnLowQuality` triggers a retry. |
