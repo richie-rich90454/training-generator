@@ -69,6 +69,10 @@ When processing completes, review the generated items in the output preview. The
 - **Copy to clipboard** for a quick paste, or
 - **Export** to choose a save location. The output is written by the main process and split into multiple files (`training_data-1.jsonl`, `training_data-2.jsonl`, …) when it exceeds 100,000 items.
 
+::: tip v2.0.1 per-file output
+Switch **Output File Mode** to `perFile` in the Settings modal (Export section) to write one export per source file instead of a single combined dataset. You pick a destination directory once and each source becomes its own file. See [Output Mode](/configuration/output-mode.md) for the full guide.
+:::
+
 ## Example output
 
 A typical instruction-tuning item in JSONL format looks like this:
