@@ -100,7 +100,8 @@ export class ThroughputStore{
             }
             else{
                 try{
-                    this.samples=JSON.parse(raw) as ThroughputSample[]
+                    let parsed=JSON.parse(raw)
+                    this.samples=Array.isArray(parsed)?parsed as ThroughputSample[]:[]
                 }
                 catch{
                     this.samples=[]
