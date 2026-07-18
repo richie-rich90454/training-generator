@@ -488,10 +488,18 @@ export function parseEmail(buffer: Buffer): ParsedTextResult{
     }
     let headers: Record<string, string>={};
     let headerLines: string[]=headerPart.split(/\r?\n/);
+    let currentHeader: string|null=null;
     for(let line of headerLines){
         let m: RegExpMatchArray|null=line.match(/^([A-Za-z-]+):\s*(.*)$/);
         if(m){
-            headers[m[1].toLowerCase()]=m[2].trim();
+            currentHeader=m[1].toLowerCase();
+            headers[currentHeader]=m[2].trim();
+        }
+        else if(currentHeader!==null&&/^[ \t]/.test(line)){
+            headers[currentHeader]+=" "+line.trim();
+        }
+        else{
+            currentHeader=null;
         }
     }
     let metadata: Record<string, unknown>={

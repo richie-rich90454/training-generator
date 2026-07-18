@@ -224,6 +224,20 @@ describe("parseEmail", ()=>{
         let result: ParsedTextResult=parseEmail(Buffer.from(raw));
         expect(result.text).toBe("Hello base64");
     });
+    test("handles folded headers (RFC 5322)", ()=>{
+        let raw: string="From: a@b.com\nSubject: This is a long\n subject that continues\n here\nTo: c@d.com\n\nHello world.";
+        let result: ParsedTextResult=parseEmail(Buffer.from(raw));
+        expect(result.metadata.subject).toBe("This is a long subject that continues here");
+        expect(result.metadata.from).toBe("a@b.com");
+        expect(result.metadata.to).toBe("c@d.com");
+        expect(result.text).toBe("Hello world.");
+    });
+    test("ignores continuation without active header", ()=>{
+        let raw: string=" orphan continuation\nFrom: a@b.com\n\nBody text";
+        let result: ParsedTextResult=parseEmail(Buffer.from(raw));
+        expect(result.metadata.from).toBe("a@b.com");
+        expect(result.text).toBe("Body text");
+    });
 });
 describe("parseRss", ()=>{
     test("extracts items", ()=>{
