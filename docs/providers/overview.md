@@ -77,7 +77,7 @@ Use OpenAI for high-quality cloud models.
 Requests go to `/v1/chat/completions`; the key is validated against `/v1/models` during health checks. Common model identifiers: `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`, `gpt-4-turbo`.
 
 ::: warning Cost and rate limits
-OpenAI charges per token. Large documents with many chunks can become expensive. The built-in rate limiter allows up to 60 requests per 10 seconds by default. Reduce **Concurrency** and **Max Parallel Files** if you hit limits.
+OpenAI charges per token. Large documents with many chunks can become expensive. The built-in rate limiter allows up to 60 requests per minute with a burst of 10 by default. Reduce **Concurrency** and **Max Parallel Files** if you hit limits.
 :::
 
 ## Anthropic
