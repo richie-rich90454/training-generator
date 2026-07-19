@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, For, Show, createEffect } from "solid-js"
+import { createSignal, For, Show, createEffect, createMemo } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -63,8 +63,67 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
             lastFocusable = undefined
         }
     })
+
+    /**
+     * Re-apply field-level visibility whenever the search query changes. When
+     * searching, fields whose translated label does not include the query (and
+     * whose section title does not include the query) get a
+     * `data-search-hidden="true"` attribute that the CSS hides via
+     * `[data-search-hidden="true"]{display:none !important}`. When the search
+     * box is empty the attribute is removed from every field so the modal
+     * returns to its standard single-section view.
+     */
+    createEffect(() => {
+        // Subscribe to searchQuery so the effect re-runs on each keystroke.
+        const query = searchQuery().trim().toLowerCase()
+        const panels = overlayRef?.querySelectorAll<HTMLElement>("[data-section-id]") ?? []
+        for (const panel of Array.from(panels)) {
+            const sectionId = panel.dataset.sectionId || ""
+            const sectionLabel = t(`settings.sections.${sectionId}`).toLowerCase()
+            const sectionTitleMatches = query.length === 0 || sectionLabel.includes(query)
+            const fields = panel.querySelectorAll<HTMLElement>("[data-field-label]")
+            for (const field of Array.from(fields)) {
+                const labelText = (field.textContent || "").trim().toLowerCase()
+                const fieldKey = (field.dataset.fieldLabel || "").toLowerCase()
+                const matches = query.length === 0
+                    || sectionTitleMatches
+                    || labelText.includes(query)
+                    || fieldKey.includes(query)
+                if (matches) {
+                    field.removeAttribute("data-search-hidden")
+                    // Also un-hide the enclosing .settings-field wrapper so the
+                    // entire row (label + control) is shown.
+                    field.closest<HTMLElement>(".settings-field")?.removeAttribute("data-search-hidden")
+                }
+                else {
+                    field.setAttribute("data-search-hidden", "true")
+                    field.closest<HTMLElement>(".settings-field")?.setAttribute("data-search-hidden", "true")
+                }
+            }
+        }
+    })
+
+    /** Whether the user is currently searching (search box non-empty). */
+    const isSearching = createMemo(() => searchQuery().trim().length > 0)
+
+    /** Number of sections currently visible given the search query. */
+    const visibleSectionCount = createMemo(() => {
+        let count = 0
+        for (const section of SECTIONS) {
+            if (isSectionVisible(section.id)) count++
+        }
+        return count
+    })
+
     function handleKeydown(e: KeyboardEvent): void {
         if (e.key === "Escape") {
+            // If the user is searching, clear the search first instead of
+            // closing the modal — this matches platform search-box behavior.
+            if (isSearching()) {
+                e.preventDefault()
+                setSearchQuery("")
+                return
+            }
             e.preventDefault()
             hideSettings()
             return
@@ -175,7 +234,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
         if (panel) {
             const labels = Array.from(panel.querySelectorAll<HTMLElement>("[data-field-label]"))
             for (const label of labels) {
-                if ((label.dataset.fieldLabel || "").toLowerCase().includes(query)) return true
+                // Match against either the field key (data-field-label) or the
+                // translated label text visible to the user (textContent).
+                const fieldKey = (label.dataset.fieldLabel || "").toLowerCase()
+                const labelText = (label.textContent || "").trim().toLowerCase()
+                if (fieldKey.includes(query) || labelText.includes(query)) return true
             }
         }
         return false
@@ -210,6 +273,43 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                             <Icon html={renderIcon("fa-times")} />
                         </button>
                     </div>
+                    <div class={styles["settings-search"]}>
+                        <span class={styles["settings-search__icon"]} aria-hidden="true">
+                            <Icon html={renderIcon("fa-search")} />
+                        </span>
+                        <input
+                            id="settings-search-input"
+                            class={styles["settings-search__input"]}
+                            type="search"
+                            value={searchQuery()}
+                            placeholder={t("settings.search.placeholder")}
+                            data-i18n-placeholder="settings.search.placeholder"
+                            aria-label={t("settings.search.ariaLabel")}
+                            data-i18n-aria-label="settings.search.ariaLabel"
+                            onInput={(e) => setSearchQuery(e.currentTarget.value)}
+                        />
+                        <Show when={isSearching()}>
+                            <button
+                                type="button"
+                                class={styles["settings-search__clear"]}
+                                aria-label={t("settings.search.clearAria")}
+                                data-i18n-aria-label="settings.search.clearAria"
+                                onClick={() => setSearchQuery("")}
+                            >
+                                <Icon html={renderIcon("fa-times")} />
+                            </button>
+                        </Show>
+                        <Show when={isSearching()}>
+                            <span class={styles["settings-search__count"]} aria-live="polite">
+                                {t("settings.search.resultsCount", undefined, { count: String(visibleSectionCount()) })}
+                            </span>
+                        </Show>
+                    </div>
+                    <Show when={isSearching() && visibleSectionCount() === 0}>
+                        <p class={styles["settings-search__no-results"]} role="status">
+                            {t("settings.search.noResults")}
+                        </p>
+                    </Show>
                     <div class={styles["modal-body"]}>
                         <div class={styles["settings-layout"]}>
                             <nav
@@ -217,23 +317,26 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                 aria-label={t("settings.navAria")}
                                 data-i18n-aria-label="settings.navAria"
                                 onKeyDown={handleNavKeydown}
+                                classList={{ [styles["settings-nav--searching"]]: isSearching() }}
                             >
                                 <For each={SECTIONS}>
                                     {(section) => (
-                                        <button
-                                            type="button"
-                                            class={styles["settings-nav__button"]}
-                                            data-section-nav="true"
-                                            data-section={section.id}
-                                            aria-selected={activeSection() === section.id}
-                                            aria-controls={`settings-panel-${section.id}`}
-                                            id={`settings-tab-${section.id}`}
-                                            tabIndex={activeSection() === section.id ? 0 : -1}
-                                            onClick={() => setActiveSection(section.id)}
-                                        >
-                                            <Icon html={renderIcon(section.icon)} />
-                                            <span data-i18n={`settings.sections.${section.id}`}>{t(`settings.sections.${section.id}`)}</span>
-                                        </button>
+                                        <Show when={!isSearching() || isSectionVisible(section.id)}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-nav__button"]}
+                                                data-section-nav="true"
+                                                data-section={section.id}
+                                                aria-selected={activeSection() === section.id}
+                                                aria-controls={`settings-panel-${section.id}`}
+                                                id={`settings-tab-${section.id}`}
+                                                tabIndex={activeSection() === section.id ? 0 : -1}
+                                                onClick={() => setActiveSection(section.id)}
+                                            >
+                                                <Icon html={renderIcon(section.icon)} />
+                                                <span data-i18n={`settings.sections.${section.id}`}>{t(`settings.sections.${section.id}`)}</span>
+                                            </button>
+                                        </Show>
                                     )}
                                 </For>
                             </nav>
