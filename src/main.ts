@@ -1629,6 +1629,11 @@ app.on("before-quit",async(event)=>{
     }
 })
 app.on("activate",()=>{
+    // Guard against creating a window while the app is mid-shutdown.
+    // before-quit runs async cleanup between preventDefault() and app.exit();
+    // a dock click during that window must not spawn a fresh BrowserWindow
+    // that would leak past the imminent exit.
+    if(isAppQuitting)return
     if(!mainWindow){
         createMainWindow()
     }
