@@ -222,7 +222,7 @@ export class AmbiguityValidator extends BaseValidator{
         if (passiveCount>0){
             flags.push("passive_voice")
         }
-        let score=Math.max(0, 1-(vagueDensity*0.5+passiveCount*0.02))
+        let score=Math.max(0, 1-(vagueDensity*0.05+passiveCount*0.02))
         let passed=score>=this.threshold
         return this.buildResult(score, passed, [], flags)
     }
