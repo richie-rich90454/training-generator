@@ -214,17 +214,29 @@ export class OpenAIProvider implements Provider{
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
+        const signal=options?.signal
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                if(signal?.aborted)throw new Error("Aborted")
                 const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
-                let r=await api.generateWithOpenAI(
+                let ipcPromise=api.generateWithOpenAI(
                     this.apiKey,this.baseUrl,model,prompt,{
                         temperature:strictOpts?.temperature??options?.temperature??0.7,
                         top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )
+                let r
+                if(signal){
+                    let abortPromise=new Promise<never>((_,reject)=>{
+                        signal.addEventListener("abort",()=>reject(new Error("Aborted")),{once:true})
+                    })
+                    r=await Promise.race([ipcPromise,abortPromise])
+                }
+                else{
+                    r=await ipcPromise
+                }
                 if(!r.success)throw new Error(r.error||"OpenAI generation failed")
                 return r
             },3,1000,undefined,this.rateLimiter)
@@ -369,17 +381,29 @@ export class AnthropicProvider implements Provider{
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
+        const signal=options?.signal
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                if(signal?.aborted)throw new Error("Aborted")
                 const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
-                let r=await api.generateWithAnthropic(
+                let ipcPromise=api.generateWithAnthropic(
                     this.apiKey,model,prompt,{
                         temperature:strictOpts?.temperature??options?.temperature??0.7,
                         top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )
+                let r
+                if(signal){
+                    let abortPromise=new Promise<never>((_,reject)=>{
+                        signal.addEventListener("abort",()=>reject(new Error("Aborted")),{once:true})
+                    })
+                    r=await Promise.race([ipcPromise,abortPromise])
+                }
+                else{
+                    r=await ipcPromise
+                }
                 if(!r.success)throw new Error(r.error||"Anthropic generation failed")
                 return r
             },3,1000,undefined,this.rateLimiter)
@@ -416,17 +440,29 @@ export class GeminiProvider implements Provider{
     async generate(prompt:string,model:string,options?:ProviderOptions):Promise<ProviderResult>{
         let api=window.electronAPI
         if(!api)throw new Error("Electron API not available")
+        const signal=options?.signal
         try{
             await this.rateLimiter.acquire()
             let result=await retryWithBackoff(async()=>{
+                if(signal?.aborted)throw new Error("Aborted")
                 const strictOpts=options?.processingType?getStrictGenerationOptions(options.processingType):null
-                let r=await api.generateWithGemini(
+                let ipcPromise=api.generateWithGemini(
                     this.apiKey,model,prompt,{
                         temperature:strictOpts?.temperature??options?.temperature??0.7,
                         top_p:strictOpts?.top_p??options?.top_p??0.9,
                         max_tokens:options?.max_tokens??4096
                     }
                 )
+                let r
+                if(signal){
+                    let abortPromise=new Promise<never>((_,reject)=>{
+                        signal.addEventListener("abort",()=>reject(new Error("Aborted")),{once:true})
+                    })
+                    r=await Promise.race([ipcPromise,abortPromise])
+                }
+                else{
+                    r=await ipcPromise
+                }
                 if(!r.success)throw new Error(r.error||"Gemini generation failed")
                 return r
             },3,1000,undefined,this.rateLimiter)
