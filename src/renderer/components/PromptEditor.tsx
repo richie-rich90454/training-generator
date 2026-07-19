@@ -120,6 +120,9 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
         }
     }
     function handleKeydown(e: KeyboardEvent):void{
+        if (!props.appStore?.uiStore.promptOpen()){
+            return
+        }
         if (e.key==="Escape"){
             e.preventDefault()
             handleClose()

@@ -4,7 +4,7 @@
 // and renders the fine-grained reactive component tree.
 import { render } from "solid-js/web"
 import type { JSX } from "solid-js"
-import { onMount, onCleanup } from "solid-js"
+import { onMount, onCleanup, ErrorBoundary } from "solid-js"
 import { createAppStore } from "./stores/appStore.js"
 import { TitleBar } from "./components/TitleBar.js"
 import { ToastContainer } from "./components/ToastContainer.js"
@@ -19,6 +19,77 @@ import { AnalyticsDashboard } from "./components/AnalyticsDashboard.js"
 import { PromptEditor } from "./components/PromptEditor.js"
 import { applyLanguage, t } from "./i18n.js"
 import "../styles/main.css"
+function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Element {
+    // Best-effort error log to the main-process crash log channel. Swallow
+    // failures so a broken IPC surface never blocks the recovery UI.
+    try {
+        window.electronAPI?.writeLog?.({
+            timestamp: new Date().toISOString(),
+            level: "error",
+            module: "renderer/App",
+            message: props.error?.message ?? "Unknown render error",
+            context: { stack: props.error?.stack ?? "" }
+        })
+    }
+    catch {
+        // ignore — recovery UI must not depend on IPC availability
+    }
+    function handleReload(): void {
+        // Hard reload is the most reliable recovery when reactive state is corrupted.
+        window.location.reload()
+    }
+    return (
+        <div
+            role="alert"
+            aria-live="assertive"
+            style={{
+                display: "flex",
+                "flex-direction": "column",
+                "align-items": "center",
+                "justify-content": "center",
+                padding: "32px",
+                "text-align": "center",
+                "min-height": "60vh",
+                gap: "16px"
+            }}
+        >
+            <h2 style={{ margin: 0 }}>{t("toast.unexpectedError")}</h2>
+            <p style={{ margin: 0, color: "#666", "max-width": "480px", "word-break": "break-word" }}>
+                {props.error?.message ?? String(props.error)}
+            </p>
+            <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                    type="button"
+                    onClick={() => props.reset()}
+                    style={{
+                        padding: "8px 16px",
+                        "font-size": "14px",
+                        cursor: "pointer",
+                        border: "1px solid #ccc",
+                        "border-radius": "4px",
+                        background: "#f5f5f5"
+                    }}
+                >
+                    Retry
+                </button>
+                <button
+                    type="button"
+                    onClick={handleReload}
+                    style={{
+                        padding: "8px 16px",
+                        "font-size": "14px",
+                        cursor: "pointer",
+                        border: "1px solid #ccc",
+                        "border-radius": "4px",
+                        background: "#fff"
+                    }}
+                >
+                    Reload
+                </button>
+            </div>
+        </div>
+    )
+}
 export function App(): JSX.Element {
     const appStore = createAppStore()
     const commands: Command[] = [
@@ -105,19 +176,21 @@ export function App(): JSX.Element {
     })
     return (
         <div class="app-container fade-in">
-            <TitleBar appStore={appStore} />
-            <div class="main-scroll">
-                <ToastContainer appStore={appStore} />
-                <ContentGrid appStore={appStore} />
-                <Footer appStore={appStore} />
-            </div>
-            <SettingsModal appStore={appStore} />
-            <CommandPalette commands={commands} visible={appStore.uiStore.commandPaletteOpen} onClose={appStore.uiStore.closeCommandPalette} />
-            <Dashboard appStore={appStore} />
-            <Devtools appStore={appStore} />
-            <TemplateEditor appStore={appStore} />
-            <AnalyticsDashboard items={appStore.outputStore.outputData} appStore={appStore} />
-            <PromptEditor modelValue={appStore.settingsStore.settings.customPrompt || ""} onChange={(value)=>appStore.settingsStore.setCustomPrompt(value)} appStore={appStore} />
+            <ErrorBoundary fallback={(error, reset) => <AppErrorFallback error={error as Error} reset={reset} />}>
+                <TitleBar appStore={appStore} />
+                <div class="main-scroll">
+                    <ToastContainer appStore={appStore} />
+                    <ContentGrid appStore={appStore} />
+                    <Footer appStore={appStore} />
+                </div>
+                <SettingsModal appStore={appStore} />
+                <CommandPalette commands={commands} visible={appStore.uiStore.commandPaletteOpen} onClose={appStore.uiStore.closeCommandPalette} />
+                <Dashboard appStore={appStore} />
+                <Devtools appStore={appStore} />
+                <TemplateEditor appStore={appStore} />
+                <AnalyticsDashboard items={appStore.outputStore.outputData} appStore={appStore} />
+                <PromptEditor modelValue={appStore.settingsStore.settings.customPrompt || ""} onChange={(value)=>appStore.settingsStore.setCustomPrompt(value)} appStore={appStore} />
+            </ErrorBoundary>
         </div>
     )
 }
