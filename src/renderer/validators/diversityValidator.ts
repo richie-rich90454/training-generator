@@ -158,7 +158,7 @@ export class DiversityValidator extends BaseValidator{
             this.clusters.push({centroid: embedding, members: [text]})
             clusterSize=1
         }
-        let score=1-(clusterSize/this.maxClusterSize)
+        let score=Math.max(0, 1-(clusterSize/this.maxClusterSize))
         return this.buildResult(score, passed, [], flags)
     }
     private async computeCentroid(members: string[]): Promise<number[]>{
