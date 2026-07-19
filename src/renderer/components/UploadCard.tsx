@@ -75,7 +75,6 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
             <div
                 id="drop-zone"
                 class={"file-upload-area" + (dragOver() ? " drag-over" : "")}
-                role="button"
                 aria-label={t("upload.dropzoneAria")}
                 data-i18n-aria-label="upload.dropzoneAria"
                 tabindex="0"
