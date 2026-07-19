@@ -509,18 +509,6 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
-                                        <label class={styles["settings-field__label"]} for="settings-enable-thinking">
-                                            <input
-                                                id="settings-enable-thinking"
-                                                class={styles["form-checkbox"]}
-                                                type="checkbox"
-                                                checked={settingsStore.appSettings.enableThinking}
-                                                onChange={(e) => settingsStore.setEnableThinking(e.currentTarget.checked)}
-                                            />
-                                            <span data-i18n="settings.enableThinking" data-field-label="enableThinking">{t("settings.enableThinking")}</span>
-                                        </label>
-                                    </div>
-                                    <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-file-size">
                                             <Icon html={renderIcon("fa-hdd")} />
                                             <span data-i18n="settings.maxFileSize" data-field-label="maxFileSize">{t("settings.maxFileSize")}</span>
@@ -949,6 +937,281 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <Icon html={renderIcon("fa-brain")} />
                                         <span data-i18n="settings.sections.generation">{t("settings.sections.generation")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-model">
+                                            <Icon html={renderIcon("fa-brain")} />
+                                            <span data-i18n="settings.model" data-field-label="model">{t("settings.model")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-model"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={settingsStore.settings.model || ""}
+                                            placeholder={t("settings.model.placeholder")}
+                                            data-i18n-placeholder="settings.model.placeholder"
+                                            onInput={(e) => settingsStore.setModel(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-provider">
+                                            <Icon html={renderIcon("fa-cloud")} />
+                                            <span data-i18n="settings.provider" data-field-label="provider">{t("settings.provider")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-provider"
+                                            class={styles["form-control"]}
+                                            value={settingsStore.settings.provider || "ollama"}
+                                            onChange={(e) => settingsStore.setProvider(e.currentTarget.value)}
+                                        >
+                                            <option value="ollama" data-i18n="settings.provider.ollama">{t("settings.provider.ollama")}</option>
+                                            <option value="openai" data-i18n="settings.provider.openai">{t("settings.provider.openai")}</option>
+                                            <option value="anthropic" data-i18n="settings.provider.anthropic">{t("settings.provider.anthropic")}</option>
+                                            <option value="gemini" data-i18n="settings.provider.gemini">{t("settings.provider.gemini")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-temperature">
+                                            <Icon html={renderIcon("fa-thermometer-half")} />
+                                            <span data-i18n="settings.temperature" data-field-label="temperature">{t("settings.temperature")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-temperature"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="2"
+                                            step="0.1"
+                                            value={settingsStore.settings.temperature}
+                                            onChange={(e) => settingsStore.setTemperature(parseFloat(e.currentTarget.value) || 0)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-top-p">
+                                            <Icon html={renderIcon("fa-sliders-h")} />
+                                            <span data-i18n="settings.topP" data-field-label="topP">{t("settings.topP")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-top-p"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value={settingsStore.appSettings.topP ?? 0.9}
+                                            onChange={(e) => settingsStore.setAppSetting("topP", parseFloat(e.currentTarget.value) || 0.9)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-top-k">
+                                            <Icon html={renderIcon("fa-list-ol")} />
+                                            <span data-i18n="settings.topK" data-field-label="topK">{t("settings.topK")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-top-k"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="1000"
+                                            step="1"
+                                            value={settingsStore.appSettings.topK ?? 40}
+                                            onChange={(e) => settingsStore.setAppSetting("topK", parseInt(e.currentTarget.value, 10) || 40)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-repeat-penalty">
+                                            <Icon html={renderIcon("fa-sync-alt")} />
+                                            <span data-i18n="settings.repeatPenalty" data-field-label="repeatPenalty">{t("settings.repeatPenalty")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-repeat-penalty"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0.5"
+                                            max="2"
+                                            step="0.05"
+                                            value={settingsStore.appSettings.repeatPenalty ?? 1.1}
+                                            onChange={(e) => settingsStore.setAppSetting("repeatPenalty", parseFloat(e.currentTarget.value) || 1.1)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-seed">
+                                            <Icon html={renderIcon("fa-key")} />
+                                            <span data-i18n="settings.seed" data-field-label="seed">{t("settings.seed")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-seed"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="-1"
+                                            max="2147483647"
+                                            step="1"
+                                            value={settingsStore.appSettings.seed ?? -1}
+                                            onChange={(e) => settingsStore.setAppSetting("seed", parseInt(e.currentTarget.value, 10) || -1)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-system-prompt-override">
+                                            <Icon html={renderIcon("fa-file-alt")} />
+                                            <span data-i18n="settings.systemPromptOverride" data-field-label="systemPromptOverride">{t("settings.systemPromptOverride")}</span>
+                                        </label>
+                                        <textarea
+                                            id="settings-system-prompt-override"
+                                            class={styles["form-control"]}
+                                            rows="3"
+                                            value={settingsStore.appSettings.systemPromptOverride ?? ""}
+                                            placeholder={t("settings.systemPromptOverride.placeholder")}
+                                            data-i18n-placeholder="settings.systemPromptOverride.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("systemPromptOverride", e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-stop-sequences">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.stopSequences" data-field-label="stopSequences">{t("settings.stopSequences")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-stop-sequences"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={(settingsStore.appSettings.stopSequences ?? []).join(", ")}
+                                            placeholder={t("settings.stopSequences.placeholder")}
+                                            data-i18n-placeholder="settings.stopSequences.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("stopSequences", e.currentTarget.value.split(",").map((s) => s.trim()).filter((s) => s.length > 0))}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-banned-phrases">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.bannedPhrases" data-field-label="bannedPhrases">{t("settings.bannedPhrases")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-banned-phrases"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={(settingsStore.appSettings.bannedPhrases ?? []).join(", ")}
+                                            placeholder={t("settings.bannedPhrases.placeholder")}
+                                            data-i18n-placeholder="settings.bannedPhrases.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("bannedPhrases", e.currentTarget.value.split(",").map((s) => s.trim()).filter((s) => s.length > 0))}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-required-phrases">
+                                            <Icon html={renderIcon("fa-check-circle")} />
+                                            <span data-i18n="settings.requiredPhrases" data-field-label="requiredPhrases">{t("settings.requiredPhrases")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-required-phrases"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={(settingsStore.appSettings.requiredPhrases ?? []).join(", ")}
+                                            placeholder={t("settings.requiredPhrases.placeholder")}
+                                            data-i18n-placeholder="settings.requiredPhrases.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("requiredPhrases", e.currentTarget.value.split(",").map((s) => s.trim()).filter((s) => s.length > 0))}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-custom-prompt">
+                                            <Icon html={renderIcon("fa-edit")} />
+                                            <span data-i18n="settings.customPrompt" data-field-label="customPrompt">{t("settings.customPrompt")}</span>
+                                        </label>
+                                        <textarea
+                                            id="settings-custom-prompt"
+                                            class={styles["form-control"]}
+                                            rows="3"
+                                            value={settingsStore.settings.customPrompt || ""}
+                                            placeholder={t("settings.customPrompt.placeholder")}
+                                            data-i18n-placeholder="settings.customPrompt.placeholder"
+                                            onInput={(e) => settingsStore.setCustomPrompt(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-enable-thinking">
+                                            <input
+                                                id="settings-enable-thinking"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.enableThinking ?? false}
+                                                onChange={(e) => settingsStore.setEnableThinking(e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.enableThinking" data-field-label="enableThinking">{t("settings.enableThinking")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-retry-count">
+                                            <Icon html={renderIcon("fa-undo")} />
+                                            <span data-i18n="settings.retryCount" data-field-label="retryCount">{t("settings.retryCount")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-retry-count"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="10"
+                                            step="1"
+                                            value={settingsStore.appSettings.retryCount ?? 3}
+                                            onChange={(e) => settingsStore.setAppSetting("retryCount", parseInt(e.currentTarget.value, 10) || 0)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-retry-backoff-strategy">
+                                            <Icon html={renderIcon("fa-sliders-h")} />
+                                            <span data-i18n="settings.retryBackoffStrategy" data-field-label="retryBackoffStrategy">{t("settings.retryBackoffStrategy")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-retry-backoff-strategy"
+                                            class={styles["form-control"]}
+                                            value={settingsStore.appSettings.retryBackoffStrategy || "exponential"}
+                                            onChange={(e) => settingsStore.setAppSetting("retryBackoffStrategy", e.currentTarget.value as "fixed" | "linear" | "exponential")}
+                                        >
+                                            <option value="fixed" data-i18n="settings.retryBackoffStrategy.fixed">{t("settings.retryBackoffStrategy.fixed")}</option>
+                                            <option value="linear" data-i18n="settings.retryBackoffStrategy.linear">{t("settings.retryBackoffStrategy.linear")}</option>
+                                            <option value="exponential" data-i18n="settings.retryBackoffStrategy.exponential">{t("settings.retryBackoffStrategy.exponential")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-request-timeout-ms">
+                                            <Icon html={renderIcon("fa-clock")} />
+                                            <span data-i18n="settings.requestTimeoutMs" data-field-label="requestTimeoutMs">{t("settings.requestTimeoutMs")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-request-timeout-ms"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1000"
+                                            max="600000"
+                                            step="1000"
+                                            value={settingsStore.appSettings.requestTimeoutMs ?? 60000}
+                                            onChange={(e) => settingsStore.setAppSetting("requestTimeoutMs", parseInt(e.currentTarget.value, 10) || 60000)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-stream-timeout-ms">
+                                            <Icon html={renderIcon("fa-clock")} />
+                                            <span data-i18n="settings.streamTimeoutMs" data-field-label="streamTimeoutMs">{t("settings.streamTimeoutMs")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-stream-timeout-ms"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1000"
+                                            max="3600000"
+                                            step="1000"
+                                            value={settingsStore.appSettings.streamTimeoutMs ?? 600000}
+                                            onChange={(e) => settingsStore.setAppSetting("streamTimeoutMs", parseInt(e.currentTarget.value, 10) || 600000)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-abort-on-error">
+                                            <input
+                                                id="settings-abort-on-error"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.abortOnError ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("abortOnError", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.abortOnError" data-field-label="abortOnError">{t("settings.abortOnError")}</span>
+                                        </label>
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("validation")}
