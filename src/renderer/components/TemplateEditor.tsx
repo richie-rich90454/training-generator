@@ -148,9 +148,10 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
                             </button>
                         </div>
                         <div class={styles["template-editor-body"]}>
-                            <label><Icon html={renderIcon("fa-code")} /> {t("templateEditor.templateLabel")}</label>
+                            <label for="template-editor-textarea"><Icon html={renderIcon("fa-code")} /> {t("templateEditor.templateLabel")}</label>
                             <textarea
                                 ref={textareaRef}
+                                id="template-editor-textarea"
                                 class={styles["template-editor-textarea"]}
                                 aria-label={t("templateEditor.contentAria")}
                                 placeholder={t("templateEditor.placeholder")}
