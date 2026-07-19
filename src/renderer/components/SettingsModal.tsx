@@ -4,11 +4,121 @@ import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
+import { showConfirm } from "../confirm.js"
 import modalStyles from "./styles/Modal.module.css"
 import settingsModalStyles from "./styles/SettingsModal.module.css"
 import formsStyles from "./styles/Forms.module.css"
 import buttonsStyles from "./styles/Buttons.module.css"
 const styles = { ...modalStyles, ...settingsModalStyles, ...formsStyles, ...buttonsStyles }
+
+/**
+ * Default values for every FullAppSettings key (plus a small number of
+ * runtime-only keys like `customModelEndpoint` and `logLevel` that the
+ * existing code stores on appSettings via `as never` casts). Duplicated
+ * locally because settingsStore.ts is owned by another agent and is
+ * read-only here. These MUST stay in sync with the defaults in
+ * createSettingsStore() and resetAppSettings() in
+ * src/renderer/stores/settingsStore.ts.
+ */
+const DEFAULT_APP_SETTINGS: Record<string, unknown> = {
+    theme: "auto",
+    fontSize: "medium",
+    autoSave: true,
+    autoCheckOllama: true,
+    startMaximized: false,
+    rememberWindowSize: true,
+    smartSizing: true,
+    maxFileSize: 100,
+    maxOutputItems: 100000,
+    maxChunks: 500,
+    maxParallelFiles: 1,
+    enableThinking: false,
+    outputFileMode: "combined",
+    outputFilenameTemplate: "{source}",
+    confirmBeforeExport: false,
+    autoExportOnCompletion: false,
+    maxItemsPerFile: 50000,
+    stripPiiBeforeExport: false,
+    includeSourceMetadata: false,
+    fontScale: 100,
+    compactMode: false,
+    reducedMotion: false,
+    highContrast: false,
+    customCssPath: "",
+    verboseDashboard: false,
+    disableTelemetry: false,
+    disableCrashReports: false,
+    disableAutoUpdate: false,
+    updateCheckIntervalHours: 24,
+    gpuAcceleration: true,
+    sendToTrayOnClose: false,
+    startOnLogin: false,
+    cacheDir: "",
+    cacheMaxSizeMB: 500,
+    cacheTtlSeconds: 86400,
+    clearCacheOnExit: false,
+    retryCount: 3,
+    retryBackoffStrategy: "exponential",
+    requestTimeoutMs: 60000,
+    streamTimeoutMs: 600000,
+    abortOnError: false,
+    topP: 0.9,
+    topK: 40,
+    repeatPenalty: 1.1,
+    seed: -1,
+    systemPromptOverride: "",
+    stopSequences: [],
+    bannedPhrases: [],
+    requiredPhrases: [],
+    minChunkLength: 200,
+    maxChunkLength: 8000,
+    chunkOverlap: 100,
+    sentenceAwareChunking: true,
+    preserveCodeBlocks: true,
+    languageDetection: false,
+    outputLanguageOverride: "",
+    skipDedup: false,
+    dedupSimilarityThreshold: 0.92,
+    minQaPairsPerFile: 1,
+    maxQaPairsPerFile: 1000,
+    validationStrictness: "normal",
+    autoRegenerateOnLowQuality: false,
+    regenerateThreshold: 0.6,
+    maxRegenerationAttempts: 2,
+    logToFile: false,
+    logFilePath: "",
+    // Runtime-only keys (not declared on FullAppSettings interface but used
+    // by the existing SettingsModal fields via `as never` casts):
+    customModelEndpoint: "",
+    logLevel: "info"
+}
+
+/**
+ * Map of sectionId -> list of appSettings keys that belong to that section.
+ * Used by the per-section reset button to restore only that section's
+ * settings to their defaults via settingsStore.setAppSetting.
+ *
+ * The values are typed as `string` rather than `keyof FullAppSettings` because
+ * a small number of keys (e.g. `customModelEndpoint`, `logLevel`) are stored
+ * on appSettings at runtime via `as never` casts but are not declared on the
+ * FullAppSettings interface (which is owned by another agent). The reset
+ * helper below also casts via `as never` for the same reason.
+ */
+const SECTION_KEYS: Record<string, string[]> = {
+    appearance: ["theme", "fontSize", "fontScale", "density", "compactMode", "reducedMotion", "highContrast", "customCssPath"],
+    profiles: [],
+    processing: ["autoSave", "autoCheckOllama", "maxFileSize", "maxOutputItems", "maxChunks", "maxParallelFiles", "minChunkLength", "maxChunkLength", "chunkOverlap", "sentenceAwareChunking", "preserveCodeBlocks", "languageDetection"],
+    window: ["startMaximized", "rememberWindowSize"],
+    outputMode: ["outputFileMode", "outputFilenameTemplate", "maxItemsPerFile", "includeSourceMetadata", "stripPiiBeforeExport"],
+    export: ["confirmBeforeExport", "autoExportOnCompletion"],
+    generation: ["retryCount", "retryBackoffStrategy", "requestTimeoutMs", "streamTimeoutMs", "abortOnError", "topP", "topK", "repeatPenalty", "seed", "systemPromptOverride", "stopSequences", "bannedPhrases", "requiredPhrases", "enableThinking"],
+    validation: ["validationStrictness", "skipDedup", "dedupSimilarityThreshold", "autoRegenerateOnLowQuality", "regenerateThreshold", "maxRegenerationAttempts", "minQaPairsPerFile", "maxQaPairsPerFile"],
+    providers: ["customModelEndpoint"],
+    telemetry: ["disableTelemetry", "disableCrashReports", "disableAutoUpdate", "updateCheckIntervalHours"],
+    advanced: ["gpuAcceleration", "sendToTrayOnClose", "startOnLogin", "cacheDir", "cacheMaxSizeMB", "cacheTtlSeconds", "clearCacheOnExit", "logToFile", "logFilePath", "logLevel", "verboseDashboard"],
+    experimental: ["outputLanguageOverride"]
+}
+
 export interface SettingsModalProps {
     appStore: AppStore
 }
@@ -146,6 +256,40 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
         }
     }
     function handleReset(): void {
+        settingsStore.resetAppSettings()
+    }
+    /**
+     * Reset only the settings keys that belong to the given section to their
+     * default values. Each key is applied via settingsStore.setAppSetting so
+     * the existing reactivity / persistence path is reused. A confirmation
+     * dialog is shown first; if the user cancels, no keys are touched.
+     */
+    async function handleResetSection(sectionId: string): Promise<void> {
+        const keys = SECTION_KEYS[sectionId]
+        if (!keys || keys.length === 0) return
+        const sectionLabel = t(`settings.sections.${sectionId}`)
+        const confirmed = await showConfirm(
+            t("settings.resetSection.confirm", undefined, { section: sectionLabel }),
+            t("settings.resetSection")
+        )
+        if (!confirmed) return
+        for (const key of keys) {
+            const defaultValue = DEFAULT_APP_SETTINGS[key]
+            // setAppSetting is keyed by FullAppSettings[K]; the loose cast
+            // below keeps TypeScript happy while preserving runtime behavior
+            // for keys (e.g. logLevel, customModelEndpoint) that are not on
+            // the FullAppSettings interface.
+            settingsStore.setAppSetting(key as never, defaultValue as never)
+        }
+        settingsStore.saveAppSettings()
+    }
+    /**
+     * Reset every FullAppSettings key to its default value. Delegates to
+     * settingsStore.resetAppSettings() after showing a confirmation dialog.
+     */
+    async function handleResetAll(): Promise<void> {
+        const confirmed = await showConfirm(t("settings.resetAll.confirm"), t("settings.resetAll"))
+        if (!confirmed) return
         settingsStore.resetAppSettings()
     }
     function handleSave(): void {
@@ -348,10 +492,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-appearance"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-palette")} />
-                                        <span data-i18n="settings.sections.appearance">{t("settings.sections.appearance")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-palette")} />
+                                            <span data-i18n="settings.sections.appearance">{t("settings.sections.appearance")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.appearance") })}
+                                                onClick={() => handleResetSection("appearance")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-theme">
                                             <Icon html={renderIcon("fa-display")} />
@@ -583,10 +740,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-processing"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-cogs")} />
-                                        <span data-i18n="settings.sections.processing">{t("settings.sections.processing")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-cogs")} />
+                                            <span data-i18n="settings.sections.processing">{t("settings.sections.processing")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.processing") })}
+                                                onClick={() => handleResetSection("processing")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-auto-save">
                                             <input
@@ -822,10 +992,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-window"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-window-restore")} />
-                                        <span data-i18n="settings.sections.window">{t("settings.sections.window")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-window-restore")} />
+                                            <span data-i18n="settings.sections.window">{t("settings.sections.window")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.window") })}
+                                                onClick={() => handleResetSection("window")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-start-maximized">
                                             <input
@@ -858,10 +1041,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-outputMode"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-file-export")} />
-                                        <span data-i18n="settings.sections.outputMode">{t("settings.sections.outputMode")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-file-export")} />
+                                            <span data-i18n="settings.sections.outputMode">{t("settings.sections.outputMode")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.outputMode") })}
+                                                onClick={() => handleResetSection("outputMode")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-output-file-mode-combined">
                                             <input
@@ -955,10 +1151,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-export"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-download")} />
-                                        <span data-i18n="settings.sections.export">{t("settings.sections.export")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-download")} />
+                                            <span data-i18n="settings.sections.export">{t("settings.sections.export")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.export") })}
+                                                onClick={() => handleResetSection("export")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-output-format">
                                             <Icon html={renderIcon("fa-file-code")} />
@@ -1036,10 +1245,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-generation"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-brain")} />
-                                        <span data-i18n="settings.sections.generation">{t("settings.sections.generation")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-brain")} />
+                                            <span data-i18n="settings.sections.generation">{t("settings.sections.generation")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.generation") })}
+                                                onClick={() => handleResetSection("generation")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-model">
                                             <Icon html={renderIcon("fa-brain")} />
@@ -1323,10 +1545,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-validation"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-check-circle")} />
-                                        <span data-i18n="settings.sections.validation">{t("settings.sections.validation")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-check-circle")} />
+                                            <span data-i18n="settings.sections.validation">{t("settings.sections.validation")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.validation") })}
+                                                onClick={() => handleResetSection("validation")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-validate-output">
                                             <input
@@ -1511,10 +1746,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-providers"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-server")} />
-                                        <span data-i18n="settings.sections.providers">{t("settings.sections.providers")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-server")} />
+                                            <span data-i18n="settings.sections.providers">{t("settings.sections.providers")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.providers") })}
+                                                onClick={() => handleResetSection("providers")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-api-key">
                                             <Icon html={renderIcon("fa-key")} />
@@ -1631,10 +1879,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-telemetry"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-eye")} />
-                                        <span data-i18n="settings.sections.telemetry">{t("settings.sections.telemetry")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-eye")} />
+                                            <span data-i18n="settings.sections.telemetry">{t("settings.sections.telemetry")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.telemetry") })}
+                                                onClick={() => handleResetSection("telemetry")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-enable-telemetry">
                                             <Icon html={renderIcon("fa-eye")} />
@@ -1762,10 +2023,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-advanced"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-sliders-h")} />
-                                        <span data-i18n="settings.sections.advanced">{t("settings.sections.advanced")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-sliders-h")} />
+                                            <span data-i18n="settings.sections.advanced">{t("settings.sections.advanced")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.advanced") })}
+                                                onClick={() => handleResetSection("advanced")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-gpu-acceleration">
                                             <Icon html={renderIcon("fa-bolt")} />
@@ -1971,11 +2245,24 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                     role="tabpanel"
                                     aria-labelledby="settings-tab-experimental"
                                 >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-magic")} />
-                                        <span data-i18n="settings.sections.experimental">{t("settings.sections.experimental")}</span>
-                                        <span class={styles["settings-badge"]} data-i18n="settings.experimentalBadge">{t("settings.experimentalBadge")}</span>
-                                    </h3>
+                                    <div class={styles["settings-section__header"]}>
+                                        <h3>
+                                            <Icon html={renderIcon("fa-magic")} />
+                                            <span data-i18n="settings.sections.experimental">{t("settings.sections.experimental")}</span>
+                                            <span class={styles["settings-badge"]} data-i18n="settings.experimentalBadge">{t("settings.experimentalBadge")}</span>
+                                        </h3>
+                                        <Show when={!isSearching()}>
+                                            <button
+                                                type="button"
+                                                class={styles["settings-section__reset"]}
+                                                aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.experimental") })}
+                                                onClick={() => handleResetSection("experimental")}
+                                            >
+                                                <Icon html={renderIcon("fa-undo")} />
+                                                <span data-i18n="settings.resetSection">{t("settings.resetSection")}</span>
+                                            </button>
+                                        </Show>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-output-language-override">
                                             <Icon html={renderIcon("fa-cloud")} />
@@ -2012,12 +2299,12 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                         <div class={styles["settings-actions"]}>
                             <button
                                 class={`${styles["btn"]} ${styles["btn-secondary"]}`}
-                                aria-label={t("settings.resetAria")}
-                                data-i18n-aria-label="settings.resetAria"
-                                onClick={handleReset}
+                                aria-label={t("settings.resetAll.ariaLabel")}
+                                data-i18n-aria-label="settings.resetAll.ariaLabel"
+                                onClick={handleResetAll}
                             >
                                 <Icon html={renderIcon("fa-undo")} />
-                                <span data-i18n="settings.reset">{t("settings.reset")}</span>
+                                <span data-i18n="settings.resetAll">{t("settings.resetAll")}</span>
                             </button>
                             <button
                                 class={`${styles["btn"]} ${styles["btn-primary"]}`}

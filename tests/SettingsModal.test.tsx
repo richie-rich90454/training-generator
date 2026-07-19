@@ -97,9 +97,16 @@ describe("SettingsModal", () => {
         expect(savePreset).toHaveBeenCalledTimes(1)
         expect(hideSettings).toHaveBeenCalledTimes(1)
     })
-    test("clicking reset calls resetAppSettings", () => {
+    test("clicking reset calls resetAppSettings", async () => {
         const { settingsStore } = renderComponent(true)
-        fireEvent.click(screen.getByText(t("settings.reset")))
+        fireEvent.click(screen.getByText(t("settings.resetAll")))
+        // handleResetAll shows a confirm dialog; click OK to confirm.
+        const okBtn = document.getElementById("confirm-ok-btn") as HTMLButtonElement
+        expect(okBtn).not.toBeNull()
+        fireEvent.click(okBtn)
+        // Wait for the showConfirm promise to resolve and the reset path to run.
+        await Promise.resolve()
+        await Promise.resolve()
         expect(settingsStore.resetAppSettings).toHaveBeenCalledTimes(1)
     })
     test("typing profile name and saving calls saveCurrentProfile", () => {
