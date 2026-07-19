@@ -32,8 +32,10 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
             addLog(entry)
         }
         props.appStore.logger.addListener(listener)
+        document.addEventListener("keydown", handleKeydown)
         onCleanup(() => {
             props.appStore.logger.removeListener(listener)
+            document.removeEventListener("keydown", handleKeydown)
             if (pendingRender !== null) {
                 cancelAnimationFrame(pendingRender)
                 pendingRender = null
@@ -49,6 +51,15 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     })
     function clearLogs(): void {
         setLogEntries([])
+    }
+    function handleKeydown(e: KeyboardEvent): void {
+        if (!props.appStore.uiStore.devtoolsOpen()) {
+            return
+        }
+        if (e.key === "Escape") {
+            e.preventDefault()
+            props.appStore.uiStore.setDevtoolsOpen(false)
+        }
     }
     function switchTab(tabName: string): void {
         let validTabs = ["logs", "cache", "workers", "memory"]
@@ -99,7 +110,7 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     return (
         <Show when={props.appStore.uiStore.devtoolsOpen()}>
             <Portal mount={document.body}>
-                <div class={styles["devtools-panel"]} data-testid="devtools-panel">
+                <div class={styles["devtools-panel"]} data-testid="devtools-panel" role="dialog" aria-label={t("devtools.title")}>
                     <div class={styles["devtools-header"]}>
                         <h3>{t("devtools.title")}</h3>
                         <button class={styles["devtools-close"]} aria-label={t("devtools.closeAria")} onClick={() => props.appStore.uiStore.setDevtoolsOpen(false)}>
