@@ -69,6 +69,29 @@ describe("Footer", () => {
         render(() => <Footer appStore={makeAppStore()} />)
         expect(screen.getByText("Training Generator")).not.toBeNull()
     })
+    test("displays app version when getAppVersion IPC resolves", async () => {
+        const getAppVersion = vi.fn(async () => "2.0.1")
+        vi.stubGlobal("electronAPI", { getAppVersion })
+        render(() => <Footer appStore={makeAppStore()} />)
+        // Wait for the onMount IPC call to resolve and the signal to update.
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(getAppVersion).toHaveBeenCalledTimes(1)
+        expect(screen.getByText(/2\.0\.1/)).not.toBeNull()
+    })
+    test("does not display version when getAppVersion is missing", () => {
+        vi.stubGlobal("electronAPI", undefined)
+        render(() => <Footer appStore={makeAppStore()} />)
+        expect(screen.queryByText(/v\d+\.\d+\.\d+/)).toBeNull()
+    })
+    test("does not display version when getAppVersion rejects", async () => {
+        const getAppVersion = vi.fn(async () => {
+            throw new Error("IPC unavailable")
+        })
+        vi.stubGlobal("electronAPI", { getAppVersion })
+        render(() => <Footer appStore={makeAppStore()} />)
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(screen.queryByText(/v\d+\.\d+\.\d+/)).toBeNull()
+    })
     test("renders documentation link", () => {
         render(() => <Footer appStore={makeAppStore()} />)
         const docLink = screen.getByText("Documentation")
