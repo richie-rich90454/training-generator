@@ -173,10 +173,12 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                                 <h4 class={styles["panel-title"]}>{t("promptEditor.variablesTitle")}</h4>
                                 <For each={extractedVariables()}>
                                     {(variable)=>{
+                                        let inputId="variable-input-"+variable.replace(/\s+/g,"-")
                                         return (
                                             <div class={styles["variable-row"]} data-testid="variable-row">
-                                                <label class={styles["variable-label"]} data-testid={"variable-label-"+variable}>{variable}</label>
+                                                <label class={styles["variable-label"]} for={inputId} data-testid={"variable-label-"+variable}>{variable}</label>
                                                 <input
+                                                    id={inputId}
                                                     class={styles["variable-input"]}
                                                     type="text"
                                                     value={variableValues()[variable]||""}
