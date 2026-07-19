@@ -348,9 +348,10 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                                 data-i18n-placeholder="config.outputFilenameTemplate.placeholder"
                                 aria-label={t("config.outputFilenameTemplateAria")}
                                 data-i18n-aria-label="config.outputFilenameTemplateAria"
+                                aria-describedby="config-output-filename-template-help"
                                 onInput={(e) => settingsStore.setAppSetting("outputFilenameTemplate", e.currentTarget.value)}
                             />
-                            <p class={styles["config-field__help"]} data-i18n="config.outputFilenameTemplate.help">
+                            <p id="config-output-filename-template-help" class={styles["config-field__help"]} data-i18n="config.outputFilenameTemplate.help">
                                 {t("config.outputFilenameTemplate.help")}
                             </p>
                         </div>
