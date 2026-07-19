@@ -384,13 +384,14 @@ if(!gotSingleInstanceLock){
 }
 if(typeof app.on==="function"){
     app.on("second-instance",()=>{
-        if(mainWindow){
-            if(mainWindow.isMinimized()){
-                mainWindow.restore()
-            }
-            mainWindow.show()
-            mainWindow.focus()
+        if(!mainWindow||mainWindow.isDestroyed())return
+        if(mainWindow.isMinimized()){
+            mainWindow.restore()
         }
+        if(!mainWindow.isVisible()){
+            mainWindow.show()
+        }
+        mainWindow.focus()
     })
 }
 function createMainWindow(){
