@@ -73,8 +73,8 @@ export async function retryWithBackoff<T>(
         catch(error){
             lastError=error as Error
             let msg=lastError.message||""
-            // Don't retry on auth errors (4xx except 429)
-            if(msg.includes("401")||msg.includes("403")||msg.includes("invalid api key")){
+            // Don't retry on auth errors (4xx except 429) or aborts
+            if(msg.includes("401")||msg.includes("403")||msg.includes("invalid api key")||msg.includes("Aborted")){
                 throw lastError
             }
             // Handle rate limit (429) errors
