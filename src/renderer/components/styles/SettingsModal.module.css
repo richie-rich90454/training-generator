@@ -125,6 +125,19 @@
     text-transform:uppercase;
     letter-spacing:0.04em;
 }
+.settings-list{
+    margin:0;
+    padding-inline-start:var(--spacing-lg);
+    color:var(--text-secondary);
+    font-size:0.875rem;
+    list-style:disc;
+}
+.settings-list > li{
+    margin-bottom:var(--spacing-xs);
+}
+.settings-list > li:last-child{
+    margin-bottom:0;
+}
 @media (max-width:768px){
     .settings-field{
         margin-bottom:var(--spacing-sm);

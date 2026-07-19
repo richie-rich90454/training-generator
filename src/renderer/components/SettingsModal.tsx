@@ -1412,6 +1412,114 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <Icon html={renderIcon("fa-server")} />
                                         <span data-i18n="settings.sections.providers">{t("settings.sections.providers")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-api-key">
+                                            <Icon html={renderIcon("fa-key")} />
+                                            <span data-i18n="settings.apiKey" data-field-label="apiKey">{t("settings.apiKey")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-api-key"
+                                            class={styles["form-control"]}
+                                            type="password"
+                                            value={settingsStore.apiKeyPlain()}
+                                            placeholder={t("settings.apiKey.placeholder")}
+                                            data-i18n-placeholder="settings.apiKey.placeholder"
+                                            aria-label={t("settings.apiKey")}
+                                            data-i18n-aria-label="settings.apiKey"
+                                            onInput={(e) => settingsStore.setApiKey(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-base-url">
+                                            <Icon html={renderIcon("fa-link")} />
+                                            <span data-i18n="settings.baseUrl" data-field-label="baseUrl">{t("settings.baseUrl")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-base-url"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={settingsStore.settings.baseUrl || ""}
+                                            placeholder={t("settings.baseUrl.placeholder")}
+                                            data-i18n-placeholder="settings.baseUrl.placeholder"
+                                            onInput={(e) => settingsStore.setBaseUrl(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-ollama-host">
+                                            <Icon html={renderIcon("fa-server")} />
+                                            <span data-i18n="settings.ollamaHost" data-field-label="ollamaHost">{t("settings.ollamaHost")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-ollama-host"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={settingsStore.settings.ollamaHost || "localhost"}
+                                            placeholder={t("settings.ollamaHost.placeholder")}
+                                            data-i18n-placeholder="settings.ollamaHost.placeholder"
+                                            onInput={(e) => settingsStore.setOllamaHost(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-ollama-port">
+                                            <Icon html={renderIcon("fa-server")} />
+                                            <span data-i18n="settings.ollamaPort" data-field-label="ollamaPort">{t("settings.ollamaPort")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-ollama-port"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="65535"
+                                            step="1"
+                                            value={settingsStore.settings.ollamaPort ?? 11434}
+                                            onChange={(e) => settingsStore.setOllamaPort(parseInt(e.currentTarget.value, 10) || 11434)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-custom-model-endpoint">
+                                            <Icon html={renderIcon("fa-link")} />
+                                            <span data-i18n="settings.customModelEndpoint" data-field-label="customModelEndpoint">{t("settings.customModelEndpoint")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-custom-model-endpoint"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={(settingsStore.appSettings as Record<string, unknown>).customModelEndpoint as string ?? ""}
+                                            placeholder={t("settings.customModelEndpoint.placeholder")}
+                                            data-i18n-placeholder="settings.customModelEndpoint.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("customModelEndpoint" as never, e.currentTarget.value as never)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <span class={styles["settings-field__label"]} data-i18n="settings.providersList" data-field-label="providersList">{t("settings.providersList")}</span>
+                                        <Show
+                                            when={(settingsStore.appSettings.providers ?? []).length > 0}
+                                            fallback={<p data-i18n="settings.providersEmpty">{t("settings.providersEmpty")}</p>}
+                                        >
+                                            <ul class={styles["settings-list"]}>
+                                                <For each={settingsStore.appSettings.providers ?? []}>
+                                                    {(provider) => (
+                                                        <li>{provider.name ?? provider.id ?? String(provider)}</li>
+                                                    )}
+                                                </For>
+                                            </ul>
+                                        </Show>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <span class={styles["settings-field__label"]} data-i18n="settings.failoverPriority" data-field-label="failoverPriority">{t("settings.failoverPriority")}</span>
+                                        <Show
+                                            when={(settingsStore.appSettings.failoverPriority ?? []).length > 0}
+                                            fallback={<p data-i18n="settings.failoverEmpty">{t("settings.failoverEmpty")}</p>}
+                                        >
+                                            <ul class={styles["settings-list"]}>
+                                                <For each={settingsStore.appSettings.failoverPriority ?? []}>
+                                                    {(priority) => (
+                                                        <li>{priority}</li>
+                                                    )}
+                                                </For>
+                                            </ul>
+                                        </Show>
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("telemetry")}
