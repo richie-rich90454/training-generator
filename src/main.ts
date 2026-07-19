@@ -350,6 +350,10 @@ function resolveWritableUserDataPath():string{
 }
 userDataPath=resolveWritableUserDataPath()
 cachePath=path.join(userDataPath,"Cache")
+// keyStoragePath was initialised against the preferred (documents) path
+// above. Rebind it to the resolved writable path so secure-key persistence
+// follows the same fallback when documents is not writable.
+keyStoragePath=path.join(userDataPath,".keys")
 try{
     fs.mkdirSync(cachePath,{recursive:true})
 }
