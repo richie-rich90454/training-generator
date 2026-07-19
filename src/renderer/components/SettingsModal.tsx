@@ -716,8 +716,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="200"
                                             step="10"
                                             value={settingsStore.appSettings.fontScale ?? 100}
-                                            onChange={(e) => settingsStore.setAppSetting("fontScale", parseInt(e.currentTarget.value, 10) || 100)}
+                                            aria-invalid={numericErrors()["fontScale"] ? "true" : undefined}
+                                            aria-describedby="error-fontScale"
+                                            onChange={(e) => { validateNumeric("fontScale", e.currentTarget.value); settingsStore.setAppSetting("fontScale", parseInt(e.currentTarget.value, 10) || 100) }}
                                         />
+                                        <NumericError error={numericErrors()["fontScale"] ?? ""} id="error-fontScale" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-density">
@@ -937,8 +940,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             min="10"
                                             max="1000"
                                             value={settingsStore.appSettings.maxFileSize}
-                                            onChange={(e) => settingsStore.setMaxFileSize(parseInt(e.currentTarget.value, 10))}
+                                            aria-invalid={numericErrors()["maxFileSize"] ? "true" : undefined}
+                                            aria-describedby="error-maxFileSize"
+                                            onChange={(e) => { validateNumeric("maxFileSize", e.currentTarget.value); settingsStore.setMaxFileSize(parseInt(e.currentTarget.value, 10)) }}
                                         />
+                                        <NumericError error={numericErrors()["maxFileSize"] ?? ""} id="error-maxFileSize" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-output-items">
@@ -1017,8 +1023,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10000"
                                             step="100"
                                             value={settingsStore.settings.chunkSize}
-                                            onChange={(e) => settingsStore.setChunkSize(parseInt(e.currentTarget.value, 10))}
+                                            aria-invalid={numericErrors()["chunkSize"] ? "true" : undefined}
+                                            aria-describedby="error-chunkSize"
+                                            onChange={(e) => { validateNumeric("chunkSize", e.currentTarget.value); settingsStore.setChunkSize(parseInt(e.currentTarget.value, 10)) }}
                                         />
+                                        <NumericError error={numericErrors()["chunkSize"] ?? ""} id="error-chunkSize" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-concurrency">
@@ -1034,8 +1043,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10"
                                             step="1"
                                             value={settingsStore.settings.concurrency}
-                                            onChange={(e) => settingsStore.setConcurrency(parseInt(e.currentTarget.value, 10))}
+                                            aria-invalid={numericErrors()["concurrency"] ? "true" : undefined}
+                                            aria-describedby="error-concurrency"
+                                            onChange={(e) => { validateNumeric("concurrency", e.currentTarget.value); settingsStore.setConcurrency(parseInt(e.currentTarget.value, 10)) }}
                                         />
+                                        <NumericError error={numericErrors()["concurrency"] ?? ""} id="error-concurrency" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-min-chunk-length">
@@ -1051,8 +1063,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="2000"
                                             step="50"
                                             value={settingsStore.appSettings.minChunkLength ?? 200}
-                                            onChange={(e) => settingsStore.setAppSetting("minChunkLength", parseInt(e.currentTarget.value, 10) || 200)}
+                                            aria-invalid={numericErrors()["minChunkLength"] ? "true" : undefined}
+                                            aria-describedby="error-minChunkLength"
+                                            onChange={(e) => { validateNumeric("minChunkLength", e.currentTarget.value); settingsStore.setAppSetting("minChunkLength", parseInt(e.currentTarget.value, 10) || 200) }}
                                         />
+                                        <NumericError error={numericErrors()["minChunkLength"] ?? ""} id="error-minChunkLength" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-chunk-length">
@@ -1068,8 +1083,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="32000"
                                             step="500"
                                             value={settingsStore.appSettings.maxChunkLength ?? 8000}
-                                            onChange={(e) => settingsStore.setAppSetting("maxChunkLength", parseInt(e.currentTarget.value, 10) || 8000)}
+                                            aria-invalid={numericErrors()["maxChunkLength"] ? "true" : undefined}
+                                            aria-describedby="error-maxChunkLength"
+                                            onChange={(e) => { validateNumeric("maxChunkLength", e.currentTarget.value); settingsStore.setAppSetting("maxChunkLength", parseInt(e.currentTarget.value, 10) || 8000) }}
                                         />
+                                        <NumericError error={numericErrors()["maxChunkLength"] ?? ""} id="error-maxChunkLength" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-chunk-overlap">
@@ -1085,8 +1103,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1000"
                                             step="10"
                                             value={settingsStore.appSettings.chunkOverlap ?? 100}
-                                            onChange={(e) => settingsStore.setAppSetting("chunkOverlap", parseInt(e.currentTarget.value, 10) || 0)}
+                                            aria-invalid={numericErrors()["chunkOverlap"] ? "true" : undefined}
+                                            aria-describedby="error-chunkOverlap"
+                                            onChange={(e) => { validateNumeric("chunkOverlap", e.currentTarget.value); settingsStore.setAppSetting("chunkOverlap", parseInt(e.currentTarget.value, 10) || 0) }}
                                         />
+                                        <NumericError error={numericErrors()["chunkOverlap"] ?? ""} id="error-chunkOverlap" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-sentence-aware-chunking">
@@ -1275,8 +1296,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 max="1000000"
                                                 step="100"
                                                 value={settingsStore.appSettings.maxItemsPerFile ?? 50000}
-                                                onChange={(e) => settingsStore.setAppSetting("maxItemsPerFile", parseInt(e.currentTarget.value, 10) || 50000)}
+                                                aria-invalid={numericErrors()["maxItemsPerFile"] ? "true" : undefined}
+                                                aria-describedby="error-maxItemsPerFile"
+                                                onChange={(e) => { validateNumeric("maxItemsPerFile", e.currentTarget.value); settingsStore.setAppSetting("maxItemsPerFile", parseInt(e.currentTarget.value, 10) || 50000) }}
                                             />
+                                            <NumericError error={numericErrors()["maxItemsPerFile"] ?? ""} id="error-maxItemsPerFile" />
                                         </div>
                                         <div class={styles["settings-field"]}>
                                             <label class={styles["settings-field__label"]} for="settings-include-source-metadata">
@@ -1476,8 +1500,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="2"
                                             step="0.1"
                                             value={settingsStore.settings.temperature}
-                                            onChange={(e) => settingsStore.setTemperature(parseFloat(e.currentTarget.value) || 0)}
+                                            aria-invalid={numericErrors()["temperature"] ? "true" : undefined}
+                                            aria-describedby="error-temperature"
+                                            onChange={(e) => { validateNumeric("temperature", e.currentTarget.value); settingsStore.setTemperature(parseFloat(e.currentTarget.value) || 0) }}
                                         />
+                                        <NumericError error={numericErrors()["temperature"] ?? ""} id="error-temperature" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-top-p">
@@ -1493,8 +1520,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1"
                                             step="0.05"
                                             value={settingsStore.appSettings.topP ?? 0.9}
-                                            onChange={(e) => settingsStore.setAppSetting("topP", parseFloat(e.currentTarget.value) || 0.9)}
+                                            aria-invalid={numericErrors()["topP"] ? "true" : undefined}
+                                            aria-describedby="error-topP"
+                                            onChange={(e) => { validateNumeric("topP", e.currentTarget.value); settingsStore.setAppSetting("topP", parseFloat(e.currentTarget.value) || 0.9) }}
                                         />
+                                        <NumericError error={numericErrors()["topP"] ?? ""} id="error-topP" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-top-k">
@@ -1510,8 +1540,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1000"
                                             step="1"
                                             value={settingsStore.appSettings.topK ?? 40}
-                                            onChange={(e) => settingsStore.setAppSetting("topK", parseInt(e.currentTarget.value, 10) || 40)}
+                                            aria-invalid={numericErrors()["topK"] ? "true" : undefined}
+                                            aria-describedby="error-topK"
+                                            onChange={(e) => { validateNumeric("topK", e.currentTarget.value); settingsStore.setAppSetting("topK", parseInt(e.currentTarget.value, 10) || 40) }}
                                         />
+                                        <NumericError error={numericErrors()["topK"] ?? ""} id="error-topK" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-repeat-penalty">
@@ -1527,8 +1560,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="2"
                                             step="0.05"
                                             value={settingsStore.appSettings.repeatPenalty ?? 1.1}
-                                            onChange={(e) => settingsStore.setAppSetting("repeatPenalty", parseFloat(e.currentTarget.value) || 1.1)}
+                                            aria-invalid={numericErrors()["repeatPenalty"] ? "true" : undefined}
+                                            aria-describedby="error-repeatPenalty"
+                                            onChange={(e) => { validateNumeric("repeatPenalty", e.currentTarget.value); settingsStore.setAppSetting("repeatPenalty", parseFloat(e.currentTarget.value) || 1.1) }}
                                         />
+                                        <NumericError error={numericErrors()["repeatPenalty"] ?? ""} id="error-repeatPenalty" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-seed">
@@ -1544,8 +1580,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="2147483647"
                                             step="1"
                                             value={settingsStore.appSettings.seed ?? -1}
-                                            onChange={(e) => settingsStore.setAppSetting("seed", parseInt(e.currentTarget.value, 10) || -1)}
+                                            aria-invalid={numericErrors()["seed"] ? "true" : undefined}
+                                            aria-describedby="error-seed"
+                                            onChange={(e) => { validateNumeric("seed", e.currentTarget.value); settingsStore.setAppSetting("seed", parseInt(e.currentTarget.value, 10) || -1) }}
                                         />
+                                        <NumericError error={numericErrors()["seed"] ?? ""} id="error-seed" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-system-prompt-override">
@@ -1654,8 +1693,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10"
                                             step="1"
                                             value={settingsStore.appSettings.retryCount ?? 3}
-                                            onChange={(e) => settingsStore.setAppSetting("retryCount", parseInt(e.currentTarget.value, 10) || 0)}
+                                            aria-invalid={numericErrors()["retryCount"] ? "true" : undefined}
+                                            aria-describedby="error-retryCount"
+                                            onChange={(e) => { validateNumeric("retryCount", e.currentTarget.value); settingsStore.setAppSetting("retryCount", parseInt(e.currentTarget.value, 10) || 0) }}
                                         />
+                                        <NumericError error={numericErrors()["retryCount"] ?? ""} id="error-retryCount" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-retry-backoff-strategy">
@@ -1688,8 +1730,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="600000"
                                             step="1000"
                                             value={settingsStore.appSettings.requestTimeoutMs ?? 60000}
-                                            onChange={(e) => settingsStore.setAppSetting("requestTimeoutMs", parseInt(e.currentTarget.value, 10) || 60000)}
+                                            aria-invalid={numericErrors()["requestTimeoutMs"] ? "true" : undefined}
+                                            aria-describedby="error-requestTimeoutMs"
+                                            onChange={(e) => { validateNumeric("requestTimeoutMs", e.currentTarget.value); settingsStore.setAppSetting("requestTimeoutMs", parseInt(e.currentTarget.value, 10) || 60000) }}
                                         />
+                                        <NumericError error={numericErrors()["requestTimeoutMs"] ?? ""} id="error-requestTimeoutMs" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-stream-timeout-ms">
@@ -1705,8 +1750,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="3600000"
                                             step="1000"
                                             value={settingsStore.appSettings.streamTimeoutMs ?? 600000}
-                                            onChange={(e) => settingsStore.setAppSetting("streamTimeoutMs", parseInt(e.currentTarget.value, 10) || 600000)}
+                                            aria-invalid={numericErrors()["streamTimeoutMs"] ? "true" : undefined}
+                                            aria-describedby="error-streamTimeoutMs"
+                                            onChange={(e) => { validateNumeric("streamTimeoutMs", e.currentTarget.value); settingsStore.setAppSetting("streamTimeoutMs", parseInt(e.currentTarget.value, 10) || 600000) }}
                                         />
+                                        <NumericError error={numericErrors()["streamTimeoutMs"] ?? ""} id="error-streamTimeoutMs" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-abort-on-error">
@@ -1816,8 +1864,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1"
                                             step="0.01"
                                             value={settingsStore.appSettings.dedupSimilarityThreshold ?? 0.92}
-                                            onChange={(e) => settingsStore.setAppSetting("dedupSimilarityThreshold", parseFloat(e.currentTarget.value) || 0.92)}
+                                            aria-invalid={numericErrors()["dedupSimilarityThreshold"] ? "true" : undefined}
+                                            aria-describedby="error-dedupSimilarityThreshold"
+                                            onChange={(e) => { validateNumeric("dedupSimilarityThreshold", e.currentTarget.value); settingsStore.setAppSetting("dedupSimilarityThreshold", parseFloat(e.currentTarget.value) || 0.92) }}
                                         />
+                                        <NumericError error={numericErrors()["dedupSimilarityThreshold"] ?? ""} id="error-dedupSimilarityThreshold" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-quality-threshold">
@@ -1833,8 +1884,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1"
                                             step="0.05"
                                             value={settingsStore.appSettings.qualityThreshold ?? 0.7}
-                                            onChange={(e) => settingsStore.setAppSetting("qualityThreshold", parseFloat(e.currentTarget.value) || 0.7)}
+                                            aria-invalid={numericErrors()["qualityThreshold"] ? "true" : undefined}
+                                            aria-describedby="error-qualityThreshold"
+                                            onChange={(e) => { validateNumeric("qualityThreshold", e.currentTarget.value); settingsStore.setAppSetting("qualityThreshold", parseFloat(e.currentTarget.value) || 0.7) }}
                                         />
+                                        <NumericError error={numericErrors()["qualityThreshold"] ?? ""} id="error-qualityThreshold" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-auto-regenerate-on-low-quality">
@@ -1863,8 +1917,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="1"
                                             step="0.05"
                                             value={settingsStore.appSettings.regenerateThreshold ?? 0.6}
-                                            onChange={(e) => settingsStore.setAppSetting("regenerateThreshold", parseFloat(e.currentTarget.value) || 0.6)}
+                                            aria-invalid={numericErrors()["regenerateThreshold"] ? "true" : undefined}
+                                            aria-describedby="error-regenerateThreshold"
+                                            onChange={(e) => { validateNumeric("regenerateThreshold", e.currentTarget.value); settingsStore.setAppSetting("regenerateThreshold", parseFloat(e.currentTarget.value) || 0.6) }}
                                         />
+                                        <NumericError error={numericErrors()["regenerateThreshold"] ?? ""} id="error-regenerateThreshold" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-regeneration-attempts">
@@ -1880,8 +1937,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10"
                                             step="1"
                                             value={settingsStore.appSettings.maxRegenerationAttempts ?? 2}
-                                            onChange={(e) => settingsStore.setAppSetting("maxRegenerationAttempts", parseInt(e.currentTarget.value, 10) || 0)}
+                                            aria-invalid={numericErrors()["maxRegenerationAttempts"] ? "true" : undefined}
+                                            aria-describedby="error-maxRegenerationAttempts"
+                                            onChange={(e) => { validateNumeric("maxRegenerationAttempts", e.currentTarget.value); settingsStore.setAppSetting("maxRegenerationAttempts", parseInt(e.currentTarget.value, 10) || 0) }}
                                         />
+                                        <NumericError error={numericErrors()["maxRegenerationAttempts"] ?? ""} id="error-maxRegenerationAttempts" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-min-qa-pairs-per-file">
@@ -1897,8 +1957,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10000"
                                             step="1"
                                             value={settingsStore.appSettings.minQaPairsPerFile ?? 1}
-                                            onChange={(e) => settingsStore.setAppSetting("minQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1)}
+                                            aria-invalid={numericErrors()["minQaPairsPerFile"] ? "true" : undefined}
+                                            aria-describedby="error-minQaPairsPerFile"
+                                            onChange={(e) => { validateNumeric("minQaPairsPerFile", e.currentTarget.value); settingsStore.setAppSetting("minQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1) }}
                                         />
+                                        <NumericError error={numericErrors()["minQaPairsPerFile"] ?? ""} id="error-minQaPairsPerFile" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-qa-pairs-per-file">
@@ -1914,8 +1977,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="100000"
                                             step="10"
                                             value={settingsStore.appSettings.maxQaPairsPerFile ?? 1000}
-                                            onChange={(e) => settingsStore.setAppSetting("maxQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1)}
+                                            aria-invalid={numericErrors()["maxQaPairsPerFile"] ? "true" : undefined}
+                                            aria-describedby="error-maxQaPairsPerFile"
+                                            onChange={(e) => { validateNumeric("maxQaPairsPerFile", e.currentTarget.value); settingsStore.setAppSetting("maxQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1) }}
                                         />
+                                        <NumericError error={numericErrors()["maxQaPairsPerFile"] ?? ""} id="error-maxQaPairsPerFile" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-refinement-passes">
@@ -1931,8 +1997,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10"
                                             step="1"
                                             value={settingsStore.appSettings.refinementPasses ?? 0}
-                                            onChange={(e) => settingsStore.setAppSetting("refinementPasses", parseInt(e.currentTarget.value, 10) || 0)}
+                                            aria-invalid={numericErrors()["refinementPasses"] ? "true" : undefined}
+                                            aria-describedby="error-refinementPasses"
+                                            onChange={(e) => { validateNumeric("refinementPasses", e.currentTarget.value); settingsStore.setAppSetting("refinementPasses", parseInt(e.currentTarget.value, 10) || 0) }}
                                         />
+                                        <NumericError error={numericErrors()["refinementPasses"] ?? ""} id="error-refinementPasses" />
                                     </div>
                                 </section>
                                 <section
@@ -2023,8 +2092,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="65535"
                                             step="1"
                                             value={settingsStore.settings.ollamaPort ?? 11434}
-                                            onChange={(e) => settingsStore.setOllamaPort(parseInt(e.currentTarget.value, 10) || 11434)}
+                                            aria-invalid={numericErrors()["ollamaPort"] ? "true" : undefined}
+                                            aria-describedby="error-ollamaPort"
+                                            onChange={(e) => { validateNumeric("ollamaPort", e.currentTarget.value); settingsStore.setOllamaPort(parseInt(e.currentTarget.value, 10) || 11434) }}
                                         />
+                                        <NumericError error={numericErrors()["ollamaPort"] ?? ""} id="error-ollamaPort" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-custom-model-endpoint">
@@ -2189,8 +2261,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="720"
                                             step="1"
                                             value={settingsStore.appSettings.updateCheckIntervalHours ?? 24}
-                                            onChange={(e) => settingsStore.setAppSetting("updateCheckIntervalHours", parseInt(e.currentTarget.value, 10) || 24)}
+                                            aria-invalid={numericErrors()["updateCheckIntervalHours"] ? "true" : undefined}
+                                            aria-describedby="error-updateCheckIntervalHours"
+                                            onChange={(e) => { validateNumeric("updateCheckIntervalHours", e.currentTarget.value); settingsStore.setAppSetting("updateCheckIntervalHours", parseInt(e.currentTarget.value, 10) || 24) }}
                                         />
+                                        <NumericError error={numericErrors()["updateCheckIntervalHours"] ?? ""} id="error-updateCheckIntervalHours" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-retention-days">
@@ -2206,8 +2281,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="3650"
                                             step="1"
                                             value={settingsStore.appSettings.retentionDays ?? 30}
-                                            onChange={(e) => settingsStore.setAppSetting("retentionDays", parseInt(e.currentTarget.value, 10) || 30)}
+                                            aria-invalid={numericErrors()["retentionDays"] ? "true" : undefined}
+                                            aria-describedby="error-retentionDays"
+                                            onChange={(e) => { validateNumeric("retentionDays", e.currentTarget.value); settingsStore.setAppSetting("retentionDays", parseInt(e.currentTarget.value, 10) || 30) }}
                                         />
+                                        <NumericError error={numericErrors()["retentionDays"] ?? ""} id="error-retentionDays" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-data-residency">
@@ -2341,8 +2419,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="10240"
                                             step="50"
                                             value={settingsStore.appSettings.cacheMaxSizeMB ?? 500}
-                                            onChange={(e) => settingsStore.setAppSetting("cacheMaxSizeMB", parseInt(e.currentTarget.value, 10) || 500)}
+                                            aria-invalid={numericErrors()["cacheMaxSizeMB"] ? "true" : undefined}
+                                            aria-describedby="error-cacheMaxSizeMB"
+                                            onChange={(e) => { validateNumeric("cacheMaxSizeMB", e.currentTarget.value); settingsStore.setAppSetting("cacheMaxSizeMB", parseInt(e.currentTarget.value, 10) || 500) }}
                                         />
+                                        <NumericError error={numericErrors()["cacheMaxSizeMB"] ?? ""} id="error-cacheMaxSizeMB" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-cache-ttl">
@@ -2358,8 +2439,11 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             max="604800"
                                             step="60"
                                             value={settingsStore.appSettings.cacheTtlSeconds ?? 86400}
-                                            onChange={(e) => settingsStore.setAppSetting("cacheTtlSeconds", parseInt(e.currentTarget.value, 10) || 86400)}
+                                            aria-invalid={numericErrors()["cacheTtlSeconds"] ? "true" : undefined}
+                                            aria-describedby="error-cacheTtlSeconds"
+                                            onChange={(e) => { validateNumeric("cacheTtlSeconds", e.currentTarget.value); settingsStore.setAppSetting("cacheTtlSeconds", parseInt(e.currentTarget.value, 10) || 86400) }}
                                         />
+                                        <NumericError error={numericErrors()["cacheTtlSeconds"] ?? ""} id="error-cacheTtlSeconds" />
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-clear-cache-on-exit">
