@@ -96,10 +96,21 @@ export class GrammarValidator extends BaseValidator{
                 flags.push("missing_capitalization")
             }
         }
-        let confusableMatches=text.match(/\b(their|there|they're|your|you're|its|it's)\b/gi)
-        if (confusableMatches && confusableMatches.length>0){
-            issueCount+=confusableMatches.length
-            if (!flags.includes("confusables")){
+        let confusablePatterns=[
+            /\btheir\s+(?:is|are|was|were|been|being|going|coming|doing|making|taking|getting|looking|feeling|seems|appears|will|would|can|could|should|do|does|did|has|have|had|not)\b/gi,
+            /\bits\s+(?:a|an|the|is|are|was|were|been|being|going|coming|doing|making|taking|getting|looking|feeling|seems|appears|will|would|can|could|should|do|does|did|has|have|had|not)\b/gi,
+            /\byour\s+(?:is|are|was|were|been|being|going|coming|doing|making|taking|getting|looking|feeling|seems|appears|will|would|can|could|should|do|does|did|has|have|had|not)\b/gi
+        ]
+        let confusableCount=0
+        for(let pattern of confusablePatterns){
+            let matches=text.match(pattern)
+            if(matches){
+                confusableCount+=matches.length
+            }
+        }
+        if(confusableCount>0){
+            issueCount+=confusableCount
+            if(!flags.includes("confusables")){
                 flags.push("confusables")
             }
         }
