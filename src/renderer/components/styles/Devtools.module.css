@@ -1,7 +1,7 @@
 .devtools-panel{
     position:fixed;
     bottom:16px;
-    right:16px;
+    inset-inline-end:16px;
     width:min(560px,calc(100vw - 32px));
     max-height:min(500px,calc(100vh - 100px));
     background:var(--surface-color);

@@ -1,7 +1,7 @@
 .dashboard-overlay{
     position:fixed;
     top:80px;
-    right:16px;
+    inset-inline-end:16px;
     z-index:9000;
     pointer-events:auto;
 }
