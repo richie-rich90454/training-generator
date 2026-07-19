@@ -16,7 +16,7 @@
 .file-upload-area.drag-over{
     border-color:var(--primary-color);
     background:var(--surface-color);
-    box-shadow:0 0 0 3px rgba(0, 120, 212, .15);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
 }
 .file-upload-area:focus-visible{
     outline:2px solid var(--primary-color);
@@ -132,5 +132,9 @@
     flex-shrink:0;
 }
 .file-remove:hover{
-    background:rgba(234, 67, 53, .1);
+    background:color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+.file-remove:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
 }
