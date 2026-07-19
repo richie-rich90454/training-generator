@@ -1224,6 +1224,182 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <Icon html={renderIcon("fa-check-circle")} />
                                         <span data-i18n="settings.sections.validation">{t("settings.sections.validation")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-validate-output">
+                                            <input
+                                                id="settings-validate-output"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={(settingsStore.appSettings as Record<string, unknown>).validateOutput as boolean ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("validateOutput" as never, e.currentTarget.checked as never)}
+                                            />
+                                            <span data-i18n="settings.validateOutput" data-field-label="validateOutput">{t("settings.validateOutput")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-validation-strictness">
+                                            <Icon html={renderIcon("fa-sliders-h")} />
+                                            <span data-i18n="settings.validationStrictness" data-field-label="validationStrictness">{t("settings.validationStrictness")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-validation-strictness"
+                                            class={styles["form-control"]}
+                                            value={settingsStore.appSettings.validationStrictness || "normal"}
+                                            onChange={(e) => settingsStore.setAppSetting("validationStrictness", e.currentTarget.value as "lenient" | "normal" | "strict")}
+                                        >
+                                            <option value="lenient" data-i18n="settings.validationStrictness.lenient">{t("settings.validationStrictness.lenient")}</option>
+                                            <option value="normal" data-i18n="settings.validationStrictness.normal">{t("settings.validationStrictness.normal")}</option>
+                                            <option value="strict" data-i18n="settings.validationStrictness.strict">{t("settings.validationStrictness.strict")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-deduplicate">
+                                            <input
+                                                id="settings-deduplicate"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={(settingsStore.appSettings as Record<string, unknown>).deduplicate as boolean ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("deduplicate" as never, e.currentTarget.checked as never)}
+                                            />
+                                            <span data-i18n="settings.deduplicate" data-field-label="deduplicate">{t("settings.deduplicate")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-skip-dedup">
+                                            <input
+                                                id="settings-skip-dedup"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.skipDedup ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("skipDedup", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.skipDedup" data-field-label="skipDedup">{t("settings.skipDedup")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-dedup-similarity-threshold">
+                                            <Icon html={renderIcon("fa-layer-group")} />
+                                            <span data-i18n="settings.dedupSimilarityThreshold" data-field-label="dedupSimilarityThreshold">{t("settings.dedupSimilarityThreshold")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-dedup-similarity-threshold"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0.5"
+                                            max="1"
+                                            step="0.01"
+                                            value={settingsStore.appSettings.dedupSimilarityThreshold ?? 0.92}
+                                            onChange={(e) => settingsStore.setAppSetting("dedupSimilarityThreshold", parseFloat(e.currentTarget.value) || 0.92)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-quality-threshold">
+                                            <Icon html={renderIcon("fa-star")} />
+                                            <span data-i18n="settings.qualityThreshold" data-field-label="qualityThreshold">{t("settings.qualityThreshold")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-quality-threshold"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value={settingsStore.appSettings.qualityThreshold ?? 0.7}
+                                            onChange={(e) => settingsStore.setAppSetting("qualityThreshold", parseFloat(e.currentTarget.value) || 0.7)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-auto-regenerate-on-low-quality">
+                                            <input
+                                                id="settings-auto-regenerate-on-low-quality"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.autoRegenerateOnLowQuality ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("autoRegenerateOnLowQuality", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.autoRegenerateOnLowQuality" data-field-label="autoRegenerateOnLowQuality">{t("settings.autoRegenerateOnLowQuality")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-regenerate-threshold">
+                                            <Icon html={renderIcon("fa-sync-alt")} />
+                                            <span data-i18n="settings.regenerateThreshold" data-field-label="regenerateThreshold">{t("settings.regenerateThreshold")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-regenerate-threshold"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value={settingsStore.appSettings.regenerateThreshold ?? 0.6}
+                                            onChange={(e) => settingsStore.setAppSetting("regenerateThreshold", parseFloat(e.currentTarget.value) || 0.6)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-max-regeneration-attempts">
+                                            <Icon html={renderIcon("fa-undo")} />
+                                            <span data-i18n="settings.maxRegenerationAttempts" data-field-label="maxRegenerationAttempts">{t("settings.maxRegenerationAttempts")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-max-regeneration-attempts"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="10"
+                                            step="1"
+                                            value={settingsStore.appSettings.maxRegenerationAttempts ?? 2}
+                                            onChange={(e) => settingsStore.setAppSetting("maxRegenerationAttempts", parseInt(e.currentTarget.value, 10) || 0)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-min-qa-pairs-per-file">
+                                            <Icon html={renderIcon("fa-list-ol")} />
+                                            <span data-i18n="settings.minQaPairsPerFile" data-field-label="minQaPairsPerFile">{t("settings.minQaPairsPerFile")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-min-qa-pairs-per-file"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="10000"
+                                            step="1"
+                                            value={settingsStore.appSettings.minQaPairsPerFile ?? 1}
+                                            onChange={(e) => settingsStore.setAppSetting("minQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-max-qa-pairs-per-file">
+                                            <Icon html={renderIcon("fa-list-ol")} />
+                                            <span data-i18n="settings.maxQaPairsPerFile" data-field-label="maxQaPairsPerFile">{t("settings.maxQaPairsPerFile")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-max-qa-pairs-per-file"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="100000"
+                                            step="10"
+                                            value={settingsStore.appSettings.maxQaPairsPerFile ?? 1000}
+                                            onChange={(e) => settingsStore.setAppSetting("maxQaPairsPerFile", parseInt(e.currentTarget.value, 10) || 1)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-refinement-passes">
+                                            <Icon html={renderIcon("fa-highlighter")} />
+                                            <span data-i18n="settings.refinementPasses" data-field-label="refinementPasses">{t("settings.refinementPasses")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-refinement-passes"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="10"
+                                            step="1"
+                                            value={settingsStore.appSettings.refinementPasses ?? 0}
+                                            onChange={(e) => settingsStore.setAppSetting("refinementPasses", parseInt(e.currentTarget.value, 10) || 0)}
+                                        />
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("providers")}
