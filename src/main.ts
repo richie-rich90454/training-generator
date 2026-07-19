@@ -1591,7 +1591,13 @@ app.whenReady().then(()=>{
     registerWindowControlHandlers(()=>mainWindow)
     createTray()
     registerDeferredIpcHandlers()
-    setTimeout(()=>registerDeferredIpcHandlers(),5000)
+    // Belt-and-braces fallback in case dom-ready fires before window controls
+    // are wired. The handler is idempotent so this is safe. Unref'd so the
+    // timer does not keep the main process alive during shutdown.
+    let deferredFallbackTimer=setTimeout(()=>registerDeferredIpcHandlers(),5000)
+    if(typeof deferredFallbackTimer.unref==="function"){
+        deferredFallbackTimer.unref()
+    }
 }).catch((error)=>{
     console.error("Failed to ready app:",error)
     app.quit()
