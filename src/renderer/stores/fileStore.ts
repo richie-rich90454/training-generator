@@ -5,7 +5,7 @@ import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
 const MAX_FILES = 100
 const MAX_FILE_SIZE = 100 * 1024 * 1024
-const VALID_EXTENSIONS = ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]
+const VALID_EXTENSIONS = ["pdf", "docx", "doc", "rtf", "txt", "md", "markdown", "html"]
 export interface FileAddResult {
     addedCount: number
     skippedCount: number
@@ -115,6 +115,7 @@ export function createFileStore(): FileStore {
             rtf: "file-alt",
             txt: "file-alt",
             md: "markdown",
+            markdown: "markdown",
             html: "code"
         }
         return icons[fileType] || "file"
@@ -151,12 +152,12 @@ export function createFileStore(): FileStore {
     }
     function getStatusColor(status: string): string {
         const colorMap: Record<string, string> = {
-            waiting: "#A19F9D",
-            processing: "#0078D4",
-            completed: "#107C10",
-            failed: "#D13438"
+            waiting: "var(--text-secondary)",
+            processing: "var(--primary-color)",
+            completed: "var(--secondary-color)",
+            failed: "var(--accent-color)"
         }
-        return colorMap[status] || "#A19F9D"
+        return colorMap[status] || "var(--text-secondary)"
     }
     return {
         get selectedFiles() { return selectedFiles },

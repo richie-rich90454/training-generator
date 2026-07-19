@@ -37,7 +37,7 @@ describe("FileStore initial state", () => {
 })
 describe("FileStore addFiles validation", () => {
     it("accepts all supported extensions", () => {
-        let exts = ["pdf", "docx", "doc", "rtf", "txt", "md", "html"]
+        let exts = ["pdf", "docx", "doc", "rtf", "txt", "md", "markdown", "html"]
         let files = exts.map(ext => createFile(`file.${ext}`))
         let result = store.addFiles(files)
         expect(result.addedCount).toBe(exts.length)
@@ -141,6 +141,7 @@ describe("FileStore icons", () => {
         expect(store.getFileIcon("docx")).toBe("word")
         expect(store.getFileIcon("doc")).toBe("word")
         expect(store.getFileIcon("md")).toBe("markdown")
+        expect(store.getFileIcon("markdown")).toBe("markdown")
         expect(store.getFileIcon("html")).toBe("code")
         expect(store.getFileIcon("unknown")).toBe("file")
     })
@@ -160,11 +161,11 @@ describe("FileStore icons", () => {
         expect(store.getStatusLabel("unknown")).toBe(store.getStatusLabel("waiting"))
     })
     it("returns status colors", () => {
-        expect(store.getStatusColor("waiting")).toBe("#A19F9D")
-        expect(store.getStatusColor("processing")).toBe("#0078D4")
-        expect(store.getStatusColor("completed")).toBe("#107C10")
-        expect(store.getStatusColor("failed")).toBe("#D13438")
-        expect(store.getStatusColor("unknown")).toBe("#A19F9D")
+        expect(store.getStatusColor("waiting")).toBe("var(--text-secondary)")
+        expect(store.getStatusColor("processing")).toBe("var(--primary-color)")
+        expect(store.getStatusColor("completed")).toBe("var(--secondary-color)")
+        expect(store.getStatusColor("failed")).toBe("var(--accent-color)")
+        expect(store.getStatusColor("unknown")).toBe("var(--text-secondary)")
     })
 })
 describe("FileStore formatFileSize", () => {
