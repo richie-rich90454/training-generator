@@ -63,5 +63,16 @@
     font-variant-numeric:tabular-nums;
     color:var(--text-secondary);
     min-width:36px;
-    text-align:right;
+    text-align:end;
+}
+.output-live-stream{
+    max-height:200px;
+    margin-block-start:var(--spacing-sm);
+    overflow-y:auto;
+}
+.output-live-stream__pre{
+    white-space:pre-wrap;
+    word-break:break-all;
+    font-size:11px;
+    opacity:.85;
 }

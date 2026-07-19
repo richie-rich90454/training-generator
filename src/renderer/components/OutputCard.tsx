@@ -121,12 +121,12 @@ export function OutputCard(props: OutputCardProps): JSX.Element {
             <Show when={hasLiveStream()}>
                 <div
                     ref={liveStreamRef}
-                    class={styles["output-preview"]}
-                    style={{ "max-height": "200px", "margin-top": "8px", "overflow-y": "auto" }}
+                    class={`${styles["output-preview"]} ${styles["output-live-stream"]}`}
                     role="region"
                     aria-label={t("output.liveStreamAria")}
+                    data-i18n-aria-label="output.liveStreamAria"
                 >
-                    <pre style={{ "white-space": "pre-wrap", "word-break": "break-all", "font-size": "11px", opacity: "0.85" }}>{liveStream()}</pre>
+                    <pre class={styles["output-live-stream__pre"]}>{liveStream()}</pre>
                 </div>
             </Show>
         </div>
