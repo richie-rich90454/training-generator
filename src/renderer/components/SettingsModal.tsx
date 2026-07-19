@@ -124,6 +124,19 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
             // File dialog may be unavailable in non-Electron environments; ignore.
         }
     }
+    async function handleBrowseExportPath(): Promise<void> {
+        const api = (window as unknown as { electronAPI?: { chooseDirectory?: (defaultPath?: string) => Promise<string | null> } }).electronAPI
+        if (!api?.chooseDirectory) return
+        try {
+            const dirPath = await api.chooseDirectory()
+            if (dirPath) {
+                settingsStore.setAppSetting("exportPath" as never, dirPath as never)
+            }
+        }
+        catch {
+            // Directory dialog may be unavailable in non-Electron environments; ignore.
+        }
+    }
     function handleNavKeydown(e: KeyboardEvent): void {
         const buttons = Array.from(overlayRef?.querySelectorAll<HTMLButtonElement>('button[data-section-nav="true"]') ?? [])
         if (buttons.length === 0) return
@@ -843,6 +856,63 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             </label>
                                         </div>
                                     </Show>
+                                </section>
+                                <section
+                                    class={sectionClass("export")}
+                                    data-section-id="export"
+                                    id="settings-panel-export"
+                                    role="tabpanel"
+                                    aria-labelledby="settings-tab-export"
+                                >
+                                    <h3>
+                                        <Icon html={renderIcon("fa-download")} />
+                                        <span data-i18n="settings.sections.export">{t("settings.sections.export")}</span>
+                                    </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-output-format">
+                                            <Icon html={renderIcon("fa-file-code")} />
+                                            <span data-i18n="settings.outputFormat" data-field-label="outputFormat">{t("settings.outputFormat")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-output-format"
+                                            class={styles["form-control"]}
+                                            value={settingsStore.settings.outputFormat || "jsonl"}
+                                            onChange={(e) => settingsStore.setOutputFormat(e.currentTarget.value)}
+                                        >
+                                            <option value="jsonl" data-i18n="settings.outputFormat.jsonl">{t("settings.outputFormat.jsonl")}</option>
+                                            <option value="json" data-i18n="settings.outputFormat.json">{t("settings.outputFormat.json")}</option>
+                                            <option value="chatml" data-i18n="settings.outputFormat.chatml">{t("settings.outputFormat.chatml")}</option>
+                                            <option value="csv" data-i18n="settings.outputFormat.csv">{t("settings.outputFormat.csv")}</option>
+                                            <option value="text" data-i18n="settings.outputFormat.text">{t("settings.outputFormat.text")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-export-path">
+                                            <Icon html={renderIcon("fa-folder-open")} />
+                                            <span data-i18n="settings.exportPath" data-field-label="exportPath">{t("settings.exportPath")}</span>
+                                        </label>
+                                        <div class={`section-actions ${styles["settings-actions--inline"]}`}>
+                                            <input
+                                                id="settings-export-path"
+                                                class={styles["form-control"]}
+                                                type="text"
+                                                value={(settingsStore.appSettings as Record<string, unknown>).exportPath as string ?? ""}
+                                                placeholder={t("settings.exportPath.placeholder")}
+                                                data-i18n-placeholder="settings.exportPath.placeholder"
+                                                onInput={(e) => settingsStore.setAppSetting("exportPath" as never, e.currentTarget.value as never)}
+                                            />
+                                            <button
+                                                type="button"
+                                                class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                                                aria-label={t("settings.exportPath.browseAria")}
+                                                data-i18n-aria-label="settings.exportPath.browseAria"
+                                                onClick={handleBrowseExportPath}
+                                            >
+                                                <Icon html={renderIcon("fa-folder-open")} />
+                                                <span data-i18n="settings.exportPath.browse">{t("settings.exportPath.browse")}</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-confirm-before-export">
                                             <input
@@ -867,18 +937,6 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             <span data-i18n="settings.autoExportOnCompletion" data-field-label="autoExportOnCompletion">{t("settings.autoExportOnCompletion")}</span>
                                         </label>
                                     </div>
-                                </section>
-                                <section
-                                    class={sectionClass("export")}
-                                    data-section-id="export"
-                                    id="settings-panel-export"
-                                    role="tabpanel"
-                                    aria-labelledby="settings-tab-export"
-                                >
-                                    <h3>
-                                        <Icon html={renderIcon("fa-download")} />
-                                        <span data-i18n="settings.sections.export">{t("settings.sections.export")}</span>
-                                    </h3>
                                 </section>
                                 <section
                                     class={sectionClass("generation")}
