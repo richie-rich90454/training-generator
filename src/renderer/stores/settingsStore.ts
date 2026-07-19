@@ -66,8 +66,10 @@ export interface SettingsStore {
     applyLanguage: (lang: string) => void
     updateTemperatureDisplay: (temp: number) => { rangeFill: string; temperatureColor: string; temperatureColorHover: string; temperatureShadow: string; text: string }
 }
-let mediaListener: ((e: MediaQueryListEvent) => void) | null = null
 export function createSettingsStore(): SettingsStore {
+    // Per-instance media listener so multiple settingsStore instances don't
+    // remove each other's matchMedia change listeners.
+    let mediaListener: ((e: MediaQueryListEvent) => void) | null = null
     const [settings, setSettings] = createStore<AppSettings>({
         model: "",
         processingType: "instruction",
