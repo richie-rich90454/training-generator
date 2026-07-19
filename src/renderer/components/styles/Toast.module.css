@@ -54,6 +54,11 @@
 .toast-close:hover{
     color:var(--text-primary);
 }
+.toast-close:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+    border-radius:var(--radius-small);
+}
 .toast-info{
     border-left:4px solid var(--primary-color);
 }

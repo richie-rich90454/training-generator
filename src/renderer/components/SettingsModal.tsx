@@ -1532,6 +1532,125 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <Icon html={renderIcon("fa-eye")} />
                                         <span data-i18n="settings.sections.telemetry">{t("settings.sections.telemetry")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-enable-telemetry">
+                                            <Icon html={renderIcon("fa-eye")} />
+                                            <span data-i18n="settings.enableTelemetry" data-field-label="enableTelemetry">{t("settings.enableTelemetry")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-enable-telemetry"
+                                            type="checkbox"
+                                            checked={(settingsStore.appSettings as Record<string, unknown>).enableTelemetry as boolean ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("enableTelemetry" as never, e.currentTarget.checked as never)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-disable-telemetry">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.disableTelemetry" data-field-label="disableTelemetry">{t("settings.disableTelemetry")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-disable-telemetry"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.disableTelemetry ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("disableTelemetry", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-crash-reports-enabled">
+                                            <Icon html={renderIcon("fa-bug")} />
+                                            <span data-i18n="settings.crashReportsEnabled" data-field-label="crashReportsEnabled">{t("settings.crashReportsEnabled")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-crash-reports-enabled"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.crashReportsEnabled ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("crashReportsEnabled", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-disable-crash-reports">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.disableCrashReports" data-field-label="disableCrashReports">{t("settings.disableCrashReports")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-disable-crash-reports"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.disableCrashReports ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("disableCrashReports", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-auto-update">
+                                            <Icon html={renderIcon("fa-sync-alt")} />
+                                            <span data-i18n="settings.autoUpdate" data-field-label="autoUpdate">{t("settings.autoUpdate")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-auto-update"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.autoUpdate ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("autoUpdate", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-disable-auto-update">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.disableAutoUpdate" data-field-label="disableAutoUpdate">{t("settings.disableAutoUpdate")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-disable-auto-update"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.disableAutoUpdate ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("disableAutoUpdate", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-update-check-interval">
+                                            <Icon html={renderIcon("fa-clock")} />
+                                            <span data-i18n="settings.updateCheckIntervalHours" data-field-label="updateCheckIntervalHours">{t("settings.updateCheckIntervalHours")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-update-check-interval"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="720"
+                                            step="1"
+                                            value={settingsStore.appSettings.updateCheckIntervalHours ?? 24}
+                                            onChange={(e) => settingsStore.setAppSetting("updateCheckIntervalHours", parseInt(e.currentTarget.value, 10) || 24)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-retention-days">
+                                            <Icon html={renderIcon("fa-clock")} />
+                                            <span data-i18n="settings.retentionDays" data-field-label="retentionDays">{t("settings.retentionDays")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-retention-days"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="3650"
+                                            step="1"
+                                            value={settingsStore.appSettings.retentionDays ?? 30}
+                                            onChange={(e) => settingsStore.setAppSetting("retentionDays", parseInt(e.currentTarget.value, 10) || 30)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-data-residency">
+                                            <Icon html={renderIcon("fa-server")} />
+                                            <span data-i18n="settings.dataResidency" data-field-label="dataResidency">{t("settings.dataResidency")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-data-residency"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={settingsStore.appSettings.dataResidency ?? ""}
+                                            placeholder={t("settings.dataResidency.placeholder")}
+                                            data-i18n-placeholder="settings.dataResidency.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("dataResidency", e.currentTarget.value)}
+                                        />
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("advanced")}
