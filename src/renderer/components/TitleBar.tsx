@@ -36,7 +36,7 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
     }
     return (
         <div class={styles["title-bar"]}>
-            <div class={styles["title-bar-drag-region"]}>
+            <div class={styles["title-bar-drag-region"]} onDblClick={handleMaximize}>
                 <div class={styles["title-bar-icon"]} aria-hidden="true">
                     <img src="./assets/icon.svg" alt="" aria-hidden="true" />
                 </div>
