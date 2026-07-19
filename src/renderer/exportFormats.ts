@@ -72,7 +72,7 @@ export function exportCSV(items: TrainingItem[]): string{
     }
     let rows=validItems.map(item=>{
         if(header==="messages"){
-            return csvEscape(JSON.stringify(item.messages))
+            return csvEscape(item.messages!=null?JSON.stringify(item.messages):"")
         }
         if(header==="text"){
             return csvEscape(item.text!=null?String(item.text):"")
@@ -151,7 +151,7 @@ export class CSVExporter implements Exporter{
         let rows=validItems.map(item=>{
             let row=""
             if(header.startsWith("messages")){
-                row=csvEscape(JSON.stringify(item.messages))
+                row=csvEscape(item.messages!=null?JSON.stringify(item.messages):"")
             }
             else if(header.startsWith("text")){
                 row=csvEscape(item.text!=null?String(item.text):"")
