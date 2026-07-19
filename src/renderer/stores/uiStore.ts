@@ -95,7 +95,6 @@ const MAX_LIVE_STREAM_CHARS = 5000
 const DEFAULT_TOAST_DURATION = 4000
 let nextLogId = 1
 let nextToastId = 1
-let previewTimer: number | null = null
 export function createUIStore(): UIStore {
     const [progressPercent, setProgressPercent] = createSignal<number>(0)
     const [progressText, setProgressText] = createSignal<string>(t("processing.ready"))
@@ -110,6 +109,9 @@ export function createUIStore(): UIStore {
     })
     let dashboardStartTime = 0
     let dashboardInterval: number | null = null
+    // Per-instance debounce timer so multiple UIStore instances don't clobber
+    // each other's pending preview updates.
+    let previewTimer: number | null = null
     const [devtoolsOpen, setDevtoolsOpenState] = createSignal<boolean>(false)
     const [commandPaletteOpen, setCommandPaletteOpenState] = createSignal<boolean>(false)
     const [outputPreview, setOutputPreview] = createSignal<string>("")
