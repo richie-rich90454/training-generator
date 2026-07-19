@@ -107,7 +107,7 @@ describe("FileStore status", () => {
         store.setFileStatus("a.txt", "processing")
         expect(store.getStatusIcon("processing")).toContain("tg-spinner")
         expect(store.getStatusLabel("processing")).toBe("Processing")
-        expect(store.getStatusColor("processing")).toBe("#0078D4")
+        expect(store.getStatusColor("processing")).toBe("var(--primary-color)")
     })
     it("sets completed status", () => {
         let store: FileStore=makeFileStore()
@@ -115,7 +115,7 @@ describe("FileStore status", () => {
         store.setFileStatus("a.txt", "completed")
         expect(store.getStatusIcon("completed")).toContain("m9 12 2 2 4-4")
         expect(store.getStatusLabel("completed")).toBe("Completed")
-        expect(store.getStatusColor("completed")).toBe("#107C10")
+        expect(store.getStatusColor("completed")).toBe("var(--secondary-color)")
     })
     it("sets failed status", () => {
         let store: FileStore=makeFileStore()
@@ -123,7 +123,7 @@ describe("FileStore status", () => {
         store.setFileStatus("a.txt", "failed")
         expect(store.getStatusIcon("failed")).toContain('x1="15" y1="9"')
         expect(store.getStatusLabel("failed")).toBe("Failed")
-        expect(store.getStatusColor("failed")).toBe("#D13438")
+        expect(store.getStatusColor("failed")).toBe("var(--accent-color)")
     })
 })
 describe("FileStore helpers", () => {
