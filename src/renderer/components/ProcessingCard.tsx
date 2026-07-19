@@ -4,6 +4,7 @@ import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
+import { showConfirm } from "../confirm.js"
 import cardsStyles from "./styles/Cards.module.css"
 import buttonsStyles from "./styles/Buttons.module.css"
 import processingCardStyles from "./styles/ProcessingCard.module.css"
@@ -15,8 +16,10 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
     const { appStore } = props
     const { uiStore, fileStore } = appStore
     let logRef: HTMLDivElement | undefined
-    function handleProcess(): void {
+    async function handleProcess(): Promise<void> {
         if (appStore.isProcessing()) {
+            const confirmed = await showConfirm(t("confirm.abortProcessing"), t("processing.running"))
+            if (!confirmed) return
             appStore.stopProcessing()
         }
         else {
@@ -35,11 +38,11 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
         }
     }
     onMount(() => {
-        scrollLogToBottom()
+        queueMicrotask(scrollLogToBottom)
     })
     createEffect(() => {
-        uiStore.logs
-        scrollLogToBottom()
+        const _ = uiStore.logs
+        queueMicrotask(scrollLogToBottom)
     })
     return (
         <div class={styles["card"]}>
@@ -66,7 +69,8 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                     </button>
                     <button
                         id="demo-btn"
-                        class={`${styles["btn"]} ${styles["btn-secondary"]}`+(fileStore.demoActive()?" active":"")}
+                        class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                        classList={{ active: fileStore.demoActive() }}
                         title={t("processing.demoTitle")}
                         aria-label={t("processing.demoAria")}
                         data-i18n-title="processing.demoTitle"

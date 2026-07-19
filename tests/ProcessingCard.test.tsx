@@ -4,6 +4,10 @@ import { ProcessingCard } from "../src/renderer/components/ProcessingCard.tsx"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
 import { t } from "../src/renderer/i18n.js"
 
+vi.mock("../src/renderer/confirm.js", () => ({
+    showConfirm: vi.fn(async () => true)
+}))
+
 interface StubOpts {
     isProcessing?: boolean
     canProcess?: boolean
@@ -87,10 +91,20 @@ describe("ProcessingCard", () => {
         fireEvent.click(container.querySelector("#process-btn") as HTMLButtonElement)
         expect(processFiles).toHaveBeenCalledTimes(1)
     })
-    test("clicking stop calls appStore.stopProcessing", () => {
+    test("clicking stop calls appStore.stopProcessing after confirm", async () => {
         const { stopProcessing, container } = renderComponent({ isProcessing: true })
         fireEvent.click(container.querySelector("#process-btn") as HTMLButtonElement)
+        // showConfirm resolves on next microtask; wait for it.
+        await new Promise((resolve) => setTimeout(resolve, 0))
         expect(stopProcessing).toHaveBeenCalledTimes(1)
+    })
+    test("clicking stop does not call stopProcessing when confirm is dismissed", async () => {
+        const { showConfirm } = await import("../src/renderer/confirm.js")
+        ;(showConfirm as ReturnType<typeof vi.fn>).mockResolvedValueOnce(false)
+        const { stopProcessing, container } = renderComponent({ isProcessing: true })
+        fireEvent.click(container.querySelector("#process-btn") as HTMLButtonElement)
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(stopProcessing).not.toHaveBeenCalled()
     })
     test("demo button click calls appStore.toggleDemoMode", () => {
         const { toggleDemoMode, container } = renderComponent()
