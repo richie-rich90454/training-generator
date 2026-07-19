@@ -1547,6 +1547,9 @@ function registerDeferredIpcHandlers():void{
             if(result.canceled||!result.filePath){
                 return{success:false,error:t("error.exportCancelled")}
             }
+            if(!isPathSafeForWrite(result.filePath)&&!isAllowedSavePath(result.filePath)){
+                return{success:false,error:t("error.filePathOutsideWriteDirs")}
+            }
             await fsp.writeFile(result.filePath,data,"utf-8")
             return{success:true}
         }
