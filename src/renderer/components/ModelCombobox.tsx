@@ -113,22 +113,12 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
         }
     })
     return (
-        <div
-            ref={wrapperRef}
-            class={configPanelStyles["model-combobox"]}
-            style={{
-                position: "relative",
-                display: "flex",
-                "align-items": "stretch",
-                gap: "var(--spacing-xs, 4px)"
-            }}
-        >
+        <div ref={wrapperRef} class={configPanelStyles["model-combobox"]}>
             <input
                 ref={inputRef}
                 id={props.inputId}
                 type="text"
                 class={`${formsStyles["form-control"]} ${configPanelStyles["model-combobox__input"]}`}
-                style={{ "border-top-right-radius": 0, "border-bottom-right-radius": 0 }}
                 value={props.value}
                 placeholder={props.placeholder}
                 disabled={props.disabled}
@@ -147,21 +137,9 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
             <Show when={props.onRefresh}>
                 <button
                     type="button"
-                    class={configPanelStyles["model-combobox__toggle"]}
-                    style={{
-                        display: "flex",
-                        "align-items": "center",
-                        "justify-content": "center",
-                        width: "36px",
-                        padding: 0,
-                        background: "var(--surface-color)",
-                        color: "var(--text-secondary)",
-                        border: "1px solid var(--text-disabled)",
-                        "border-left": "none",
-                        "border-radius": 0,
-                        cursor: props.disabled ? "not-allowed" : "pointer"
-                    }}
+                    class={`${configPanelStyles["model-combobox__toggle"]} ${configPanelStyles["model-combobox__toggle--refresh"]}`}
                     aria-label={t("modelCombobox.refreshAria")}
+                    data-i18n-aria-label="modelCombobox.refreshAria"
                     tabindex={-1}
                     disabled={props.disabled}
                     data-testid="model-combobox-refresh"
@@ -174,20 +152,6 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
             <button
                 type="button"
                 class={configPanelStyles["model-combobox__toggle"]}
-                style={{
-                    display: "flex",
-                    "align-items": "center",
-                    "justify-content": "center",
-                    width: "40px",
-                    padding: 0,
-                    background: "var(--surface-color)",
-                    color: "var(--text-secondary)",
-                    border: "1px solid var(--text-disabled)",
-                    "border-left": "none",
-                    "border-top-right-radius": "var(--radius-medium)",
-                    "border-bottom-right-radius": "var(--radius-medium)",
-                    cursor: props.disabled ? "not-allowed" : "pointer"
-                }}
                 aria-label={t("modelCombobox.toggleAria")}
                 data-i18n-aria-label="modelCombobox.toggleAria"
                 tabindex={-1}
@@ -210,22 +174,6 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
                 <ul
                     id={`${props.inputId}-listbox`}
                     class={configPanelStyles["model-combobox__listbox"]}
-                    style={{
-                        position: "absolute",
-                        top: "calc(100% + 2px)",
-                        left: 0,
-                        right: 0,
-                        "max-height": "200px",
-                        overflow: "auto",
-                        "z-index": 100,
-                        margin: 0,
-                        padding: "var(--spacing-xs, 4px) 0",
-                        "list-style": "none",
-                        background: "var(--surface-color)",
-                        border: "1px solid var(--border-color)",
-                        "border-radius": "var(--radius-medium)",
-                        "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.12)"
-                    }}
                     role="listbox"
                     aria-label={props.ariaLabel ? `${props.ariaLabel} ${t("modelCombobox.listboxAria")}` : t("modelCombobox.listboxAria")}
                     data-testid="model-combobox-listbox"
@@ -236,12 +184,6 @@ export function ModelCombobox(props: ModelComboboxProps): JSX.Element {
                                 class={configPanelStyles["model-combobox__option"]}
                                 classList={{
                                     [configPanelStyles["model-combobox__option--selected"]]: index() === selectedIndex()
-                                }}
-                                style={{
-                                    padding: "var(--spacing-sm, 8px) var(--spacing-md, 12px)",
-                                    cursor: "pointer",
-                                    "background-color": index() === selectedIndex() ? "var(--surface-variant)" : "transparent",
-                                    color: "var(--text-primary)"
                                 }}
                                 id={`${props.inputId}-option-${index()}`}
                                 role="option"
