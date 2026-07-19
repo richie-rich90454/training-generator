@@ -1633,14 +1633,38 @@ app.on("activate",()=>{
         createMainWindow()
     }
 })
+function persistCrashReport(kind:string,payload:unknown):void{
+    // Best-effort synchronous crash log — must be sync because we are about to
+    // terminate the process. Writes a single line per crash to crash.log in
+    // the user data directory so post-mortem debugging is possible even when
+    // console output is lost (e.g. packaged app, GUI launch).
+    try{
+        let crashDir=path.join(userDataPath,"logs")
+        fs.mkdirSync(crashDir,{recursive:true})
+        let crashPath=path.join(crashDir,"crash.log")
+        let entry={
+            timestamp:new Date().toISOString(),
+            kind,
+            payload:payload instanceof Error
+                ?{name:payload.name,message:payload.message,stack:payload.stack}
+                :String(payload)
+        }
+        fs.appendFileSync(crashPath,JSON.stringify(entry)+"\n","utf-8")
+    }
+    catch{
+        // Nothing more we can do — the process is dying.
+    }
+}
 process.on("uncaughtException",(error:Error)=>{
     console.error("Uncaught Exception:",error)
+    persistCrashReport("uncaughtException",error)
     if(typeof app?.quit==="function"&&!isAppQuitting){
         app.quit()
     }
 })
 process.on("unhandledRejection",(reason:unknown,promise:Promise<unknown>)=>{
     console.error("Unhandled Rejection at:",promise,"reason:",reason)
+    persistCrashReport("unhandledRejection",reason)
     if(typeof app?.quit==="function"&&!isAppQuitting){
         app.quit()
     }
