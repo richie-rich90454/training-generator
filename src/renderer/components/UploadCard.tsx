@@ -25,6 +25,9 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
         if (result.rejectedCount > 0) {
             props.appStore.uiStore.showToast(t("toast.noValidFiles"), "error")
         }
+        if (result.skippedCount > 0) {
+            props.appStore.uiStore.showToast(t("toast.filesSkipped", undefined, { count: String(result.skippedCount) }), "warning")
+        }
     }
     function handleDragEnter(e: DragEvent): void {
         e.preventDefault()
@@ -151,6 +154,9 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
                                         <button
                                             class={styles["file-remove"]}
                                             aria-label={t("file.removeAria", undefined, { name: file.name })}
+                                            data-i18n-aria-label="file.removeAria"
+                                            data-i18n-aria-label-vars={JSON.stringify({ name: file.name })}
+                                            title={t("file.removeAria", undefined, { name: file.name })}
                                             onClick={() => fileStore.removeFile(file.name)}
                                         >
                                             <Icon html={renderIcon("fa-times")} />

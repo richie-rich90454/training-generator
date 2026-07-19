@@ -258,6 +258,7 @@ export const translations: Record<string, TranslationDict> = {
     "toast.copyTooLarge": "Output too large to copy to clipboard",
     "toast.copyFailed": "Failed to copy to clipboard",
     "toast.noValidFiles": "No valid files selected. Supported formats: PDF, DOCX, DOC, RTF, TXT, MD, HTML",
+    "toast.filesSkipped": "{{count}} file(s) were skipped (too large or duplicate).",
     "toast.fileTooLarge": "File too large: {{name}} ({{size}}). Maximum size is 100MB.",
     "toast.templateLoadFailed": "Failed to read template file",
     "toast.templateEmpty": "Cannot save an empty template",
