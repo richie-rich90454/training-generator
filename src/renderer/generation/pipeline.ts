@@ -145,8 +145,6 @@ export class GenerationPipeline {
     let completedFiles = 0
     const maxParallel = Math.max(1, settings.maxParallelFiles || 1)
     let queueIndex = 0
-    // Per-file item accumulator for correct totalItemsSoFar reporting
-    let fileItemsAccumulated = 0
 
     const orchSettings: OrchestratorSettings = {
       model: settings.model,
@@ -178,7 +176,9 @@ export class GenerationPipeline {
 
         completedFiles++
         const fileIndex = completedFiles
-        fileItemsAccumulated = 0
+        // Per-file item accumulator for correct totalItemsSoFar reporting.
+        // Local to this iteration so concurrent workers don't clobber each other.
+        let fileItemsAccumulated = 0
 
         let fileChunkCount = 0
 
