@@ -1027,18 +1027,7 @@ function registerCriticalIpcHandlers():void{
             if(!isPathSafeForWrite(filePath)&&!isAllowedSavePath(filePath)){
                 return{success:false,error:t("error.filePathOutsideWriteDirs")}
             }
-            // Atomic write: write to a temp file in the same directory, then rename.
-            // Prevents partial/corrupted files if the process crashes mid-write.
-            let dir=path.dirname(filePath)
-            let tempPath=path.join(dir,`.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`)
-            try{
-                await fsp.writeFile(tempPath,content,"utf-8")
-                await fsp.rename(tempPath,filePath)
-            }
-            catch(error){
-                await fsp.unlink(tempPath).catch(()=>{})
-                throw error
-            }
+            await atomicWriteFile(filePath,content)
             return{success:true}
         }
         catch(error){
@@ -1412,17 +1401,34 @@ function isDataSizeValid(data:unknown):boolean{
         return false
     }
 }
+async function atomicWriteFile(filePath:string,content:string):Promise<void>{
+    // Atomic write: write to a temp file in the same directory, then rename.
+    // Prevents partial/corrupted files if the process crashes mid-write.
+    let dir=path.dirname(filePath)
+    let tempPath=path.join(dir,`.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`)
+    try{
+        await fsp.writeFile(tempPath,content,"utf-8")
+        await fsp.rename(tempPath,filePath)
+    }
+    catch(error){
+        await fsp.unlink(tempPath).catch(()=>{})
+        throw error
+    }
+}
 function registerDeferredIpcHandlers():void{
     if(deferredIpcRegistered)return
     deferredIpcRegistered=true
     handle("cache:load",async():Promise<{success:boolean;data?:Record<string,any>}>=>{
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-            if(fs.existsSync(cachePath)){
-                let data=JSON.parse(fs.readFileSync(cachePath,"utf-8"))
+            try{
+                let raw=await fsp.readFile(cachePath,"utf-8")
+                let data=JSON.parse(raw)
                 return{success:true,data}
             }
-            return{success:true,data:{}}
+            catch{
+                return{success:true,data:{}}
+            }
         }
         catch{
             return{success:true,data:{}}
@@ -1434,7 +1440,8 @@ function registerDeferredIpcHandlers():void{
         }
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-            fs.writeFileSync(cachePath,JSON.stringify(data))
+            let serialized=JSON.stringify(data)
+            await atomicWriteFile(cachePath,serialized)
             return{success:true}
         }
         catch{
@@ -1444,7 +1451,7 @@ function registerDeferredIpcHandlers():void{
     handle("cache:clear",async():Promise<{success:boolean}>=>{
         try{
             let cachePath=path.join(app.getPath("userData"),"training-cache.json")
-            if(fs.existsSync(cachePath))fs.unlinkSync(cachePath)
+            try{await fsp.unlink(cachePath)}catch{/* file may not exist */}
             return{success:true}
         }
         catch{
@@ -1466,7 +1473,8 @@ function registerDeferredIpcHandlers():void{
         }
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-            fs.writeFileSync(progressPath,JSON.stringify(data))
+            let serialized=JSON.stringify(data)
+            await atomicWriteFile(progressPath,serialized)
             return{success:true}
         }
         catch{
@@ -1476,11 +1484,14 @@ function registerDeferredIpcHandlers():void{
     handle("progress:load",async():Promise<{success:boolean;data?:any}>=>{
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-            if(fs.existsSync(progressPath)){
-                let data=JSON.parse(fs.readFileSync(progressPath,"utf-8"))
+            try{
+                let raw=await fsp.readFile(progressPath,"utf-8")
+                let data=JSON.parse(raw)
                 return{success:true,data}
             }
-            return{success:true,data:null}
+            catch{
+                return{success:true,data:null}
+            }
         }
         catch{
             return{success:true,data:null}
@@ -1489,7 +1500,7 @@ function registerDeferredIpcHandlers():void{
     handle("progress:clear",async():Promise<{success:boolean}>=>{
         try{
             let progressPath=path.join(app.getPath("userData"),"training-progress.json")
-            if(fs.existsSync(progressPath))fs.unlinkSync(progressPath)
+            try{await fsp.unlink(progressPath)}catch{/* file may not exist */}
             return{success:true}
         }
         catch{
@@ -1502,7 +1513,8 @@ function registerDeferredIpcHandlers():void{
         }
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-            fs.writeFileSync(checkpointPath,JSON.stringify(data))
+            let serialized=JSON.stringify(data)
+            await atomicWriteFile(checkpointPath,serialized)
             return{success:true}
         }
         catch{
@@ -1512,11 +1524,14 @@ function registerDeferredIpcHandlers():void{
     handle("load-checkpoint",async():Promise<{success:boolean;data?:any}>=>{
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-            if(fs.existsSync(checkpointPath)){
-                let data=JSON.parse(fs.readFileSync(checkpointPath,"utf-8"))
+            try{
+                let raw=await fsp.readFile(checkpointPath,"utf-8")
+                let data=JSON.parse(raw)
                 return{success:true,data}
             }
-            return{success:true,data:null}
+            catch{
+                return{success:true,data:null}
+            }
         }
         catch{
             return{success:true,data:null}
@@ -1525,7 +1540,7 @@ function registerDeferredIpcHandlers():void{
     handle("clear-checkpoint",async():Promise<{success:boolean}>=>{
         try{
             let checkpointPath=path.join(userDataPath,"training-checkpoint.json")
-            if(fs.existsSync(checkpointPath))fs.unlinkSync(checkpointPath)
+            try{await fsp.unlink(checkpointPath)}catch{/* file may not exist */}
             return{success:true}
         }
         catch{
