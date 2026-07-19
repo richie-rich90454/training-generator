@@ -111,6 +111,19 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
     async function handleDeleteProfile(): Promise<void> {
         await settingsStore.deleteCurrentProfile()
     }
+    async function handleBrowseCustomCss(): Promise<void> {
+        const api = (window as unknown as { electronAPI?: { openFileDialog?: () => Promise<Array<{ path: string }> | null> } }).electronAPI
+        if (!api?.openFileDialog) return
+        try {
+            const result = await api.openFileDialog()
+            if (result && result.length > 0 && result[0].path) {
+                settingsStore.setAppSetting("customCssPath", result[0].path)
+            }
+        }
+        catch {
+            // File dialog may be unavailable in non-Electron environments; ignore.
+        }
+    }
     function handleNavKeydown(e: KeyboardEvent): void {
         const buttons = Array.from(overlayRef?.querySelectorAll<HTMLButtonElement>('button[data-section-nav="true"]') ?? [])
         if (buttons.length === 0) return
@@ -282,6 +295,101 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 )}
                                             </For>
                                         </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-font-scale">
+                                            <Icon html={renderIcon("fa-text-height")} />
+                                            <span data-i18n="settings.fontScale" data-field-label="fontScale">{t("settings.fontScale")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-font-scale"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="50"
+                                            max="200"
+                                            step="10"
+                                            value={settingsStore.appSettings.fontScale ?? 100}
+                                            onChange={(e) => settingsStore.setAppSetting("fontScale", parseInt(e.currentTarget.value, 10) || 100)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-density">
+                                            <Icon html={renderIcon("fa-sliders-h")} />
+                                            <span data-i18n="settings.density" data-field-label="density">{t("settings.density")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-density"
+                                            class={styles["form-control"]}
+                                            value={settingsStore.appSettings.density || "normal"}
+                                            onChange={(e) => settingsStore.setAppSetting("density", e.currentTarget.value as "compact" | "normal" | "spacious")}
+                                        >
+                                            <option value="compact" data-i18n="settings.density.compact">{t("settings.density.compact")}</option>
+                                            <option value="normal" data-i18n="settings.density.normal">{t("settings.density.normal")}</option>
+                                            <option value="spacious" data-i18n="settings.density.spacious">{t("settings.density.spacious")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-compact-mode">
+                                            <input
+                                                id="settings-compact-mode"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.compactMode ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("compactMode", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.compactMode" data-field-label="compactMode">{t("settings.compactMode")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-reduced-motion">
+                                            <input
+                                                id="settings-reduced-motion"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.reducedMotion ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("reducedMotion", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.reducedMotion" data-field-label="reducedMotion">{t("settings.reducedMotion")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-high-contrast">
+                                            <input
+                                                id="settings-high-contrast"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.highContrast ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("highContrast", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.highContrast" data-field-label="highContrast">{t("settings.highContrast")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-custom-css-path">
+                                            <Icon html={renderIcon("fa-file-code")} />
+                                            <span data-i18n="settings.customCssPath" data-field-label="customCssPath">{t("settings.customCssPath")}</span>
+                                        </label>
+                                        <div class={`section-actions ${styles["settings-actions--inline"]}`}>
+                                            <input
+                                                id="settings-custom-css-path"
+                                                class={styles["form-control"]}
+                                                type="text"
+                                                value={settingsStore.appSettings.customCssPath ?? ""}
+                                                placeholder={t("settings.customCssPath.placeholder")}
+                                                data-i18n-placeholder="settings.customCssPath.placeholder"
+                                                onInput={(e) => settingsStore.setAppSetting("customCssPath", e.currentTarget.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                                                aria-label={t("settings.customCssPath.browseAria")}
+                                                data-i18n-aria-label="settings.customCssPath.browseAria"
+                                                onClick={handleBrowseCustomCss}
+                                            >
+                                                <Icon html={renderIcon("fa-folder-open")} />
+                                                <span data-i18n="settings.customCssPath.browse">{t("settings.customCssPath.browse")}</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </section>
                                 <section
