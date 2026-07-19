@@ -202,6 +202,13 @@ describe("TitleBar", () => {
             expect(maxBtn.querySelector('[class*="icon-maximize"]')).not.toBeNull()
             expect(maxBtn.querySelector('[class*="icon-restore"]')).not.toBeNull()
         })
+        test("double-clicking the drag region toggles maximize", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const dragRegion = document.querySelector('[class*="title-bar-drag-region"]') as HTMLElement
+            expect(dragRegion).not.toBeNull()
+            fireEvent.dblClick(dragRegion)
+            expect(electronAPI.windowMaximizeToggle).toHaveBeenCalledTimes(1)
+        })
     })
 
     describe("maximize subscription", () => {
@@ -220,7 +227,7 @@ describe("TitleBar", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             const callback = electronAPI.onWindowMaximizedChange.mock.calls[0][0] as (m: boolean) => void
             callback(true)
-            const maxBtn = screen.getByLabelText("Maximize")
+            const maxBtn = screen.getByLabelText("Restore")
             expect(maxBtn.className).toContain("is-maximized")
         })
         test("maximized=false callback removes is-maximized class from max button", () => {
@@ -230,6 +237,26 @@ describe("TitleBar", () => {
             callback(false)
             const maxBtn = screen.getByLabelText("Maximize")
             expect(maxBtn.className).not.toContain("is-maximized")
+        })
+        test("aria-label toggles to Restore when maximized", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const callback = electronAPI.onWindowMaximizedChange.mock.calls[0][0] as (m: boolean) => void
+            expect(screen.getByLabelText("Maximize")).not.toBeNull()
+            callback(true)
+            expect(screen.getByLabelText("Restore")).not.toBeNull()
+            expect(screen.queryByLabelText("Maximize")).toBeNull()
+            callback(false)
+            expect(screen.getByLabelText("Maximize")).not.toBeNull()
+            expect(screen.queryByLabelText("Restore")).toBeNull()
+        })
+        test("data-i18n-aria-label toggles between window.maximize and window.restore", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const callback = electronAPI.onWindowMaximizedChange.mock.calls[0][0] as (m: boolean) => void
+            const maxBtn = screen.getByLabelText("Maximize")
+            expect(maxBtn.getAttribute("data-i18n-aria-label")).toBe("window.maximize")
+            callback(true)
+            const restoreBtn = screen.getByLabelText("Restore")
+            expect(restoreBtn.getAttribute("data-i18n-aria-label")).toBe("window.restore")
         })
         test("onCleanup calls the unsubscribe function returned by onWindowMaximizedChange", () => {
             const unsubscribe = vi.fn()
