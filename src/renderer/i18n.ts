@@ -91,6 +91,7 @@ export const translations: Record<string, TranslationDict> = {
     "header.editTemplates": "Edit Prompt Templates",
     "window.minimize": "Minimize",
     "window.maximize": "Maximize",
+    "window.restore": "Restore",
     "window.close": "Close",
     "upload.clearAria": "Clear all files",
     "upload.dropzoneAria": "Drop files here or press Enter to browse",

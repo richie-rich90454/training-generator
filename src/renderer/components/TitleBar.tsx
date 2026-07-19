@@ -78,8 +78,8 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
                 <button
                     class={`${styles["window-btn"]} ${styles["window-btn-max"]}`}
                     classList={{ [styles["is-maximized"]]: isMaximized() }}
-                    aria-label={t("window.maximize")}
-                    data-i18n-aria-label="window.maximize"
+                    aria-label={isMaximized() ? t("window.restore") : t("window.maximize")}
+                    data-i18n-aria-label={isMaximized() ? "window.restore" : "window.maximize"}
                     onClick={handleMaximize}
                 >
                     <svg class={styles["icon-maximize"]} viewBox="0 0 10 10" width="10" height="10"><rect x="2" y="2" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1" /></svg>
