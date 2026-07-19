@@ -39,6 +39,11 @@
 .dashboard-close:hover{
     opacity:.8;
 }
+.dashboard-close:focus-visible{
+    outline:2px solid var(--surface-color);
+    outline-offset:2px;
+    border-radius:var(--radius-small);
+}
 .dashboard-body{
     padding:var(--spacing-sm) var(--spacing-md);
     font-size:.8125rem;
