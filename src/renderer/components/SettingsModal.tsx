@@ -1873,6 +1873,36 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <span data-i18n="settings.sections.experimental">{t("settings.sections.experimental")}</span>
                                         <span class={styles["settings-badge"]} data-i18n="settings.experimentalBadge">{t("settings.experimentalBadge")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-output-language-override">
+                                            <Icon html={renderIcon("fa-cloud")} />
+                                            <span data-i18n="settings.outputLanguageOverride" data-field-label="outputLanguageOverride">{t("settings.outputLanguageOverride")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-output-language-override"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={settingsStore.appSettings.outputLanguageOverride ?? ""}
+                                            placeholder={t("settings.outputLanguageOverride.placeholder")}
+                                            data-i18n-placeholder="settings.outputLanguageOverride.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("outputLanguageOverride", e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-experimental-custom-endpoint">
+                                            <Icon html={renderIcon("fa-link")} />
+                                            <span data-i18n="settings.customModelEndpoint" data-field-label="customModelEndpoint">{t("settings.customModelEndpoint")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-experimental-custom-endpoint"
+                                            class={styles["form-control"]}
+                                            type="text"
+                                            value={(settingsStore.appSettings as Record<string, unknown>).customModelEndpoint as string ?? ""}
+                                            placeholder={t("settings.customModelEndpoint.placeholder")}
+                                            data-i18n-placeholder="settings.customModelEndpoint.placeholder"
+                                            onInput={(e) => settingsStore.setAppSetting("customModelEndpoint" as never, e.currentTarget.value as never)}
+                                        />
+                                    </div>
                                 </section>
                             </div>
                         </div>
