@@ -582,6 +582,134 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             </For>
                                         </select>
                                     </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-chunk-size">
+                                            <Icon html={renderIcon("fa-cut")} />
+                                            <span data-i18n="settings.chunkSize" data-field-label="chunkSize">{t("settings.chunkSize")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-chunk-size"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="500"
+                                            max="10000"
+                                            step="100"
+                                            value={settingsStore.settings.chunkSize}
+                                            onChange={(e) => settingsStore.setChunkSize(parseInt(e.currentTarget.value, 10))}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-concurrency">
+                                            <Icon html={renderIcon("fa-bolt")} />
+                                            <span data-i18n="settings.concurrency" data-field-label="concurrency">{t("settings.concurrency")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-concurrency"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1"
+                                            max="10"
+                                            step="1"
+                                            value={settingsStore.settings.concurrency}
+                                            onChange={(e) => settingsStore.setConcurrency(parseInt(e.currentTarget.value, 10))}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-min-chunk-length">
+                                            <Icon html={renderIcon("fa-cut")} />
+                                            <span data-i18n="settings.minChunkLength" data-field-label="minChunkLength">{t("settings.minChunkLength")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-min-chunk-length"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="50"
+                                            max="2000"
+                                            step="50"
+                                            value={settingsStore.appSettings.minChunkLength ?? 200}
+                                            onChange={(e) => settingsStore.setAppSetting("minChunkLength", parseInt(e.currentTarget.value, 10) || 200)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-max-chunk-length">
+                                            <Icon html={renderIcon("fa-expand")} />
+                                            <span data-i18n="settings.maxChunkLength" data-field-label="maxChunkLength">{t("settings.maxChunkLength")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-max-chunk-length"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="1000"
+                                            max="32000"
+                                            step="500"
+                                            value={settingsStore.appSettings.maxChunkLength ?? 8000}
+                                            onChange={(e) => settingsStore.setAppSetting("maxChunkLength", parseInt(e.currentTarget.value, 10) || 8000)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-chunk-overlap">
+                                            <Icon html={renderIcon("fa-layer-group")} />
+                                            <span data-i18n="settings.chunkOverlap" data-field-label="chunkOverlap">{t("settings.chunkOverlap")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-chunk-overlap"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="0"
+                                            max="1000"
+                                            step="10"
+                                            value={settingsStore.appSettings.chunkOverlap ?? 100}
+                                            onChange={(e) => settingsStore.setAppSetting("chunkOverlap", parseInt(e.currentTarget.value, 10) || 0)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-sentence-aware-chunking">
+                                            <input
+                                                id="settings-sentence-aware-chunking"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.sentenceAwareChunking ?? true}
+                                                onChange={(e) => settingsStore.setAppSetting("sentenceAwareChunking", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.sentenceAwareChunking" data-field-label="sentenceAwareChunking">{t("settings.sentenceAwareChunking")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-preserve-code-blocks">
+                                            <input
+                                                id="settings-preserve-code-blocks"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.preserveCodeBlocks ?? true}
+                                                onChange={(e) => settingsStore.setAppSetting("preserveCodeBlocks", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.preserveCodeBlocks" data-field-label="preserveCodeBlocks">{t("settings.preserveCodeBlocks")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-language-detection">
+                                            <input
+                                                id="settings-language-detection"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.languageDetection ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("languageDetection", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.languageDetection" data-field-label="languageDetection">{t("settings.languageDetection")}</span>
+                                        </label>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-incremental">
+                                            <input
+                                                id="settings-incremental"
+                                                class={styles["form-checkbox"]}
+                                                type="checkbox"
+                                                checked={settingsStore.appSettings.incremental ?? false}
+                                                onChange={(e) => settingsStore.setAppSetting("incremental", e.currentTarget.checked)}
+                                            />
+                                            <span data-i18n="settings.incremental" data-field-label="incremental">{t("settings.incremental")}</span>
+                                        </label>
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("window")}
