@@ -62,23 +62,20 @@ export function applyLlama2Template(messages: ChatMessage[]): string{
         system=messages[0].content
         turns=messages.slice(1)
     }
-    let result=""
-    if(system.length>0){
-        result="<<SYS>>\n"+system+"\n<</SYS>>\n\n"
-    }
+    let systemBlock=system.length>0?"<<SYS>>\n"+system+"\n<</SYS>>\n\n":""
     let parts: string[]=[]
     for(let i=0;i<turns.length;i+=2){
         let user=turns[i]
         let assistant=turns[i+1]
+        let prefix=i===0&&systemBlock.length>0?systemBlock:""
         if(user!=null&&user.role==="user"&&assistant!=null&&assistant.role==="assistant"){
-            parts.push("[INST] "+user.content+" [/INST] "+assistant.content)
+            parts.push("[INST] "+prefix+user.content+" [/INST] "+assistant.content)
         }
         else if(user!=null&&user.role==="user"){
-            parts.push("[INST] "+user.content+" [/INST] ")
+            parts.push("[INST] "+prefix+user.content+" [/INST] ")
         }
     }
-    result+=parts.join("")
-    return result
+    return parts.join("")
 }
 export function applyLlama3Template(messages: ChatMessage[]): string{
     let result="<|begin_of_text|>"
