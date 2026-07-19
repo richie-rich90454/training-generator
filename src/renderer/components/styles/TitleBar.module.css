@@ -2,7 +2,7 @@
     height:var(--title-bar-height);
     display:flex;
     align-items:center;
-    padding:0 0 0 12px;
+    padding-inline-start:12px;
     background:var(--surface-color);
     border-bottom:1px solid var(--border-color);
     user-select:none;
@@ -34,7 +34,7 @@
     font-size:13px;
     font-weight:600;
     color:var(--text-primary);
-    margin-left:8px;
+    margin-inline-start:8px;
     user-select:none;
     white-space:nowrap;
     overflow:hidden;
@@ -44,7 +44,7 @@
     display:flex;
     align-items:center;
     gap:2px;
-    margin-left:12px;
+    margin-inline-start:12px;
     -webkit-app-region:no-drag;
 }
 .title-bar-actions .btn-icon{
@@ -83,7 +83,7 @@
 .window-controls{
     display:flex;
     align-items:center;
-    margin-left:auto;
+    margin-inline-start:auto;
     -webkit-app-region:no-drag;
 }
 .window-btn{
