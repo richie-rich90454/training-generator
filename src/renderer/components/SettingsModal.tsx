@@ -119,6 +119,96 @@ const SECTION_KEYS: Record<string, string[]> = {
     experimental: ["outputLanguageOverride"]
 }
 
+/**
+ * Numeric ranges used for inline validation of numeric inputs. The min/max
+ * here MUST match the min/max attributes set on the <input type="number">
+ * elements below as well as the clamp() ranges in settingsStore.
+ */
+const NUMERIC_RANGES: Record<string, { min: number, max: number }> = {
+    fontScale: { min: 50, max: 200 },
+    maxFileSize: { min: 10, max: 1000 },
+    minChunkLength: { min: 50, max: 10000 },
+    maxChunkLength: { min: 500, max: 100000 },
+    chunkOverlap: { min: 0, max: 1000 },
+    chunkSize: { min: 500, max: 10000 },
+    concurrency: { min: 1, max: 10 },
+    maxItemsPerFile: { min: 100, max: 1000000 },
+    temperature: { min: 0, max: 2 },
+    topP: { min: 0, max: 1 },
+    topK: { min: 1, max: 1000 },
+    repeatPenalty: { min: 0.5, max: 2 },
+    seed: { min: -1, max: 2147483647 },
+    retryCount: { min: 0, max: 10 },
+    requestTimeoutMs: { min: 1000, max: 600000 },
+    streamTimeoutMs: { min: 1000, max: 3600000 },
+    dedupSimilarityThreshold: { min: 0.5, max: 1 },
+    qualityThreshold: { min: 0, max: 1 },
+    regenerateThreshold: { min: 0, max: 1 },
+    maxRegenerationAttempts: { min: 0, max: 10 },
+    minQaPairsPerFile: { min: 1, max: 10000 },
+    maxQaPairsPerFile: { min: 1, max: 100000 },
+    refinementPasses: { min: 0, max: 10 },
+    ollamaPort: { min: 1, max: 65535 },
+    updateCheckIntervalHours: { min: 1, max: 720 },
+    retentionDays: { min: 1, max: 3650 },
+    cacheMaxSizeMB: { min: 10, max: 10000 },
+    cacheTtlSeconds: { min: 60, max: 604800 }
+}
+
+/**
+ * Info-icon tooltip rendered next to a setting's label. The tooltip is shown
+ * on hover (CSS) AND on keyboard focus (the icon is focusable). Implements
+ * both a native `title` attribute and a custom CSS tooltip with role="tooltip"
+ * linked via aria-describedby, satisfying the v2.0.1 a11y requirements.
+ *
+ * The tooltip text is read from
+ *   settings.<section>.<field>.tooltip
+ * falling back to an empty string when the key is missing so unlabeled fields
+ * simply render no tooltip bubble instead of showing a raw key.
+ */
+function SettingTooltip(props: { section: string, field: string }): JSX.Element {
+    const tooltipKey = `settings.${props.section}.${props.field}.tooltip`
+    const tooltipId = `tooltip-${props.section}-${props.field}`
+    const tooltipText = t(tooltipKey)
+    const ariaLabel = t("settings.tooltip.ariaLabel")
+    return (
+        <span class={styles["settings-tooltip"]}>
+            <span
+                class={styles["settings-tooltip__icon"]}
+                tabindex="0"
+                role="img"
+                aria-label={ariaLabel}
+                aria-describedby={tooltipId}
+                title={tooltipText}
+            >
+                <Icon html={renderIcon("fa-info-circle")} />
+            </span>
+            <span
+                id={tooltipId}
+                class={styles["settings-tooltip__bubble"]}
+                role="tooltip"
+            >
+                {tooltipText}
+            </span>
+        </span>
+    )
+}
+
+/**
+ * Inline validation error shown below a numeric input. Renders nothing when
+ * the error message is empty so callers can always include it. The optional
+ * id is used by the parent input's aria-describedby.
+ */
+function NumericError(props: { error: string, id?: string }): JSX.Element {
+    return (
+        <Show when={props.error.length > 0}>
+            <p id={props.id} class={styles["settings-field__error"]} role="alert">
+                {props.error}
+            </p>
+        </Show>
+    )
+}
+
 export interface SettingsModalProps {
     appStore: AppStore
 }
@@ -151,6 +241,8 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
     const [profileName, setProfileName] = createSignal("")
     const [activeSection, setActiveSection] = createSignal<string>("appearance")
     const [searchQuery, setSearchQuery] = createSignal<string>("")
+    // Map of numeric setting key -> current validation error message (empty = valid).
+    const [numericErrors, setNumericErrors] = createSignal<Record<string, string>>({})
     let overlayRef: HTMLDivElement | undefined
     let firstFocusable: HTMLElement | undefined
     let lastFocusable: HTMLElement | undefined
@@ -291,6 +383,44 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
         const confirmed = await showConfirm(t("settings.resetAll.confirm"), t("settings.resetAll"))
         if (!confirmed) return
         settingsStore.resetAppSettings()
+    }
+    /**
+     * Validate a numeric input. Returns an error message string (empty if
+     * valid) and updates the numericErrors signal map. The message is also
+     * surfaced to the caller so it can wire aria-invalid / aria-describedby.
+     */
+    function validateNumeric(key: string, raw: string): string {
+        const range = NUMERIC_RANGES[key]
+        if (!range) return ""
+        const trimmed = (raw ?? "").trim()
+        if (trimmed.length === 0) {
+            const msg = t("settings.validation.required")
+            setNumericErrors((prev) => ({ ...prev, [key]: msg }))
+            return msg
+        }
+        const n = Number(trimmed)
+        if (!Number.isFinite(n)) {
+            const msg = t("settings.validation.required")
+            setNumericErrors((prev) => ({ ...prev, [key]: msg }))
+            return msg
+        }
+        if (n < range.min) {
+            const msg = t("settings.validation.rangeUnder", undefined, { min: String(range.min) })
+            setNumericErrors((prev) => ({ ...prev, [key]: msg }))
+            return msg
+        }
+        if (n > range.max) {
+            const msg = t("settings.validation.rangeOver", undefined, { max: String(range.max) })
+            setNumericErrors((prev) => ({ ...prev, [key]: msg }))
+            return msg
+        }
+        setNumericErrors((prev) => {
+            if (!prev[key]) return prev
+            const next = { ...prev }
+            delete next[key]
+            return next
+        })
+        return ""
     }
     function handleSave(): void {
         settingsStore.saveAppSettings()
@@ -513,6 +643,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-theme">
                                             <Icon html={renderIcon("fa-display")} />
                                             <span data-i18n="settings.theme" data-field-label="theme">{t("settings.theme")}</span>
+                                            <SettingTooltip section="appearance" field="theme" />
                                         </label>
                                         <select
                                             id="settings-theme"
@@ -533,6 +664,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-font-size">
                                             <Icon html={renderIcon("fa-text-height")} />
                                             <span data-i18n="settings.fontSize" data-field-label="fontSize">{t("settings.fontSize")}</span>
+                                            <SettingTooltip section="appearance" field="fontSize" />
                                         </label>
                                         <select
                                             id="settings-font-size"
@@ -553,6 +685,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-ui-language">
                                             <Icon html={renderIcon("fa-language")} />
                                             <span data-i18n="settings.uiLanguage" data-field-label="uiLanguage">{t("settings.uiLanguage")}</span>
+                                            <SettingTooltip section="appearance" field="uiLanguage" />
                                         </label>
                                         <select
                                             id="settings-ui-language"
@@ -573,6 +706,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-font-scale">
                                             <Icon html={renderIcon("fa-text-height")} />
                                             <span data-i18n="settings.fontScale" data-field-label="fontScale">{t("settings.fontScale")}</span>
+                                            <SettingTooltip section="appearance" field="fontScale" />
                                         </label>
                                         <input
                                             id="settings-font-scale"
@@ -589,6 +723,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-density">
                                             <Icon html={renderIcon("fa-sliders-h")} />
                                             <span data-i18n="settings.density" data-field-label="density">{t("settings.density")}</span>
+                                            <SettingTooltip section="appearance" field="density" />
                                         </label>
                                         <select
                                             id="settings-density"
@@ -611,6 +746,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("compactMode", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.compactMode" data-field-label="compactMode">{t("settings.compactMode")}</span>
+                                            <SettingTooltip section="appearance" field="compactMode" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -623,6 +759,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("reducedMotion", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.reducedMotion" data-field-label="reducedMotion">{t("settings.reducedMotion")}</span>
+                                            <SettingTooltip section="appearance" field="reducedMotion" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -635,12 +772,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("highContrast", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.highContrast" data-field-label="highContrast">{t("settings.highContrast")}</span>
+                                            <SettingTooltip section="appearance" field="highContrast" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-custom-css-path">
                                             <Icon html={renderIcon("fa-file-code")} />
                                             <span data-i18n="settings.customCssPath" data-field-label="customCssPath">{t("settings.customCssPath")}</span>
+                                            <SettingTooltip section="appearance" field="customCssPath" />
                                         </label>
                                         <div class={`section-actions ${styles["settings-actions--inline"]}`}>
                                             <input
@@ -680,6 +819,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-profile-select">
                                             <Icon html={renderIcon("fa-list-ol")} />
                                             <span data-i18n="settings.profileSelect" data-field-label="profileSelect">{t("settings.profileSelect")}</span>
+                                            <SettingTooltip section="profiles" field="profileSelect" />
                                         </label>
                                         <select
                                             id="settings-profile-select"
@@ -699,6 +839,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-profile-name">
                                             <Icon html={renderIcon("fa-save")} />
                                             <span data-i18n="settings.saveProfile" data-field-label="saveProfile">{t("settings.saveProfile")}</span>
+                                            <SettingTooltip section="profiles" field="saveProfile" />
                                         </label>
                                         <div class={`section-actions ${styles["settings-actions--inline"]}`}>
                                             <input
@@ -767,6 +908,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAutoSave(e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.autoSave" data-field-label="autoSave">{t("settings.autoSave")}</span>
+                                            <SettingTooltip section="processing" field="autoSave" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -779,12 +921,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAutoCheckOllama(e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.autoCheckOllama" data-field-label="autoCheckOllama">{t("settings.autoCheckOllama")}</span>
+                                            <SettingTooltip section="processing" field="autoCheckOllama" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-max-file-size">
                                             <Icon html={renderIcon("fa-hdd")} />
                                             <span data-i18n="settings.maxFileSize" data-field-label="maxFileSize">{t("settings.maxFileSize")}</span>
+                                            <SettingTooltip section="processing" field="maxFileSize" />
                                         </label>
                                         <input
                                             id="settings-max-file-size"
@@ -800,6 +944,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-output-items">
                                             <Icon html={renderIcon("fa-database")} />
                                             <span data-i18n="settings.maxOutputItems" data-field-label="maxOutputItems">{t("settings.maxOutputItems")}</span>
+                                            <SettingTooltip section="processing" field="maxOutputItems" />
                                         </label>
                                         <select
                                             id="settings-max-output-items"
@@ -820,6 +965,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-chunks">
                                             <Icon html={renderIcon("fa-cut")} />
                                             <span data-i18n="settings.maxChunks" data-field-label="maxChunks">{t("settings.maxChunks")}</span>
+                                            <SettingTooltip section="processing" field="maxChunks" />
                                         </label>
                                         <select
                                             id="settings-max-chunks"
@@ -840,6 +986,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-parallel">
                                             <Icon html={renderIcon("fa-bolt")} />
                                             <span data-i18n="settings.maxParallelFiles" data-field-label="maxParallelFiles">{t("settings.maxParallelFiles")}</span>
+                                            <SettingTooltip section="processing" field="maxParallelFiles" />
                                         </label>
                                         <select
                                             id="settings-max-parallel"
@@ -860,6 +1007,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-chunk-size">
                                             <Icon html={renderIcon("fa-cut")} />
                                             <span data-i18n="settings.chunkSize" data-field-label="chunkSize">{t("settings.chunkSize")}</span>
+                                            <SettingTooltip section="processing" field="chunkSize" />
                                         </label>
                                         <input
                                             id="settings-chunk-size"
@@ -876,6 +1024,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-concurrency">
                                             <Icon html={renderIcon("fa-bolt")} />
                                             <span data-i18n="settings.concurrency" data-field-label="concurrency">{t("settings.concurrency")}</span>
+                                            <SettingTooltip section="processing" field="concurrency" />
                                         </label>
                                         <input
                                             id="settings-concurrency"
@@ -892,6 +1041,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-min-chunk-length">
                                             <Icon html={renderIcon("fa-cut")} />
                                             <span data-i18n="settings.minChunkLength" data-field-label="minChunkLength">{t("settings.minChunkLength")}</span>
+                                            <SettingTooltip section="processing" field="minChunkLength" />
                                         </label>
                                         <input
                                             id="settings-min-chunk-length"
@@ -908,6 +1058,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-chunk-length">
                                             <Icon html={renderIcon("fa-expand")} />
                                             <span data-i18n="settings.maxChunkLength" data-field-label="maxChunkLength">{t("settings.maxChunkLength")}</span>
+                                            <SettingTooltip section="processing" field="maxChunkLength" />
                                         </label>
                                         <input
                                             id="settings-max-chunk-length"
@@ -924,6 +1075,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-chunk-overlap">
                                             <Icon html={renderIcon("fa-layer-group")} />
                                             <span data-i18n="settings.chunkOverlap" data-field-label="chunkOverlap">{t("settings.chunkOverlap")}</span>
+                                            <SettingTooltip section="processing" field="chunkOverlap" />
                                         </label>
                                         <input
                                             id="settings-chunk-overlap"
@@ -946,6 +1098,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("sentenceAwareChunking", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.sentenceAwareChunking" data-field-label="sentenceAwareChunking">{t("settings.sentenceAwareChunking")}</span>
+                                            <SettingTooltip section="processing" field="sentenceAwareChunking" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -958,6 +1111,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("preserveCodeBlocks", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.preserveCodeBlocks" data-field-label="preserveCodeBlocks">{t("settings.preserveCodeBlocks")}</span>
+                                            <SettingTooltip section="processing" field="preserveCodeBlocks" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -970,6 +1124,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("languageDetection", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.languageDetection" data-field-label="languageDetection">{t("settings.languageDetection")}</span>
+                                            <SettingTooltip section="processing" field="languageDetection" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -982,6 +1137,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("incremental", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.incremental" data-field-label="incremental">{t("settings.incremental")}</span>
+                                            <SettingTooltip section="processing" field="incremental" />
                                         </label>
                                     </div>
                                 </section>
@@ -1019,6 +1175,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setStartMaximized(e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.startMaximized" data-field-label="startMaximized">{t("settings.startMaximized")}</span>
+                                            <SettingTooltip section="window" field="startMaximized" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -1031,6 +1188,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setRememberWindowSize(e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.rememberWindowSize" data-field-label="rememberWindowSize">{t("settings.rememberWindowSize")}</span>
+                                            <SettingTooltip section="window" field="rememberWindowSize" />
                                         </label>
                                     </div>
                                 </section>
@@ -1091,6 +1249,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             <label class={styles["settings-field__label"]} for="settings-output-filename-template">
                                                 <Icon html={renderIcon("fa-file-signature")} />
                                                 <span data-i18n="settings.outputFilenameTemplate" data-field-label="outputFilenameTemplate">{t("settings.outputFilenameTemplate")}</span>
+                                                <SettingTooltip section="outputMode" field="outputFilenameTemplate" />
                                             </label>
                                             <input
                                                 id="settings-output-filename-template"
@@ -1106,6 +1265,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             <label class={styles["settings-field__label"]} for="settings-max-items-per-file">
                                                 <Icon html={renderIcon("fa-list-ol")} />
                                                 <span data-i18n="settings.maxItemsPerFile" data-field-label="maxItemsPerFile">{t("settings.maxItemsPerFile")}</span>
+                                                <SettingTooltip section="outputMode" field="maxItemsPerFile" />
                                             </label>
                                             <input
                                                 id="settings-max-items-per-file"
@@ -1128,6 +1288,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                     onChange={(e) => settingsStore.setAppSetting("includeSourceMetadata", e.currentTarget.checked)}
                                                 />
                                                 <span data-i18n="settings.includeSourceMetadata" data-field-label="includeSourceMetadata">{t("settings.includeSourceMetadata")}</span>
+                                                <SettingTooltip section="outputMode" field="includeSourceMetadata" />
                                             </label>
                                         </div>
                                         <div class={styles["settings-field"]}>
@@ -1140,6 +1301,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                     onChange={(e) => settingsStore.setAppSetting("stripPiiBeforeExport", e.currentTarget.checked)}
                                                 />
                                                 <span data-i18n="settings.stripPiiBeforeExport" data-field-label="stripPiiBeforeExport">{t("settings.stripPiiBeforeExport")}</span>
+                                                <SettingTooltip section="outputMode" field="stripPiiBeforeExport" />
                                             </label>
                                         </div>
                                     </Show>
@@ -1172,6 +1334,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-output-format">
                                             <Icon html={renderIcon("fa-file-code")} />
                                             <span data-i18n="settings.outputFormat" data-field-label="outputFormat">{t("settings.outputFormat")}</span>
+                                            <SettingTooltip section="export" field="outputFormat" />
                                         </label>
                                         <select
                                             id="settings-output-format"
@@ -1190,6 +1353,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-export-path">
                                             <Icon html={renderIcon("fa-folder-open")} />
                                             <span data-i18n="settings.exportPath" data-field-label="exportPath">{t("settings.exportPath")}</span>
+                                            <SettingTooltip section="export" field="exportPath" />
                                         </label>
                                         <div class={`section-actions ${styles["settings-actions--inline"]}`}>
                                             <input
@@ -1223,6 +1387,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("confirmBeforeExport", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.confirmBeforeExport" data-field-label="confirmBeforeExport">{t("settings.confirmBeforeExport")}</span>
+                                            <SettingTooltip section="export" field="confirmBeforeExport" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -1235,6 +1400,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("autoExportOnCompletion", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.autoExportOnCompletion" data-field-label="autoExportOnCompletion">{t("settings.autoExportOnCompletion")}</span>
+                                            <SettingTooltip section="export" field="autoExportOnCompletion" />
                                         </label>
                                     </div>
                                 </section>
@@ -1266,6 +1432,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-model">
                                             <Icon html={renderIcon("fa-brain")} />
                                             <span data-i18n="settings.model" data-field-label="model">{t("settings.model")}</span>
+                                            <SettingTooltip section="generation" field="model" />
                                         </label>
                                         <input
                                             id="settings-model"
@@ -1281,6 +1448,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-provider">
                                             <Icon html={renderIcon("fa-cloud")} />
                                             <span data-i18n="settings.provider" data-field-label="provider">{t("settings.provider")}</span>
+                                            <SettingTooltip section="generation" field="provider" />
                                         </label>
                                         <select
                                             id="settings-provider"
@@ -1298,6 +1466,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-temperature">
                                             <Icon html={renderIcon("fa-thermometer-half")} />
                                             <span data-i18n="settings.temperature" data-field-label="temperature">{t("settings.temperature")}</span>
+                                            <SettingTooltip section="generation" field="temperature" />
                                         </label>
                                         <input
                                             id="settings-temperature"
@@ -1314,6 +1483,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-top-p">
                                             <Icon html={renderIcon("fa-sliders-h")} />
                                             <span data-i18n="settings.topP" data-field-label="topP">{t("settings.topP")}</span>
+                                            <SettingTooltip section="generation" field="topP" />
                                         </label>
                                         <input
                                             id="settings-top-p"
@@ -1330,6 +1500,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-top-k">
                                             <Icon html={renderIcon("fa-list-ol")} />
                                             <span data-i18n="settings.topK" data-field-label="topK">{t("settings.topK")}</span>
+                                            <SettingTooltip section="generation" field="topK" />
                                         </label>
                                         <input
                                             id="settings-top-k"
@@ -1346,6 +1517,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-repeat-penalty">
                                             <Icon html={renderIcon("fa-sync-alt")} />
                                             <span data-i18n="settings.repeatPenalty" data-field-label="repeatPenalty">{t("settings.repeatPenalty")}</span>
+                                            <SettingTooltip section="generation" field="repeatPenalty" />
                                         </label>
                                         <input
                                             id="settings-repeat-penalty"
@@ -1362,6 +1534,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-seed">
                                             <Icon html={renderIcon("fa-key")} />
                                             <span data-i18n="settings.seed" data-field-label="seed">{t("settings.seed")}</span>
+                                            <SettingTooltip section="generation" field="seed" />
                                         </label>
                                         <input
                                             id="settings-seed"
@@ -1378,6 +1551,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-system-prompt-override">
                                             <Icon html={renderIcon("fa-file-alt")} />
                                             <span data-i18n="settings.systemPromptOverride" data-field-label="systemPromptOverride">{t("settings.systemPromptOverride")}</span>
+                                            <SettingTooltip section="generation" field="systemPromptOverride" />
                                         </label>
                                         <textarea
                                             id="settings-system-prompt-override"
@@ -1393,6 +1567,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-stop-sequences">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.stopSequences" data-field-label="stopSequences">{t("settings.stopSequences")}</span>
+                                            <SettingTooltip section="generation" field="stopSequences" />
                                         </label>
                                         <input
                                             id="settings-stop-sequences"
@@ -1408,6 +1583,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-banned-phrases">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.bannedPhrases" data-field-label="bannedPhrases">{t("settings.bannedPhrases")}</span>
+                                            <SettingTooltip section="generation" field="bannedPhrases" />
                                         </label>
                                         <input
                                             id="settings-banned-phrases"
@@ -1423,6 +1599,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-required-phrases">
                                             <Icon html={renderIcon("fa-check-circle")} />
                                             <span data-i18n="settings.requiredPhrases" data-field-label="requiredPhrases">{t("settings.requiredPhrases")}</span>
+                                            <SettingTooltip section="generation" field="requiredPhrases" />
                                         </label>
                                         <input
                                             id="settings-required-phrases"
@@ -1438,6 +1615,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-custom-prompt">
                                             <Icon html={renderIcon("fa-edit")} />
                                             <span data-i18n="settings.customPrompt" data-field-label="customPrompt">{t("settings.customPrompt")}</span>
+                                            <SettingTooltip section="generation" field="customPrompt" />
                                         </label>
                                         <textarea
                                             id="settings-custom-prompt"
@@ -1459,12 +1637,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setEnableThinking(e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.enableThinking" data-field-label="enableThinking">{t("settings.enableThinking")}</span>
+                                            <SettingTooltip section="generation" field="enableThinking" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-retry-count">
                                             <Icon html={renderIcon("fa-undo")} />
                                             <span data-i18n="settings.retryCount" data-field-label="retryCount">{t("settings.retryCount")}</span>
+                                            <SettingTooltip section="generation" field="retryCount" />
                                         </label>
                                         <input
                                             id="settings-retry-count"
@@ -1481,6 +1661,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-retry-backoff-strategy">
                                             <Icon html={renderIcon("fa-sliders-h")} />
                                             <span data-i18n="settings.retryBackoffStrategy" data-field-label="retryBackoffStrategy">{t("settings.retryBackoffStrategy")}</span>
+                                            <SettingTooltip section="generation" field="retryBackoffStrategy" />
                                         </label>
                                         <select
                                             id="settings-retry-backoff-strategy"
@@ -1497,6 +1678,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-request-timeout-ms">
                                             <Icon html={renderIcon("fa-clock")} />
                                             <span data-i18n="settings.requestTimeoutMs" data-field-label="requestTimeoutMs">{t("settings.requestTimeoutMs")}</span>
+                                            <SettingTooltip section="generation" field="requestTimeoutMs" />
                                         </label>
                                         <input
                                             id="settings-request-timeout-ms"
@@ -1513,6 +1695,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-stream-timeout-ms">
                                             <Icon html={renderIcon("fa-clock")} />
                                             <span data-i18n="settings.streamTimeoutMs" data-field-label="streamTimeoutMs">{t("settings.streamTimeoutMs")}</span>
+                                            <SettingTooltip section="generation" field="streamTimeoutMs" />
                                         </label>
                                         <input
                                             id="settings-stream-timeout-ms"
@@ -1535,6 +1718,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("abortOnError", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.abortOnError" data-field-label="abortOnError">{t("settings.abortOnError")}</span>
+                                            <SettingTooltip section="generation" field="abortOnError" />
                                         </label>
                                     </div>
                                 </section>
@@ -1572,12 +1756,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("validateOutput" as never, e.currentTarget.checked as never)}
                                             />
                                             <span data-i18n="settings.validateOutput" data-field-label="validateOutput">{t("settings.validateOutput")}</span>
+                                            <SettingTooltip section="validation" field="validateOutput" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-validation-strictness">
                                             <Icon html={renderIcon("fa-sliders-h")} />
                                             <span data-i18n="settings.validationStrictness" data-field-label="validationStrictness">{t("settings.validationStrictness")}</span>
+                                            <SettingTooltip section="validation" field="validationStrictness" />
                                         </label>
                                         <select
                                             id="settings-validation-strictness"
@@ -1600,6 +1786,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("deduplicate" as never, e.currentTarget.checked as never)}
                                             />
                                             <span data-i18n="settings.deduplicate" data-field-label="deduplicate">{t("settings.deduplicate")}</span>
+                                            <SettingTooltip section="validation" field="deduplicate" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
@@ -1612,12 +1799,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("skipDedup", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.skipDedup" data-field-label="skipDedup">{t("settings.skipDedup")}</span>
+                                            <SettingTooltip section="validation" field="skipDedup" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-dedup-similarity-threshold">
                                             <Icon html={renderIcon("fa-layer-group")} />
                                             <span data-i18n="settings.dedupSimilarityThreshold" data-field-label="dedupSimilarityThreshold">{t("settings.dedupSimilarityThreshold")}</span>
+                                            <SettingTooltip section="validation" field="dedupSimilarityThreshold" />
                                         </label>
                                         <input
                                             id="settings-dedup-similarity-threshold"
@@ -1634,6 +1823,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-quality-threshold">
                                             <Icon html={renderIcon("fa-star")} />
                                             <span data-i18n="settings.qualityThreshold" data-field-label="qualityThreshold">{t("settings.qualityThreshold")}</span>
+                                            <SettingTooltip section="validation" field="qualityThreshold" />
                                         </label>
                                         <input
                                             id="settings-quality-threshold"
@@ -1656,12 +1846,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 onChange={(e) => settingsStore.setAppSetting("autoRegenerateOnLowQuality", e.currentTarget.checked)}
                                             />
                                             <span data-i18n="settings.autoRegenerateOnLowQuality" data-field-label="autoRegenerateOnLowQuality">{t("settings.autoRegenerateOnLowQuality")}</span>
+                                            <SettingTooltip section="validation" field="autoRegenerateOnLowQuality" />
                                         </label>
                                     </div>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-regenerate-threshold">
                                             <Icon html={renderIcon("fa-sync-alt")} />
                                             <span data-i18n="settings.regenerateThreshold" data-field-label="regenerateThreshold">{t("settings.regenerateThreshold")}</span>
+                                            <SettingTooltip section="validation" field="regenerateThreshold" />
                                         </label>
                                         <input
                                             id="settings-regenerate-threshold"
@@ -1678,6 +1870,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-regeneration-attempts">
                                             <Icon html={renderIcon("fa-undo")} />
                                             <span data-i18n="settings.maxRegenerationAttempts" data-field-label="maxRegenerationAttempts">{t("settings.maxRegenerationAttempts")}</span>
+                                            <SettingTooltip section="validation" field="maxRegenerationAttempts" />
                                         </label>
                                         <input
                                             id="settings-max-regeneration-attempts"
@@ -1694,6 +1887,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-min-qa-pairs-per-file">
                                             <Icon html={renderIcon("fa-list-ol")} />
                                             <span data-i18n="settings.minQaPairsPerFile" data-field-label="minQaPairsPerFile">{t("settings.minQaPairsPerFile")}</span>
+                                            <SettingTooltip section="validation" field="minQaPairsPerFile" />
                                         </label>
                                         <input
                                             id="settings-min-qa-pairs-per-file"
@@ -1710,6 +1904,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-max-qa-pairs-per-file">
                                             <Icon html={renderIcon("fa-list-ol")} />
                                             <span data-i18n="settings.maxQaPairsPerFile" data-field-label="maxQaPairsPerFile">{t("settings.maxQaPairsPerFile")}</span>
+                                            <SettingTooltip section="validation" field="maxQaPairsPerFile" />
                                         </label>
                                         <input
                                             id="settings-max-qa-pairs-per-file"
@@ -1726,6 +1921,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-refinement-passes">
                                             <Icon html={renderIcon("fa-highlighter")} />
                                             <span data-i18n="settings.refinementPasses" data-field-label="refinementPasses">{t("settings.refinementPasses")}</span>
+                                            <SettingTooltip section="validation" field="refinementPasses" />
                                         </label>
                                         <input
                                             id="settings-refinement-passes"
@@ -1767,6 +1963,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-api-key">
                                             <Icon html={renderIcon("fa-key")} />
                                             <span data-i18n="settings.apiKey" data-field-label="apiKey">{t("settings.apiKey")}</span>
+                                            <SettingTooltip section="providers" field="apiKey" />
                                         </label>
                                         <input
                                             id="settings-api-key"
@@ -1784,6 +1981,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-base-url">
                                             <Icon html={renderIcon("fa-link")} />
                                             <span data-i18n="settings.baseUrl" data-field-label="baseUrl">{t("settings.baseUrl")}</span>
+                                            <SettingTooltip section="providers" field="baseUrl" />
                                         </label>
                                         <input
                                             id="settings-base-url"
@@ -1799,6 +1997,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-ollama-host">
                                             <Icon html={renderIcon("fa-server")} />
                                             <span data-i18n="settings.ollamaHost" data-field-label="ollamaHost">{t("settings.ollamaHost")}</span>
+                                            <SettingTooltip section="providers" field="ollamaHost" />
                                         </label>
                                         <input
                                             id="settings-ollama-host"
@@ -1814,6 +2013,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-ollama-port">
                                             <Icon html={renderIcon("fa-server")} />
                                             <span data-i18n="settings.ollamaPort" data-field-label="ollamaPort">{t("settings.ollamaPort")}</span>
+                                            <SettingTooltip section="providers" field="ollamaPort" />
                                         </label>
                                         <input
                                             id="settings-ollama-port"
@@ -1830,6 +2030,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-custom-model-endpoint">
                                             <Icon html={renderIcon("fa-link")} />
                                             <span data-i18n="settings.customModelEndpoint" data-field-label="customModelEndpoint">{t("settings.customModelEndpoint")}</span>
+                                            <SettingTooltip section="providers" field="customModelEndpoint" />
                                         </label>
                                         <input
                                             id="settings-custom-model-endpoint"
@@ -1900,6 +2101,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-enable-telemetry">
                                             <Icon html={renderIcon("fa-eye")} />
                                             <span data-i18n="settings.enableTelemetry" data-field-label="enableTelemetry">{t("settings.enableTelemetry")}</span>
+                                            <SettingTooltip section="telemetry" field="enableTelemetry" />
                                         </label>
                                         <input
                                             id="settings-enable-telemetry"
@@ -1912,6 +2114,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-disable-telemetry">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.disableTelemetry" data-field-label="disableTelemetry">{t("settings.disableTelemetry")}</span>
+                                            <SettingTooltip section="telemetry" field="disableTelemetry" />
                                         </label>
                                         <input
                                             id="settings-disable-telemetry"
@@ -1924,6 +2127,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-crash-reports-enabled">
                                             <Icon html={renderIcon("fa-bug")} />
                                             <span data-i18n="settings.crashReportsEnabled" data-field-label="crashReportsEnabled">{t("settings.crashReportsEnabled")}</span>
+                                            <SettingTooltip section="telemetry" field="crashReportsEnabled" />
                                         </label>
                                         <input
                                             id="settings-crash-reports-enabled"
@@ -1936,6 +2140,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-disable-crash-reports">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.disableCrashReports" data-field-label="disableCrashReports">{t("settings.disableCrashReports")}</span>
+                                            <SettingTooltip section="telemetry" field="disableCrashReports" />
                                         </label>
                                         <input
                                             id="settings-disable-crash-reports"
@@ -1948,6 +2153,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-auto-update">
                                             <Icon html={renderIcon("fa-sync-alt")} />
                                             <span data-i18n="settings.autoUpdate" data-field-label="autoUpdate">{t("settings.autoUpdate")}</span>
+                                            <SettingTooltip section="telemetry" field="autoUpdate" />
                                         </label>
                                         <input
                                             id="settings-auto-update"
@@ -1960,6 +2166,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-disable-auto-update">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.disableAutoUpdate" data-field-label="disableAutoUpdate">{t("settings.disableAutoUpdate")}</span>
+                                            <SettingTooltip section="telemetry" field="disableAutoUpdate" />
                                         </label>
                                         <input
                                             id="settings-disable-auto-update"
@@ -1972,6 +2179,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-update-check-interval">
                                             <Icon html={renderIcon("fa-clock")} />
                                             <span data-i18n="settings.updateCheckIntervalHours" data-field-label="updateCheckIntervalHours">{t("settings.updateCheckIntervalHours")}</span>
+                                            <SettingTooltip section="telemetry" field="updateCheckIntervalHours" />
                                         </label>
                                         <input
                                             id="settings-update-check-interval"
@@ -1988,6 +2196,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-retention-days">
                                             <Icon html={renderIcon("fa-clock")} />
                                             <span data-i18n="settings.retentionDays" data-field-label="retentionDays">{t("settings.retentionDays")}</span>
+                                            <SettingTooltip section="telemetry" field="retentionDays" />
                                         </label>
                                         <input
                                             id="settings-retention-days"
@@ -2004,6 +2213,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-data-residency">
                                             <Icon html={renderIcon("fa-server")} />
                                             <span data-i18n="settings.dataResidency" data-field-label="dataResidency">{t("settings.dataResidency")}</span>
+                                            <SettingTooltip section="telemetry" field="dataResidency" />
                                         </label>
                                         <input
                                             id="settings-data-residency"
@@ -2044,6 +2254,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-gpu-acceleration">
                                             <Icon html={renderIcon("fa-bolt")} />
                                             <span data-i18n="settings.gpuAcceleration" data-field-label="gpuAcceleration">{t("settings.gpuAcceleration")}</span>
+                                            <SettingTooltip section="advanced" field="gpuAcceleration" />
                                         </label>
                                         <input
                                             id="settings-gpu-acceleration"
@@ -2056,6 +2267,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-send-to-tray-on-close">
                                             <Icon html={renderIcon("fa-window-restore")} />
                                             <span data-i18n="settings.sendToTrayOnClose" data-field-label="sendToTrayOnClose">{t("settings.sendToTrayOnClose")}</span>
+                                            <SettingTooltip section="advanced" field="sendToTrayOnClose" />
                                         </label>
                                         <input
                                             id="settings-send-to-tray-on-close"
@@ -2068,6 +2280,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-start-on-login">
                                             <Icon html={renderIcon("fa-cog")} />
                                             <span data-i18n="settings.startOnLogin" data-field-label="startOnLogin">{t("settings.startOnLogin")}</span>
+                                            <SettingTooltip section="advanced" field="startOnLogin" />
                                         </label>
                                         <input
                                             id="settings-start-on-login"
@@ -2080,6 +2293,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-cache-dir">
                                             <Icon html={renderIcon("fa-folder-open")} />
                                             <span data-i18n="settings.cacheDir" data-field-label="cacheDir">{t("settings.cacheDir")}</span>
+                                            <SettingTooltip section="advanced" field="cacheDir" />
                                         </label>
                                         <div class={`section-actions ${styles["settings-actions--inline"]}`}>
                                             <input
@@ -2117,6 +2331,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-cache-max-size">
                                             <Icon html={renderIcon("fa-database")} />
                                             <span data-i18n="settings.cacheMaxSizeMB" data-field-label="cacheMaxSizeMB">{t("settings.cacheMaxSizeMB")}</span>
+                                            <SettingTooltip section="advanced" field="cacheMaxSizeMB" />
                                         </label>
                                         <input
                                             id="settings-cache-max-size"
@@ -2133,6 +2348,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-cache-ttl">
                                             <Icon html={renderIcon("fa-clock")} />
                                             <span data-i18n="settings.cacheTtlSeconds" data-field-label="cacheTtlSeconds">{t("settings.cacheTtlSeconds")}</span>
+                                            <SettingTooltip section="advanced" field="cacheTtlSeconds" />
                                         </label>
                                         <input
                                             id="settings-cache-ttl"
@@ -2149,6 +2365,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-clear-cache-on-exit">
                                             <Icon html={renderIcon("fa-times-circle")} />
                                             <span data-i18n="settings.clearCacheOnExit" data-field-label="clearCacheOnExit">{t("settings.clearCacheOnExit")}</span>
+                                            <SettingTooltip section="advanced" field="clearCacheOnExit" />
                                         </label>
                                         <input
                                             id="settings-clear-cache-on-exit"
@@ -2161,6 +2378,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-log-to-file">
                                             <Icon html={renderIcon("fa-file-alt")} />
                                             <span data-i18n="settings.logToFile" data-field-label="logToFile">{t("settings.logToFile")}</span>
+                                            <SettingTooltip section="advanced" field="logToFile" />
                                         </label>
                                         <input
                                             id="settings-log-to-file"
@@ -2173,6 +2391,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-log-file-path">
                                             <Icon html={renderIcon("fa-file-code")} />
                                             <span data-i18n="settings.logFilePath" data-field-label="logFilePath">{t("settings.logFilePath")}</span>
+                                            <SettingTooltip section="advanced" field="logFilePath" />
                                         </label>
                                         <div class={`section-actions ${styles["settings-actions--inline"]}`}>
                                             <input
@@ -2212,6 +2431,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-log-level">
                                             <Icon html={renderIcon("fa-list-ol")} />
                                             <span data-i18n="settings.logLevel" data-field-label="logLevel">{t("settings.logLevel")}</span>
+                                            <SettingTooltip section="advanced" field="logLevel" />
                                         </label>
                                         <select
                                             id="settings-log-level"
@@ -2229,6 +2449,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-verbose-dashboard">
                                             <Icon html={renderIcon("fa-chart-bar")} />
                                             <span data-i18n="settings.verboseDashboard" data-field-label="verboseDashboard">{t("settings.verboseDashboard")}</span>
+                                            <SettingTooltip section="advanced" field="verboseDashboard" />
                                         </label>
                                         <input
                                             id="settings-verbose-dashboard"
@@ -2267,6 +2488,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-output-language-override">
                                             <Icon html={renderIcon("fa-cloud")} />
                                             <span data-i18n="settings.outputLanguageOverride" data-field-label="outputLanguageOverride">{t("settings.outputLanguageOverride")}</span>
+                                            <SettingTooltip section="experimental" field="outputLanguageOverride" />
                                         </label>
                                         <input
                                             id="settings-output-language-override"
@@ -2282,6 +2504,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <label class={styles["settings-field__label"]} for="settings-experimental-custom-endpoint">
                                             <Icon html={renderIcon("fa-link")} />
                                             <span data-i18n="settings.customModelEndpoint" data-field-label="customModelEndpoint">{t("settings.customModelEndpoint")}</span>
+                                            <SettingTooltip section="experimental" field="customModelEndpoint" />
                                         </label>
                                         <input
                                             id="settings-experimental-custom-endpoint"
