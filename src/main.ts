@@ -1574,17 +1574,24 @@ app.on("before-quit",async(event)=>{
     if(isAppQuitting)return
     event.preventDefault()
     isAppQuitting=true
-    if(fileParser){
-        try{await fileParser.dispose()}catch{}// intentional: dispose throws during shutdown
-        fileParser=null
+    try{
+        if(fileParser){
+            try{await fileParser.dispose()}catch(error){console.warn("fileParser.dispose failed:",error)}
+            fileParser=null
+        }
+        if(tray&&!tray.isDestroyed()){
+            tray.destroy()
+            tray=null
+        }
+        try{httpAgent.destroy()}catch(error){console.warn("httpAgent.destroy failed:",error)}
+        try{httpsAgent.destroy()}catch(error){console.warn("httpsAgent.destroy failed:",error)}
     }
-    if(tray&&!tray.isDestroyed()){
-        tray.destroy()
-        tray=null
+    catch(error){
+        console.error("before-quit cleanup failed:",error)
     }
-    try{httpAgent.destroy()}catch{}// intentional: agent.destroy throws during shutdown
-    try{httpsAgent.destroy()}catch{}// intentional: agent.destroy throws during shutdown
-    app.exit()
+    finally{
+        app.exit()
+    }
 })
 app.on("activate",()=>{
     if(!mainWindow){
