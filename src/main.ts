@@ -1027,7 +1027,18 @@ function registerCriticalIpcHandlers():void{
             if(!isPathSafeForWrite(filePath)&&!isAllowedSavePath(filePath)){
                 return{success:false,error:t("error.filePathOutsideWriteDirs")}
             }
-            await fsp.writeFile(filePath,content,"utf-8")
+            // Atomic write: write to a temp file in the same directory, then rename.
+            // Prevents partial/corrupted files if the process crashes mid-write.
+            let dir=path.dirname(filePath)
+            let tempPath=path.join(dir,`.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`)
+            try{
+                await fsp.writeFile(tempPath,content,"utf-8")
+                await fsp.rename(tempPath,filePath)
+            }
+            catch(error){
+                await fsp.unlink(tempPath).catch(()=>{})
+                throw error
+            }
             return{success:true}
         }
         catch(error){
