@@ -56,7 +56,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
             event.preventDefault()
             let command=filteredCommands()[selectedIndex()]
             if (command!==undefined){
-                command.action()
+                executeCommand(command)
             }
         }
         else if (event.key==="Escape"){
@@ -66,6 +66,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     }
     function executeCommand(command: Command):void{
         command.action()
+        props.onClose()
     }
     function onBackdropClick(event: MouseEvent):void{
         if (event.target===event.currentTarget){
