@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
-import { t } from "../i18n.js"
+import { t, getCurrentLang } from "../i18n.js"
 import dashboardStyles from "./styles/Dashboard.module.css"
 const styles = { ...dashboardStyles }
 export interface DashboardProps {
@@ -103,12 +103,14 @@ export function Dashboard(props: DashboardProps): JSX.Element {
                         <div class={styles["dashboard-header"]}>
                             <h3><Icon html={renderIcon("fa-tachometer-alt", 20)} /> {t("dashboard.title")}</h3>
                             <button
+                                type="button"
                                 class={styles["dashboard-close"]}
                                 aria-label={t("dashboard.closeAria")}
+                                data-i18n-aria-label="dashboard.closeAria"
                                 onClick={() => props.appStore.uiStore.setDashboardOpen(false)}
                                 data-testid="dashboard-close"
                             >
-                                &times;
+                                <Icon html={renderIcon("fa-times")} />
                             </button>
                         </div>
                         <div class={styles["dashboard-body"]}>
@@ -117,7 +119,7 @@ export function Dashboard(props: DashboardProps): JSX.Element {
                                     <tr><td>{t("dashboard.label.chunks")}</td><td data-testid="dash-chunks">{metrics().chunksDone} / {metrics().chunksTotal}</td></tr>
                                     <tr><td>{t("dashboard.label.chunksPerSecond")}</td><td data-testid="dash-cps">{metrics().chunksPerSecond}</td></tr>
                                     <tr><td>{t("dashboard.label.tokensPerSecond")}</td><td data-testid="dash-tps">{metrics().tokensPerSecond}</td></tr>
-                                    <tr><td>{t("dashboard.label.totalTokens")}</td><td data-testid="dash-tokens">{metrics().totalTokens.toLocaleString()}</td></tr>
+                                    <tr><td>{t("dashboard.label.totalTokens")}</td><td data-testid="dash-tokens">{metrics().totalTokens.toLocaleString(getCurrentLang())}</td></tr>
                                     <tr><td>{t("dashboard.label.cacheHitRate")}</td><td data-testid="dash-cache">{metrics().cacheHitRate}%</td></tr>
                                     <tr><td>{t("dashboard.label.providerLatency")}</td><td data-testid="dash-latency">{metrics().providerLatency > 0 ? metrics().providerLatency + " ms" : "--"}</td></tr>
                                     <tr><td>{t("dashboard.label.activeProvider")}</td><td data-testid="dash-provider">{metrics().activeProvider}</td></tr>

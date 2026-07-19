@@ -31,10 +31,12 @@
     background:none;
     border:none;
     color:var(--surface-color);
-    font-size:1.25rem;
     cursor:pointer;
-    padding:0 var(--spacing-xs);
-    line-height:1;
+    padding:var(--spacing-xs);
+    line-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 .dashboard-close:hover{
     opacity:.8;
@@ -61,7 +63,7 @@
     white-space:nowrap;
 }
 .dashboard-body td:last-child{
-    text-align:right;
+    text-align:end;
     font-weight:600;
     font-variant-numeric:tabular-nums;
 }
