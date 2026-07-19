@@ -121,15 +121,16 @@ export class VertexAiExporter implements Exporter{
     extension=".jsonl"
     export(items: TrainingItem[], options?: AutoMLOptions): string{
         let systemInstruction=options?.systemInstruction
+        let hasSystemOverride=systemInstruction!=null&&systemInstruction!==""
         let lines: string[]=[]
         for (let item of items){
             let messages: {role: string, content: string}[]=[]
-            if (systemInstruction!=null&&systemInstruction!==""){
-                messages.push({ role: "system", content: systemInstruction })
+            if (hasSystemOverride){
+                messages.push({ role: "system", content: systemInstruction as string })
             }
             if (item.messages!=null&&item.messages.length>0){
                 for (let msg of item.messages){
-                    if (msg.role=="system"&&systemInstruction!=null){
+                    if (msg.role=="system"&&hasSystemOverride){
                         continue
                     }
                     messages.push({ role: msg.role, content: msg.content })
