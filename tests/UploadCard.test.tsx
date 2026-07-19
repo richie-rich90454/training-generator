@@ -107,6 +107,35 @@ describe("UploadCard", () => {
         fireEvent.dragEnter(dropzone)
         expect(dropzone.className).toContain("drag-over")
     })
+    test("shows warning toast when files are skipped", () => {
+        const stub = makeStub()
+        stub.addFiles.mockReturnValue({ addedCount: 1, skippedCount: 2, rejectedCount: 0 })
+        const { container } = render(() => <UploadCard appStore={stub.appStore} />)
+        const dropzone = container.querySelector(".file-upload-area") as HTMLElement
+        fireEvent.drop(dropzone, { dataTransfer: { files: [makeFile("big.txt")] } })
+        expect(stub.showToast).toHaveBeenCalledWith(
+            t("toast.filesSkipped", undefined, { count: "2" }),
+            "warning"
+        )
+    })
+    test("does not show skipped toast when skippedCount is zero", () => {
+        const stub = makeStub()
+        stub.addFiles.mockReturnValue({ addedCount: 1, skippedCount: 0, rejectedCount: 0 })
+        const { container } = render(() => <UploadCard appStore={stub.appStore} />)
+        const dropzone = container.querySelector(".file-upload-area") as HTMLElement
+        fireEvent.drop(dropzone, { dataTransfer: { files: [makeFile("ok.txt")] } })
+        const skippedCall = stub.showToast.mock.calls.find(
+            (call) => typeof call[0] === "string" && call[0].includes("file(s) were skipped")
+        )
+        expect(skippedCall).toBeUndefined()
+    })
+    test("file-remove button has data-i18n-aria-label and title", () => {
+        const { appStore } = makeStub({ selectedFiles: [makeSelectedFile("remove.txt", 50)] })
+        render(() => <UploadCard appStore={appStore} />)
+        const removeBtn = screen.getByLabelText(t("file.removeAria", undefined, { name: "remove.txt" })) as HTMLButtonElement
+        expect(removeBtn.getAttribute("data-i18n-aria-label")).toBe("file.removeAria")
+        expect(removeBtn.getAttribute("title")).toContain("remove.txt")
+    })
     test("unmounts without throwing", () => {
         const utils = render(() => <UploadCard appStore={makeStub().appStore} />)
         expect(() => utils.unmount()).not.toThrow()
