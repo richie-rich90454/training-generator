@@ -84,7 +84,22 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         applyWidth(width)
         saveWidth(width)
     }
+    function handleTouchMove(e: TouchEvent): void {
+        if (!isDragging() || !gridRef || e.touches.length === 0) {
+            return
+        }
+        const { contentLeft, gap, available } = getLayoutMetrics()
+        let width = e.touches[0].clientX - contentLeft - gap
+        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, available - MIN_RIGHT_WIDTH))
+        applyWidth(width)
+        saveWidth(width)
+    }
     function handleMouseUp(): void {
+        if (isDragging()) {
+            setIsDragging(false)
+        }
+    }
+    function handleTouchEnd(): void {
         if (isDragging()) {
             setIsDragging(false)
         }
@@ -114,10 +129,14 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         }
         document.addEventListener("mousemove", handleMouseMove)
         document.addEventListener("mouseup", handleMouseUp)
+        document.addEventListener("touchmove", handleTouchMove, { passive: false })
+        document.addEventListener("touchend", handleTouchEnd)
     })
     onCleanup(() => {
         document.removeEventListener("mousemove", handleMouseMove)
         document.removeEventListener("mouseup", handleMouseUp)
+        document.removeEventListener("touchmove", handleTouchMove)
+        document.removeEventListener("touchend", handleTouchEnd)
     })
     return (
         <main
@@ -138,6 +157,7 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
                 data-i18n-aria-label="splitter.resizeAria"
                 tabindex="0"
                 onMouseDown={() => setIsDragging(true)}
+                onTouchStart={(e) => { e.preventDefault(); setIsDragging(true) }}
                 onDblClick={resetToDefault}
                 onKeyDown={handleKeydown}
                 classList={{ [styles["splitter-active"]]: isDragging() }}
