@@ -67,6 +67,12 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             return
         }
         gridRef.style.gridTemplateColumns = ""
+        try {
+            localStorage.removeItem(SPLITTER_KEY)
+        }
+        catch {
+            // ignore storage errors
+        }
     }
     function handleMouseMove(e: MouseEvent): void {
         if (!isDragging() || !gridRef) {
@@ -129,8 +135,10 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
                 role="separator"
                 aria-orientation="vertical"
                 aria-label={t("splitter.resizeAria")}
+                data-i18n-aria-label="splitter.resizeAria"
                 tabindex="0"
                 onMouseDown={() => setIsDragging(true)}
+                onDblClick={resetToDefault}
                 onKeyDown={handleKeydown}
                 classList={{ [styles["splitter-active"]]: isDragging() }}
             />
