@@ -47,7 +47,9 @@ export class RuleBasedToxicityScorer implements ToxicityScorer{
     private buildPattern(word: string): string{
         let trimmed=word.trim()
         let escaped=this.escapeRegExp(trimmed)
-        return "\\b"+escaped+"\\b"
+        let prefix=/^\w/.test(trimmed)?"\\b":""
+        let suffix=/\w$/.test(trimmed)?"\\b":""
+        return prefix+escaped+suffix
     }
     private escapeRegExp(text: string): string{
         return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
