@@ -35,6 +35,9 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
         }
     }
     function handleKeydown(e: KeyboardEvent):void{
+        if (!props.appStore?.uiStore.analyticsOpen()){
+            return
+        }
         if (e.key==="Escape"){
             e.preventDefault()
             handleClose()
