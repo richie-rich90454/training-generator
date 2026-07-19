@@ -1663,6 +1663,203 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                         <Icon html={renderIcon("fa-sliders-h")} />
                                         <span data-i18n="settings.sections.advanced">{t("settings.sections.advanced")}</span>
                                     </h3>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-gpu-acceleration">
+                                            <Icon html={renderIcon("fa-bolt")} />
+                                            <span data-i18n="settings.gpuAcceleration" data-field-label="gpuAcceleration">{t("settings.gpuAcceleration")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-gpu-acceleration"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.gpuAcceleration ?? true}
+                                            onChange={(e) => settingsStore.setAppSetting("gpuAcceleration", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-send-to-tray-on-close">
+                                            <Icon html={renderIcon("fa-window-restore")} />
+                                            <span data-i18n="settings.sendToTrayOnClose" data-field-label="sendToTrayOnClose">{t("settings.sendToTrayOnClose")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-send-to-tray-on-close"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.sendToTrayOnClose ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("sendToTrayOnClose", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-start-on-login">
+                                            <Icon html={renderIcon("fa-cog")} />
+                                            <span data-i18n="settings.startOnLogin" data-field-label="startOnLogin">{t("settings.startOnLogin")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-start-on-login"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.startOnLogin ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("startOnLogin", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-cache-dir">
+                                            <Icon html={renderIcon("fa-folder-open")} />
+                                            <span data-i18n="settings.cacheDir" data-field-label="cacheDir">{t("settings.cacheDir")}</span>
+                                        </label>
+                                        <div class={`section-actions ${styles["settings-actions--inline"]}`}>
+                                            <input
+                                                id="settings-cache-dir"
+                                                class={styles["form-control"]}
+                                                type="text"
+                                                value={settingsStore.appSettings.cacheDir ?? ""}
+                                                placeholder={t("settings.cacheDir.placeholder")}
+                                                data-i18n-placeholder="settings.cacheDir.placeholder"
+                                                onInput={(e) => settingsStore.setAppSetting("cacheDir", e.currentTarget.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                                                aria-label={t("settings.cacheDir.browseAria")}
+                                                data-i18n-aria-label="settings.cacheDir.browseAria"
+                                                onClick={async () => {
+                                                    const api = (window as unknown as { electronAPI?: { chooseDirectory?: (defaultPath?: string) => Promise<string | null> } }).electronAPI
+                                                    if (!api?.chooseDirectory) return
+                                                    try {
+                                                        const dirPath = await api.chooseDirectory()
+                                                        if (dirPath) settingsStore.setAppSetting("cacheDir", dirPath)
+                                                    }
+                                                    catch {
+                                                        // Directory dialog may be unavailable in non-Electron environments; ignore.
+                                                    }
+                                                }}
+                                            >
+                                                <Icon html={renderIcon("fa-folder-open")} />
+                                                <span data-i18n="settings.cacheDir.browse">{t("settings.cacheDir.browse")}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-cache-max-size">
+                                            <Icon html={renderIcon("fa-database")} />
+                                            <span data-i18n="settings.cacheMaxSizeMB" data-field-label="cacheMaxSizeMB">{t("settings.cacheMaxSizeMB")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-cache-max-size"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="50"
+                                            max="10240"
+                                            step="50"
+                                            value={settingsStore.appSettings.cacheMaxSizeMB ?? 500}
+                                            onChange={(e) => settingsStore.setAppSetting("cacheMaxSizeMB", parseInt(e.currentTarget.value, 10) || 500)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-cache-ttl">
+                                            <Icon html={renderIcon("fa-clock")} />
+                                            <span data-i18n="settings.cacheTtlSeconds" data-field-label="cacheTtlSeconds">{t("settings.cacheTtlSeconds")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-cache-ttl"
+                                            class={styles["form-control"]}
+                                            type="number"
+                                            min="60"
+                                            max="604800"
+                                            step="60"
+                                            value={settingsStore.appSettings.cacheTtlSeconds ?? 86400}
+                                            onChange={(e) => settingsStore.setAppSetting("cacheTtlSeconds", parseInt(e.currentTarget.value, 10) || 86400)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-clear-cache-on-exit">
+                                            <Icon html={renderIcon("fa-times-circle")} />
+                                            <span data-i18n="settings.clearCacheOnExit" data-field-label="clearCacheOnExit">{t("settings.clearCacheOnExit")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-clear-cache-on-exit"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.clearCacheOnExit ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("clearCacheOnExit", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-log-to-file">
+                                            <Icon html={renderIcon("fa-file-alt")} />
+                                            <span data-i18n="settings.logToFile" data-field-label="logToFile">{t("settings.logToFile")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-log-to-file"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.logToFile ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("logToFile", e.currentTarget.checked)}
+                                        />
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-log-file-path">
+                                            <Icon html={renderIcon("fa-file-code")} />
+                                            <span data-i18n="settings.logFilePath" data-field-label="logFilePath">{t("settings.logFilePath")}</span>
+                                        </label>
+                                        <div class={`section-actions ${styles["settings-actions--inline"]}`}>
+                                            <input
+                                                id="settings-log-file-path"
+                                                class={styles["form-control"]}
+                                                type="text"
+                                                value={settingsStore.appSettings.logFilePath ?? ""}
+                                                placeholder={t("settings.logFilePath.placeholder")}
+                                                data-i18n-placeholder="settings.logFilePath.placeholder"
+                                                onInput={(e) => settingsStore.setAppSetting("logFilePath", e.currentTarget.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                                                aria-label={t("settings.logFilePath.browseAria")}
+                                                data-i18n-aria-label="settings.logFilePath.browseAria"
+                                                onClick={async () => {
+                                                    const api = (window as unknown as { electronAPI?: { openFileDialog?: () => Promise<Array<{ path: string }> | null> } }).electronAPI
+                                                    if (!api?.openFileDialog) return
+                                                    try {
+                                                        const result = await api.openFileDialog()
+                                                        if (result && result.length > 0 && result[0].path) {
+                                                            settingsStore.setAppSetting("logFilePath", result[0].path)
+                                                        }
+                                                    }
+                                                    catch {
+                                                        // File dialog may be unavailable in non-Electron environments; ignore.
+                                                    }
+                                                }}
+                                            >
+                                                <Icon html={renderIcon("fa-folder-open")} />
+                                                <span data-i18n="settings.logFilePath.browse">{t("settings.logFilePath.browse")}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-log-level">
+                                            <Icon html={renderIcon("fa-list-ol")} />
+                                            <span data-i18n="settings.logLevel" data-field-label="logLevel">{t("settings.logLevel")}</span>
+                                        </label>
+                                        <select
+                                            id="settings-log-level"
+                                            class={styles["form-control"]}
+                                            value={(settingsStore.appSettings as Record<string, unknown>).logLevel as string ?? "info"}
+                                            onChange={(e) => settingsStore.setAppSetting("logLevel" as never, e.currentTarget.value as never)}
+                                        >
+                                            <option value="debug" data-i18n="settings.logLevel.debug">{t("settings.logLevel.debug")}</option>
+                                            <option value="info" data-i18n="settings.logLevel.info">{t("settings.logLevel.info")}</option>
+                                            <option value="warn" data-i18n="settings.logLevel.warn">{t("settings.logLevel.warn")}</option>
+                                            <option value="error" data-i18n="settings.logLevel.error">{t("settings.logLevel.error")}</option>
+                                        </select>
+                                    </div>
+                                    <div class={styles["settings-field"]}>
+                                        <label class={styles["settings-field__label"]} for="settings-verbose-dashboard">
+                                            <Icon html={renderIcon("fa-chart-bar")} />
+                                            <span data-i18n="settings.verboseDashboard" data-field-label="verboseDashboard">{t("settings.verboseDashboard")}</span>
+                                        </label>
+                                        <input
+                                            id="settings-verbose-dashboard"
+                                            type="checkbox"
+                                            checked={settingsStore.appSettings.verboseDashboard ?? false}
+                                            onChange={(e) => settingsStore.setAppSetting("verboseDashboard", e.currentTarget.checked)}
+                                        />
+                                    </div>
                                 </section>
                                 <section
                                     class={sectionClass("experimental")}
