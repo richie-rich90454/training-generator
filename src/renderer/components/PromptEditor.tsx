@@ -233,12 +233,12 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
     if (!props.appStore){
         return (
             <div class={styles["prompt-editor"]} data-testid="prompt-editor">
-                <div style={{ display: "none" }} data-testid="extracted-variables">{JSON.stringify(extractedVariables())}</div>
-                <div style={{ display: "none" }} data-testid="is-dirty">{isDirty().toString()}</div>
-                <div style={{ display: "none" }} data-testid="variable-values">{JSON.stringify(variableValues())}</div>
-                <div style={{ display: "none" }} data-testid="selected-version-id">{selectedVersionId()}</div>
-                <div style={{ display: "none" }} data-testid="has-variables">{hasVariables().toString()}</div>
-                <div style={{ display: "none" }} data-testid="preview-text">{previewText()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="extracted-variables">{JSON.stringify(extractedVariables())}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="is-dirty">{isDirty().toString()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="variable-values">{JSON.stringify(variableValues())}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="selected-version-id">{selectedVersionId()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="has-variables">{hasVariables().toString()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="preview-text">{previewText()}</div>
                 {editorBody()}
             </div>
         )

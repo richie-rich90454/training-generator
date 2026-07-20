@@ -93,6 +93,9 @@
     word-break:break-word;
     margin:0;
 }
+.test-only{
+    display:none;
+}
 .history-list{
     display:flex;
     flex-direction:column;
