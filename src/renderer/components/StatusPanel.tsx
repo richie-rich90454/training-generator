@@ -2,7 +2,7 @@ import type { JSX } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
-import { t } from "../i18n.js"
+import { t, getCurrentLang } from "../i18n.js"
 import cardsStyles from "./styles/Cards.module.css"
 const styles = { ...cardsStyles }
 export interface StatusPanelProps {
@@ -59,7 +59,7 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
                 </div>
                 <div class={`status-row`}>
                     <span class={`status-key`} data-i18n="status.filesProcessed">{t("status.filesProcessed")}</span>
-                    <span class={`status-value`}>{uiStore.filesProcessed()}</span>
+                    <span class={`status-value`}>{uiStore.filesProcessed().toLocaleString(getCurrentLang())}</span>
                 </div>
                 <div class={`status-row`}>
                     <span class={`status-key`} data-i18n="status.lastProcessed">{t("status.lastProcessed")}</span>

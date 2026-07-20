@@ -279,7 +279,8 @@ describe("StatusPanel files processed", () => {
         const stub = makeStub({ files: 99999 })
         render(() => <StatusPanel appStore={makeAppStore(stub)} />)
         const rows = document.querySelectorAll(".status-row")
-        expect(rows[0].textContent).toContain("99999")
+        // Default locale is "en" → 99999 is grouped as "99,999"
+        expect(rows[0].textContent).toContain("99,999")
     })
 })
 
