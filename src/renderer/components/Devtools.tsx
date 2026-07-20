@@ -17,7 +17,6 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     let [activeTab, setActiveTab] = createSignal<string>("logs")
     let [logFilter, setLogFilter] = createSignal<string>("all")
     let [logEntries, setLogEntries] = createSignal<LogEntry[]>([])
-    let pendingRender: number | null = null
     function addLog(entry: LogEntry): void {
         setLogEntries((prev) => {
             let next = [...prev, entry]
@@ -36,10 +35,6 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
         onCleanup(() => {
             props.appStore.logger.removeListener(listener)
             document.removeEventListener("keydown", handleKeydown)
-            if (pendingRender !== null) {
-                cancelAnimationFrame(pendingRender)
-                pendingRender = null
-            }
         })
     })
     let filteredEntries = createMemo<LogEntry[]>(() => {
