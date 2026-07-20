@@ -298,4 +298,69 @@ describe("ContentGrid", () => {
         expect(leftTrack + 4 + rightTrack + 48 + 48).toBe(1200)
         window.getComputedStyle = original
     })
+    test("RTL drag inverts width calculation (right edge grows left column)", async () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        // clientWidth=1200, no padding/border/gap → available=1196, maxLeft=916
+        setupRect(main, 1200)
+        const original = window.getComputedStyle
+        window.getComputedStyle = (() => ({
+            gridTemplateColumns: "",
+            getPropertyValue: () => "",
+            paddingLeft: "0px",
+            paddingRight: "0px",
+            borderLeftWidth: "0px",
+            columnGap: "0px",
+            direction: "rtl"
+        })) as any
+        fireEvent.mouseDown(splitter)
+        await Promise.resolve()
+        // In RTL, the left column is mirrored to the right edge of the content
+        // area. Dragging the splitter to clientX=1000 (near the right edge)
+        // should produce a large left width (close to max).
+        // LTR formula: width = 1000 - 0 - 0 = 1000 → clamped to 916
+        // RTL formula: width = available(1196) - 1000 = 196 → clamped to 320 (min)
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 1000 }))
+        await Promise.resolve()
+        expect(Number(localStorage.getItem(SPLITTER_KEY))).toBe(320)
+        // Conversely, dragging near the left edge (clientX=100) should produce
+        // a near-max left width: available - 100 = 1096 → clamped to 916.
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 100 }))
+        await Promise.resolve()
+        expect(Number(localStorage.getItem(SPLITTER_KEY))).toBe(916)
+        window.getComputedStyle = original
+    })
+    test("RTL ArrowRight shrinks left column (visual right moves splitter right)", () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        setupRect(main, 1200)
+        const original = window.getComputedStyle
+        window.getComputedStyle = (() => ({
+            gridTemplateColumns: "600px 4px 596px",
+            getPropertyValue: () => "",
+            direction: "rtl"
+        })) as any
+        // LTR: ArrowRight grows left → 600+5=605. RTL: ArrowRight shrinks → 600-5=595.
+        fireEvent.keyDown(splitter, { key: "ArrowRight" })
+        expect(localStorage.getItem(SPLITTER_KEY)).toBe("595")
+        window.getComputedStyle = original
+    })
+    test("RTL ArrowLeft grows left column (visual left moves splitter left)", () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        setupRect(main, 1200)
+        const original = window.getComputedStyle
+        window.getComputedStyle = (() => ({
+            gridTemplateColumns: "600px 4px 596px",
+            getPropertyValue: () => "",
+            direction: "rtl"
+        })) as any
+        // LTR: ArrowLeft shrinks left → 600-5=595. RTL: ArrowLeft grows → 600+5=605.
+        fireEvent.keyDown(splitter, { key: "ArrowLeft" })
+        expect(localStorage.getItem(SPLITTER_KEY)).toBe("605")
+        window.getComputedStyle = original
+    })
 })

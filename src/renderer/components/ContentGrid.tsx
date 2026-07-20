@@ -38,9 +38,9 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             // ignore storage errors
         }
     }
-    function getLayoutMetrics(): { contentLeft: number; gap: number; available: number } {
+    function getLayoutMetrics(): { contentLeft: number; gap: number; available: number; isRTL: boolean } {
         if (!gridRef) {
-            return { contentLeft: 0, gap: 0, available: 0 }
+            return { contentLeft: 0, gap: 0, available: 0, isRTL: false }
         }
         const rect = gridRef.getBoundingClientRect()
         const style = window.getComputedStyle(gridRef)
@@ -48,10 +48,11 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         const pl = parseFloat(style.paddingLeft) || 0
         const pr = parseFloat(style.paddingRight) || 0
         const gap = parseFloat(style.columnGap) || 0
+        const isRTL = style.direction === "rtl"
         const contentWidth = Math.max(0, gridRef.clientWidth - pl - pr)
         const contentLeft = rect.left + bl + pl
         const available = Math.max(0, contentWidth - 4 - 2 * gap)
-        return { contentLeft, gap, available }
+        return { contentLeft, gap, available, isRTL }
     }
     function applyWidth(width: number): void {
         if (!gridRef) {
@@ -74,13 +75,21 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             // ignore storage errors
         }
     }
+    function calcLeftWidth(clientX: number): number {
+        const { contentLeft, gap, available, isRTL } = getLayoutMetrics()
+        let width = clientX - contentLeft - gap
+        if (isRTL) {
+            // In RTL, the left column is visually on the right, so dragging the
+            // splitter toward the right of the content area should shrink it.
+            width = available - width
+        }
+        return Math.max(MIN_LEFT_WIDTH, Math.min(width, available - MIN_RIGHT_WIDTH))
+    }
     function handleMouseMove(e: MouseEvent): void {
         if (!isDragging() || !gridRef) {
             return
         }
-        const { contentLeft, gap, available } = getLayoutMetrics()
-        let width = e.clientX - contentLeft - gap
-        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, available - MIN_RIGHT_WIDTH))
+        const width = calcLeftWidth(e.clientX)
         applyWidth(width)
         saveWidth(width)
     }
@@ -88,9 +97,7 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!isDragging() || !gridRef || e.touches.length === 0) {
             return
         }
-        const { contentLeft, gap, available } = getLayoutMetrics()
-        let width = e.touches[0].clientX - contentLeft - gap
-        width = Math.max(MIN_LEFT_WIDTH, Math.min(width, available - MIN_RIGHT_WIDTH))
+        const width = calcLeftWidth(e.touches[0].clientX)
         applyWidth(width)
         saveWidth(width)
     }
@@ -108,7 +115,7 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         if (!gridRef || e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
             return
         }
-        const { available } = getLayoutMetrics()
+        const { available, isRTL } = getLayoutMetrics()
         const computed = window.getComputedStyle(gridRef)
         const cols = computed.gridTemplateColumns.split(" ")
         let left = cols[0] ? parseInt(cols[0], 10) : available * 0.6
@@ -116,7 +123,12 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
             left = available * 0.6
         }
         const step = e.shiftKey ? 20 : 5
-        const next = e.key === "ArrowLeft" ? left - step : left + step
+        // ArrowRight visually moves the splitter right. In LTR that grows the
+        // left column; in RTL it shrinks it (the left column is mirrored to
+        // the right edge of the content area).
+        const visualRight = e.key === "ArrowRight"
+        const growLeft = visualRight !== isRTL
+        const next = growLeft ? left + step : left - step
         const clamped = Math.max(MIN_LEFT_WIDTH, Math.min(next, available - MIN_RIGHT_WIDTH))
         applyWidth(clamped)
         saveWidth(clamped)
