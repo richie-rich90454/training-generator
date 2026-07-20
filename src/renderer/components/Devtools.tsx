@@ -17,6 +17,7 @@ export interface DevtoolsProps {
 export function Devtools(props: DevtoolsProps): JSX.Element {
     let [activeTab, setActiveTab] = createSignal<string>("logs")
     let [logFilter, setLogFilter] = createSignal<string>("all")
+    let [logSearch, setLogSearch] = createSignal<string>("")
     let [logEntries, setLogEntries] = createSignal<LogEntry[]>([])
     let tablistRef: HTMLDivElement | undefined
     let panelRef: HTMLDivElement | undefined
@@ -82,10 +83,19 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     })
     let filteredEntries = createMemo<LogEntry[]>(() => {
         let filter = logFilter()
-        if (filter === "all") {
-            return logEntries()
-        }
-        return logEntries().filter((entry) => entry.level === filter)
+        let search = logSearch().trim().toLowerCase()
+        return logEntries().filter((entry) => {
+            if (filter !== "all" && entry.level !== filter) {
+                return false
+            }
+            if (search) {
+                const haystack = `${entry.message} ${entry.module} ${entry.level}`.toLowerCase()
+                if (!haystack.includes(search)) {
+                    return false
+                }
+            }
+            return true
+        })
     })
     function clearLogs(): void {
         setLogEntries([])
@@ -241,6 +251,16 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                                         <option value="warn" data-i18n="devtools.logLevel.warn">{t("devtools.logLevel.warn")}</option>
                                         <option value="error" data-i18n="devtools.logLevel.error">{t("devtools.logLevel.error")}</option>
                                     </select>
+                                    <input
+                                        id="devtools-log-search"
+                                        type="search"
+                                        value={logSearch()}
+                                        aria-label={t("devtools.searchAria")}
+                                        data-i18n-aria-label="devtools.searchAria"
+                                        placeholder={t("devtools.searchPlaceholder")}
+                                        data-i18n-placeholder="devtools.searchPlaceholder"
+                                        onInput={(e) => setLogSearch(e.currentTarget.value)}
+                                    />
                                     <button id="devtools-clear-logs" data-i18n="devtools.clearLogs" onClick={clearLogs}>{t("devtools.clearLogs")}</button>
                                 </div>
                                 <div id="devtools-log-output" data-testid="devtools-log-output">
