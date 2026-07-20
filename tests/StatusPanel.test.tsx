@@ -245,6 +245,56 @@ describe("StatusPanel ollama error state", () => {
         expect(document.body.textContent).toContain("Error")
         expect(document.body.textContent).not.toContain("Offline")
     })
+    test("renders error detail message when status has error", () => {
+        const stub = makeStub({
+            status: { running: false, models: [], error: "connection refused" }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const detail = document.querySelector(".status-error-detail")
+        expect(detail).not.toBeNull()
+        expect(detail?.textContent).toContain("connection refused")
+    })
+    test("error detail includes the raw error string", () => {
+        const stub = makeStub({
+            status: { running: false, models: [], error: "ECONNREFUSED 127.0.0.1:11434" }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const detail = document.querySelector(".status-error-detail")
+        expect(detail?.textContent).toContain("ECONNREFUSED 127.0.0.1:11434")
+    })
+    test("error detail is hidden when there is no error", () => {
+        const stub = makeStub({
+            status: { running: true, models: [], version: "1.0" }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const detail = document.querySelector(".status-error-detail")
+        expect(detail).toBeNull()
+    })
+    test("error detail is hidden when offline without error", () => {
+        const stub = makeStub({
+            status: { running: false, models: [] }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const detail = document.querySelector(".status-error-detail")
+        expect(detail).toBeNull()
+    })
+    test("error detail has data-i18n='status.ollamaErrorDetail'", () => {
+        const stub = makeStub({
+            status: { running: false, models: [], error: "boom" }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const detail = document.querySelector(".status-error-detail")
+        expect(detail?.getAttribute("data-i18n")).toBe("status.ollamaErrorDetail")
+    })
+    test("error detail is inside the aria-live status-indicator", () => {
+        const stub = makeStub({
+            status: { running: false, models: [], error: "boom" }
+        })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const indicator = document.querySelector(".status-indicator")
+        const detail = indicator?.querySelector(".status-error-detail")
+        expect(detail).not.toBeNull()
+    })
 })
 
 describe("StatusPanel files processed", () => {

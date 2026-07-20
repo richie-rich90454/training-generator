@@ -10,6 +10,7 @@
 .status-indicator{
     display:flex;
     align-items:center;
+    flex-wrap:wrap;
     gap:var(--spacing-sm);
     padding:var(--spacing-sm) var(--spacing-md);
     border-radius:var(--radius-medium);
@@ -50,6 +51,14 @@
 }
 .status-label{
     font-weight:500;
+}
+.status-error-detail{
+    flex-basis:100%;
+    margin-top:var(--spacing-xs);
+    font-size:.75rem;
+    font-weight:400;
+    color:var(--text-secondary);
+    word-break:break-word;
 }
 .status-row{
     display:flex;

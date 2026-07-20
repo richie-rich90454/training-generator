@@ -1,4 +1,5 @@
 import type { JSX } from "solid-js"
+import { Show } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -52,6 +53,13 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
         }
         return "status.ollamaOffline"
     }
+    function errorDetail(): string {
+        const status = uiStore.ollamaStatus()
+        if (!status || !status.error) {
+            return ""
+        }
+        return t("status.ollamaErrorDetail", undefined, { error: status.error })
+    }
     return (
         <div class={`${styles["card"]} status-panel`}>
             <div class={styles["card-header"]}>
@@ -69,6 +77,11 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
                 >
                     <span class={`status-dot`} aria-hidden="true" />
                     <span class={`status-label`} data-i18n={statusI18nKey()}>{statusText()}</span>
+                    <Show when={errorDetail()}>
+                        <span class={`status-error-detail`} data-i18n="status.ollamaErrorDetail">
+                            {errorDetail()}
+                        </span>
+                    </Show>
                 </div>
                 <div class={`status-row`}>
                     <span class={`status-key`} data-i18n="status.filesProcessed">{t("status.filesProcessed")}</span>
