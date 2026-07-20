@@ -563,6 +563,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                 class={`${styles["modal"]} ${styles["active"]}`}
                 role="dialog"
                 aria-modal="true"
+                aria-labelledby="settings-modal-title"
                 aria-label={t("settings.modalAria")}
                 data-i18n-aria-label="settings.modalAria"
                 onClick={handleOverlayClick}
@@ -570,7 +571,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
             >
                 <div class={`${styles["modal-content"]} ${styles["settings-modal-content"]}`}>
                     <div class={styles["modal-header"]}>
-                        <h2>
+                        <h2 id="settings-modal-title">
                             <Icon html={renderIcon("fa-cog")} />
                             <span data-i18n="settings.title">{t("settings.title")}</span>
                         </h2>
