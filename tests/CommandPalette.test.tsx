@@ -2,6 +2,7 @@ import { describe, test, expect, vi, beforeEach } from "vitest"
 import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
 import { CommandPalette, fuzzyScore } from "../src/renderer/components/CommandPalette.tsx"
 import type { Command } from "../src/renderer/components/CommandPalette.tsx"
+import { t } from "../src/renderer/i18n.js"
 function makeCommands():Command[]{
     return [
         { id: "open", label: "Open file", shortcut: "Ctrl+O", icon: "📂", action: vi.fn() },
@@ -257,5 +258,57 @@ describe("CommandPalette",()=>{
         expect(parsed.length).toBeLessThanOrEqual(5)
         // Most recent should be c6, then c5, etc.
         expect(parsed[0]).toBe("c6")
+    })
+    test("locks body scroll while open",()=>{
+        document.body.style.overflow=""
+        renderComponent({ commands: makeCommands(), visible: true })
+        expect(document.body.style.overflow).toBe("hidden")
+    })
+    test("restores body scroll on unmount via onCleanup",()=>{
+        document.body.style.overflow="auto"
+        const utils=renderComponent({ commands: makeCommands(), visible: true })
+        expect(document.body.style.overflow).toBe("hidden")
+        utils.unmount()
+        expect(document.body.style.overflow).toBe("auto")
+    })
+    test("saves and restores previously focused element",()=>{
+        const trigger=document.createElement("button")
+        trigger.textContent="Open palette"
+        document.body.appendChild(trigger)
+        trigger.focus()
+        expect(document.activeElement).toBe(trigger)
+        const utils=renderComponent({ commands: makeCommands(), visible: true })
+        // Palette is open — focus should have moved to the input
+        expect(document.activeElement).not.toBe(trigger)
+        utils.unmount()
+        // After unmount, focus should be restored to the trigger
+        expect(document.activeElement).toBe(trigger)
+        document.body.removeChild(trigger)
+    })
+    test("dialog has role=dialog and aria-modal=true",()=>{
+        renderComponent({ commands: makeCommands(), visible: true })
+        const dialog=screen.getByRole("dialog")
+        expect(dialog.getAttribute("aria-modal")).toBe("true")
+    })
+    test("dialog aria-labelledby points to visible title",()=>{
+        const { container }=renderComponent({ commands: makeCommands(), visible: true })
+        const dialog=screen.getByRole("dialog")
+        const labelledBy=dialog.getAttribute("aria-labelledby")
+        expect(labelledBy).toBe("command-palette-title")
+        const title=container.querySelector("#command-palette-title")
+        expect(title).not.toBeNull()
+        expect(title?.textContent ?? "").toContain(t("commandPalette.title"))
+    })
+    test("no-results message has data-i18n attribute",()=>{
+        const { container }=renderComponent({ commands: makeCommands(), visible: true })
+        const input=screen.getByTestId("command-palette-input")
+        fireEvent.input(input, { target: { value: "zzzznonexistent" } })
+        const noResults=container.querySelector('[data-i18n="commandPalette.noCommands"]')
+        expect(noResults).not.toBeNull()
+    })
+    test("input placeholder has data-i18n-placeholder",()=>{
+        renderComponent({ commands: makeCommands(), visible: true })
+        const input=screen.getByTestId("command-palette-input") as HTMLInputElement
+        expect(input.getAttribute("data-i18n-placeholder")).toBe("commandPalette.placeholder")
     })
 })

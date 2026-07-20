@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, createMemo, For, Show, createEffect } from "solid-js"
+import { createSignal, createMemo, For, Show, createEffect, onCleanup } from "solid-js"
 import { t } from "../i18n.js"
 import commandPaletteStyles from "./styles/CommandPalette.module.css"
 const styles = { ...commandPaletteStyles }
@@ -109,6 +109,8 @@ function saveRecentCommandId(id: string, currentRecent: string[]): string[]{
 
 export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     let inputRef: HTMLInputElement|undefined
+    let lastFocusedElement: HTMLElement|null=null
+    let prevBodyOverflow: string=""
     let [query, setQuery]=createSignal<string>("")
     let [selectedIndex, setSelectedIndex]=createSignal<number>(0)
     let [recentCommandIds, setRecentCommandIds]=createSignal<string[]>(loadRecentCommandIds())
@@ -161,12 +163,48 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     })
     createEffect(()=>{
         if (props.visible()){
+            // Save the previously focused element so we can restore focus
+            // back to it when the palette closes. This is critical for
+            // keyboard and screen reader users who activated the palette
+            // via a keyboard shortcut (e.g. Ctrl+K).
+            lastFocusedElement=document.activeElement as HTMLElement
+            // Lock body scroll while the palette is open to prevent the
+            // background from scrolling behind the overlay.
+            prevBodyOverflow=document.body.style.overflow
+            document.body.style.overflow="hidden"
             setQuery("")
             setSelectedIndex(0)
             // Reload recent commands from localStorage in case another
             // window/tab updated them since the palette was last opened.
             setRecentCommandIds(loadRecentCommandIds())
             inputRef?.focus()
+        }
+        else {
+            // Restore body scroll only if we were the one who hid it.
+            if (prevBodyOverflow!==""){
+                document.body.style.overflow=prevBodyOverflow
+                prevBodyOverflow=""
+            }
+            // Restore focus to the element that had focus before the palette
+            // opened, but only if it is still in the DOM.
+            if (lastFocusedElement && document.contains(lastFocusedElement)){
+                lastFocusedElement.focus()
+                lastFocusedElement=null
+            }
+        }
+    })
+    // If the component is unmounted while the palette is still open (e.g.
+    // because the whole tree is torn down), make sure we restore body
+    // overflow and focus. Without this the page would be stuck with
+    // overflow:hidden and no focused element.
+    onCleanup(()=>{
+        if (prevBodyOverflow!==""){
+            document.body.style.overflow=prevBodyOverflow
+            prevBodyOverflow=""
+        }
+        if (lastFocusedElement && document.contains(lastFocusedElement)){
+            lastFocusedElement.focus()
+            lastFocusedElement=null
         }
     })
     function onKeydown(event: KeyboardEvent):void{
@@ -208,13 +246,29 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     }
     return (
         <Show when={props.visible()}>
-            <div class={styles["command-palette-overlay"]} data-testid="command-palette-overlay" onClick={onBackdropClick}>
-                <div class={styles["command-palette"]} data-testid="command-palette" onKeyDown={onKeydown}>
+            <div
+                class={styles["command-palette-overlay"]}
+                data-testid="command-palette-overlay"
+                onClick={onBackdropClick}
+                role="presentation"
+            >
+                <div
+                    class={styles["command-palette"]}
+                    data-testid="command-palette"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="command-palette-title"
+                    onKeyDown={onKeydown}
+                >
+                    <h2 id="command-palette-title" class="sr-only" data-i18n="commandPalette.title">
+                        {t("commandPalette.title")}
+                    </h2>
                     <input
                         ref={inputRef}
                         class={styles["command-palette-input"]}
                         type="text"
                         placeholder={t("commandPalette.placeholder")}
+                        data-i18n-placeholder="commandPalette.placeholder"
                         aria-label={t("commandPalette.inputAria")}
                         data-i18n-aria-label="commandPalette.inputAria"
                         aria-autocomplete="list"
@@ -226,7 +280,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
                         value={query()}
                         onInput={(e)=>setQuery(e.currentTarget.value)}
                     />
-                    <Show when={filteredCommands().length>0} fallback={<div class={styles["command-empty"]} data-testid="command-empty">{t("commandPalette.noCommands")}</div>}>
+                    <Show when={filteredCommands().length>0} fallback={<div class={styles["command-empty"]} data-testid="command-empty" data-i18n="commandPalette.noCommands">{t("commandPalette.noCommands")}</div>}>
                         <ul id="command-palette-listbox" class={styles["command-list"]} role="listbox" data-testid="command-list">
                             <For each={filteredCommands()}>
                                 {(command, index)=>{
