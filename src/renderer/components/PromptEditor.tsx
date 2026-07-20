@@ -147,15 +147,24 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                         type="text"
                         value={versionName()}
                         placeholder={t("promptEditor.versionNamePlaceholder")}
+                        data-i18n-placeholder="promptEditor.versionNamePlaceholder"
                         aria-label={t("promptEditor.versionNamePlaceholder")}
                         data-i18n-aria-label="promptEditor.versionNamePlaceholder"
                         data-testid="version-name-input"
                         onInput={(e)=>setVersionName(e.currentTarget.value)}
                     />
-                    <button class={styles["toolbar-button"]} type="button" onClick={togglePreview} data-testid="toggle-preview-button">{showPreview()?t("promptEditor.hidePreview"):t("promptEditor.showPreview")}</button>
-                    <button class={styles["toolbar-button"]} type="button" onClick={toggleHistory} data-testid="toggle-history-button">{showHistory()?t("promptEditor.hideHistory"):t("promptEditor.showHistory")}</button>
-                    <button class={styles["toolbar-button"]} type="button" onClick={runPreview} data-testid="run-button">{t("promptEditor.run")}</button>
-                    <button class={styles["toolbar-button"]} type="button" onClick={()=>saveVersion("")} data-testid="save-button">{t("promptEditor.save")}</button>
+                    <button class={styles["toolbar-button"]} type="button" onClick={togglePreview} data-testid="toggle-preview-button">
+                        <Show when={showPreview()} fallback={<span data-i18n="promptEditor.showPreview">{t("promptEditor.showPreview")}</span>}>
+                            <span data-i18n="promptEditor.hidePreview">{t("promptEditor.hidePreview")}</span>
+                        </Show>
+                    </button>
+                    <button class={styles["toolbar-button"]} type="button" onClick={toggleHistory} data-testid="toggle-history-button">
+                        <Show when={showHistory()} fallback={<span data-i18n="promptEditor.showHistory">{t("promptEditor.showHistory")}</span>}>
+                            <span data-i18n="promptEditor.hideHistory">{t("promptEditor.hideHistory")}</span>
+                        </Show>
+                    </button>
+                    <button class={styles["toolbar-button"]} type="button" onClick={runPreview} data-testid="run-button" data-i18n="promptEditor.run">{t("promptEditor.run")}</button>
+                    <button class={styles["toolbar-button"]} type="button" onClick={()=>saveVersion("")} data-testid="save-button" data-i18n="promptEditor.save">{t("promptEditor.save")}</button>
                 </div>
                 <div class={styles["editor-main"]}>
                     <div class={styles["editor-panel"]}>
@@ -170,7 +179,7 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                         ></textarea>
                         <Show when={hasVariables()}>
                             <div class={styles["variable-panel"]} data-testid="variable-panel">
-                                <h4 class={styles["panel-title"]}>{t("promptEditor.variablesTitle")}</h4>
+                                <h4 class={styles["panel-title"]} data-i18n="promptEditor.variablesTitle">{t("promptEditor.variablesTitle")}</h4>
                                 <For each={extractedVariables()}>
                                     {(variable)=>{
                                         let inputId="variable-input-"+variable.replace(/\s+/g,"-")
@@ -194,14 +203,14 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                     </div>
                     <Show when={showPreview()}>
                         <div class={styles["preview-panel"]} data-testid="preview-panel">
-                            <h4 class={styles["panel-title"]}>{t("promptEditor.previewTitle")}</h4>
+                            <h4 class={styles["panel-title"]} data-i18n="promptEditor.previewTitle">{t("promptEditor.previewTitle")}</h4>
                             <pre class={styles["preview-text"]} data-testid="preview-text">{previewText()}</pre>
                         </div>
                     </Show>
                     <Show when={showHistory()}>
                         <div class={styles["history-panel"]} data-testid="history-panel">
-                            <h4 class={styles["panel-title"]}>{t("promptEditor.historyTitle")}</h4>
-                            <Show when={props.history && props.history.length>0} fallback={<div class={styles["history-empty"]} data-testid="history-empty">{t("promptEditor.noSavedVersions")}</div>}>
+                            <h4 class={styles["panel-title"]} data-i18n="promptEditor.historyTitle">{t("promptEditor.historyTitle")}</h4>
+                            <Show when={props.history && props.history.length>0} fallback={<div class={styles["history-empty"]} data-testid="history-empty" data-i18n="promptEditor.noSavedVersions">{t("promptEditor.noSavedVersions")}</div>}>
                                 <div class={styles["history-list"]} data-testid="history-list">
                                     <For each={props.history}>
                                         {(version)=>{
