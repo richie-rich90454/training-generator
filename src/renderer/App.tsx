@@ -138,7 +138,7 @@ export function App(): JSX.Element {
                     break
                 case "k":
                     e.preventDefault()
-                    appStore.showShortcutsHelp()
+                    appStore.uiStore.openCommandPalette()
                     break
             }
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {

@@ -316,11 +316,11 @@ describe("App", () => {
             dispatchKey("e", { ctrl: true })
             expect(exportOutputSpy).toHaveBeenCalledWith("jsonl")
         })
-        test("Ctrl+K calls showShortcutsHelp", async () => {
+        test("Ctrl+K calls openCommandPalette", async () => {
             render(() => <App />)
             await Promise.resolve()
             dispatchKey("k", { ctrl: true })
-            expect(showShortcutsHelpSpy).toHaveBeenCalledTimes(1)
+            expect(openCommandPaletteSpy).toHaveBeenCalledTimes(1)
         })
         test("Ctrl+Shift+C calls copyOutput", async () => {
             render(() => <App />)
