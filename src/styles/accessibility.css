@@ -57,6 +57,25 @@
         transform:none;
     }
 }
+/* Mirror of the @media (prefers-reduced-motion: reduce) block above.
+   Triggered by the `reducedMotion` user setting so users can opt in even
+   when their OS does not signal a motion preference. */
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after{
+    transition-duration:0s !important;
+    animation-duration:0s !important;
+    animation:none !important;
+}
+body.reduced-motion .modal-content{
+    transform:none;
+}
+body.reduced-motion .toast,
+body.reduced-motion .toast-visible,
+body.reduced-motion .toast-hiding{
+    transition:none;
+    transform:none;
+}
 @media (forced-colors: active){
     .card,.config-panel,.app-footer{
         border:1px solid ButtonText;

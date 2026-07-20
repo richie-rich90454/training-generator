@@ -63,6 +63,7 @@ export interface SettingsStore {
     refreshProfiles: () => Promise<void>
     applyTheme: (theme: string) => void
     applyFontSize: (size: string) => void
+    applyReducedMotion: (enabled: boolean) => void
     applyLanguage: (lang: string) => void
     updateTemperatureDisplay: (temp: number) => { rangeFill: string; temperatureColor: string; temperatureColorHover: string; temperatureShadow: string; text: string }
 }
@@ -262,6 +263,16 @@ export function createSettingsStore(): SettingsStore {
         }
         else {
             document.body.classList.add("font-medium")
+        }
+    }
+    function applyReducedMotion(enabled: boolean): void {
+        // Mirrors the OS-level `prefers-reduced-motion: reduce` media query
+        // so users can opt in via settings even when their OS doesn't signal it.
+        if (enabled) {
+            document.body.classList.add("reduced-motion")
+        }
+        else {
+            document.body.classList.remove("reduced-motion")
         }
     }
     function applyLanguageLocal(lang: string): void {
@@ -626,6 +637,9 @@ export function createSettingsStore(): SettingsStore {
         const size = appSettings.fontSize
         applyFontSize(size || "medium")
     })
+    createEffect(() => {
+        applyReducedMotion(Boolean(appSettings.reducedMotion))
+    })
     loadAppSettings()
     return {
         get settings() { return settings },
@@ -675,6 +689,7 @@ export function createSettingsStore(): SettingsStore {
         refreshProfiles,
         applyTheme,
         applyFontSize,
+        applyReducedMotion,
         applyLanguage: applyLanguageLocal,
         updateTemperatureDisplay
     }

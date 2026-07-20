@@ -176,7 +176,14 @@ export class OnboardingTour{
             this.updateOverlaySpotlight();
         };
         if (target && this.doc.defaultView){
-            target.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+            const mediaQuery = this.doc.defaultView.matchMedia?.("(prefers-reduced-motion: reduce)")
+            const prefersReducedMotion = Boolean(mediaQuery?.matches)
+                || this.doc.body.classList.contains("reduced-motion")
+            target.scrollIntoView({
+                behavior: prefersReducedMotion ? "auto" : "smooth",
+                block: "center",
+                inline: "center"
+            });
             this.renderFrame=this.doc.defaultView.requestAnimationFrame(finalize);
         }
         else{
