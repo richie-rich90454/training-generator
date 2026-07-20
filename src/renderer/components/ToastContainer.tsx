@@ -34,7 +34,11 @@ export function ToastContainer(props: ToastContainerProps): JSX.Element {
         >
             <For each={uiStore.toasts}>
                 {(toast) => (
-                    <div class={"toast toast-" + toast.type + " toast-visible"} role="status" aria-live="polite">
+                    <div
+                        class={"toast toast-" + toast.type + " toast-visible"}
+                        role={toast.type === "error" ? "alert" : "status"}
+                        aria-atomic="true"
+                    >
                         <span class={styles["toast-icon"]}>
                             <Icon html={iconForType(toast.type)} />
                         </span>
