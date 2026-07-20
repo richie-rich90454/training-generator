@@ -48,7 +48,12 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
                 </div>
             </div>
             <div class={`status-list`}>
-                <div class={statusClass()}>
+                <div
+                    class={statusClass()}
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
                     <span class={`status-dot`} aria-hidden="true" />
                     <span class={`status-label`}>{statusText()}</span>
                 </div>

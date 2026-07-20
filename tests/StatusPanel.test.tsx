@@ -100,6 +100,24 @@ describe("StatusPanel rendering", () => {
         const dot = document.querySelector(".status-dot")
         expect(dot?.getAttribute("aria-hidden")).toBe("true")
     })
+    test("status-indicator exposes role=status for screen readers", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const indicator = document.querySelector(".status-indicator")
+        expect(indicator?.getAttribute("role")).toBe("status")
+    })
+    test("status-indicator exposes aria-live=polite", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const indicator = document.querySelector(".status-indicator")
+        expect(indicator?.getAttribute("aria-live")).toBe("polite")
+    })
+    test("status-indicator exposes aria-atomic=true", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const indicator = document.querySelector(".status-indicator")
+        expect(indicator?.getAttribute("aria-atomic")).toBe("true")
+    })
 })
 
 describe("StatusPanel ollama offline state", () => {
