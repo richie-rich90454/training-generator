@@ -100,6 +100,29 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     function clearLogs(): void {
         setLogEntries([])
     }
+    function exportLogs(): void {
+        const entries = filteredEntries()
+        if (entries.length === 0) {
+            return
+        }
+        try {
+            const lines = entries.map((entry) => {
+                return `[${entry.timestamp}] [${entry.level.toUpperCase()}] [${entry.module}] ${entry.message}`
+            })
+            const blob = new Blob([lines.join("\n")], { type: "text/plain" })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = `${t("devtools.exportLogsFilename")}.txt`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+        }
+        catch {
+            props.appStore.uiStore.showToast(t("devtools.exportLogsFailed"), "error")
+        }
+    }
     function handleKeydown(e: KeyboardEvent): void {
         if (!props.appStore.uiStore.devtoolsOpen()) {
             return
@@ -262,6 +285,13 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                                         onInput={(e) => setLogSearch(e.currentTarget.value)}
                                     />
                                     <button id="devtools-clear-logs" data-i18n="devtools.clearLogs" onClick={clearLogs}>{t("devtools.clearLogs")}</button>
+                                    <button
+                                        id="devtools-export-logs"
+                                        data-i18n="devtools.exportLogs"
+                                        aria-label={t("devtools.exportLogsAria")}
+                                        data-i18n-aria-label="devtools.exportLogsAria"
+                                        onClick={exportLogs}
+                                    >{t("devtools.exportLogs")}</button>
                                 </div>
                                 <div id="devtools-log-output" data-testid="devtools-log-output">
                                     <Show when={filteredEntries().length > 0} fallback={<div class={styles["devtools-empty"]} data-testid="devtools-empty" data-i18n="devtools.noLogEntries">{t("devtools.noLogEntries")}</div>}>
