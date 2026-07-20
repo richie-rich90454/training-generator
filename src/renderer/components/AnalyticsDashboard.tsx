@@ -177,31 +177,31 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                 <div class={styles["test-only"]} aria-hidden="true" data-testid="avg-duration-ms-data">{avgDurationMs()}</div>
                 <div class={styles["metrics-cards"]}>
                     <div class={styles["metric-card"]} data-testid="total-items-card">
-                        <h3 class={styles["metric-label"]}>{t("analytics.totalItems")}</h3>
+                        <h3 class={styles["metric-label"]} data-i18n="analytics.totalItems">{t("analytics.totalItems")}</h3>
                         <p class={styles["metric-value"]} data-testid="total-items-value">{totalItems()}</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="quality-score-card">
-                        <h3 class={styles["metric-label"]}>{t("analytics.qualityScore")}</h3>
+                        <h3 class={styles["metric-label"]} data-i18n="analytics.qualityScore">{t("analytics.qualityScore")}</h3>
                         <p class={styles["metric-value"]} data-testid="quality-score-value">{qualityScore().toFixed(1)}%</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="total-runs-card">
-                        <h3 class={styles["metric-label"]}>{t("analytics.totalRuns")}</h3>
+                        <h3 class={styles["metric-label"]} data-i18n="analytics.totalRuns">{t("analytics.totalRuns")}</h3>
                         <p class={styles["metric-value"]} data-testid="total-runs-value">{totalRuns()}</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="avg-output-length-card">
-                        <h3 class={styles["metric-label"]}>{t("analytics.avgOutputLength")}</h3>
+                        <h3 class={styles["metric-label"]} data-i18n="analytics.avgOutputLength">{t("analytics.avgOutputLength")}</h3>
                         <p class={styles["metric-value"]} data-testid="avg-output-length-value">{avgOutputLength().toFixed(0)}</p>
                     </div>
                 </div>
                 <div class={`distribution-section`} data-testid="format-distribution">
-                    <h3 class={styles["section-title"]}>{t("analytics.formatDistribution")}</h3>
+                    <h3 class={styles["section-title"]} data-i18n="analytics.formatDistribution">{t("analytics.formatDistribution")}</h3>
                     <div class={styles["format-list"]}>
                         <For each={formatDistribution()}>
                             {(item)=>{
                                 let testId="format-row-"+item.format
                                 return (
                                     <div class={styles["format-row"]} data-testid={testId}>
-                                        <span class={`format-label`} data-testid={"format-label-"+item.format}>{t("analytics.format."+item.format)}</span>
+                                        <span class={`format-label`} data-testid={"format-label-"+item.format} data-i18n={"analytics.format."+item.format}>{t("analytics.format."+item.format)}</span>
                                         <span class={`format-count`} data-testid={"format-count-"+item.format}>{item.count}</span>
                                     </div>
                                 )
@@ -210,34 +210,34 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                     </div>
                 </div>
                 <div class={`run-status-section`} data-testid="run-status-breakdown">
-                    <h3 class={styles["section-title"]}>{t("analytics.runStatus")}</h3>
+                    <h3 class={styles["section-title"]} data-i18n="analytics.runStatus">{t("analytics.runStatus")}</h3>
                     <div class={styles["status-list"]}>
                         <div class={styles["status-row"]} data-testid="status-completed">
-                            <span class={`status-label`}>{t("analytics.status.completed")}</span>
+                            <span class={`status-label`} data-i18n="analytics.status.completed">{t("analytics.status.completed")}</span>
                             <span class={`status-value`} data-testid="status-completed-value">{completedRuns()}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-failed">
-                            <span class={`status-label`}>{t("analytics.status.failed")}</span>
+                            <span class={`status-label`} data-i18n="analytics.status.failed">{t("analytics.status.failed")}</span>
                             <span class={`status-value`} data-testid="status-failed-value">{failedRuns()}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-running">
-                            <span class={`status-label`}>{t("analytics.status.running")}</span>
+                            <span class={`status-label`} data-i18n="analytics.status.running">{t("analytics.status.running")}</span>
                             <span class={`status-value`} data-testid="status-running-value">{runningRuns()}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-queued">
-                            <span class={`status-label`}>{t("analytics.status.queued")}</span>
+                            <span class={`status-label`} data-i18n="analytics.status.queued">{t("analytics.status.queued")}</span>
                             <span class={`status-value`} data-testid="status-queued-value">{queuedRuns()}</span>
                         </div>
                     </div>
                 </div>
                 <div class={`validator-section`} data-testid="validator-reports-table">
-                    <h3 class={styles["section-title"]}>{t("analytics.validatorReports")}</h3>
+                    <h3 class={styles["section-title"]} data-i18n="analytics.validatorReports">{t("analytics.validatorReports")}</h3>
                     <table class={styles["validator-table"]}>
                         <thead>
                             <tr>
-                                <th>{t("analytics.column.name")}</th>
-                                <th>{t("analytics.column.passRate")}</th>
-                                <th>{t("analytics.column.flagged")}</th>
+                                <th data-i18n="analytics.column.name">{t("analytics.column.name")}</th>
+                                <th data-i18n="analytics.column.passRate">{t("analytics.column.passRate")}</th>
+                                <th data-i18n="analytics.column.flagged">{t("analytics.column.flagged")}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -256,8 +256,8 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                     </table>
                 </div>
                 <div class={`top-issues-section`} data-testid="top-issues-list">
-                    <h3 class={styles["section-title"]}>{t("analytics.topIssues")}</h3>
-                    <Show when={topIssues().length>0} fallback={<div class={styles["issues-empty"]} data-testid="issues-empty">{t("analytics.noIssues")}</div>}>
+                    <h3 class={styles["section-title"]} data-i18n="analytics.topIssues">{t("analytics.topIssues")}</h3>
+                    <Show when={topIssues().length>0} fallback={<div class={styles["issues-empty"]} data-testid="issues-empty" data-i18n="analytics.noIssues">{t("analytics.noIssues")}</div>}>
                         <ul class={styles["issues-list"]}>
                             <For each={topIssues()}>
                                 {(issue)=>{
@@ -287,6 +287,7 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                     role="dialog"
                     aria-modal="true"
                     aria-label={t("analytics.title")}
+                    data-i18n-aria-label="analytics.title"
                     onClick={handleBackdropClick}
                 >
                     <div class={styles["modal-content"]} style={{ "max-width": "900px", width: "85%", "max-height": "85vh", padding: "0", overflow: "hidden" }}>
