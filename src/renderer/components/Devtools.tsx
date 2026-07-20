@@ -107,32 +107,32 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
             <Portal mount={document.body}>
                 <div class={styles["devtools-panel"]} data-testid="devtools-panel" role="dialog" aria-modal="true" aria-labelledby="devtools-title">
                     <div class={styles["devtools-header"]}>
-                        <h3 id="devtools-title">{t("devtools.title")}</h3>
+                        <h3 id="devtools-title" data-i18n="devtools.title">{t("devtools.title")}</h3>
                         <button class={styles["devtools-close"]} aria-label={t("devtools.closeAria")} data-i18n-aria-label="devtools.closeAria" onClick={() => props.appStore.uiStore.setDevtoolsOpen(false)}>
                             &times;
                         </button>
                     </div>
                     <div class={styles["devtools-tabs"]}>
-                        <button class={"devtools-tab" + (activeTab() === "logs" ? " active" : "")} data-tab="logs" onClick={() => switchTab("logs")}>{t("devtools.tab.logs")}</button>
-                        <button class={"devtools-tab" + (activeTab() === "cache" ? " active" : "")} data-tab="cache" onClick={() => switchTab("cache")}>{t("devtools.tab.cache")}</button>
-                        <button class={"devtools-tab" + (activeTab() === "workers" ? " active" : "")} data-tab="workers" onClick={() => switchTab("workers")}>{t("devtools.tab.workers")}</button>
-                        <button class={"devtools-tab" + (activeTab() === "memory" ? " active" : "")} data-tab="memory" onClick={() => switchTab("memory")}>{t("devtools.tab.memory")}</button>
+                        <button class={"devtools-tab" + (activeTab() === "logs" ? " active" : "")} data-tab="logs" onClick={() => switchTab("logs")}><span data-i18n="devtools.tab.logs">{t("devtools.tab.logs")}</span></button>
+                        <button class={"devtools-tab" + (activeTab() === "cache" ? " active" : "")} data-tab="cache" onClick={() => switchTab("cache")}><span data-i18n="devtools.tab.cache">{t("devtools.tab.cache")}</span></button>
+                        <button class={"devtools-tab" + (activeTab() === "workers" ? " active" : "")} data-tab="workers" onClick={() => switchTab("workers")}><span data-i18n="devtools.tab.workers">{t("devtools.tab.workers")}</span></button>
+                        <button class={"devtools-tab" + (activeTab() === "memory" ? " active" : "")} data-tab="memory" onClick={() => switchTab("memory")}><span data-i18n="devtools.tab.memory">{t("devtools.tab.memory")}</span></button>
                     </div>
                     <div class={styles["devtools-content"]}>
                         <Show when={activeTab() === "logs"}>
                             <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-logs">
                                 <div class={styles["devtools-log-controls"]}>
                                     <select id="devtools-log-filter" aria-label={t("devtools.logFilterAria")} data-i18n-aria-label="devtools.logFilterAria" value={logFilter()} onChange={(e) => setLogFilter(e.currentTarget.value)}>
-                                        <option value="all">{t("devtools.logLevel.all")}</option>
-                                        <option value="debug">{t("devtools.logLevel.debug")}</option>
-                                        <option value="info">{t("devtools.logLevel.info")}</option>
-                                        <option value="warn">{t("devtools.logLevel.warn")}</option>
-                                        <option value="error">{t("devtools.logLevel.error")}</option>
+                                        <option value="all" data-i18n="devtools.logLevel.all">{t("devtools.logLevel.all")}</option>
+                                        <option value="debug" data-i18n="devtools.logLevel.debug">{t("devtools.logLevel.debug")}</option>
+                                        <option value="info" data-i18n="devtools.logLevel.info">{t("devtools.logLevel.info")}</option>
+                                        <option value="warn" data-i18n="devtools.logLevel.warn">{t("devtools.logLevel.warn")}</option>
+                                        <option value="error" data-i18n="devtools.logLevel.error">{t("devtools.logLevel.error")}</option>
                                     </select>
-                                    <button id="devtools-clear-logs" onClick={clearLogs}>{t("devtools.clearLogs")}</button>
+                                    <button id="devtools-clear-logs" data-i18n="devtools.clearLogs" onClick={clearLogs}>{t("devtools.clearLogs")}</button>
                                 </div>
                                 <div id="devtools-log-output" data-testid="devtools-log-output">
-                                    <Show when={filteredEntries().length > 0} fallback={<div class={styles["devtools-empty"]} data-testid="devtools-empty">{t("devtools.noLogEntries")}</div>}>
+                                    <Show when={filteredEntries().length > 0} fallback={<div class={styles["devtools-empty"]} data-testid="devtools-empty" data-i18n="devtools.noLogEntries">{t("devtools.noLogEntries")}</div>}>
                                         <For each={filteredEntries()}>
                                             {(entry) => {
                                                 return (
@@ -153,12 +153,12 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-cache">
                                 <table>
                                     <tbody>
-                                        <tr><td>{t("devtools.cache.hits")}</td><td>{cacheStats().cs.hits}</td></tr>
-                                        <tr><td>{t("devtools.cache.misses")}</td><td>{cacheStats().cs.misses}</td></tr>
-                                        <tr><td>{t("devtools.cache.totalRequests")}</td><td>{cacheStats().cs.totalRequests}</td></tr>
-                                        <tr><td>{t("devtools.cache.hitRate")}</td><td>{cacheStats().hitRate}%</td></tr>
-                                        <tr><td>{t("devtools.cache.tokensSaved")}</td><td>{cacheStats().cs.estimatedTokensSaved.toLocaleString("en-US")}</td></tr>
-                                        <tr><td>{t("devtools.cache.costSaved")}</td><td>{t("devtools.cache.currencyPrefix")}{cacheStats().cs.estimatedCostSaved.toFixed(4)}</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.hits">{t("devtools.cache.hits")}</span></td><td>{cacheStats().cs.hits}</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.misses">{t("devtools.cache.misses")}</span></td><td>{cacheStats().cs.misses}</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.totalRequests">{t("devtools.cache.totalRequests")}</span></td><td>{cacheStats().cs.totalRequests}</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.hitRate">{t("devtools.cache.hitRate")}</span></td><td>{cacheStats().hitRate}%</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.tokensSaved">{t("devtools.cache.tokensSaved")}</span></td><td>{cacheStats().cs.estimatedTokensSaved.toLocaleString("en-US")}</td></tr>
+                                        <tr><td><span data-i18n="devtools.cache.costSaved">{t("devtools.cache.costSaved")}</span></td><td><span data-i18n="devtools.cache.currencyPrefix">{t("devtools.cache.currencyPrefix")}</span>{cacheStats().cs.estimatedCostSaved.toFixed(4)}</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -167,9 +167,9 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-workers">
                                 <table>
                                     <tbody>
-                                        <tr><td>{t("devtools.workers.pool")}</td><td>{workerInfo().workerCount}{t("devtools.workers.countSuffix")}</td></tr>
-                                        <tr><td>{t("devtools.workers.status")}</td><td>{workerInfo().workerStatus}</td></tr>
-                                        <tr><td>{t("devtools.workers.types")}</td><td>{t("devtools.workers.chunkWorker")}, {t("devtools.workers.dedupWorker")}</td></tr>
+                                        <tr><td><span data-i18n="devtools.workers.pool">{t("devtools.workers.pool")}</span></td><td>{workerInfo().workerCount}<span data-i18n="devtools.workers.countSuffix">{t("devtools.workers.countSuffix")}</span></td></tr>
+                                        <tr><td><span data-i18n="devtools.workers.status">{t("devtools.workers.status")}</span></td><td>{workerInfo().workerStatus}</td></tr>
+                                        <tr><td><span data-i18n="devtools.workers.types">{t("devtools.workers.types")}</span></td><td><span data-i18n="devtools.workers.chunkWorker">{t("devtools.workers.chunkWorker")}</span>, <span data-i18n="devtools.workers.dedupWorker">{t("devtools.workers.dedupWorker")}</span></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -178,16 +178,16 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-memory">
                                 <Show when={memoryInfo().available} fallback={(
                                     <>
-                                        <p>{t("devtools.memory.unavailable")}</p>
-                                        <p>{t("devtools.memory.preciseFlagHint")}</p>
+                                        <p data-i18n="devtools.memory.unavailable">{t("devtools.memory.unavailable")}</p>
+                                        <p data-i18n="devtools.memory.preciseFlagHint">{t("devtools.memory.preciseFlagHint")}</p>
                                     </>
                                 )}>
                                     <table>
                                         <tbody>
-                                            <tr><td>{t("devtools.memory.usedHeap")}</td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).usedMB}{t("devtools.memory.mbSuffix")}</td></tr>
-                                            <tr><td>{t("devtools.memory.totalHeap")}</td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).totalMB}{t("devtools.memory.mbSuffix")}</td></tr>
-                                            <tr><td>{t("devtools.memory.heapLimit")}</td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).limitMB}{t("devtools.memory.mbSuffix")}</td></tr>
-                                            <tr><td>{t("devtools.memory.usage")}</td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).usagePercent}%</td></tr>
+                                            <tr><td><span data-i18n="devtools.memory.usedHeap">{t("devtools.memory.usedHeap")}</span></td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).usedMB}<span data-i18n="devtools.memory.mbSuffix">{t("devtools.memory.mbSuffix")}</span></td></tr>
+                                            <tr><td><span data-i18n="devtools.memory.totalHeap">{t("devtools.memory.totalHeap")}</span></td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).totalMB}<span data-i18n="devtools.memory.mbSuffix">{t("devtools.memory.mbSuffix")}</span></td></tr>
+                                            <tr><td><span data-i18n="devtools.memory.heapLimit">{t("devtools.memory.heapLimit")}</span></td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).limitMB}<span data-i18n="devtools.memory.mbSuffix">{t("devtools.memory.mbSuffix")}</span></td></tr>
+                                            <tr><td><span data-i18n="devtools.memory.usage">{t("devtools.memory.usage")}</span></td><td>{(memoryInfo() as { available: true, usedMB: string, totalMB: string, limitMB: string, usagePercent: string }).usagePercent}%</td></tr>
                                         </tbody>
                                     </table>
                                 </Show>
