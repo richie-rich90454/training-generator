@@ -166,41 +166,44 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
                 >
                     <div class={styles["template-editor-modal"]}>
                         <div class={styles["template-editor-header"]}>
-                            <h2 id="template-editor-title"><Icon html={renderIcon("fa-edit", 20)} /> {t("templateEditor.title")}</h2>
+                            <h2 id="template-editor-title"><Icon html={renderIcon("fa-edit", 20)} /> <span data-i18n="templateEditor.title">{t("templateEditor.title")}</span></h2>
                             <button
                                 class={styles["template-editor-close"]}
                                 aria-label={t("templateEditor.closeAria")}
+                                data-i18n-aria-label="templateEditor.closeAria"
                                 onClick={handleClose}
                             >
                                 &times;
                             </button>
                         </div>
                         <div class={styles["template-editor-body"]}>
-                            <label for="template-editor-textarea"><Icon html={renderIcon("fa-code")} /> {t("templateEditor.templateLabel")}</label>
+                            <label for="template-editor-textarea"><Icon html={renderIcon("fa-code")} /> <span data-i18n="templateEditor.templateLabel">{t("templateEditor.templateLabel")}</span></label>
                             <textarea
                                 ref={textareaRef}
                                 id="template-editor-textarea"
                                 class={styles["template-editor-textarea"]}
                                 aria-label={t("templateEditor.contentAria")}
+                                data-i18n-aria-label="templateEditor.contentAria"
                                 placeholder={t("templateEditor.placeholder")}
+                                data-i18n-placeholder="templateEditor.placeholder"
                                 spellcheck={false}
                                 value={content()}
                                 onInput={handleInput}
                             ></textarea>
-                            <label><Icon html={renderIcon("fa-highlighter")} /> {t("templateEditor.highlightedLabel")}</label>
+                            <label><Icon html={renderIcon("fa-highlighter")} /> <span data-i18n="templateEditor.highlightedLabel">{t("templateEditor.highlightedLabel")}</span></label>
                             <pre class={styles["template-editor-preview"]} innerHTML={highlighted()}></pre>
-                            <label><Icon html={renderIcon("fa-eye")} /> {t("templateEditor.previewLabel")}</label>
+                            <label><Icon html={renderIcon("fa-eye")} /> <span data-i18n="templateEditor.previewLabel">{t("templateEditor.previewLabel")}</span></label>
                             <pre class={styles["template-editor-preview"]}>{livePreview()}</pre>
                         </div>
                         <div class={styles["template-editor-footer"]}>
-                            <button class={`btn btn-secondary`} aria-label={t("templateEditor.loadAria")} onClick={handleLoad}>
-                                <Icon html={renderIcon("fa-folder-open")} /> {t("templateEditor.load")}
+                            <button class={`btn btn-secondary`} aria-label={t("templateEditor.loadAria")} data-i18n-aria-label="templateEditor.loadAria" onClick={handleLoad}>
+                                <Icon html={renderIcon("fa-folder-open")} /> <span data-i18n="templateEditor.load">{t("templateEditor.load")}</span>
                             </button>
-                            <button class={`btn btn-primary`} aria-label={t("templateEditor.saveAria")} onClick={handleSave}>
-                                <Icon html={renderIcon("fa-save")} /> {t("templateEditor.save")}
+                            <button class={`btn btn-primary`} aria-label={t("templateEditor.saveAria")} data-i18n-aria-label="templateEditor.saveAria" onClick={handleSave}>
+                                <Icon html={renderIcon("fa-save")} /> <span data-i18n="templateEditor.save">{t("templateEditor.save")}</span>
                             </button>
-                            <button class={`btn btn-secondary`} aria-label={t("templateEditor.closeAria")} onClick={handleClose}>
-                                <Icon html={renderIcon("fa-times")} /> {t("templateEditor.close")}
+                            <button class={`btn btn-secondary`} aria-label={t("templateEditor.closeAria")} data-i18n-aria-label="templateEditor.closeAria" onClick={handleClose}>
+                                <Icon html={renderIcon("fa-times")} /> <span data-i18n="templateEditor.close">{t("templateEditor.close")}</span>
                             </button>
                         </div>
                     </div>
