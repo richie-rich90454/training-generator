@@ -150,4 +150,34 @@ describe("TemplateEditor", () => {
         expect(textarea.getAttribute("data-i18n-aria-label")).toBe("templateEditor.contentAria")
         cleanup()
     })
+    test("Tab on last focusable wraps to first", () => {
+        cleanup()
+        renderComponent(true)
+        const dialog = screen.getByRole("dialog")
+        const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(selector))
+        expect(focusable.length).toBeGreaterThan(0)
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        last.focus()
+        expect(document.activeElement).toBe(last)
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: false, bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(first)
+        cleanup()
+    })
+    test("Shift+Tab on first focusable wraps to last", () => {
+        cleanup()
+        renderComponent(true)
+        const dialog = screen.getByRole("dialog")
+        const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(selector))
+        expect(focusable.length).toBeGreaterThan(0)
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        first.focus()
+        expect(document.activeElement).toBe(first)
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(last)
+        cleanup()
+    })
 })

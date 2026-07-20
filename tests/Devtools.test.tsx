@@ -414,6 +414,34 @@ describe("Devtools focus and scroll lock", () => {
         expect(document.activeElement).toBe(trigger)
         document.body.removeChild(trigger)
     })
+    test("Tab on last focusable wraps to first", () => {
+        const stub = makeStub(true)
+        render(() => <Devtools appStore={makeAppStore(stub)} />)
+        const panel = screen.getByTestId("devtools-panel")
+        const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable = Array.from(panel.querySelectorAll<HTMLElement>(selector))
+        expect(focusable.length).toBeGreaterThan(0)
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        last.focus()
+        expect(document.activeElement).toBe(last)
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: false, bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(first)
+    })
+    test("Shift+Tab on first focusable wraps to last", () => {
+        const stub = makeStub(true)
+        render(() => <Devtools appStore={makeAppStore(stub)} />)
+        const panel = screen.getByTestId("devtools-panel")
+        const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable = Array.from(panel.querySelectorAll<HTMLElement>(selector))
+        expect(focusable.length).toBeGreaterThan(0)
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        first.focus()
+        expect(document.activeElement).toBe(first)
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(last)
+    })
 })
 
 describe("Devtools log search", () => {

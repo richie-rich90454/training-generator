@@ -249,6 +249,19 @@ describe("App", () => {
             render(() => <App />)
             expect(document.querySelector(".main-scroll")).not.toBeNull()
         })
+        test("renders skip-to-content link pointing to main-content", () => {
+            render(() => <App />)
+            const skipLink = document.querySelector(".skip-link") as HTMLAnchorElement
+            expect(skipLink).not.toBeNull()
+            expect(skipLink.getAttribute("href")).toBe("#main-content")
+            expect(skipLink.getAttribute("data-i18n")).toBe("app.skipToContent")
+        })
+        test("main-scroll container has id main-content as skip target", () => {
+            render(() => <App />)
+            const main = document.getElementById("main-content")
+            expect(main).not.toBeNull()
+            expect(main?.classList.contains("main-scroll")).toBe(true)
+        })
     })
 
     describe("lifecycle", () => {

@@ -311,4 +311,23 @@ describe("CommandPalette",()=>{
         const input=screen.getByTestId("command-palette-input") as HTMLInputElement
         expect(input.getAttribute("data-i18n-placeholder")).toBe("commandPalette.placeholder")
     })
+    test("Tab on input keeps focus within dialog (forward cycle)",()=>{
+        renderComponent({ commands: makeCommands(), visible: true })
+        const dialog=screen.getByRole("dialog")
+        const input=screen.getByTestId("command-palette-input") as HTMLInputElement
+        input.focus()
+        expect(document.activeElement).toBe(input)
+        fireEvent.keyDown(dialog, { key: "Tab", shiftKey: false, bubbles: true, cancelable: true })
+        // The input is the only focusable element, so Tab cycle keeps focus on it
+        expect(document.activeElement).toBe(input)
+    })
+    test("Shift+Tab on input keeps focus within dialog (backward cycle)",()=>{
+        renderComponent({ commands: makeCommands(), visible: true })
+        const dialog=screen.getByRole("dialog")
+        const input=screen.getByTestId("command-palette-input") as HTMLInputElement
+        input.focus()
+        expect(document.activeElement).toBe(input)
+        fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true, bubbles: true, cancelable: true })
+        expect(document.activeElement).toBe(input)
+    })
 })
