@@ -303,7 +303,7 @@
 }
 .settings-tooltip__icon:hover,
 .settings-tooltip__icon:focus-visible{
-    color:var(--primary-color);
+    color:var(--primary-text);
     outline:2px solid var(--primary-color);
     outline-offset:1px;
 }

@@ -24,7 +24,7 @@
 }
 .upload-icon{
     font-size:3rem;
-    color:var(--primary-color);
+    color:var(--primary-text);
     margin-bottom:var(--spacing-md);
 }
 .upload-icon svg{
@@ -85,7 +85,7 @@
     flex:1;
 }
 .file-icon{
-    color:var(--primary-color);
+    color:var(--primary-text);
     font-size:1.25rem;
     flex-shrink:0;
 }
@@ -120,7 +120,7 @@
 .file-remove{
     background:none;
     border:none;
-    color:var(--accent-color);
+    color:var(--accent-text);
     cursor:pointer;
     width:32px;
     height:32px;

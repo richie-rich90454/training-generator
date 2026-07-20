@@ -7,6 +7,12 @@
     --accent-hover:#C53929;
     --warning-color:#FBBC05;
     --warning-hover:#F9A825;
+    /* Text-safe variants: meet WCAG AA 4.5:1 on light backgrounds.
+       Use these whenever the brand color is the *text* color. */
+    --primary-text:#1557B0;
+    --warning-text:#9A5400;
+    --accent-text:#C53929;
+    --secondary-text:#2E7D32;
     --surface-color:#FFFFFF;
     --surface-variant:#F3F3F3;
     --background-color:#FAFAFA;
@@ -56,6 +62,12 @@
     --accent-hover:#F6AEA9;
     --warning-color:#FDD663;
     --warning-hover:#FDE293;
+    /* Dark theme brand colors already pass WCAG AA on dark backgrounds,
+       so the text-safe variants alias to the same colors. */
+    --primary-text:#8AB4F8;
+    --warning-text:#FDD663;
+    --accent-text:#F28B82;
+    --secondary-text:#81C995;
     --surface-color:#202124;
     --surface-variant:#2D2E30;
     --background-color:#1A1A1A;

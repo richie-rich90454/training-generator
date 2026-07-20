@@ -63,23 +63,23 @@
     border-left:4px solid var(--primary-color);
 }
 .toast-info .toast-icon{
-    color:var(--primary-color);
+    color:var(--primary-text);
 }
 .toast-success{
     border-left:4px solid var(--secondary-color);
 }
 .toast-success .toast-icon{
-    color:var(--secondary-color);
+    color:var(--secondary-text);
 }
 .toast-warning{
     border-left:4px solid var(--warning-color);
 }
 .toast-warning .toast-icon{
-    color:var(--warning-color);
+    color:var(--warning-text);
 }
 .toast-error{
     border-left:4px solid var(--accent-color);
 }
 .toast-error .toast-icon{
-    color:var(--accent-color);
+    color:var(--accent-text);
 }

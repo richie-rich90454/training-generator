@@ -108,7 +108,7 @@
 }
 .stats-warnings .warning{
     margin-bottom:var(--spacing-xs);
-    color:var(--accent-color);
+    color:var(--accent-text);
     font-size:.875rem;
 }
 .stats-warnings .warning:last-child{
@@ -143,7 +143,7 @@
     color:var(--text-secondary);
 }
 .flag-reasons{
-    color:var(--accent-color);
+    color:var(--accent-text);
     font-weight:500;
 }
 .flag-preview{

@@ -72,7 +72,7 @@
 }
 .devtools-tab.active{
     background:var(--surface-color);
-    color:var(--primary-color);
+    color:var(--primary-text);
     border-color:var(--primary-color);
 }
 .devtools-tab:focus-visible{
@@ -154,13 +154,13 @@
     color:var(--text-secondary);
 }
 .log-level-info{
-    color:var(--primary-color);
+    color:var(--primary-text);
 }
 .log-level-warn{
-    color:var(--warning-color);
+    color:var(--warning-text);
 }
 .log-level-error{
-    color:var(--accent-color);
+    color:var(--accent-text);
 }
 .log-module{
     color:var(--text-secondary);

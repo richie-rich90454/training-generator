@@ -41,13 +41,13 @@
     background:var(--accent-color);
 }
 .status-indicator--checking{
-    color:var(--warning-color);
+    color:var(--warning-text);
 }
 .status-indicator--online{
-    color:var(--secondary-color);
+    color:var(--secondary-text);
 }
 .status-indicator--error{
-    color:var(--accent-color);
+    color:var(--accent-text);
 }
 .status-label{
     font-weight:500;
