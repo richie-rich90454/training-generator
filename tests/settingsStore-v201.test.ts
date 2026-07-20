@@ -632,3 +632,32 @@ describe("SettingsStore v2.0.1 reducedMotion apply", () => {
         expect(document.body.classList.contains("reduced-motion")).toBe(false)
     })
 })
+
+describe("SettingsStore v2.0.1 highContrast apply", () => {
+    it("applyHighContrast(true) adds high-contrast class to body", () => {
+        store = makeSettingsStore()
+        document.body.classList.remove("high-contrast")
+        store.applyHighContrast(true)
+        expect(document.body.classList.contains("high-contrast")).toBe(true)
+    })
+    it("applyHighContrast(false) removes high-contrast class from body", () => {
+        store = makeSettingsStore()
+        document.body.classList.add("high-contrast")
+        store.applyHighContrast(false)
+        expect(document.body.classList.contains("high-contrast")).toBe(false)
+    })
+    it("setting highContrast=true via setAppSetting adds high-contrast class", () => {
+        store = makeSettingsStore()
+        document.body.classList.remove("high-contrast")
+        store.setAppSetting("highContrast", true)
+        expect(document.body.classList.contains("high-contrast")).toBe(true)
+    })
+    it("setting highContrast=false via setAppSetting removes high-contrast class", () => {
+        store = makeSettingsStore()
+        // Start from true so the effect re-runs when we flip to false.
+        store.setAppSetting("highContrast", true)
+        expect(document.body.classList.contains("high-contrast")).toBe(true)
+        store.setAppSetting("highContrast", false)
+        expect(document.body.classList.contains("high-contrast")).toBe(false)
+    })
+})

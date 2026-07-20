@@ -263,3 +263,85 @@ describe("WCAG contrast ratio helpers", () => {
         expect(contrastRatio("#777777", "#FFFFFF")).toBeCloseTo(4.48, 1)
     })
 })
+
+/**
+ * High-contrast theme (both @media (prefers-contrast: more) and the
+ * body.high-contrast class set by the user setting). Uses pure saturated
+ * colors so text stays readable for low-vision users.
+ */
+const HIGH_CONTRAST_THEME = {
+    "--primary-color": "#0000FF",
+    "--primary-text": "#0000FF",
+    "--secondary-color": "#008000",
+    "--secondary-text": "#008000",
+    "--accent-color": "#CC0000",
+    "--accent-text": "#CC0000",
+    "--warning-color": "#CC6600",
+    "--warning-text": "#994C00",
+    "--surface-color": "#FFFFFF",
+    "--surface-variant": "#F0F0F0",
+    "--background-color": "#FFFFFF",
+    "--text-primary": "#000000",
+    "--text-secondary": "#333333",
+    "--text-disabled": "#666666"
+} as const
+
+describe("WCAG color contrast — high-contrast theme", () => {
+    const bg = HIGH_CONTRAST_THEME["--background-color"]
+    const surface = HIGH_CONTRAST_THEME["--surface-color"]
+    const surfaceVariant = HIGH_CONTRAST_THEME["--surface-variant"]
+
+    describe("text on page background (#FFFFFF)", () => {
+        test("text-primary passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--text-primary"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("text-secondary passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--text-secondary"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("primary-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--primary-text"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("secondary-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--secondary-text"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("accent-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--accent-text"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("warning-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--warning-text"], bg)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+    })
+
+    describe("text on surface-variant (#F0F0F0)", () => {
+        test("text-primary passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--text-primary"], surfaceVariant)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("primary-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--primary-text"], surfaceVariant)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("secondary-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--secondary-text"], surfaceVariant)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("accent-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--accent-text"], surfaceVariant)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+        test("warning-text passes AA", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--warning-text"], surfaceVariant)).toBeGreaterThanOrEqual(AA_NORMAL)
+        })
+    })
+
+    describe("raw brand colors used as UI accents pass 3:1", () => {
+        test("primary-color passes 3:1", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--primary-color"], bg)).toBeGreaterThanOrEqual(AA_UI)
+        })
+        test("secondary-color passes 3:1", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--secondary-color"], bg)).toBeGreaterThanOrEqual(AA_UI)
+        })
+        test("accent-color passes 3:1", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--accent-color"], bg)).toBeGreaterThanOrEqual(AA_UI)
+        })
+        test("warning-color passes 3:1", () => {
+            expect(contrastRatio(HIGH_CONTRAST_THEME["--warning-color"], bg)).toBeGreaterThanOrEqual(AA_UI)
+        })
+    })
+})
