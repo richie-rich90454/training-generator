@@ -77,7 +77,6 @@ function GeneratedView(props: { item: FormattedView }): JSX.Element{
 export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
     let [currentIndex, setCurrentIndex]=createSignal<number>(props.selectedIndex||0)
     let [showJson, setShowJson]=createSignal<boolean>(false)
-    let [splitRatio, setSplitRatio]=createSignal<number>(0.5)
     let currentItem=createMemo<TrainingItem|undefined>(()=>{
         return props.items[currentIndex()]
     })
@@ -194,11 +193,11 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
                         </div>
                     }>
                         <div class={styles["split-view"]} data-testid="split-view">
-                            <div class={styles["original-panel"]} style={{ flex: splitRatio() }} data-testid="original-panel">
+                            <div class={styles["original-panel"]} data-testid="original-panel">
                                 <h3 class={`panel-title`}>{t("datasetPreview.original")}</h3>
                                 <pre class={`original-text`} data-testid="original-text">{originalSource()}</pre>
                             </div>
-                            <div class={styles["generated-panel"]} style={{ flex: 1-splitRatio() }} data-testid="generated-panel">
+                            <div class={styles["generated-panel"]} data-testid="generated-panel">
                                 <GeneratedView item={formattedItem()} />
                             </div>
                         </div>

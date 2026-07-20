@@ -19,14 +19,16 @@
     flex:1;
     overflow:auto;
 }
-.original-panel,
-.generated-panel{
+.original-panel{
+    flex:0.5;
     padding:8px;
     overflow:auto;
-    border-right:1px solid var(--border-color);
+    border-inline-end:1px solid var(--border-color);
 }
 .generated-panel{
-    border-right:none;
+    flex:0.5;
+    padding:8px;
+    overflow:auto;
 }
 .single-view{
     flex:1;
