@@ -4,6 +4,9 @@
     gap:16px;
     padding:16px;
 }
+.test-only{
+    display:none;
+}
 .metrics-cards{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));

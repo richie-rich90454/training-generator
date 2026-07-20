@@ -168,13 +168,13 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
     function dashboardBody(): JSX.Element{
         return (
             <div class={styles["analytics-dashboard"]} data-testid="analytics-dashboard">
-                <div style={{ display: "none" }} data-testid="format-distribution-data">{JSON.stringify(formatDistribution())}</div>
-                <div style={{ display: "none" }} data-testid="avg-output-length-data">{avgOutputLength()}</div>
-                <div style={{ display: "none" }} data-testid="avg-instruction-length-data">{avgInstructionLength()}</div>
-                <div style={{ display: "none" }} data-testid="quality-score-data">{qualityScore()}</div>
-                <div style={{ display: "none" }} data-testid="top-issues-data">{JSON.stringify(topIssues())}</div>
-                <div style={{ display: "none" }} data-testid="total-items-data">{totalItems()}</div>
-                <div style={{ display: "none" }} data-testid="avg-duration-ms-data">{avgDurationMs()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="format-distribution-data">{JSON.stringify(formatDistribution())}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="avg-output-length-data">{avgOutputLength()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="avg-instruction-length-data">{avgInstructionLength()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="quality-score-data">{qualityScore()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="top-issues-data">{JSON.stringify(topIssues())}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="total-items-data">{totalItems()}</div>
+                <div class={styles["test-only"]} aria-hidden="true" data-testid="avg-duration-ms-data">{avgDurationMs()}</div>
                 <div class={styles["metrics-cards"]}>
                     <div class={styles["metric-card"]} data-testid="total-items-card">
                         <h3 class={styles["metric-label"]}>{t("analytics.totalItems")}</h3>
