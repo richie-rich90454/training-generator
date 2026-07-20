@@ -19,6 +19,15 @@
         --accent-hover:#990000;
         --warning-color:#CC6600;
         --warning-hover:#994C00;
+        /* Text-safe variants: in high-contrast mode the brand colors are
+           already saturated enough to meet AA on white, so the text variants
+           alias to the brand colors. Warning is the exception — #CC6600 only
+           reaches 3.84:1 on white, so the text variant uses the darker
+           --warning-hover (#994C00 = 6.20:1). */
+        --primary-text:#0000FF;
+        --secondary-text:#008000;
+        --accent-text:#CC0000;
+        --warning-text:#994C00;
         --surface-color:#FFFFFF;
         --surface-variant:#F0F0F0;
         --background-color:#FFFFFF;
@@ -40,6 +49,45 @@
     .progress-fill{
         background:var(--primary-color);
     }
+}
+/* Mirror of @media (prefers-contrast: more) above. Triggered by the
+   `highContrast` user setting so users can opt in even when their OS
+   does not signal a contrast preference. */
+body.high-contrast{
+    --primary-color:#0000FF;
+    --primary-hover:#0000CC;
+    --secondary-color:#008000;
+    --secondary-hover:#006600;
+    --accent-color:#CC0000;
+    --accent-hover:#990000;
+    --warning-color:#CC6600;
+    --warning-hover:#994C00;
+    --primary-text:#0000FF;
+    --secondary-text:#008000;
+    --accent-text:#CC0000;
+    --warning-text:#994C00;
+    --surface-color:#FFFFFF;
+    --surface-variant:#F0F0F0;
+    --background-color:#FFFFFF;
+    --text-primary:#000000;
+    --text-secondary:#333333;
+    --text-disabled:#666666;
+    --border-color:#000000;
+    --border-hover:#000000;
+}
+body.high-contrast .card,
+body.high-contrast .config-panel,
+body.high-contrast .app-footer{
+    border:2px solid var(--border-color);
+    box-shadow:none;
+    background:var(--surface-color);
+}
+body.high-contrast .btn{
+    border:2px solid var(--text-primary);
+    box-shadow:none;
+}
+body.high-contrast .progress-fill{
+    background:var(--primary-color);
 }
 @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{

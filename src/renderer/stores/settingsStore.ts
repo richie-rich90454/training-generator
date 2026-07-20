@@ -64,6 +64,7 @@ export interface SettingsStore {
     applyTheme: (theme: string) => void
     applyFontSize: (size: string) => void
     applyReducedMotion: (enabled: boolean) => void
+    applyHighContrast: (enabled: boolean) => void
     applyLanguage: (lang: string) => void
     updateTemperatureDisplay: (temp: number) => { rangeFill: string; temperatureColor: string; temperatureColorHover: string; temperatureShadow: string; text: string }
 }
@@ -273,6 +274,16 @@ export function createSettingsStore(): SettingsStore {
         }
         else {
             document.body.classList.remove("reduced-motion")
+        }
+    }
+    function applyHighContrast(enabled: boolean): void {
+        // Mirrors the OS-level `prefers-contrast: more` media query so users
+        // can opt in via settings even when their OS doesn't signal it.
+        if (enabled) {
+            document.body.classList.add("high-contrast")
+        }
+        else {
+            document.body.classList.remove("high-contrast")
         }
     }
     function applyLanguageLocal(lang: string): void {
@@ -640,6 +651,9 @@ export function createSettingsStore(): SettingsStore {
     createEffect(() => {
         applyReducedMotion(Boolean(appSettings.reducedMotion))
     })
+    createEffect(() => {
+        applyHighContrast(Boolean(appSettings.highContrast))
+    })
     loadAppSettings()
     return {
         get settings() { return settings },
@@ -690,6 +704,7 @@ export function createSettingsStore(): SettingsStore {
         applyTheme,
         applyFontSize,
         applyReducedMotion,
+        applyHighContrast,
         applyLanguage: applyLanguageLocal,
         updateTemperatureDisplay
     }
