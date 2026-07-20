@@ -223,4 +223,19 @@ describe("AnalyticsDashboard",()=>{
         renderComponent({ items: makeItems(), validatorReports: [] })
         expect(screen.getByTestId("issues-empty").getAttribute("data-i18n")).toBe("analytics.noIssues")
     })
+    test("large counts are locale-formatted with thousands separators",()=>{
+        const items: TrainingItem[] = []
+        for (let i=0; i<99999; i++){
+            items.push({ format: "instruction", instruction: "q", input: "", output: "a" } as unknown as TrainingItem)
+        }
+        renderComponent({ items })
+        expect(screen.getByTestId("total-items-value").textContent).toBe("99,999")
+        expect(screen.getByTestId("format-count-instruction").textContent).toBe("99,999")
+    })
+    test("quality score is locale-formatted with one decimal place",()=>{
+        const items = makeItems()
+        const reports: ValidatorReport[] = [{ name: "X", passRate: 88.5, flaggedCount: 0 }]
+        renderComponent({ items, validatorReports: reports })
+        expect(screen.getByTestId("quality-score-value").textContent).toBe("88.5%")
+    })
 })

@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js"
 import { createMemo, For, Show, onMount, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
-import { t } from "../i18n.js"
+import { t, getCurrentLang } from "../i18n.js"
 import type { TrainingItem } from "../../types/index.js"
 import type { RunRecord } from "../../core/runHistoryManager.js"
 import type { AppStore } from "../stores/appStore.js"
@@ -165,6 +165,15 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
         let reportsList=reports()
         return [...reportsList].sort((a, b)=>b.flaggedCount-a.flaggedCount)
     })
+    function formatCount(n: number): string {
+        return n.toLocaleString(getCurrentLang())
+    }
+    function formatPercent(n: number): string {
+        return n.toLocaleString(getCurrentLang(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })+"%"
+    }
+    function formatAvg(n: number): string {
+        return n.toLocaleString(getCurrentLang(), { maximumFractionDigits: 0 })
+    }
     function dashboardBody(): JSX.Element{
         return (
             <div class={styles["analytics-dashboard"]} data-testid="analytics-dashboard">
@@ -178,19 +187,19 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                 <div class={styles["metrics-cards"]}>
                     <div class={styles["metric-card"]} data-testid="total-items-card">
                         <h3 class={styles["metric-label"]} data-i18n="analytics.totalItems">{t("analytics.totalItems")}</h3>
-                        <p class={styles["metric-value"]} data-testid="total-items-value">{totalItems()}</p>
+                        <p class={styles["metric-value"]} data-testid="total-items-value">{formatCount(totalItems())}</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="quality-score-card">
                         <h3 class={styles["metric-label"]} data-i18n="analytics.qualityScore">{t("analytics.qualityScore")}</h3>
-                        <p class={styles["metric-value"]} data-testid="quality-score-value">{qualityScore().toFixed(1)}%</p>
+                        <p class={styles["metric-value"]} data-testid="quality-score-value">{formatPercent(qualityScore())}</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="total-runs-card">
                         <h3 class={styles["metric-label"]} data-i18n="analytics.totalRuns">{t("analytics.totalRuns")}</h3>
-                        <p class={styles["metric-value"]} data-testid="total-runs-value">{totalRuns()}</p>
+                        <p class={styles["metric-value"]} data-testid="total-runs-value">{formatCount(totalRuns())}</p>
                     </div>
                     <div class={styles["metric-card"]} data-testid="avg-output-length-card">
                         <h3 class={styles["metric-label"]} data-i18n="analytics.avgOutputLength">{t("analytics.avgOutputLength")}</h3>
-                        <p class={styles["metric-value"]} data-testid="avg-output-length-value">{avgOutputLength().toFixed(0)}</p>
+                        <p class={styles["metric-value"]} data-testid="avg-output-length-value">{formatAvg(avgOutputLength())}</p>
                     </div>
                 </div>
                 <div class={`distribution-section`} data-testid="format-distribution">
@@ -202,7 +211,7 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                                 return (
                                     <div class={styles["format-row"]} data-testid={testId}>
                                         <span class={`format-label`} data-testid={"format-label-"+item.format} data-i18n={"analytics.format."+item.format}>{t("analytics.format."+item.format)}</span>
-                                        <span class={`format-count`} data-testid={"format-count-"+item.format}>{item.count}</span>
+                                        <span class={`format-count`} data-testid={"format-count-"+item.format}>{formatCount(item.count)}</span>
                                     </div>
                                 )
                             }}
@@ -214,19 +223,19 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                     <div class={styles["status-list"]}>
                         <div class={styles["status-row"]} data-testid="status-completed">
                             <span class={`status-label`} data-i18n="analytics.status.completed">{t("analytics.status.completed")}</span>
-                            <span class={`status-value`} data-testid="status-completed-value">{completedRuns()}</span>
+                            <span class={`status-value`} data-testid="status-completed-value">{formatCount(completedRuns())}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-failed">
                             <span class={`status-label`} data-i18n="analytics.status.failed">{t("analytics.status.failed")}</span>
-                            <span class={`status-value`} data-testid="status-failed-value">{failedRuns()}</span>
+                            <span class={`status-value`} data-testid="status-failed-value">{formatCount(failedRuns())}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-running">
                             <span class={`status-label`} data-i18n="analytics.status.running">{t("analytics.status.running")}</span>
-                            <span class={`status-value`} data-testid="status-running-value">{runningRuns()}</span>
+                            <span class={`status-value`} data-testid="status-running-value">{formatCount(runningRuns())}</span>
                         </div>
                         <div class={styles["status-row"]} data-testid="status-queued">
                             <span class={`status-label`} data-i18n="analytics.status.queued">{t("analytics.status.queued")}</span>
-                            <span class={`status-value`} data-testid="status-queued-value">{queuedRuns()}</span>
+                            <span class={`status-value`} data-testid="status-queued-value">{formatCount(queuedRuns())}</span>
                         </div>
                     </div>
                 </div>
@@ -246,8 +255,8 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                                     return (
                                         <tr class={`validator-row`} data-testid={"validator-row-"+report.name}>
                                             <td data-testid={"validator-name-"+report.name}>{report.name}</td>
-                                            <td data-testid={"validator-rate-"+report.name}>{report.passRate.toFixed(1)}%</td>
-                                            <td data-testid={"validator-flagged-"+report.name}>{report.flaggedCount}</td>
+                                            <td data-testid={"validator-rate-"+report.name}>{formatPercent(report.passRate)}</td>
+                                            <td data-testid={"validator-flagged-"+report.name}>{formatCount(report.flaggedCount)}</td>
                                         </tr>
                                     )
                                 }}
@@ -264,7 +273,7 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                                     return (
                                         <li class={styles["issue-item"]} data-testid={"issue-"+issue.name}>
                                             <span class={`issue-name`} data-testid={"issue-name-"+issue.name}>{issue.name}</span>
-                                            <span class={`issue-count`} data-testid={"issue-count-"+issue.name}>{issue.flaggedCount}</span>
+                                            <span class={`issue-count`} data-testid={"issue-count-"+issue.name}>{formatCount(issue.flaggedCount)}</span>
                                         </li>
                                     )
                                 }}
