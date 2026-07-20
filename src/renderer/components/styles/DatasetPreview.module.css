@@ -6,6 +6,19 @@
 .test-only{
     display:none;
 }
+.empty-state{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    padding:var(--spacing-md, 16px);
+    color:var(--text-secondary);
+    font-size:.875rem;
+    text-align:center;
+}
+.empty-state p{
+    margin:0;
+}
 .preview-toolbar{
     display:flex;
     align-items:center;

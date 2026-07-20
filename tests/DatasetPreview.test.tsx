@@ -174,4 +174,36 @@ describe("DatasetPreview",()=>{
         renderComponent({ items, format: "instruction" })
         expect(screen.getByTestId("index-display").textContent).toContain("3")
     })
+    test("renders empty state when items array is empty", () => {
+        renderComponent({ items: [], format: "instruction" })
+        expect(screen.queryByTestId("empty-state")).not.toBeNull()
+        expect(screen.getByTestId("empty-state").textContent).toContain("No items to preview.")
+    })
+    test("hides toolbar when items array is empty", () => {
+        renderComponent({ items: [], format: "instruction" })
+        expect(screen.queryByTestId("preview-toolbar")).toBeNull()
+        expect(screen.queryByTestId("prev-button")).toBeNull()
+        expect(screen.queryByTestId("next-button")).toBeNull()
+    })
+    test("hides content area when items array is empty", () => {
+        renderComponent({ items: [], format: "instruction" })
+        expect(screen.queryByTestId("single-view")).toBeNull()
+        expect(screen.queryByTestId("split-view")).toBeNull()
+        expect(screen.queryByTestId("json-view")).toBeNull()
+    })
+    test("empty state exposes role=status for screen readers", () => {
+        renderComponent({ items: [], format: "instruction" })
+        const empty = screen.getByTestId("empty-state")
+        expect(empty.getAttribute("role")).toBe("status")
+    })
+    test("empty state exposes aria-label", () => {
+        renderComponent({ items: [], format: "instruction" })
+        const empty = screen.getByTestId("empty-state")
+        expect(empty.getAttribute("aria-label")).toBe("Dataset preview is empty")
+    })
+    test("empty state message has data-i18n attribute", () => {
+        renderComponent({ items: [], format: "instruction" })
+        const msg = screen.getByTestId("empty-state").querySelector("[data-i18n='datasetPreview.empty']")
+        expect(msg).not.toBeNull()
+    })
 })

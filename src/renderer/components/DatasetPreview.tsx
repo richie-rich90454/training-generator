@@ -177,35 +177,49 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
         <div class={styles["dataset-preview"]} data-testid="dataset-preview">
             <div class={styles["test-only"]} aria-hidden="true" data-testid="current-index">{currentIndex()}</div>
             <div class={styles["test-only"]} aria-hidden="true" data-testid="formatted-type">{formattedItem().type}</div>
-            <div class={styles["preview-toolbar"]}>
-                <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button">{t("datasetPreview.prev")}</button>
-                <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
-                <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button">{t("datasetPreview.next")}</button>
-                <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle">{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
-                <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button">{t("datasetPreview.edit")}</button>
-                <button class={`action-button`} type="button" onClick={emitDelete} data-testid="delete-button">{t("datasetPreview.delete")}</button>
-            </div>
-            <Show when={showJson()} fallback={
-                <div class={`preview-content`}>
-                    <Show when={props.showOriginal && hasOriginal()} fallback={
-                        <div class={styles["single-view"]} data-testid="single-view">
-                            <GeneratedView item={formattedItem()} />
+            <Show when={total() === 0} fallback={
+                <>
+                    <div class={styles["preview-toolbar"]}>
+                        <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button">{t("datasetPreview.prev")}</button>
+                        <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
+                        <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button">{t("datasetPreview.next")}</button>
+                        <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle">{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
+                        <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button">{t("datasetPreview.edit")}</button>
+                        <button class={`action-button`} type="button" onClick={emitDelete} data-testid="delete-button">{t("datasetPreview.delete")}</button>
+                    </div>
+                    <Show when={showJson()} fallback={
+                        <div class={`preview-content`}>
+                            <Show when={props.showOriginal && hasOriginal()} fallback={
+                                <div class={styles["single-view"]} data-testid="single-view">
+                                    <GeneratedView item={formattedItem()} />
+                                </div>
+                            }>
+                                <div class={styles["split-view"]} data-testid="split-view">
+                                    <div class={styles["original-panel"]} data-testid="original-panel">
+                                        <h3 class={`panel-title`}>{t("datasetPreview.original")}</h3>
+                                        <pre class={`original-text`} data-testid="original-text">{originalSource()}</pre>
+                                    </div>
+                                    <div class={styles["generated-panel"]} data-testid="generated-panel">
+                                        <GeneratedView item={formattedItem()} />
+                                    </div>
+                                </div>
+                            </Show>
                         </div>
                     }>
-                        <div class={styles["split-view"]} data-testid="split-view">
-                            <div class={styles["original-panel"]} data-testid="original-panel">
-                                <h3 class={`panel-title`}>{t("datasetPreview.original")}</h3>
-                                <pre class={`original-text`} data-testid="original-text">{originalSource()}</pre>
-                            </div>
-                            <div class={styles["generated-panel"]} data-testid="generated-panel">
-                                <GeneratedView item={formattedItem()} />
-                            </div>
+                        <div class={`json-view`} data-testid="json-view">
+                            <pre data-testid="json-content">{jsonText()}</pre>
                         </div>
                     </Show>
-                </div>
+                </>
             }>
-                <div class={`json-view`} data-testid="json-view">
-                    <pre data-testid="json-content">{jsonText()}</pre>
+                <div
+                    class={styles["empty-state"]}
+                    role="status"
+                    aria-label={t("datasetPreview.emptyAria")}
+                    data-i18n-aria-label="datasetPreview.emptyAria"
+                    data-testid="empty-state"
+                >
+                    <p data-i18n="datasetPreview.empty">{t("datasetPreview.empty")}</p>
                 </div>
             </Show>
         </div>
