@@ -143,6 +143,14 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
             lastFocusedElement=document.activeElement as HTMLElement
             prevBodyOverflow=document.body.style.overflow
             document.body.style.overflow="hidden"
+            // Move focus into the modal so keyboard and screen reader users
+            // are not stranded on the trigger element behind the overlay.
+            const focusable=overlayRef?.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+            )
+            if (focusable && focusable.length>0){
+                focusable[0].focus()
+            }
         }
         else {
             if (prevBodyOverflow!==""){
