@@ -175,8 +175,8 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
     }
     return (
         <div class={styles["dataset-preview"]} data-testid="dataset-preview">
-            <div style={{ display: "none" }} data-testid="current-index">{currentIndex()}</div>
-            <div style={{ display: "none" }} data-testid="formatted-type">{formattedItem().type}</div>
+            <div class={styles["test-only"]} aria-hidden="true" data-testid="current-index">{currentIndex()}</div>
+            <div class={styles["test-only"]} aria-hidden="true" data-testid="formatted-type">{formattedItem().type}</div>
             <div class={styles["preview-toolbar"]}>
                 <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button">{t("datasetPreview.prev")}</button>
                 <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
