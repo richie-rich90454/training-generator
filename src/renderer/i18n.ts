@@ -243,6 +243,8 @@ export const translations: Record<string, TranslationDict> = {
     "app.errorTitle": "An unexpected error occurred",
     "app.errorRetry": "Retry",
     "app.errorReload": "Reload",
+    "app.skipToContent": "Skip to main content",
+    "app.skipToContentAria": "Skip to main content",
     "toast.ollamaNotRunning": "Ollama is not running",
     "toast.noModelSelected": "No model selected. Please select a model in the configuration panel.",
     "toast.modelNotAvailable": "Model '{{model}}' is not available. Please pull the model in Ollama first.",

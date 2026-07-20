@@ -178,9 +178,12 @@ export function App(): JSX.Element {
     })
     return (
         <div class="app-container fade-in">
+            <a href="#main-content" class="skip-link" data-i18n="app.skipToContent" aria-label={t("app.skipToContentAria")} data-i18n-aria-label="app.skipToContentAria">
+                {t("app.skipToContent")}
+            </a>
             <ErrorBoundary fallback={(error, reset) => <AppErrorFallback error={error as Error} reset={reset} />}>
                 <TitleBar appStore={appStore} />
-                <div class="main-scroll">
+                <div class="main-scroll" id="main-content">
                     <ToastContainer appStore={appStore} />
                     <ContentGrid appStore={appStore} />
                     <Footer appStore={appStore} />
