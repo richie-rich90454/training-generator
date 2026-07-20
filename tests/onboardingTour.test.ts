@@ -185,6 +185,45 @@ describe("OnboardingTour", ()=>{
         await nextFrame();
         expect(document.querySelector(".tg-onboarding-tooltip")).not.toBeNull();
     });
+    test("render uses instant scroll when body has reduced-motion class", async ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(100, 100, 50, 50);
+        let scrollIntoView=vi.fn();
+        target.scrollIntoView=scrollIntoView;
+        document.body.appendChild(target);
+        document.body.classList.add("reduced-motion");
+        tour.start();
+        expect(scrollIntoView).toHaveBeenCalledWith({behavior: "auto", block: "center", inline: "center"});
+        await nextFrame();
+    });
+    test("render uses instant scroll when prefers-reduced-motion matches", async ()=>{
+        let target=document.createElement("div");
+        target.id="target1";
+        target.getBoundingClientRect=()=>new DOMRect(100, 100, 50, 50);
+        let scrollIntoView=vi.fn();
+        target.scrollIntoView=scrollIntoView;
+        document.body.appendChild(target);
+        const original = window.matchMedia;
+        window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+            matches: query === "(prefers-reduced-motion: reduce)",
+            media: query,
+            onchange: null,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            dispatchEvent: vi.fn()
+        })) as unknown as typeof window.matchMedia;
+        try {
+            tour.start();
+            expect(scrollIntoView).toHaveBeenCalledWith({behavior: "auto", block: "center", inline: "center"});
+            await nextFrame();
+        }
+        finally {
+            window.matchMedia = original;
+        }
+    });
     test("render creates spotlight overlay around target", async ()=>{
         let target=document.createElement("div");
         target.id="target1";

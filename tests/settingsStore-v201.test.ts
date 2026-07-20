@@ -603,3 +603,32 @@ describe("SettingsStore v2.0.1 resetAppSettings restores defaults", () => {
         expect(store.appSettings.logToFile).toBe(false)
     })
 })
+
+describe("SettingsStore v2.0.1 reducedMotion apply", () => {
+    it("applyReducedMotion(true) adds reduced-motion class to body", () => {
+        store = makeSettingsStore()
+        document.body.classList.remove("reduced-motion")
+        store.applyReducedMotion(true)
+        expect(document.body.classList.contains("reduced-motion")).toBe(true)
+    })
+    it("applyReducedMotion(false) removes reduced-motion class from body", () => {
+        store = makeSettingsStore()
+        document.body.classList.add("reduced-motion")
+        store.applyReducedMotion(false)
+        expect(document.body.classList.contains("reduced-motion")).toBe(false)
+    })
+    it("setting reducedMotion=true via setAppSetting adds reduced-motion class", () => {
+        store = makeSettingsStore()
+        document.body.classList.remove("reduced-motion")
+        store.setAppSetting("reducedMotion", true)
+        expect(document.body.classList.contains("reduced-motion")).toBe(true)
+    })
+    it("setting reducedMotion=false via setAppSetting removes reduced-motion class", () => {
+        store = makeSettingsStore()
+        // Start from true so the effect re-runs when we flip to false.
+        store.setAppSetting("reducedMotion", true)
+        expect(document.body.classList.contains("reduced-motion")).toBe(true)
+        store.setAppSetting("reducedMotion", false)
+        expect(document.body.classList.contains("reduced-motion")).toBe(false)
+    })
+})
