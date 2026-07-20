@@ -225,7 +225,7 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
                             data-i18n-aria-label="datasetPreview.indexAria"
                         >{currentIndex()+1} / {total()}</span>
                         <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button" data-i18n="datasetPreview.next">{t("datasetPreview.next")}</button>
-                        <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle" data-i18n={showJson()?"datasetPreview.formatted":"datasetPreview.json"}>{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
+                        <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle" aria-pressed={showJson()} data-i18n={showJson()?"datasetPreview.formatted":"datasetPreview.json"}>{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
                         <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button" data-i18n="datasetPreview.edit">{t("datasetPreview.edit")}</button>
                         <button class={`action-button`} type="button" onClick={emitDelete} data-testid="delete-button" data-i18n="datasetPreview.delete">{t("datasetPreview.delete")}</button>
                     </div>

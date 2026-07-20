@@ -220,12 +220,12 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                         data-testid="version-name-input"
                         onInput={(e)=>setVersionName(e.currentTarget.value)}
                     />
-                    <button class={styles["toolbar-button"]} type="button" onClick={togglePreview} data-testid="toggle-preview-button">
+                    <button class={styles["toolbar-button"]} type="button" onClick={togglePreview} data-testid="toggle-preview-button" aria-pressed={showPreview()}>
                         <Show when={showPreview()} fallback={<span data-i18n="promptEditor.showPreview">{t("promptEditor.showPreview")}</span>}>
                             <span data-i18n="promptEditor.hidePreview">{t("promptEditor.hidePreview")}</span>
                         </Show>
                     </button>
-                    <button class={styles["toolbar-button"]} type="button" onClick={toggleHistory} data-testid="toggle-history-button">
+                    <button class={styles["toolbar-button"]} type="button" onClick={toggleHistory} data-testid="toggle-history-button" aria-pressed={showHistory()}>
                         <Show when={showHistory()} fallback={<span data-i18n="promptEditor.showHistory">{t("promptEditor.showHistory")}</span>}>
                             <span data-i18n="promptEditor.hideHistory">{t("promptEditor.hideHistory")}</span>
                         </Show>

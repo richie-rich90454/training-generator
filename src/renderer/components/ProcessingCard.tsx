@@ -73,6 +73,7 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                         classList={{ active: fileStore.demoActive() }}
                         title={t("processing.demoTitle")}
                         aria-label={t("processing.demoAria")}
+                        aria-pressed={fileStore.demoActive()}
                         data-i18n-title="processing.demoTitle"
                         data-i18n-aria-label="processing.demoAria"
                         onClick={handleDemo}
@@ -87,6 +88,7 @@ export function ProcessingCard(props: ProcessingCardProps): JSX.Element {
                         class={`${styles["btn"]} ${styles["btn-secondary"]}`}
                         title={t("dashboard.toggleTitle")}
                         aria-label={t("dashboard.toggleAria")}
+                        aria-pressed={appStore.uiStore.dashboardOpen()}
                         data-i18n-title="dashboard.toggleTitle"
                         data-i18n-aria-label="dashboard.toggleAria"
                         onClick={handleDashboard}
