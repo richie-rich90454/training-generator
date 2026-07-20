@@ -238,9 +238,35 @@ const SECTIONS: SectionDef[] = [
 ]
 export function SettingsModal(props: SettingsModalProps): JSX.Element {
     const { settingsStore, hideSettings, savePreset } = props.appStore
-    const [profileName, setProfileName] = createSignal("")
-    const [activeSection, setActiveSection] = createSignal<string>("appearance")
+    // Persist the last active section so the modal reopens on the same
+    // section the user was viewing before closing it. Falls back to
+    // "appearance" if no value (or an invalid one) is stored.
+    const SETTINGS_SECTION_STORAGE_KEY = "settings.activeSection"
+    function loadInitialSection(): string {
+        try {
+            const stored = window.localStorage.getItem(SETTINGS_SECTION_STORAGE_KEY)
+            if (stored && SECTIONS.some((s) => s.id === stored)) {
+                return stored
+            }
+        }
+        catch {
+            // localStorage may be unavailable (e.g. private mode, SSR); fall
+            // back to the default section silently.
+        }
+        return "appearance"
+    }
+    function persistSection(id: string): void {
+        setActiveSection(id)
+        try {
+            window.localStorage.setItem(SETTINGS_SECTION_STORAGE_KEY, id)
+        }
+        catch {
+            // Ignore write failures (e.g. storage full, private mode).
+        }
+    }
+    const [activeSection, setActiveSection] = createSignal<string>(loadInitialSection())
     const [searchQuery, setSearchQuery] = createSignal<string>("")
+    const [profileName, setProfileName] = createSignal("")
     // Map of numeric setting key -> current validation error message (empty = valid).
     const [numericErrors, setNumericErrors] = createSignal<Record<string, string>>({})
     let overlayRef: HTMLDivElement | undefined
@@ -514,23 +540,23 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
             e.preventDefault()
             const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % buttons.length
             buttons[nextIndex].focus()
-            setActiveSection(buttons[nextIndex].dataset.section || "appearance")
+            persistSection(buttons[nextIndex].dataset.section || "appearance")
         }
         else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
             e.preventDefault()
             const prevIndex = currentIndex <= 0 ? buttons.length - 1 : currentIndex - 1
             buttons[prevIndex].focus()
-            setActiveSection(buttons[prevIndex].dataset.section || "appearance")
+            persistSection(buttons[prevIndex].dataset.section || "appearance")
         }
         else if (e.key === "Home") {
             e.preventDefault()
             buttons[0].focus()
-            setActiveSection(buttons[0].dataset.section || "appearance")
+            persistSection(buttons[0].dataset.section || "appearance")
         }
         else if (e.key === "End") {
             e.preventDefault()
             buttons[buttons.length - 1].focus()
-            setActiveSection(buttons[buttons.length - 1].dataset.section || "appearance")
+            persistSection(buttons[buttons.length - 1].dataset.section || "appearance")
         }
     }
     function isSectionVisible(sectionId: string): boolean {
@@ -625,6 +651,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                         <div class={styles["settings-layout"]}>
                             <nav
                                 class={styles["settings-nav"]}
+                                role="tablist"
                                 aria-label={t("settings.navAria")}
                                 data-i18n-aria-label="settings.navAria"
                                 onKeyDown={handleNavKeydown}
@@ -636,13 +663,14 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             <button
                                                 type="button"
                                                 class={styles["settings-nav__button"]}
+                                                role="tab"
                                                 data-section-nav="true"
                                                 data-section={section.id}
                                                 aria-selected={activeSection() === section.id}
                                                 aria-controls={`settings-panel-${section.id}`}
                                                 id={`settings-tab-${section.id}`}
                                                 tabIndex={activeSection() === section.id ? 0 : -1}
-                                                onClick={() => setActiveSection(section.id)}
+                                                onClick={() => persistSection(section.id)}
                                             >
                                                 <Icon html={renderIcon(section.icon)} />
                                                 <span data-i18n={`settings.sections.${section.id}`}>{t(`settings.sections.${section.id}`)}</span>

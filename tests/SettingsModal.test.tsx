@@ -163,4 +163,32 @@ describe("SettingsModal", () => {
         // The title element should contain visible text (settings.title)
         expect(title?.textContent ?? "").toContain(t("settings.title"))
     })
+    test("active section persists across modal reopen via localStorage", () => {
+        // Clear any prior value
+        window.localStorage.removeItem("settings.activeSection")
+        // First open: default to "appearance"
+        const first = renderComponent(true)
+        const firstTab = screen.getByRole("tab", { name: t("settings.sections.appearance") })
+        // The active section's tab should have aria-selected="true"
+        expect(firstTab.getAttribute("aria-selected")).toBe("true")
+        // Click the "export" section tab
+        const exportTab = screen.getByRole("tab", { name: t("settings.sections.export") })
+        fireEvent.click(exportTab)
+        expect(exportTab.getAttribute("aria-selected")).toBe("true")
+        expect(window.localStorage.getItem("settings.activeSection")).toBe("export")
+        // Close (unmount) and reopen — should restore to "export"
+        first.unmount()
+        renderComponent(true)
+        const restoredExportTab = screen.getByRole("tab", { name: t("settings.sections.export") })
+        expect(restoredExportTab.getAttribute("aria-selected")).toBe("true")
+        // Cleanup
+        window.localStorage.removeItem("settings.activeSection")
+    })
+    test("invalid stored section falls back to appearance", () => {
+        window.localStorage.setItem("settings.activeSection", "nonexistent-section")
+        renderComponent(true)
+        const appearanceTab = screen.getByRole("tab", { name: t("settings.sections.appearance") })
+        expect(appearanceTab.getAttribute("aria-selected")).toBe("true")
+        window.localStorage.removeItem("settings.activeSection")
+    })
 })
