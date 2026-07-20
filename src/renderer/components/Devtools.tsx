@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, createMemo, For, Show, onMount, onCleanup } from "solid-js"
+import { createSignal, createMemo, createEffect, For, Show, onMount, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
 import type { AppStore } from "../stores/appStore.js"
 import type { LogEntry, LogLevel } from "../logger.js"
@@ -19,6 +19,9 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     let [logFilter, setLogFilter] = createSignal<string>("all")
     let [logEntries, setLogEntries] = createSignal<LogEntry[]>([])
     let tablistRef: HTMLDivElement | undefined
+    let panelRef: HTMLDivElement | undefined
+    let lastFocusedElement: HTMLElement | null = null
+    let prevBodyOverflow: string = ""
     function addLog(entry: LogEntry): void {
         setLogEntries((prev) => {
             let next = [...prev, entry]
@@ -38,6 +41,44 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
             props.appStore.logger.removeListener(listener)
             document.removeEventListener("keydown", handleKeydown)
         })
+    })
+    // Track open state to manage focus restoration and body scroll lock.
+    // Using createEffect (instead of onMount) means this runs whenever
+    // devtoolsOpen() changes, so opening and closing both work correctly
+    // even though the component stays mounted.
+    createEffect(() => {
+        const isOpen = props.appStore.uiStore.devtoolsOpen()
+        if (isOpen) {
+            lastFocusedElement = document.activeElement as HTMLElement
+            prevBodyOverflow = document.body.style.overflow
+            document.body.style.overflow = "hidden"
+            const focusable = panelRef?.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+            )
+            if (focusable && focusable.length > 0) {
+                focusable[0].focus()
+            }
+        }
+        else {
+            if (prevBodyOverflow !== "") {
+                document.body.style.overflow = prevBodyOverflow
+                prevBodyOverflow = ""
+            }
+            if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                lastFocusedElement.focus()
+                lastFocusedElement = null
+            }
+        }
+    })
+    onCleanup(() => {
+        if (prevBodyOverflow !== "") {
+            document.body.style.overflow = prevBodyOverflow
+            prevBodyOverflow = ""
+        }
+        if (lastFocusedElement && document.contains(lastFocusedElement)) {
+            lastFocusedElement.focus()
+            lastFocusedElement = null
+        }
     })
     let filteredEntries = createMemo<LogEntry[]>(() => {
         let filter = logFilter()
@@ -133,7 +174,7 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     return (
         <Show when={props.appStore.uiStore.devtoolsOpen()}>
             <Portal mount={document.body}>
-                <div class={styles["devtools-panel"]} data-testid="devtools-panel" role="dialog" aria-modal="true" aria-labelledby="devtools-title">
+                <div class={styles["devtools-panel"]} ref={panelRef} data-testid="devtools-panel" role="dialog" aria-modal="true" aria-labelledby="devtools-title">
                     <div class={styles["devtools-header"]}>
                         <h3 id="devtools-title" data-i18n="devtools.title">{t("devtools.title")}</h3>
                         <button class={styles["devtools-close"]} aria-label={t("devtools.closeAria")} data-i18n-aria-label="devtools.closeAria" onClick={() => props.appStore.uiStore.setDevtoolsOpen(false)}>
