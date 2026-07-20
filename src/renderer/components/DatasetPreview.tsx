@@ -173,13 +173,47 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
     function toggleJson():void{
         setShowJson(!showJson())
     }
+    function handleKeydown(e: KeyboardEvent):void{
+        if (e.ctrlKey||e.altKey||e.metaKey){
+            return
+        }
+        const isRTL = typeof window!=="undefined" && window.getComputedStyle(e.currentTarget as Element).direction==="rtl"
+        const visualRight = e.key==="ArrowRight"
+        const visualLeft = e.key==="ArrowLeft"
+        if (!visualRight && !visualLeft && e.key!=="Home" && e.key!=="End"){
+            return
+        }
+        e.preventDefault()
+        if (e.key==="Home"){
+            goToItem(0)
+            return
+        }
+        if (e.key==="End"){
+            goToItem(total()-1)
+            return
+        }
+        const goNext = visualRight !== isRTL
+        if (goNext){
+            nextItem()
+        }
+        else {
+            prevItem()
+        }
+    }
     return (
         <div class={styles["dataset-preview"]} data-testid="dataset-preview">
             <div class={styles["test-only"]} aria-hidden="true" data-testid="current-index">{currentIndex()}</div>
             <div class={styles["test-only"]} aria-hidden="true" data-testid="formatted-type">{formattedItem().type}</div>
             <Show when={total() === 0} fallback={
                 <>
-                    <div class={styles["preview-toolbar"]}>
+                    <div
+                        class={styles["preview-toolbar"]}
+                        role="toolbar"
+                        aria-orientation="horizontal"
+                        aria-label={t("datasetPreview.toolbarAria")}
+                        data-i18n-aria-label="datasetPreview.toolbarAria"
+                        onKeyDown={handleKeydown}
+                    >
                         <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button" data-i18n="datasetPreview.prev">{t("datasetPreview.prev")}</button>
                         <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
                         <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button" data-i18n="datasetPreview.next">{t("datasetPreview.next")}</button>
