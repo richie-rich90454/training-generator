@@ -123,6 +123,29 @@ describe("AppStore initialization", () => {
         await app.init()
         expect(() => app.dispose()).not.toThrow()
     })
+    it("calls disposeWindowControls on dispose", async() => {
+        const disposeWindowControlsSpy = vi.fn()
+        vi.doMock("../src/renderer/windowControls.js", () => ({
+            initWindowControls: vi.fn(),
+            disposeWindowControls: disposeWindowControlsSpy
+        }))
+        // Re-import appStore so it picks up the mocked windowControls module
+        vi.resetModules()
+        const { createAppStore: freshCreateAppStore } = await import("../src/renderer/stores/appStore.js")
+        const app: AppStore = withRoot((dispose) => {
+            const fresh = freshCreateAppStore()
+            disposes.push(() => {
+                fresh.dispose()
+                dispose()
+            })
+            return fresh
+        })
+        await app.init()
+        app.dispose()
+        expect(disposeWindowControlsSpy).toHaveBeenCalledTimes(1)
+        vi.doUnmock("../src/renderer/windowControls.js")
+        vi.resetModules()
+    })
     it("stops ollama monitor on dispose", async() => {
         let app: AppStore = makeAppStore()
         await app.init()

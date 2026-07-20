@@ -19,7 +19,7 @@ import { AnalyticsDashboard } from "./components/AnalyticsDashboard.js"
 import { PromptEditor } from "./components/PromptEditor.js"
 import { applyLanguage, t } from "./i18n.js"
 import "../styles/main.css"
-function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Element {
+export function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Element {
     // Best-effort error log to the main-process crash log channel. Swallow
     // failures so a broken IPC surface never blocks the recovery UI.
     try {

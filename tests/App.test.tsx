@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { render, screen, cleanup } from "@solidjs/testing-library"
+import { render, screen, cleanup, fireEvent } from "@solidjs/testing-library"
 import type { JSX } from "solid-js"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
 
@@ -152,7 +152,7 @@ vi.mock("../src/renderer/components/PromptEditor.tsx", () => ({
 let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
 // Import App AFTER all mocks are set up
-const { App } = await import("../src/renderer/App.tsx")
+const { App, AppErrorFallback } = await import("../src/renderer/App.tsx")
 
 function resetSpies(): void {
     initSpy.mockClear()
@@ -439,5 +439,78 @@ describe("App module-level error boundary", () => {
         await import("../src/renderer/App.tsx")
         expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("error.missingRequiredParameters"))
         errSpy.mockRestore()
+    })
+})
+
+describe("AppErrorFallback", () => {
+    test("renders role=alert and aria-live=assertive", () => {
+        render(() => <AppErrorFallback error={new Error("boom")} reset={vi.fn()} />)
+        const alert = screen.getByRole("alert")
+        expect(alert.getAttribute("aria-live")).toBe("assertive")
+    })
+    test("renders error title with data-i18n and i18n'd text", () => {
+        render(() => <AppErrorFallback error={new Error("boom")} reset={vi.fn()} />)
+        const heading = screen.getByRole("heading", { level: 2 })
+        expect(heading.textContent).toBe("app.errorTitle")
+        expect(heading.getAttribute("data-i18n")).toBe("app.errorTitle")
+    })
+    test("renders error message in paragraph", () => {
+        render(() => <AppErrorFallback error={new Error("specific failure")} reset={vi.fn()} />)
+        const paragraph = screen.getByText("specific failure")
+        expect(paragraph.tagName).toBe("P")
+    })
+    test("renders Retry button with data-i18n and calls reset on click", async () => {
+        const resetSpy = vi.fn()
+        render(() => <AppErrorFallback error={new Error("boom")} reset={resetSpy} />)
+        const buttons = screen.getAllByRole("button")
+        const retry = buttons.find((b) => b.getAttribute("data-i18n") === "app.errorRetry")
+        expect(retry).toBeDefined()
+        expect(retry?.textContent).toBe("app.errorRetry")
+        fireEvent.click(retry!)
+        expect(resetSpy).toHaveBeenCalledTimes(1)
+    })
+    test("renders Reload button with data-i18n and triggers reload on click", async () => {
+        const reloadSpy = vi.fn()
+        Object.defineProperty(window, "location", {
+            value: { reload: reloadSpy },
+            writable: true
+        })
+        render(() => <AppErrorFallback error={new Error("boom")} reset={vi.fn()} />)
+        const buttons = screen.getAllByRole("button")
+        const reload = buttons.find((b) => b.getAttribute("data-i18n") === "app.errorReload")
+        expect(reload).toBeDefined()
+        expect(reload?.textContent).toBe("app.errorReload")
+        fireEvent.click(reload!)
+        expect(reloadSpy).toHaveBeenCalledTimes(1)
+    })
+    test("logs error to electronAPI.writeLog when available", () => {
+        const writeLogSpy = vi.fn()
+        Object.defineProperty(window, "electronAPI", {
+            value: { writeLog: writeLogSpy },
+            writable: true,
+            configurable: true
+        })
+        const error = new Error("test failure")
+        render(() => <AppErrorFallback error={error} reset={vi.fn()} />)
+        expect(writeLogSpy).toHaveBeenCalledTimes(1)
+        const logged = writeLogSpy.mock.calls[0][0]
+        expect(logged.level).toBe("error")
+        expect(logged.module).toBe("renderer/App")
+        expect(logged.message).toBe("test failure")
+        expect(logged.context.stack).toBe(error.stack)
+    })
+    test("does not throw when electronAPI.writeLog is unavailable", () => {
+        Object.defineProperty(window, "electronAPI", {
+            value: undefined,
+            writable: true,
+            configurable: true
+        })
+        expect(() => render(() => <AppErrorFallback error={new Error("boom")} reset={vi.fn()} />)).not.toThrow()
+    })
+    test("falls back to String(error) when error.message is undefined", () => {
+        const err = { foo: "bar" } as unknown as Error
+        render(() => <AppErrorFallback error={err} reset={vi.fn()} />)
+        // String({foo:"bar"}) is "[object Object]"
+        expect(screen.getByText("[object Object]")).not.toBeNull()
     })
 })
