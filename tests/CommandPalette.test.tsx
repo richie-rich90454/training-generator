@@ -1,6 +1,6 @@
-import { describe, test, expect, vi } from "vitest"
-import { render, screen, fireEvent } from "@solidjs/testing-library"
-import { CommandPalette } from "../src/renderer/components/CommandPalette.tsx"
+import { describe, test, expect, vi, beforeEach } from "vitest"
+import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
+import { CommandPalette, fuzzyScore } from "../src/renderer/components/CommandPalette.tsx"
 import type { Command } from "../src/renderer/components/CommandPalette.tsx"
 function makeCommands():Command[]{
     return [
@@ -23,6 +23,11 @@ function getSelectedId():string|null{
     return null
 }
 describe("CommandPalette",()=>{
+    beforeEach(()=>{
+        // Clear recent-commands storage so each test starts with a clean
+        // ordering (no recent commands).
+        window.localStorage.removeItem("commandPalette.recentCommands")
+    })
     test("renders when visible",()=>{
         let commands=makeCommands()
         renderComponent({ commands, visible: true })
@@ -163,5 +168,94 @@ describe("CommandPalette",()=>{
         fireEvent.keyDown(palette, { key: "ArrowUp" })
         await Promise.resolve()
         expect(getSelectedId()).toBe("command-item-open")
+    })
+    test("fuzzyScore returns high score for exact substring match",()=>{
+        const score=fuzzyScore("save", "Save file")
+        expect(score).toBeGreaterThan(0)
+    })
+    test("fuzzyScore returns -1 for no match",()=>{
+        const score=fuzzyScore("xyz", "Save file")
+        expect(score).toBe(-1)
+    })
+    test("fuzzyScore matches subsequence (sv -> Save file)",()=>{
+        const score=fuzzyScore("sv", "Save file")
+        expect(score).toBeGreaterThan(0)
+    })
+    test("fuzzyScore gives higher score for consecutive matches",()=>{
+        const consecutiveScore=fuzzyScore("sav", "Save file")
+        const scatteredScore=fuzzyScore("sef", "Save file")
+        expect(consecutiveScore).toBeGreaterThan(scatteredScore)
+    })
+    test("fuzzy search matches by subsequence (sv -> Save)",async()=>{
+        let commands=makeCommands()
+        renderComponent({ commands, visible: true })
+        let input=screen.getByTestId("command-palette-input")
+        // "sv" should fuzzy-match "Save file" (S-a-V-e) but not "Open file" or "Close window"
+        fireEvent.input(input, { target: { value: "sv" } })
+        await Promise.resolve()
+        expect(screen.queryByTestId("command-item-save")).not.toBeNull()
+        expect(screen.queryByTestId("command-item-open")).toBeNull()
+        expect(screen.queryByTestId("command-item-close")).toBeNull()
+    })
+    test("fuzzy search ranks prefix match above subsequence match",async()=>{
+        const commands: Command[]=[
+            { id: "save", label: "Save file", action: vi.fn() },
+            { id: "asave", label: "Another save", action: vi.fn() }
+        ]
+        renderComponent({ commands, visible: true })
+        let input=screen.getByTestId("command-palette-input")
+        // "save" should match both as a substring, but "Save file" should
+        // rank higher because the match is at the start.
+        fireEvent.input(input, { target: { value: "save" } })
+        await Promise.resolve()
+        const items=screen.queryAllByTestId(/^command-item-/)
+        expect(items.length).toBe(2)
+        expect(items[0].getAttribute("data-testid")).toBe("command-item-save")
+        expect(items[1].getAttribute("data-testid")).toBe("command-item-asave")
+    })
+    test("recent commands appear first when query is empty",async()=>{
+        let commands=makeCommands()
+        renderComponent({ commands, visible: true })
+        // Execute "save" to mark it as recent
+        fireEvent.click(screen.getByTestId("command-item-save"))
+        await Promise.resolve()
+        // Re-render the palette (simulating reopen)
+        renderComponent({ commands, visible: true })
+        const items=screen.queryAllByTestId(/^command-item-/)
+        // "save" should now be first
+        expect(items[0].getAttribute("data-testid")).toBe("command-item-save")
+    })
+    test("executing a command persists it to localStorage",async()=>{
+        let commands=makeCommands()
+        renderComponent({ commands, visible: true })
+        fireEvent.click(screen.getByTestId("command-item-save"))
+        await Promise.resolve()
+        const raw=window.localStorage.getItem("commandPalette.recentCommands")
+        expect(raw).not.toBeNull()
+        const parsed=JSON.parse(raw!) as string[]
+        expect(parsed[0]).toBe("save")
+    })
+    test("recent commands list caps at 5 entries",async()=>{
+        const commands: Command[]=[
+            { id: "c1", label: "Command 1", action: vi.fn() },
+            { id: "c2", label: "Command 2", action: vi.fn() },
+            { id: "c3", label: "Command 3", action: vi.fn() },
+            { id: "c4", label: "Command 4", action: vi.fn() },
+            { id: "c5", label: "Command 5", action: vi.fn() },
+            { id: "c6", label: "Command 6", action: vi.fn() }
+        ]
+        // Execute 6 different commands across 6 palette opens
+        for (let i=0; i<6; i++){
+            cleanup()
+            renderComponent({ commands, visible: true })
+            fireEvent.click(screen.getByTestId("command-item-c"+(i+1)))
+            await Promise.resolve()
+        }
+        const raw=window.localStorage.getItem("commandPalette.recentCommands")
+        expect(raw).not.toBeNull()
+        const parsed=JSON.parse(raw!) as string[]
+        expect(parsed.length).toBeLessThanOrEqual(5)
+        // Most recent should be c6, then c5, etc.
+        expect(parsed[0]).toBe("c6")
     })
 })

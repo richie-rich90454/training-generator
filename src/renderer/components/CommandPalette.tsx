@@ -15,18 +15,145 @@ export interface CommandPaletteProps{
     visible: ()=>boolean
     onClose: ()=>void
 }
+
+/**
+ * Fuzzy-match a query against a target string. Returns a score (higher is
+ * better) or -1 when there is no match.
+ *
+ * The matching strategy is subsequence-based: every character of the query
+ * must appear in the target, in order, but not necessarily contiguously.
+ * Consecutive matches are scored higher than scattered ones, and matches at
+ * word boundaries (space, camelCase transition, start of string) get a
+ * bonus. This is the same style of fuzzy matching used by VS Code's
+ * Quick Open and most modern command palettes.
+ *
+ * Examples:
+ *   fuzzyScore("save", "Save file")     -> high score (prefix match)
+ *   fuzzyScore("sv", "Save file")       -> medium score (subsequence)
+ *   fuzzyScore("sf", "Save file")       -> low score (scattered)
+ *   fuzzyScore("xyz", "Save file")      -> -1 (no match)
+ */
+export function fuzzyScore(query: string, target: string): number{
+    if (query.length===0){
+        return 0
+    }
+    const q=query.toLowerCase()
+    const tgt=target.toLowerCase()
+    if (tgt.includes(q)){
+        // Exact substring match — highest score. Longer targets score lower
+        // because they are less specific.
+        return 1000 - (tgt.length - q.length)
+    }
+    let qi=0
+    let score=0
+    let consecutive=0
+    let lastMatchIndex=-2
+    for (let ti=0; ti<tgt.length && qi<q.length; ti++){
+        if (tgt[ti]===q[qi]){
+            // Bonus for consecutive matches.
+            if (ti===lastMatchIndex+1){
+                consecutive++
+                score+=10*consecutive
+            }
+            else{
+                consecutive=0
+                score+=1
+            }
+            // Bonus for word-boundary matches (start of string, after space,
+            // or camelCase transition).
+            if (ti===0 || tgt[ti-1]===" " || (tgt[ti-1]!==tgt[ti-1].toUpperCase() && tgt[ti]===tgt[ti].toUpperCase())){
+                score+=15
+            }
+            lastMatchIndex=ti
+            qi++
+        }
+    }
+    if (qi<q.length){
+        return -1
+    }
+    return score
+}
+
+const RECENT_COMMANDS_STORAGE_KEY="commandPalette.recentCommands"
+const MAX_RECENT_COMMANDS=5
+
+function loadRecentCommandIds(): string[]{
+    try{
+        const raw=window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY)
+        if (!raw){
+            return []
+        }
+        const parsed=JSON.parse(raw)
+        if (!Array.isArray(parsed)){
+            return []
+        }
+        return parsed.filter((v): v is string=>typeof v==="string").slice(0, MAX_RECENT_COMMANDS)
+    }
+    catch{
+        return []
+    }
+}
+
+function saveRecentCommandId(id: string, currentRecent: string[]): string[]{
+    // Remove duplicates then prepend. Keep at most MAX_RECENT_COMMANDS.
+    const filtered=currentRecent.filter((c)=>c!==id)
+    const next=[id, ...filtered].slice(0, MAX_RECENT_COMMANDS)
+    try{
+        window.localStorage.setItem(RECENT_COMMANDS_STORAGE_KEY, JSON.stringify(next))
+    }
+    catch{
+        // Ignore storage errors (private mode, quota, etc.).
+    }
+    return next
+}
+
 export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     let inputRef: HTMLInputElement|undefined
     let [query, setQuery]=createSignal<string>("")
     let [selectedIndex, setSelectedIndex]=createSignal<number>(0)
+    let [recentCommandIds, setRecentCommandIds]=createSignal<string[]>(loadRecentCommandIds())
     let filteredCommands=createMemo<Command[]>(()=>{
         let q=query().trim().toLowerCase()
         if (q.length===0){
-            return props.commands
+            // When the query is empty, show recent commands first, then the
+            // remaining commands in their original order. Duplicates are
+            // removed so a command that is already in the recent list does
+            // not appear twice.
+            const recent=recentCommandIds()
+            const recentSet=new Set(recent)
+            const recentCommands: Command[]=[]
+            const restCommands: Command[]=[]
+            for (const cmd of props.commands){
+                if (recentSet.has(cmd.id)){
+                    recentCommands.push(cmd)
+                }
+                else{
+                    restCommands.push(cmd)
+                }
+            }
+            // Sort recentCommands by their position in recentCommandIds
+            // (most recent first).
+            recentCommands.sort((a, b)=>{
+                return recent.indexOf(a.id) - recent.indexOf(b.id)
+            })
+            return [...recentCommands, ...restCommands]
         }
-        return props.commands.filter((command)=>{
-            return command.label.toLowerCase().includes(q)||command.id.toLowerCase().includes(q)
+        // Fuzzy match against both label and id. Keep only commands with a
+        // non-negative score, and sort by descending score (best matches
+        // first). Ties are broken by original order to keep the UI stable.
+        const scored=props.commands.map((command, originalIndex)=>{
+            const labelScore=fuzzyScore(q, command.label)
+            const idScore=fuzzyScore(q, command.id)
+            const bestScore=Math.max(labelScore, idScore)
+            return { command, score: bestScore, originalIndex }
+        }).filter((entry)=>entry.score>=0)
+        scored.sort((a, b)=>{
+            if (b.score!==a.score){
+                return b.score - a.score
+            }
+            return a.originalIndex - b.originalIndex
         })
+        return scored.map((entry)=>entry.command)
     })
     createEffect(()=>{
         query()
@@ -36,6 +163,9 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
         if (props.visible()){
             setQuery("")
             setSelectedIndex(0)
+            // Reload recent commands from localStorage in case another
+            // window/tab updated them since the palette was last opened.
+            setRecentCommandIds(loadRecentCommandIds())
             inputRef?.focus()
         }
     })
@@ -65,6 +195,9 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
         }
     }
     function executeCommand(command: Command):void{
+        // Record this command as recent BEFORE invoking its action, so that
+        // even if the action throws the recent list is still updated.
+        setRecentCommandIds(saveRecentCommandId(command.id, recentCommandIds()))
         command.action()
         props.onClose()
     }
