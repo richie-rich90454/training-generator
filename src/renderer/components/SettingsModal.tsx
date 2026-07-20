@@ -637,13 +637,13 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                             </button>
                         </Show>
                         <Show when={isSearching()}>
-                            <span class={styles["settings-search__count"]} aria-live="polite">
+                            <span class={styles["settings-search__count"]} aria-live="polite" data-i18n="settings.search.resultsCount">
                                 {t("settings.search.resultsCount", undefined, { count: String(visibleSectionCount()) })}
                             </span>
                         </Show>
                     </div>
                     <Show when={isSearching() && visibleSectionCount() === 0}>
-                        <p class={styles["settings-search__no-results"]} role="status">
+                        <p class={styles["settings-search__no-results"]} role="status" data-i18n="settings.search.noResults">
                             {t("settings.search.noResults")}
                         </p>
                     </Show>
@@ -697,6 +697,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.appearance") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("appearance")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -959,6 +960,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.processing") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("processing")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -1244,6 +1246,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.window") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("window")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -1295,6 +1298,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.outputMode") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("outputMode")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -1412,6 +1416,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.export") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("export")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -1510,6 +1515,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.generation") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("generation")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -1852,6 +1858,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.validation") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("validation")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -2086,6 +2093,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.providers") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("providers")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -2227,6 +2235,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.telemetry") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("telemetry")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -2386,6 +2395,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.advanced") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("advanced")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />
@@ -2626,6 +2636,7 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                                 type="button"
                                                 class={styles["settings-section__reset"]}
                                                 aria-label={t("settings.resetSection.ariaLabel", undefined, { section: t("settings.sections.experimental") })}
+                                                data-i18n-aria-label="settings.resetSection.ariaLabel"
                                                 onClick={() => handleResetSection("experimental")}
                                             >
                                                 <Icon html={renderIcon("fa-undo")} />

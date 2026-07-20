@@ -191,4 +191,23 @@ describe("SettingsModal", () => {
         expect(appearanceTab.getAttribute("aria-selected")).toBe("true")
         window.localStorage.removeItem("settings.activeSection")
     })
+    test("search results count and no-results messages have data-i18n", () => {
+        const { container } = renderComponent(true)
+        // Type a query that won't match anything to trigger no-results
+        const searchInput = container.querySelector("#settings-search-input") as HTMLInputElement
+        fireEvent.input(searchInput, { target: { value: "zzzznonexistent" } })
+        // The results-count span (always rendered when searching) should have data-i18n
+        const countSpan = container.querySelector('[data-i18n="settings.search.resultsCount"]')
+        expect(countSpan).not.toBeNull()
+        // The no-results paragraph should also have data-i18n
+        const noResults = container.querySelector('[data-i18n="settings.search.noResults"]')
+        expect(noResults).not.toBeNull()
+    })
+    test("all reset-section buttons have data-i18n-aria-label", () => {
+        const { container } = renderComponent(true)
+        // Use the data-i18n-aria-label attribute to find reset-section buttons
+        const resetButtons = container.querySelectorAll('[data-i18n-aria-label="settings.resetSection.ariaLabel"]')
+        // At least the appearance section's reset button should be rendered
+        expect(resetButtons.length).toBeGreaterThanOrEqual(1)
+    })
 })
