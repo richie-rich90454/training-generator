@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, Show, onMount, onCleanup } from "solid-js"
+import { createSignal, createEffect, Show, onMount, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
@@ -20,6 +20,7 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
     let [highlighted, setHighlighted]=createSignal<string>("")
     let [livePreview, setLivePreview]=createSignal<string>("")
     let lastFocusedElement: HTMLElement|null=null
+    let prevBodyOverflow: string=""
     function escapeHtml(text: string): string{
         let div=document.createElement("div")
         div.textContent=text
@@ -50,10 +51,6 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
     }
     function handleClose():void{
         props.appStore.uiStore.closeTemplateEditor()
-        if (lastFocusedElement&&document.contains(lastFocusedElement)){
-            lastFocusedElement.focus()
-            lastFocusedElement=null
-        }
     }
     function handleBackdropClick(e: MouseEvent):void{
         if (e.target===overlayRef){
@@ -116,14 +113,45 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
             handleClose()
         }
     }
+    // Track open state to manage focus restoration, body scroll lock, and
+    // preview initialization. Using createEffect (instead of onMount) means
+    // this runs whenever templateOpen() changes, so opening and closing the
+    // modal both work correctly even though the component stays mounted.
+    createEffect(()=>{
+        const isOpen=props.appStore.uiStore.templateOpen()
+        if (isOpen){
+            updatePreviews()
+            lastFocusedElement=document.activeElement as HTMLElement
+            prevBodyOverflow=document.body.style.overflow
+            document.body.style.overflow="hidden"
+            textareaRef?.focus()
+        }
+        else {
+            if (prevBodyOverflow!==""){
+                document.body.style.overflow=prevBodyOverflow
+                prevBodyOverflow=""
+            }
+            if (lastFocusedElement&&document.contains(lastFocusedElement)){
+                lastFocusedElement.focus()
+                lastFocusedElement=null
+            }
+        }
+    })
     onMount(()=>{
-        updatePreviews()
-        lastFocusedElement=document.activeElement as HTMLElement
-        textareaRef?.focus()
         document.addEventListener("keydown",handleKeydown)
     })
     onCleanup(()=>{
         document.removeEventListener("keydown",handleKeydown)
+        // Restore body scroll and focus if the component is unmounted while
+        // the modal is still open.
+        if (prevBodyOverflow!==""){
+            document.body.style.overflow=prevBodyOverflow
+            prevBodyOverflow=""
+        }
+        if (lastFocusedElement&&document.contains(lastFocusedElement)){
+            lastFocusedElement.focus()
+            lastFocusedElement=null
+        }
     })
     return (
         <Show when={props.appStore.uiStore.templateOpen()}>
@@ -133,12 +161,12 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
                     class={styles["template-editor-overlay"]}
                     role="dialog"
                     aria-modal="true"
-                    aria-label={t("templateEditor.title")}
+                    aria-labelledby="template-editor-title"
                     onClick={handleBackdropClick}
                 >
                     <div class={styles["template-editor-modal"]}>
                         <div class={styles["template-editor-header"]}>
-                            <h2><Icon html={renderIcon("fa-edit", 20)} /> {t("templateEditor.title")}</h2>
+                            <h2 id="template-editor-title"><Icon html={renderIcon("fa-edit", 20)} /> {t("templateEditor.title")}</h2>
                             <button
                                 class={styles["template-editor-close"]}
                                 aria-label={t("templateEditor.closeAria")}
