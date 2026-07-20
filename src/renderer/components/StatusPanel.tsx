@@ -61,11 +61,11 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
         return t("status.ollamaErrorDetail", undefined, { error: status.error })
     }
     return (
-        <div class={`${styles["card"]} status-panel`}>
+        <div class={`${styles["card"]} status-panel`} role="region" aria-labelledby="status-panel-title">
             <div class={styles["card-header"]}>
                 <div class={styles["card-title"]}>
                     <Icon html={renderIcon("fa-server")} />
-                    <span data-i18n="status.title">{t("status.title")}</span>
+                    <span id="status-panel-title" data-i18n="status.title">{t("status.title")}</span>
                 </div>
             </div>
             <div class={`status-list`}>

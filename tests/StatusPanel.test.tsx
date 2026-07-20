@@ -400,6 +400,27 @@ describe("StatusPanel unmount", () => {
     })
 })
 
+describe("StatusPanel landmark", () => {
+    test("card exposes role=region for screen reader navigation", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const panel = document.querySelector(".status-panel")
+        expect(panel?.getAttribute("role")).toBe("region")
+    })
+    test("card exposes aria-labelledby pointing at title", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const panel = document.querySelector(".status-panel")
+        expect(panel?.getAttribute("aria-labelledby")).toBe("status-panel-title")
+    })
+    test("title span has id='status-panel-title'", () => {
+        const stub = makeStub()
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const title = document.querySelector('[data-i18n="status.title"]')
+        expect(title?.getAttribute("id")).toBe("status-panel-title")
+    })
+})
+
 describe("StatusPanel data-i18n attributes", () => {
     test("title span has data-i18n='status.title'", () => {
         const stub = makeStub()
