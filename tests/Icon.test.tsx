@@ -294,4 +294,83 @@ describe("iconRegistry", () => {
     test("registry has at least 40 icons", () => {
         expect(Object.keys(iconRegistry).length).toBeGreaterThanOrEqual(40)
     })
+    test("all registry entries use stroke='currentColor' for color inheritance", () => {
+        for (const [, svg] of Object.entries(iconRegistry)) {
+            expect(svg).toContain('stroke="currentColor"')
+        }
+    })
+    test("all registry entries use fill='none' (stroke-based icons)", () => {
+        for (const [, svg] of Object.entries(iconRegistry)) {
+            expect(svg).toContain('fill="none"')
+        }
+    })
+    test("all registry entries use stroke-linecap and stroke-linejoin 'round'", () => {
+        for (const [, svg] of Object.entries(iconRegistry)) {
+            expect(svg).toContain('stroke-linecap="round"')
+            expect(svg).toContain('stroke-linejoin="round"')
+        }
+    })
+})
+
+describe("Icon component audit (3.20)", () => {
+    test("aria-hidden stays 'true' when html prop changes", () => {
+        const [html, setHtml] = createSignal('<svg id="a"></svg>')
+        render(() => <Icon html={html()} />)
+        const span = document.querySelector("span")
+        expect(span?.getAttribute("aria-hidden")).toBe("true")
+        setHtml('<svg id="b"></svg>')
+        expect(span?.getAttribute("aria-hidden")).toBe("true")
+    })
+    test("aria-hidden stays 'true' when class prop changes", () => {
+        const [cls, setCls] = createSignal("first")
+        render(() => <Icon html="<svg></svg>" class={cls()} />)
+        const span = document.querySelector("span")
+        expect(span?.getAttribute("aria-hidden")).toBe("true")
+        setCls("second")
+        expect(span?.getAttribute("aria-hidden")).toBe("true")
+    })
+    test("integration: Icon renders sanitized SVG from renderIcon", () => {
+        const html = renderIcon("fa-cog")
+        render(() => <Icon html={html} />)
+        const span = document.querySelector("span")
+        expect(span?.innerHTML).toContain("<svg")
+        expect(span?.innerHTML).toContain("</svg>")
+        expect(span?.innerHTML).toContain('viewBox="0 0 24 24"')
+        expect(span?.innerHTML).toContain('stroke="currentColor"')
+        // Sanitization ensured: no script tags, no on* handlers
+        expect(span?.innerHTML).not.toContain("<script")
+        expect(span?.innerHTML).not.toContain("onload")
+        expect(span?.innerHTML).not.toContain("onclick")
+    })
+    test("integration: Icon renders fallback SVG for unknown icon name", () => {
+        const html = renderIcon("fa-nonexistent-icon-xyz")
+        render(() => <Icon html={html} />)
+        const span = document.querySelector("span")
+        expect(span?.innerHTML).toContain("<circle")
+        expect(span?.innerHTML).toContain('cx="12"')
+        expect(span?.innerHTML).toContain('cy="12"')
+        expect(span?.innerHTML).toContain('r="10"')
+    })
+    test("integration: Icon preserves size from renderIcon", () => {
+        const html = renderIcon("fa-cog", 24)
+        render(() => <Icon html={html} />)
+        const span = document.querySelector("span")
+        expect(span?.innerHTML).toContain('width="24"')
+        expect(span?.innerHTML).toContain('height="24"')
+    })
+    test("span does not receive role attribute (aria-hidden makes it decorative)", () => {
+        render(() => <Icon html="<svg></svg>" />)
+        const span = document.querySelector("span")
+        expect(span?.getAttribute("role")).toBeNull()
+    })
+    test("span does not receive tabindex (not focusable)", () => {
+        render(() => <Icon html="<svg></svg>" />)
+        const span = document.querySelector("span")
+        expect(span?.getAttribute("tabindex")).toBeNull()
+    })
+    test("inner SVG does not have tabindex attribute", () => {
+        render(() => <Icon html={renderIcon("fa-cog")} />)
+        const svg = document.querySelector("svg")
+        expect(svg?.getAttribute("tabindex")).toBeNull()
+    })
 })
