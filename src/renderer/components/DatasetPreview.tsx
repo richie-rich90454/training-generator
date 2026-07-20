@@ -34,17 +34,17 @@ function GeneratedView(props: { item: FormattedView }): JSX.Element{
         return (
             <div class={`instruction-view`} data-testid="instruction-view">
                 <div class={styles["card"]} data-testid="instruction-card">
-                    <h4 class={`card-title`}>{t("datasetPreview.instructionLabel")}</h4>
+                    <h4 class={`card-title`} data-i18n="datasetPreview.instructionLabel">{t("datasetPreview.instructionLabel")}</h4>
                     <p data-testid="instruction-text">{view.instruction}</p>
                 </div>
                 <Show when={view.input.length>0}>
                     <div class={styles["card"]} data-testid="input-card">
-                        <h4 class={`card-title`}>{t("datasetPreview.inputLabel")}</h4>
+                        <h4 class={`card-title`} data-i18n="datasetPreview.inputLabel">{t("datasetPreview.inputLabel")}</h4>
                         <p data-testid="input-text">{view.input}</p>
                     </div>
                 </Show>
                 <div class={styles["card"]} data-testid="output-card">
-                    <h4 class={`card-title`}>{t("datasetPreview.outputLabel")}</h4>
+                    <h4 class={`card-title`} data-i18n="datasetPreview.outputLabel">{t("datasetPreview.outputLabel")}</h4>
                     <p data-testid="output-text">{view.output}</p>
                 </div>
             </div>
@@ -180,12 +180,12 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
             <Show when={total() === 0} fallback={
                 <>
                     <div class={styles["preview-toolbar"]}>
-                        <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button">{t("datasetPreview.prev")}</button>
+                        <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button" data-i18n="datasetPreview.prev">{t("datasetPreview.prev")}</button>
                         <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
-                        <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button">{t("datasetPreview.next")}</button>
-                        <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle">{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
-                        <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button">{t("datasetPreview.edit")}</button>
-                        <button class={`action-button`} type="button" onClick={emitDelete} data-testid="delete-button">{t("datasetPreview.delete")}</button>
+                        <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button" data-i18n="datasetPreview.next">{t("datasetPreview.next")}</button>
+                        <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle" data-i18n={showJson()?"datasetPreview.formatted":"datasetPreview.json"}>{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
+                        <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button" data-i18n="datasetPreview.edit">{t("datasetPreview.edit")}</button>
+                        <button class={`action-button`} type="button" onClick={emitDelete} data-testid="delete-button" data-i18n="datasetPreview.delete">{t("datasetPreview.delete")}</button>
                     </div>
                     <Show when={showJson()} fallback={
                         <div class={`preview-content`}>
@@ -196,7 +196,7 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
                             }>
                                 <div class={styles["split-view"]} data-testid="split-view">
                                     <div class={styles["original-panel"]} data-testid="original-panel">
-                                        <h3 class={`panel-title`}>{t("datasetPreview.original")}</h3>
+                                        <h3 class={`panel-title`} data-i18n="datasetPreview.original">{t("datasetPreview.original")}</h3>
                                         <pre class={`original-text`} data-testid="original-text">{originalSource()}</pre>
                                     </div>
                                     <div class={styles["generated-panel"]} data-testid="generated-panel">

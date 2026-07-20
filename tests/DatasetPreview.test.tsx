@@ -206,4 +206,42 @@ describe("DatasetPreview",()=>{
         const msg = screen.getByTestId("empty-state").querySelector("[data-i18n='datasetPreview.empty']")
         expect(msg).not.toBeNull()
     })
+    test("toolbar buttons carry data-i18n attributes", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("prev-button").getAttribute("data-i18n")).toBe("datasetPreview.prev")
+        expect(screen.getByTestId("next-button").getAttribute("data-i18n")).toBe("datasetPreview.next")
+        expect(screen.getByTestId("edit-button").getAttribute("data-i18n")).toBe("datasetPreview.edit")
+        expect(screen.getByTestId("delete-button").getAttribute("data-i18n")).toBe("datasetPreview.delete")
+    })
+    test("json toggle button data-i18n tracks showJson state", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        const toggle = screen.getByTestId("json-toggle")
+        expect(toggle.getAttribute("data-i18n")).toBe("datasetPreview.json")
+        fireEvent.click(toggle)
+        expect(toggle.getAttribute("data-i18n")).toBe("datasetPreview.formatted")
+    })
+    test("instruction view labels carry data-i18n attributes", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        const card = screen.getByTestId("instruction-card")
+        expect(card.querySelector("[data-i18n='datasetPreview.instructionLabel']")).not.toBeNull()
+        const outputCard = screen.getByTestId("output-card")
+        expect(outputCard.querySelector("[data-i18n='datasetPreview.outputLabel']")).not.toBeNull()
+    })
+    test("input label carries data-i18n when input present", () => {
+        const items = [{
+            format: "instruction",
+            instruction: "q",
+            input: "ctx",
+            output: "a",
+            metadata: {}
+        }] as unknown as TrainingItem[]
+        renderComponent({ items, format: "instruction" })
+        const inputCard = screen.getByTestId("input-card")
+        expect(inputCard.querySelector("[data-i18n='datasetPreview.inputLabel']")).not.toBeNull()
+    })
+    test("original panel title carries data-i18n attribute", () => {
+        renderComponent({ items: makeItems(), format: "instruction", showOriginal: true })
+        const panel = screen.getByTestId("original-panel")
+        expect(panel.querySelector("[data-i18n='datasetPreview.original']")).not.toBeNull()
+    })
 })
