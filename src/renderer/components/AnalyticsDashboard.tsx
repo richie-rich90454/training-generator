@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createMemo, For, Show, onMount, onCleanup } from "solid-js"
+import { createMemo, For, Show, createEffect, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
 import { t, getCurrentLang } from "../i18n.js"
 import type { TrainingItem } from "../../types/index.js"
@@ -21,8 +21,12 @@ export interface AnalyticsDashboardProps{
     validatorReports?: ValidatorReport[]
     appStore?: AppStore
 }
+const FOCUSABLE_SELECTOR='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
 export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
     let overlayRef: HTMLDivElement|undefined
+    let lastFocusedElement: HTMLElement|null=null
+    let focusTrapHandler: ((e: Event)=>void)|null=null
+    let keydownHandler: ((e: Event)=>void)|null=null
     let items=()=>props.items
     let runs=()=>props.runs||[]
     let reports=()=>props.validatorReports||[]
@@ -34,23 +38,76 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
             handleClose()
         }
     }
-    function handleKeydown(e: KeyboardEvent):void{
-        if (!props.appStore?.uiStore.analyticsOpen()){
-            return
+    function removeFocusTrap():void{
+        if (focusTrapHandler){
+            document.removeEventListener("keydown", focusTrapHandler)
+            focusTrapHandler=null
         }
-        if (e.key==="Escape"){
-            e.preventDefault()
-            handleClose()
+        if (keydownHandler){
+            document.removeEventListener("keydown", keydownHandler)
+            keydownHandler=null
         }
     }
-    onMount(()=>{
-        if (props.appStore){
-            document.addEventListener("keydown",handleKeydown)
+    function trapFocus():void{
+        if (focusTrapHandler){
+            return
+        }
+        focusTrapHandler=(e: Event)=>{
+            let ke=e as KeyboardEvent
+            if (ke.key!=="Tab"||!overlayRef){
+                return
+            }
+            let focusable=Array.from(overlayRef.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+            if (focusable.length===0){
+                return
+            }
+            let first=focusable[0]
+            let last=focusable[focusable.length-1]
+            if (ke.shiftKey&&document.activeElement===first){
+                ke.preventDefault()
+                last.focus()
+            }
+            else if (!ke.shiftKey&&document.activeElement===last){
+                ke.preventDefault()
+                first.focus()
+            }
+        }
+        keydownHandler=(e: Event)=>{
+            let ke=e as KeyboardEvent
+            if (ke.key==="Escape"){
+                ke.preventDefault()
+                handleClose()
+            }
+        }
+        document.addEventListener("keydown", focusTrapHandler)
+        document.addEventListener("keydown", keydownHandler)
+    }
+    createEffect(()=>{
+        if (!props.appStore){
+            return
+        }
+        const isOpen=props.appStore.uiStore.analyticsOpen()
+        if (isOpen){
+            lastFocusedElement=document.activeElement as HTMLElement
+            trapFocus()
+            let focusable=overlayRef?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+            if (focusable&&focusable.length>0){
+                focusable[0].focus()
+            }
+        }
+        else {
+            removeFocusTrap()
+            if (lastFocusedElement&&document.contains(lastFocusedElement)){
+                lastFocusedElement.focus()
+                lastFocusedElement=null
+            }
         }
     })
     onCleanup(()=>{
-        if (props.appStore){
-            document.removeEventListener("keydown",handleKeydown)
+        removeFocusTrap()
+        if (lastFocusedElement&&document.contains(lastFocusedElement)){
+            lastFocusedElement.focus()
+            lastFocusedElement=null
         }
     })
     let totalItems=createMemo(()=>{
@@ -295,15 +352,14 @@ export function AnalyticsDashboard(props: AnalyticsDashboardProps): JSX.Element{
                     class={`${styles["modal"]} ${styles["active"]}`}
                     role="dialog"
                     aria-modal="true"
-                    aria-label={t("analytics.title")}
-                    data-i18n-aria-label="analytics.title"
+                    aria-labelledby="analytics-dashboard-title"
                     onClick={handleBackdropClick}
                 >
                     <div class={styles["modal-content"]} style={{ "max-width": "900px", width: "85%", "max-height": "85vh", padding: "0", overflow: "hidden" }}>
                         <div class={styles["modal-header"]} style={{ "flex-shrink": "0" }}>
                             <h2>
                                 <Icon html={renderIcon("fa-chart-bar")} />
-                                <span data-i18n="analytics.title">{t("analytics.title")}</span>
+                                <span id="analytics-dashboard-title" data-i18n="analytics.title">{t("analytics.title")}</span>
                             </h2>
                             <button
                                 class={styles["modal-close"]}

@@ -1,9 +1,10 @@
-import { describe, test, expect } from "vitest"
-import { render, screen } from "@solidjs/testing-library"
+import { describe, test, expect, vi } from "vitest"
+import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
 import { AnalyticsDashboard } from "../src/renderer/components/AnalyticsDashboard.tsx"
 import type { ValidatorReport } from "../src/renderer/components/AnalyticsDashboard.tsx"
 import type { TrainingItem } from "../src/types/interfaces.js"
 import type { RunRecord } from "../src/core/runHistoryManager.js"
+import type { AppStore } from "../src/renderer/stores/appStore.js"
 interface FormatDistributionItem{
     format: string
     label: string
@@ -237,5 +238,64 @@ describe("AnalyticsDashboard",()=>{
         const reports: ValidatorReport[] = [{ name: "X", passRate: 88.5, flaggedCount: 0 }]
         renderComponent({ items, validatorReports: reports })
         expect(screen.getByTestId("quality-score-value").textContent).toBe("88.5%")
+    })
+    test("modal renders when analyticsOpen is true",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => true, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        expect(screen.getByRole("dialog")).not.toBeNull()
+        expect(screen.getByTestId("analytics-dashboard")).not.toBeNull()
+    })
+    test("modal does not render when analyticsOpen is false",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => false, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        expect(screen.queryByRole("dialog")).toBeNull()
+    })
+    test("close button calls closeAnalytics",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => true, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        const closeBtn=screen.getByLabelText("Close analytics dashboard")
+        fireEvent.click(closeBtn)
+        expect(closeAnalytics).toHaveBeenCalledTimes(1)
+    })
+    test("Escape key calls closeAnalytics",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => true, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        fireEvent.keyDown(document, { key: "Escape" })
+        expect(closeAnalytics).toHaveBeenCalledTimes(1)
+    })
+    test("modal exposes aria-labelledby pointing to title",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => true, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        const dialog=screen.getByRole("dialog")
+        const labelledBy=dialog.getAttribute("aria-labelledby")
+        expect(labelledBy).toBe("analytics-dashboard-title")
+        const title=document.getElementById("analytics-dashboard-title")
+        expect(title).not.toBeNull()
+        expect(title?.getAttribute("data-i18n")).toBe("analytics.title")
+    })
+    test("Tab key is trapped within modal",()=>{
+        const closeAnalytics=vi.fn()
+        const uiStore={ analyticsOpen: () => true, closeAnalytics } as unknown as AppStore["uiStore"]
+        const appStore={ uiStore } as AppStore
+        render(()=><AnalyticsDashboard items={makeItems()} appStore={appStore} />)
+        const dialog=screen.getByRole("dialog")
+        const focusable=Array.from(dialog.querySelectorAll<HTMLElement>('button:not([disabled])'))
+        expect(focusable.length).toBeGreaterThan(0)
+        const first=focusable[0]
+        const last=focusable[focusable.length-1]
+        last.focus()
+        expect(document.activeElement).toBe(last)
+        fireEvent.keyDown(document, { key: "Tab" })
+        expect(document.activeElement).toBe(first)
     })
 })
