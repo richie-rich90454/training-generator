@@ -27,6 +27,8 @@ export interface PromptEditorProps{
 }
 export function PromptEditor(props: PromptEditorProps): JSX.Element{
     let overlayRef: HTMLDivElement|undefined
+    let lastFocusedElement: HTMLElement|null=null
+    let prevBodyOverflow: string=""
     let [localContent, setLocalContent]=createSignal<string>(props.modelValue||"")
     let [variableValues, setVariableValues]=createSignal<Record<string, string>>({ ...props.variables })
     let [showPreview, setShowPreview]=createSignal<boolean>(false)
@@ -128,6 +130,31 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
             handleClose()
         }
     }
+    // Track open state to manage focus restoration and body scroll lock.
+    // Using createEffect (instead of onMount) means this runs whenever the
+    // open signal changes, so opening and closing the modal both restore
+    // state correctly.
+    createEffect(()=>{
+        if (!props.appStore){
+            return
+        }
+        const isOpen=props.appStore.uiStore.promptOpen()
+        if (isOpen){
+            lastFocusedElement=document.activeElement as HTMLElement
+            prevBodyOverflow=document.body.style.overflow
+            document.body.style.overflow="hidden"
+        }
+        else {
+            if (prevBodyOverflow!==""){
+                document.body.style.overflow=prevBodyOverflow
+                prevBodyOverflow=""
+            }
+            if (lastFocusedElement && document.contains(lastFocusedElement)){
+                lastFocusedElement.focus()
+                lastFocusedElement=null
+            }
+        }
+    })
     onMount(()=>{
         if (props.appStore){
             document.addEventListener("keydown",handleKeydown)
@@ -136,6 +163,16 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
     onCleanup(()=>{
         if (props.appStore){
             document.removeEventListener("keydown",handleKeydown)
+        }
+        // Restore body scroll and focus if the component is unmounted while
+        // the modal is still open.
+        if (prevBodyOverflow!==""){
+            document.body.style.overflow=prevBodyOverflow
+            prevBodyOverflow=""
+        }
+        if (lastFocusedElement && document.contains(lastFocusedElement)){
+            lastFocusedElement.focus()
+            lastFocusedElement=null
         }
     })
     function editorBody(): JSX.Element{
@@ -260,12 +297,12 @@ export function PromptEditor(props: PromptEditorProps): JSX.Element{
                     class={`${styles["modal"]} ${styles["active"]}`}
                     role="dialog"
                     aria-modal="true"
-                    aria-label={t("promptEditor.title")}
+                    aria-labelledby="prompt-editor-title"
                     onClick={handleBackdropClick}
                 >
                     <div class={styles["modal-content"]} style={{ "max-width": "900px", width: "85%", "max-height": "85vh", padding: "0", overflow: "hidden" }}>
                         <div class={styles["modal-header"]} style={{ "flex-shrink": "0" }}>
-                            <h2>
+                            <h2 id="prompt-editor-title">
                                 <Icon html={renderIcon("fa-edit")} />
                                 <span data-i18n="promptEditor.title">{t("promptEditor.title")}</span>
                             </h2>
