@@ -44,7 +44,11 @@ function ToastRow(props: ToastRowProps): JSX.Element {
         })
     })
     function handleDismiss(): void {
-        if (hiding || !ref) {
+        if (hiding) {
+            // Already animating out; ignore repeat clicks so onDismiss fires once.
+            return
+        }
+        if (!ref) {
             props.onDismiss(props.toast.id)
             return
         }
