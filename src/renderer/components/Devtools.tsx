@@ -105,10 +105,10 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     return (
         <Show when={props.appStore.uiStore.devtoolsOpen()}>
             <Portal mount={document.body}>
-                <div class={styles["devtools-panel"]} data-testid="devtools-panel" role="dialog" aria-label={t("devtools.title")}>
+                <div class={styles["devtools-panel"]} data-testid="devtools-panel" role="dialog" aria-modal="true" aria-labelledby="devtools-title">
                     <div class={styles["devtools-header"]}>
-                        <h3>{t("devtools.title")}</h3>
-                        <button class={styles["devtools-close"]} aria-label={t("devtools.closeAria")} onClick={() => props.appStore.uiStore.setDevtoolsOpen(false)}>
+                        <h3 id="devtools-title">{t("devtools.title")}</h3>
+                        <button class={styles["devtools-close"]} aria-label={t("devtools.closeAria")} data-i18n-aria-label="devtools.closeAria" onClick={() => props.appStore.uiStore.setDevtoolsOpen(false)}>
                             &times;
                         </button>
                     </div>
