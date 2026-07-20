@@ -295,4 +295,29 @@ describe("DatasetPreview",()=>{
         fireEvent.keyDown(screen.getByTestId("prev-button"), { key: "Enter" })
         expect(screen.getByTestId("current-index").textContent).toBe("1")
     })
+    test("index-display exposes role=status for screen readers", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("index-display").getAttribute("role")).toBe("status")
+    })
+    test("index-display exposes aria-live=polite", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("index-display").getAttribute("aria-live")).toBe("polite")
+    })
+    test("index-display exposes aria-atomic=true", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("index-display").getAttribute("aria-atomic")).toBe("true")
+    })
+    test("index-display aria-label is descriptive", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("index-display").getAttribute("aria-label")).toBe("Item 1 of 3")
+    })
+    test("index-display aria-label updates after navigation", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        fireEvent.click(screen.getByTestId("next-button"))
+        expect(screen.getByTestId("index-display").getAttribute("aria-label")).toBe("Item 2 of 3")
+    })
+    test("index-display carries data-i18n-aria-label", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        expect(screen.getByTestId("index-display").getAttribute("data-i18n-aria-label")).toBe("datasetPreview.indexAria")
+    })
 })

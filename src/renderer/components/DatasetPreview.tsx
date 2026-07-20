@@ -215,7 +215,15 @@ export function DatasetPreview(props: DatasetPreviewProps): JSX.Element{
                         onKeyDown={handleKeydown}
                     >
                         <button class={`nav-button`} type="button" disabled={currentIndex()<=0} onClick={prevItem} data-testid="prev-button" data-i18n="datasetPreview.prev">{t("datasetPreview.prev")}</button>
-                        <span class={styles["index-display"]} data-testid="index-display">{currentIndex()+1} / {total()}</span>
+                        <span
+                            class={styles["index-display"]}
+                            data-testid="index-display"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"
+                            aria-label={t("datasetPreview.indexAria", undefined, { current: String(currentIndex()+1), total: String(total()) })}
+                            data-i18n-aria-label="datasetPreview.indexAria"
+                        >{currentIndex()+1} / {total()}</span>
                         <button class={`nav-button`} type="button" disabled={currentIndex()>=total()-1} onClick={nextItem} data-testid="next-button" data-i18n="datasetPreview.next">{t("datasetPreview.next")}</button>
                         <button class={`view-toggle`} type="button" onClick={toggleJson} data-testid="json-toggle" data-i18n={showJson()?"datasetPreview.formatted":"datasetPreview.json"}>{showJson()?t("datasetPreview.formatted"):t("datasetPreview.json")}</button>
                         <button class={`action-button`} type="button" onClick={emitEdit} data-testid="edit-button" data-i18n="datasetPreview.edit">{t("datasetPreview.edit")}</button>
