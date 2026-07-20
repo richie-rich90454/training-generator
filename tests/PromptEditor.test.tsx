@@ -83,6 +83,22 @@ describe("PromptEditor",()=>{
         await Promise.resolve()
         expect(screen.queryByTestId("preview-panel")).toBeNull()
     })
+    test("toggle preview button aria-pressed tracks showPreview state",async()=>{
+        renderComponent({ modelValue: "Hello {{name}}." })
+        const btn=screen.getByTestId("toggle-preview-button")
+        expect(btn.getAttribute("aria-pressed")).toBe("false")
+        fireEvent.click(btn)
+        await Promise.resolve()
+        expect(btn.getAttribute("aria-pressed")).toBe("true")
+    })
+    test("toggle history button aria-pressed tracks showHistory state",async()=>{
+        renderComponent({ modelValue: "Hello {{name}}." })
+        const btn=screen.getByTestId("toggle-history-button")
+        expect(btn.getAttribute("aria-pressed")).toBe("false")
+        fireEvent.click(btn)
+        await Promise.resolve()
+        expect(btn.getAttribute("aria-pressed")).toBe("true")
+    })
     test("save emits save event with current content",async()=>{
         let onSave=vi.fn()
         renderComponent({ modelValue: "Hello world", onSave })

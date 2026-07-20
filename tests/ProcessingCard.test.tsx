@@ -33,6 +33,7 @@ function makeStub(opts: StubOpts = {}) {
         logs,
         getLogIcon: () => "fa-info-circle",
         toggleDashboard,
+        dashboardOpen: () => false,
         showToast: vi.fn()
     }
     const fileStore = {
@@ -133,6 +134,21 @@ describe("ProcessingCard", () => {
         const { container } = renderComponent({ demoActive: true })
         const demoBtn = container.querySelector("#demo-btn") as HTMLButtonElement
         expect(demoBtn.className).toContain("active")
+    })
+    test("demo button aria-pressed tracks demoActive state", () => {
+        const { container } = renderComponent({ demoActive: false })
+        const demoBtn = container.querySelector("#demo-btn") as HTMLButtonElement
+        expect(demoBtn.getAttribute("aria-pressed")).toBe("false")
+    })
+    test("demo button aria-pressed is true when demo active", () => {
+        const { container } = renderComponent({ demoActive: true })
+        const demoBtn = container.querySelector("#demo-btn") as HTMLButtonElement
+        expect(demoBtn.getAttribute("aria-pressed")).toBe("true")
+    })
+    test("dashboard button aria-pressed tracks dashboardOpen state", () => {
+        const { container } = renderComponent()
+        const dashBtn = container.querySelector("#dashboard-btn") as HTMLButtonElement
+        expect(dashBtn.getAttribute("aria-pressed")).toBe("false")
     })
     test("unmounts without throwing", () => {
         const utils = renderComponent()

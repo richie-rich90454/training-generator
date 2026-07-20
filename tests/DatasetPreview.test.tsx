@@ -220,6 +220,13 @@ describe("DatasetPreview",()=>{
         fireEvent.click(toggle)
         expect(toggle.getAttribute("data-i18n")).toBe("datasetPreview.formatted")
     })
+    test("json toggle button aria-pressed tracks showJson state", () => {
+        renderComponent({ items: makeItems(), format: "instruction" })
+        const toggle = screen.getByTestId("json-toggle")
+        expect(toggle.getAttribute("aria-pressed")).toBe("false")
+        fireEvent.click(toggle)
+        expect(toggle.getAttribute("aria-pressed")).toBe("true")
+    })
     test("instruction view labels carry data-i18n attributes", () => {
         renderComponent({ items: makeItems(), format: "instruction" })
         const card = screen.getByTestId("instruction-card")
