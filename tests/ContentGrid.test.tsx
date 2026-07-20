@@ -363,4 +363,55 @@ describe("ContentGrid", () => {
         expect(localStorage.getItem(SPLITTER_KEY)).toBe("605")
         window.getComputedStyle = original
     })
+    test("splitter exposes aria-valuemin equal to MIN_LEFT_WIDTH", () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        expect(splitter.getAttribute("aria-valuemin")).toBe("320")
+    })
+    test("splitter omits aria-valuenow at default layout", () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        expect(splitter.getAttribute("aria-valuenow")).toBeNull()
+        expect(splitter.getAttribute("aria-valuetext")).toBeNull()
+    })
+    test("splitter updates aria-valuenow and aria-valuemax after drag", async () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        // clientWidth=1200, no padding/border/gap → available=1196, maxLeft=916
+        setupRect(main, 1200)
+        fireEvent.mouseDown(splitter)
+        await Promise.resolve()
+        // clientX=500 → width=500 → leftWidth=500, maxLeft=916
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 500 }))
+        await Promise.resolve()
+        expect(splitter.getAttribute("aria-valuenow")).toBe("500")
+        expect(splitter.getAttribute("aria-valuemax")).toBe("916")
+        expect(splitter.getAttribute("aria-valuetext")).toBe("500px / 916px")
+    })
+    test("splitter clamps aria-valuenow to MIN_LEFT_WIDTH on drag", async () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        setupRect(main, 1200)
+        fireEvent.mouseDown(splitter)
+        await Promise.resolve()
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 0 }))
+        await Promise.resolve()
+        expect(splitter.getAttribute("aria-valuenow")).toBe("320")
+    })
+    test("double-click reset clears aria-valuenow but keeps aria-valuemax", async () => {
+        render(() => <ContentGrid appStore={makeAppStore()} />)
+        const splitter = screen.getByRole("separator")
+        const main = splitter.parentElement as HTMLElement
+        setupRect(main, 1200)
+        fireEvent.mouseDown(splitter)
+        await Promise.resolve()
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 500 }))
+        await Promise.resolve()
+        expect(splitter.getAttribute("aria-valuenow")).toBe("500")
+        fireEvent.dblClick(splitter)
+        expect(splitter.getAttribute("aria-valuenow")).toBeNull()
+        expect(splitter.getAttribute("aria-valuemax")).toBe("916")
+    })
 })

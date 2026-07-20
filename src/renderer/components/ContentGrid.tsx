@@ -17,6 +17,11 @@ const MIN_LEFT_WIDTH = 320
 const MIN_RIGHT_WIDTH = 280
 export function ContentGrid(props: ContentGridProps): JSX.Element {
     const [isDragging, setIsDragging] = createSignal(false)
+    // Reflects the current left-column width in px (undefined when the layout
+    // is at its default, i.e. no explicit width has been applied).
+    const [leftWidthNow, setLeftWidthNow] = createSignal<number | undefined>(undefined)
+    // Maximum reachable left-column width given the current container size.
+    const [maxLeftWidth, setMaxLeftWidth] = createSignal(MIN_LEFT_WIDTH)
     let gridRef: HTMLDivElement | undefined
     function getSavedWidth(): number | null {
         try {
@@ -62,12 +67,17 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
         const rightWidth = Math.max(MIN_RIGHT_WIDTH, available - width)
         const leftWidth = available - rightWidth
         gridRef.style.gridTemplateColumns = `${Math.max(MIN_LEFT_WIDTH, leftWidth)}px 4px ${rightWidth}px`
+        setLeftWidthNow(Math.round(leftWidth))
+        setMaxLeftWidth(Math.max(MIN_LEFT_WIDTH, available - MIN_RIGHT_WIDTH))
     }
     function resetToDefault(): void {
         if (!gridRef) {
             return
         }
         gridRef.style.gridTemplateColumns = ""
+        setLeftWidthNow(undefined)
+        const { available } = getLayoutMetrics()
+        setMaxLeftWidth(Math.max(MIN_LEFT_WIDTH, available - MIN_RIGHT_WIDTH))
         try {
             localStorage.removeItem(SPLITTER_KEY)
         }
@@ -167,6 +177,10 @@ export function ContentGrid(props: ContentGridProps): JSX.Element {
                 aria-orientation="vertical"
                 aria-label={t("splitter.resizeAria")}
                 data-i18n-aria-label="splitter.resizeAria"
+                aria-valuemin={MIN_LEFT_WIDTH}
+                aria-valuemax={maxLeftWidth()}
+                aria-valuenow={leftWidthNow()}
+                aria-valuetext={leftWidthNow() !== undefined ? `${leftWidthNow()}px / ${maxLeftWidth()}px` : undefined}
                 tabindex="0"
                 onMouseDown={() => setIsDragging(true)}
                 onTouchStart={(e) => { e.preventDefault(); setIsDragging(true) }}
