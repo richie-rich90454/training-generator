@@ -10,6 +10,7 @@ const styles = { ...devtoolsStyles }
 const MAX_LOG_ENTRIES = 1000
 const LOG_LEVELS = ["debug", "info", "warn", "error"] as const
 type ValidLogLevel = typeof LOG_LEVELS[number]
+const TABS = ["logs", "cache", "workers", "memory"] as const
 export interface DevtoolsProps {
     appStore: AppStore
 }
@@ -17,6 +18,7 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
     let [activeTab, setActiveTab] = createSignal<string>("logs")
     let [logFilter, setLogFilter] = createSignal<string>("all")
     let [logEntries, setLogEntries] = createSignal<LogEntry[]>([])
+    let tablistRef: HTMLDivElement | undefined
     function addLog(entry: LogEntry): void {
         setLogEntries((prev) => {
             let next = [...prev, entry]
@@ -62,6 +64,32 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
             return
         }
         setActiveTab(tabName)
+    }
+    function handleTabKeydown(e: KeyboardEvent): void {
+        const tabs = TABS as readonly string[]
+        const currentIndex = tabs.indexOf(activeTab())
+        if (currentIndex === -1) return
+        let nextIndex: number | null = null
+        if (e.key === "ArrowRight") {
+            nextIndex = (currentIndex + 1) % tabs.length
+        }
+        else if (e.key === "ArrowLeft") {
+            nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
+        }
+        else if (e.key === "Home") {
+            nextIndex = 0
+        }
+        else if (e.key === "End") {
+            nextIndex = tabs.length - 1
+        }
+        if (nextIndex === null) return
+        e.preventDefault()
+        const nextTab = tabs[nextIndex]
+        setActiveTab(nextTab)
+        const buttons = tablistRef?.querySelectorAll<HTMLButtonElement>("button[role='tab']")
+        if (buttons && buttons[nextIndex]) {
+            buttons[nextIndex].focus()
+        }
     }
     function levelClass(level: string): string {
         if (LOG_LEVELS.includes(level as ValidLogLevel)) {
@@ -112,15 +140,58 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             &times;
                         </button>
                     </div>
-                    <div class={styles["devtools-tabs"]}>
-                        <button class={"devtools-tab" + (activeTab() === "logs" ? " active" : "")} data-tab="logs" onClick={() => switchTab("logs")}><span data-i18n="devtools.tab.logs">{t("devtools.tab.logs")}</span></button>
-                        <button class={"devtools-tab" + (activeTab() === "cache" ? " active" : "")} data-tab="cache" onClick={() => switchTab("cache")}><span data-i18n="devtools.tab.cache">{t("devtools.tab.cache")}</span></button>
-                        <button class={"devtools-tab" + (activeTab() === "workers" ? " active" : "")} data-tab="workers" onClick={() => switchTab("workers")}><span data-i18n="devtools.tab.workers">{t("devtools.tab.workers")}</span></button>
-                        <button class={"devtools-tab" + (activeTab() === "memory" ? " active" : "")} data-tab="memory" onClick={() => switchTab("memory")}><span data-i18n="devtools.tab.memory">{t("devtools.tab.memory")}</span></button>
+                    <div class={styles["devtools-tabs"]} ref={tablistRef} role="tablist" aria-label={t("devtools.title")} data-i18n-aria-label="devtools.title" onKeyDown={handleTabKeydown}>
+                        <button
+                            class={"devtools-tab" + (activeTab() === "logs" ? " active" : "")}
+                            data-tab="logs"
+                            role="tab"
+                            id="devtools-tab-logs"
+                            aria-selected={activeTab() === "logs"}
+                            aria-controls="devtools-panel-logs"
+                            tabindex={activeTab() === "logs" ? 0 : -1}
+                            onClick={() => switchTab("logs")}
+                        ><span data-i18n="devtools.tab.logs">{t("devtools.tab.logs")}</span></button>
+                        <button
+                            class={"devtools-tab" + (activeTab() === "cache" ? " active" : "")}
+                            data-tab="cache"
+                            role="tab"
+                            id="devtools-tab-cache"
+                            aria-selected={activeTab() === "cache"}
+                            aria-controls="devtools-panel-cache"
+                            tabindex={activeTab() === "cache" ? 0 : -1}
+                            onClick={() => switchTab("cache")}
+                        ><span data-i18n="devtools.tab.cache">{t("devtools.tab.cache")}</span></button>
+                        <button
+                            class={"devtools-tab" + (activeTab() === "workers" ? " active" : "")}
+                            data-tab="workers"
+                            role="tab"
+                            id="devtools-tab-workers"
+                            aria-selected={activeTab() === "workers"}
+                            aria-controls="devtools-panel-workers"
+                            tabindex={activeTab() === "workers" ? 0 : -1}
+                            onClick={() => switchTab("workers")}
+                        ><span data-i18n="devtools.tab.workers">{t("devtools.tab.workers")}</span></button>
+                        <button
+                            class={"devtools-tab" + (activeTab() === "memory" ? " active" : "")}
+                            data-tab="memory"
+                            role="tab"
+                            id="devtools-tab-memory"
+                            aria-selected={activeTab() === "memory"}
+                            aria-controls="devtools-panel-memory"
+                            tabindex={activeTab() === "memory" ? 0 : -1}
+                            onClick={() => switchTab("memory")}
+                        ><span data-i18n="devtools.tab.memory">{t("devtools.tab.memory")}</span></button>
                     </div>
                     <div class={styles["devtools-content"]}>
                         <Show when={activeTab() === "logs"}>
-                            <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-logs">
+                            <div
+                                class={`${styles["devtools-tab-content"]} ${styles["active"]}`}
+                                data-testid="devtools-logs"
+                                role="tabpanel"
+                                id="devtools-panel-logs"
+                                aria-labelledby="devtools-tab-logs"
+                                tabindex="0"
+                            >
                                 <div class={styles["devtools-log-controls"]}>
                                     <select id="devtools-log-filter" aria-label={t("devtools.logFilterAria")} data-i18n-aria-label="devtools.logFilterAria" value={logFilter()} onChange={(e) => setLogFilter(e.currentTarget.value)}>
                                         <option value="all" data-i18n="devtools.logLevel.all">{t("devtools.logLevel.all")}</option>
@@ -150,7 +221,14 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             </div>
                         </Show>
                         <Show when={activeTab() === "cache"}>
-                            <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-cache">
+                            <div
+                                class={`${styles["devtools-tab-content"]} ${styles["active"]}`}
+                                data-testid="devtools-cache"
+                                role="tabpanel"
+                                id="devtools-panel-cache"
+                                aria-labelledby="devtools-tab-cache"
+                                tabindex="0"
+                            >
                                 <table>
                                     <tbody>
                                         <tr><td><span data-i18n="devtools.cache.hits">{t("devtools.cache.hits")}</span></td><td>{cacheStats().cs.hits}</td></tr>
@@ -164,7 +242,14 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             </div>
                         </Show>
                         <Show when={activeTab() === "workers"}>
-                            <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-workers">
+                            <div
+                                class={`${styles["devtools-tab-content"]} ${styles["active"]}`}
+                                data-testid="devtools-workers"
+                                role="tabpanel"
+                                id="devtools-panel-workers"
+                                aria-labelledby="devtools-tab-workers"
+                                tabindex="0"
+                            >
                                 <table>
                                     <tbody>
                                         <tr><td><span data-i18n="devtools.workers.pool">{t("devtools.workers.pool")}</span></td><td>{workerInfo().workerCount}<span data-i18n="devtools.workers.countSuffix">{t("devtools.workers.countSuffix")}</span></td></tr>
@@ -175,7 +260,14 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
                             </div>
                         </Show>
                         <Show when={activeTab() === "memory"}>
-                            <div class={`${styles["devtools-tab-content"]} ${styles["active"]}`} data-testid="devtools-memory">
+                            <div
+                                class={`${styles["devtools-tab-content"]} ${styles["active"]}`}
+                                data-testid="devtools-memory"
+                                role="tabpanel"
+                                id="devtools-panel-memory"
+                                aria-labelledby="devtools-tab-memory"
+                                tabindex="0"
+                            >
                                 <Show when={memoryInfo().available} fallback={(
                                     <>
                                         <p data-i18n="devtools.memory.unavailable">{t("devtools.memory.unavailable")}</p>
