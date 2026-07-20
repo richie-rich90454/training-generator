@@ -53,7 +53,7 @@ function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Eleme
                 gap: "16px"
             }}
         >
-            <h2 style={{ margin: 0 }}>{t("toast.unexpectedError")}</h2>
+            <h2 style={{ margin: 0 }} data-i18n="app.errorTitle">{t("app.errorTitle")}</h2>
             <p style={{ margin: 0, color: "#666", "max-width": "480px", "word-break": "break-word" }}>
                 {props.error?.message ?? String(props.error)}
             </p>
@@ -61,6 +61,7 @@ function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Eleme
                 <button
                     type="button"
                     onClick={() => props.reset()}
+                    data-i18n="app.errorRetry"
                     style={{
                         padding: "8px 16px",
                         "font-size": "14px",
@@ -70,11 +71,12 @@ function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Eleme
                         background: "#f5f5f5"
                     }}
                 >
-                    Retry
+                    {t("app.errorRetry")}
                 </button>
                 <button
                     type="button"
                     onClick={handleReload}
+                    data-i18n="app.errorReload"
                     style={{
                         padding: "8px 16px",
                         "font-size": "14px",
@@ -84,7 +86,7 @@ function AppErrorFallback(props: { error: Error; reset: () => void }): JSX.Eleme
                         background: "#fff"
                     }}
                 >
-                    Reload
+                    {t("app.errorReload")}
                 </button>
             </div>
         </div>
