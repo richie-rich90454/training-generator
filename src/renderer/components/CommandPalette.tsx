@@ -109,6 +109,7 @@ function saveRecentCommandId(id: string, currentRecent: string[]): string[]{
 
 export function CommandPalette(props: CommandPaletteProps): JSX.Element{
     let inputRef: HTMLInputElement|undefined
+    let overlayRef: HTMLDivElement|undefined
     let lastFocusedElement: HTMLElement|null=null
     let prevBodyOverflow: string=""
     let [query, setQuery]=createSignal<string>("")
@@ -231,6 +232,27 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
             event.preventDefault()
             props.onClose()
         }
+        else if (event.key==="Tab"&&overlayRef){
+            // Tab-cycle focus trap: keep Tab focus within the palette
+            // dialog. The list options are navigated via Arrow keys and
+            // are not in the tab order, so this primarily cycles focus
+            // back to the input when there is no other focusable element.
+            const selector='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+            const focusable=Array.from(overlayRef.querySelectorAll<HTMLElement>(selector))
+            if (focusable.length===0){
+                return
+            }
+            const first=focusable[0]
+            const last=focusable[focusable.length-1]
+            if (event.shiftKey&&document.activeElement===first){
+                event.preventDefault()
+                last.focus()
+            }
+            else if (!event.shiftKey&&document.activeElement===last){
+                event.preventDefault()
+                first.focus()
+            }
+        }
     }
     function executeCommand(command: Command):void{
         // Record this command as recent BEFORE invoking its action, so that
@@ -259,6 +281,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element{
                     aria-modal="true"
                     aria-labelledby="command-palette-title"
                     onKeyDown={onKeydown}
+                    ref={overlayRef}
                 >
                     <h2 id="command-palette-title" class="sr-only" data-i18n="commandPalette.title">
                         {t("commandPalette.title")}

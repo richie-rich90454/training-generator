@@ -130,6 +130,28 @@ export function Devtools(props: DevtoolsProps): JSX.Element {
         if (e.key === "Escape") {
             e.preventDefault()
             props.appStore.uiStore.setDevtoolsOpen(false)
+            return
+        }
+        // Tab-cycle focus trap: query the live DOM so the first/last
+        // focusable elements stay correct as the active tab changes and
+        // the focusable set shifts between tabs.
+        if (e.key !== "Tab" || !panelRef) {
+            return
+        }
+        const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable = Array.from(panelRef.querySelectorAll<HTMLElement>(selector))
+        if (focusable.length === 0) {
+            return
+        }
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault()
+            last.focus()
+        }
+        else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault()
+            first.focus()
         }
     }
     function switchTab(tabName: string): void {

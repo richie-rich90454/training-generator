@@ -111,6 +111,28 @@ export function TemplateEditor(props: TemplateEditorProps): JSX.Element{
         if (e.key==="Escape"){
             e.preventDefault()
             handleClose()
+            return
+        }
+        // Tab-cycle focus trap: query the live DOM so the first/last
+        // focusable elements stay correct as preview panes toggle and
+        // the focusable set changes.
+        if (e.key!=="Tab"||!overlayRef){
+            return
+        }
+        const selector='button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        const focusable=Array.from(overlayRef.querySelectorAll<HTMLElement>(selector))
+        if (focusable.length===0){
+            return
+        }
+        const first=focusable[0]
+        const last=focusable[focusable.length-1]
+        if (e.shiftKey&&document.activeElement===first){
+            e.preventDefault()
+            last.focus()
+        }
+        else if (!e.shiftKey&&document.activeElement===last){
+            e.preventDefault()
+            first.focus()
         }
     }
     // Track open state to manage focus restoration, body scroll lock, and
