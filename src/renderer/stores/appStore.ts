@@ -18,7 +18,7 @@ import { saveCheckpoint, loadCheckpoint, clearCheckpoint } from "../checkpoint.j
 import { getCacheStats, warmCache } from "../cache.js"
 import { validateItems, type QualityReport } from "../qualityValidator.js"
 import { AuditTrail } from "../audit.js"
-import { initWindowControls } from "../windowControls.js"
+import { initWindowControls, disposeWindowControls } from "../windowControls.js"
 import { OnboardingTour, DEFAULT_TOUR_STEPS, STORAGE_KEY as TOUR_STORAGE_KEY } from "../../core/onboardingTour.js"
 import { showConfirm } from "../confirm.js"
 import { renderIcon } from "../icons.js"
@@ -853,6 +853,7 @@ export function createAppStore(): AppStore {
     providerManager()?.dispose()
     setProviderManager(null)
     processor.provider = null
+    disposeWindowControls()
   }
 
   return {
