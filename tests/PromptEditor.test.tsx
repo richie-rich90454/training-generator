@@ -2,12 +2,24 @@ import { describe, test, expect, vi } from "vitest"
 import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
 import { PromptEditor } from "../src/renderer/components/PromptEditor.tsx"
 import type { PromptEditorProps, PromptVersion } from "../src/renderer/components/PromptEditor.tsx"
+import type { AppStore } from "../src/renderer/stores/appStore.js"
 function renderComponent(props: Partial<PromptEditorProps> & { modelValue: string }){
     let onChange=props.onChange||vi.fn()
     let onSave=props.onSave||vi.fn()
     let onRun=props.onRun||vi.fn()
     let onVariableChange=props.onVariableChange||vi.fn()
     return render(()=><PromptEditor {...props} onChange={onChange} onSave={onSave} onRun={onRun} onVariableChange={onVariableChange} />)
+}
+function makeModalStub(open=true){
+    let closePromptEditor=vi.fn()
+    let uiStore={ promptOpen:()=>open, closePromptEditor }
+    let appStore={ uiStore } as unknown as AppStore
+    return { appStore, closePromptEditor }
+}
+function renderModal(open=true){
+    let stub=makeModalStub(open)
+    let result=render(()=><PromptEditor appStore={stub.appStore} modelValue="" />)
+    return { ...result, ...stub }
 }
 function getExtractedVariables():string[]{
     return JSON.parse(screen.getByTestId("extracted-variables").textContent||"[]")
@@ -208,5 +220,90 @@ describe("PromptEditor",()=>{
         renderComponent({ modelValue: "No variables here." })
         expect(screen.queryByTestId("variable-panel")).toBeNull()
         expect(screen.getByTestId("has-variables").textContent).toBe("false")
+    })
+    test("debug divs are hidden via test-only class",()=>{
+        renderComponent({ modelValue: "Hello {{name}}." })
+        let debugIds=["extracted-variables","is-dirty","variable-values","selected-version-id","has-variables","preview-text"]
+        for (let id of debugIds){
+            let el=screen.getByTestId(id)
+            // The debug divs should have aria-hidden="true" (not announced by
+            // screen readers) and should NOT use inline style="display:none"
+            // (we moved to a CSS class instead).
+            expect(el.getAttribute("aria-hidden")).toBe("true")
+            expect(el.getAttribute("style")).toBeNull()
+        }
+    })
+    test("version name input has data-i18n-placeholder",()=>{
+        renderComponent({ modelValue: "" })
+        let input=screen.getByTestId("version-name-input")
+        expect(input.getAttribute("data-i18n-placeholder")).toBe("promptEditor.versionNamePlaceholder")
+    })
+    test("toolbar buttons tag labels with data-i18n",()=>{
+        renderComponent({ modelValue: "" })
+        expect(screen.getByTestId("run-button").getAttribute("data-i18n")).toBe("promptEditor.run")
+        expect(screen.getByTestId("save-button").getAttribute("data-i18n")).toBe("promptEditor.save")
+        // Toggle preview shows "showPreview" span initially
+        let togglePreview=screen.getByTestId("toggle-preview-button")
+        expect(togglePreview.querySelector("[data-i18n='promptEditor.showPreview']")).not.toBeNull()
+        fireEvent.click(togglePreview)
+        expect(togglePreview.querySelector("[data-i18n='promptEditor.hidePreview']")).not.toBeNull()
+        // Toggle history shows "showHistory" span initially
+        let toggleHistory=screen.getByTestId("toggle-history-button")
+        expect(toggleHistory.querySelector("[data-i18n='promptEditor.showHistory']")).not.toBeNull()
+        fireEvent.click(toggleHistory)
+        expect(toggleHistory.querySelector("[data-i18n='promptEditor.hideHistory']")).not.toBeNull()
+    })
+    test("panel titles have data-i18n attributes",async()=>{
+        renderComponent({ modelValue: "Hello {{name}}.", history: [] })
+        expect(screen.getByTestId("variable-panel").querySelector("[data-i18n='promptEditor.variablesTitle']")).not.toBeNull()
+        fireEvent.click(screen.getByTestId("toggle-preview-button"))
+        await Promise.resolve()
+        expect(screen.getByTestId("preview-panel").querySelector("[data-i18n='promptEditor.previewTitle']")).not.toBeNull()
+        fireEvent.click(screen.getByTestId("toggle-history-button"))
+        await Promise.resolve()
+        expect(screen.getByTestId("history-panel").querySelector("[data-i18n='promptEditor.historyTitle']")).not.toBeNull()
+        expect(screen.getByTestId("history-empty").getAttribute("data-i18n")).toBe("promptEditor.noSavedVersions")
+    })
+    test("modal has aria-labelledby pointing to visible title",()=>{
+        cleanup()
+        renderModal(true)
+        let dialog=screen.getByRole("dialog")
+        expect(dialog.getAttribute("aria-labelledby")).toBe("prompt-editor-title")
+        let title=document.getElementById("prompt-editor-title")
+        expect(title).not.toBeNull()
+        expect(title?.tagName).toBe("H2")
+        cleanup()
+    })
+    test("modal locks body scroll when open",()=>{
+        cleanup()
+        document.body.style.overflow=""
+        renderModal(true)
+        expect(document.body.style.overflow).toBe("hidden")
+        cleanup()
+    })
+    test("modal restores body scroll on unmount",()=>{
+        cleanup()
+        document.body.style.overflow="auto"
+        let utils=renderModal(true)
+        expect(document.body.style.overflow).toBe("hidden")
+        utils.unmount()
+        expect(document.body.style.overflow).toBe("auto")
+        cleanup()
+    })
+    test("modal saves and restores focus",()=>{
+        cleanup()
+        let trigger=document.createElement("button")
+        trigger.textContent="Open editor"
+        document.body.appendChild(trigger)
+        trigger.focus()
+        expect(document.activeElement).toBe(trigger)
+        let utils=renderModal(true)
+        // Modal is open — focus should have moved away from trigger
+        expect(document.activeElement).not.toBe(trigger)
+        utils.unmount()
+        // After unmount, focus should be restored to the trigger
+        expect(document.activeElement).toBe(trigger)
+        document.body.removeChild(trigger)
+        cleanup()
     })
 })
