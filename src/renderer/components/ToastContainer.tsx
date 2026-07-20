@@ -24,7 +24,14 @@ export function ToastContainer(props: ToastContainerProps): JSX.Element {
         }
     }
     return (
-        <div class={styles["toast-container"]} role="region" aria-live="polite" aria-atomic="false" aria-label={t("toast.dismissAria")}>
+        <div
+            class={styles["toast-container"]}
+            role="region"
+            aria-live="polite"
+            aria-atomic="false"
+            aria-label={t("toast.containerLabel")}
+            data-i18n-aria-label="toast.containerLabel"
+        >
             <For each={uiStore.toasts}>
                 {(toast) => (
                     <div class={"toast toast-" + toast.type + " toast-visible"} role="status" aria-live="polite">
@@ -35,6 +42,7 @@ export function ToastContainer(props: ToastContainerProps): JSX.Element {
                         <button
                             class={styles["toast-close"]}
                             aria-label={t("toast.dismissAria")}
+                            data-i18n-aria-label="toast.dismissAria"
                             onClick={() => uiStore.dismissToast(toast.id)}
                         >
                             <Icon html={renderIcon("fa-times")} />
