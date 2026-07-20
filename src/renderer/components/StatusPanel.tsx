@@ -39,6 +39,19 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
         }
         return "status-indicator status-indicator--offline"
     }
+    function statusI18nKey(): string {
+        const status = uiStore.ollamaStatus()
+        if (uiStore.ollamaLoading() || !status) {
+            return "status.ollamaChecking"
+        }
+        if (status.running) {
+            return "status.ollamaOnline"
+        }
+        if (status.error) {
+            return "status.ollamaError"
+        }
+        return "status.ollamaOffline"
+    }
     return (
         <div class={`${styles["card"]} status-panel`}>
             <div class={styles["card-header"]}>
@@ -55,7 +68,7 @@ export function StatusPanel(props: StatusPanelProps): JSX.Element {
                     aria-atomic="true"
                 >
                     <span class={`status-dot`} aria-hidden="true" />
-                    <span class={`status-label`}>{statusText()}</span>
+                    <span class={`status-label`} data-i18n={statusI18nKey()}>{statusText()}</span>
                 </div>
                 <div class={`status-row`}>
                     <span class={`status-key`} data-i18n="status.filesProcessed">{t("status.filesProcessed")}</span>

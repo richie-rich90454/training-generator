@@ -369,4 +369,28 @@ describe("StatusPanel data-i18n attributes", () => {
         const el = document.querySelector('[data-i18n="status.lastProcessed"]')
         expect(el).not.toBeNull()
     })
+    test("status-label exposes data-i18n='status.ollamaOffline' when offline", () => {
+        const stub = makeStub({ status: { running: false, models: [] } })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const label = document.querySelector(".status-label")
+        expect(label?.getAttribute("data-i18n")).toBe("status.ollamaOffline")
+    })
+    test("status-label exposes data-i18n='status.ollamaOnline' when online", () => {
+        const stub = makeStub({ status: { running: true, models: [], version: "" } })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const label = document.querySelector(".status-label")
+        expect(label?.getAttribute("data-i18n")).toBe("status.ollamaOnline")
+    })
+    test("status-label exposes data-i18n='status.ollamaChecking' when loading", () => {
+        const stub = makeStub({ loading: true, status: { running: false, models: [] } })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const label = document.querySelector(".status-label")
+        expect(label?.getAttribute("data-i18n")).toBe("status.ollamaChecking")
+    })
+    test("status-label exposes data-i18n='status.ollamaError' when error", () => {
+        const stub = makeStub({ status: { running: false, models: [], error: "boom" } })
+        render(() => <StatusPanel appStore={makeAppStore(stub)} />)
+        const label = document.querySelector(".status-label")
+        expect(label?.getAttribute("data-i18n")).toBe("status.ollamaError")
+    })
 })
