@@ -126,4 +126,31 @@ describe("SettingsModal", () => {
         const utils = renderComponent(true)
         expect(() => utils.unmount()).not.toThrow()
     })
+    test("locks body scroll while open", () => {
+        document.body.style.overflow = ""
+        renderComponent(true)
+        expect(document.body.style.overflow).toBe("hidden")
+    })
+    test("restores body scroll on unmount via onCleanup", () => {
+        document.body.style.overflow = "auto"
+        const utils = renderComponent(true)
+        expect(document.body.style.overflow).toBe("hidden")
+        utils.unmount()
+        expect(document.body.style.overflow).toBe("auto")
+    })
+    test("saves and restores previously focused element", () => {
+        // Create a focusable button outside the modal that we'll focus first
+        const trigger = document.createElement("button")
+        trigger.textContent = "Open settings"
+        document.body.appendChild(trigger)
+        trigger.focus()
+        expect(document.activeElement).toBe(trigger)
+        const utils = renderComponent(true)
+        // Modal is open — focus should have moved inside the modal
+        expect(document.activeElement).not.toBe(trigger)
+        utils.unmount()
+        // After unmount, focus should be restored to the trigger
+        expect(document.activeElement).toBe(trigger)
+        document.body.removeChild(trigger)
+    })
 })

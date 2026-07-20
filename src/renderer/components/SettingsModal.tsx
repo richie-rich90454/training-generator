@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { createSignal, For, Show, createEffect, createMemo } from "solid-js"
+import { createSignal, For, Show, createEffect, createMemo, onCleanup } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -246,9 +246,20 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
     let overlayRef: HTMLDivElement | undefined
     let firstFocusable: HTMLElement | undefined
     let lastFocusable: HTMLElement | undefined
+    let lastFocusedElement: HTMLElement | null = null
+    let prevBodyOverflow: string = ""
     createEffect(() => {
         if (props.appStore.uiStore.settingsOpen()) {
             settingsStore.refreshProfiles()
+            // Save the previously focused element so we can restore focus
+            // back to it when the modal closes. This is critical for screen
+            // reader and keyboard users who activated the modal from a button
+            // (e.g. TitleBar settings button).
+            lastFocusedElement = document.activeElement as HTMLElement
+            // Lock body scroll while the modal is open to prevent the
+            // background from scrolling behind the overlay.
+            prevBodyOverflow = document.body.style.overflow
+            document.body.style.overflow = "hidden"
             const focusable = overlayRef?.querySelectorAll<HTMLElement>(
                 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
             )
@@ -263,6 +274,31 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
         else {
             firstFocusable = undefined
             lastFocusable = undefined
+            // Restore body scroll only if we were the one who hid it.
+            if (prevBodyOverflow !== "") {
+                document.body.style.overflow = prevBodyOverflow
+                prevBodyOverflow = ""
+            }
+            // Restore focus to the element that had focus before the modal
+            // opened, but only if it is still in the DOM.
+            if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                lastFocusedElement.focus()
+                lastFocusedElement = null
+            }
+        }
+    })
+    // If the component is unmounted while the modal is still open (e.g.
+    // because the whole tree is torn down), make sure we restore body
+    // overflow and focus. Without this the page would be stuck with
+    // overflow:hidden and no focused element.
+    onCleanup(() => {
+        if (prevBodyOverflow !== "") {
+            document.body.style.overflow = prevBodyOverflow
+            prevBodyOverflow = ""
+        }
+        if (lastFocusedElement && document.contains(lastFocusedElement)) {
+            lastFocusedElement.focus()
+            lastFocusedElement = null
         }
     })
 
