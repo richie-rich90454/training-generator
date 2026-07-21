@@ -309,7 +309,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                     <p class={styles["config-section__description"]} data-i18n="config.outputMode.description">
                         {t("config.outputMode.description")}
                     </p>
-                    <div class={styles["config-field"]}>
+                    <div class={`${styles["config-field"]} ${styles["config-field--full"]}`}>
                         <div class={styles["radio-group"]} role="radiogroup" aria-label={t("config.outputModeAria")} data-i18n-aria-label="config.outputModeAria">
                             <label class={styles["radio-group__option"]}>
                                 <input
@@ -373,7 +373,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                                 onChange={(e) => settingsStore.setAppSetting("maxItemsPerFile", parseInt(e.currentTarget.value, 10) || 50000)}
                             />
                         </div>
-                        <div class={styles["checkbox-field"]}>
+                        <div class={`${styles["checkbox-field"]} ${styles["config-field--full"]}`}>
                             <label for="config-include-source-metadata">
                                 <input
                                     id="config-include-source-metadata"
@@ -385,7 +385,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                                 <span data-i18n="config.includeSourceMetadata">{t("config.includeSourceMetadata")}</span>
                             </label>
                         </div>
-                        <div class={styles["checkbox-field"]}>
+                        <div class={`${styles["checkbox-field"]} ${styles["config-field--full"]}`}>
                             <label for="config-strip-pii-before-export">
                                 <input
                                     id="config-strip-pii-before-export"
@@ -398,7 +398,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                             </label>
                         </div>
                     </Show>
-                    <div class={styles["checkbox-field"]}>
+                    <div class={`${styles["checkbox-field"]} ${styles["config-field--full"]}`}>
                         <label for="config-confirm-before-export">
                             <input
                                 id="config-confirm-before-export"
@@ -410,7 +410,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                             <span data-i18n="config.confirmBeforeExport">{t("config.confirmBeforeExport")}</span>
                         </label>
                     </div>
-                    <div class={styles["checkbox-field"]}>
+                    <div class={`${styles["checkbox-field"]} ${styles["config-field--full"]}`}>
                         <label for="config-auto-export-on-completion">
                             <input
                                 id="config-auto-export-on-completion"

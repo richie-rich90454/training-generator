@@ -219,6 +219,22 @@
     grid-template-columns:minmax(0, 1fr);
     align-items:start;
 }
+/* Modifier applied via JSX to label-less rows inside the fieldset (the
+   radio-group wrapper and the four checkbox rows). Specificity 0,2,0 matches
+   the base rule above and intentionally avoids !important; declared later so
+   it wins ties. Defensive: documents that these rows never want a 2-column
+   label/control split even if the .config-section .config-field rule is later
+   removed. */
+.config-section .config-field--full{
+    grid-template-columns:minmax(0, 1fr);
+}
+/* .checkbox-field uses display:flex (not grid), so grid-template-columns is a
+   no-op on it today. Declared defensively so that if .checkbox-field ever
+   becomes a grid it stays single-column inside the fieldset, consistent with
+   .config-field rows. */
+.config-section .checkbox-field{
+    grid-template-columns:minmax(0, 1fr);
+}
 .config-section__title{
     display:flex;
     align-items:center;
