@@ -2,6 +2,7 @@
     margin-bottom:var(--spacing-xl);
     padding-bottom:var(--spacing-lg);
     border-bottom:1px solid var(--border-color);
+    min-width:0;
 }
 .settings-section:last-child{
     border-bottom:none;
@@ -28,6 +29,7 @@
     display:flex;
     flex-direction:column;
     gap:var(--spacing-sm);
+    min-width:0;
 }
 .settings-field:last-child{
     margin-bottom:0;
