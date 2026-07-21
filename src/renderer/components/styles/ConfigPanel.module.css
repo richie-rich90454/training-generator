@@ -320,3 +320,9 @@
     margin:0;
     width:100%;
 }
+/* Defensive: the .btn base rule carries overflow:hidden and the panel/fieldset
+   chain may also clip. Draw the focus outline 2px INSIDE the border edge so it
+   is never clipped by any ancestor (or the button's own) overflow:hidden. */
+.config-panel__save-preset:focus-visible{
+    outline-offset:-2px;
+}

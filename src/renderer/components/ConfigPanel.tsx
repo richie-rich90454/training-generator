@@ -425,7 +425,7 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                 </fieldset>
                 <button
                     type="button"
-                    class={`${styles["btn"]} ${styles["btn--save-preset"]}`}
+                    class={`${styles["btn"]} ${styles["btn--save-preset"]} ${styles["config-panel__save-preset"]}`}
                     aria-label={t("config.savePresetAria")}
                     data-i18n-aria-label="config.savePresetAria"
                     onClick={handleSavePreset}
