@@ -195,11 +195,18 @@
     transition:background var(--transition-fast), box-shadow var(--transition-fast);
 }
 .config-section{
+    /* Reset <fieldset> UA defaults: min-width:min-content, margin:0 2px,
+       and the default padding/border-radius cascade can push children out of
+       the border box at narrow panel widths. */
+    min-width:0;
+    margin-inline:0;
     margin-block:var(--spacing-md);
     padding:var(--spacing-md);
     border:1px solid var(--border-color);
     border-radius:var(--radius-medium);
     background:var(--surface-variant);
+    /* Defensive: only kicks in if a child somehow overflows. */
+    overflow:hidden;
 }
 .config-section__title{
     display:flex;
