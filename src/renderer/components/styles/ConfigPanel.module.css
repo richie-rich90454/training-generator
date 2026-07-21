@@ -194,6 +194,14 @@
     font-variant-numeric:tabular-nums;
     transition:background var(--transition-fast), box-shadow var(--transition-fast);
 }
+/* At narrow panel widths (e.g. 320px) the 48px pill squeezes the range
+   track. Allow it to shrink to 36px — still wide enough for the "0.7"
+   temperature text — so the track keeps usable width. */
+@container (max-width: 360px){
+    .range-value-pill{
+        min-width:36px;
+    }
+}
 .config-section{
     /* Reset <fieldset> UA defaults: min-width:min-content, margin:0 2px,
        and the default padding/border-radius cascade can push children out of
