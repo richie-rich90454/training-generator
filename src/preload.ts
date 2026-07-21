@@ -1,6 +1,6 @@
 import{contextBridge,ipcRenderer}from "electron"
 import{invoke}from "./ipcRenderer.ts"
-import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANNEL,WINDOW_IS_MAXIMIZED_CHANNEL,WINDOW_MAXIMIZED_CHANGED_EVENT}from "./types/ipc.ts"
+import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANNEL,WINDOW_IS_MAXIMIZED_CHANNEL,WINDOW_MAXIMIZED_CHANGED_EVENT,WINDOW_SET_PROGRESS_CHANNEL}from "./types/ipc.ts"
 import type{FileObj}from "./types/index.js"
 
 const streamTokenCallbacks=new Map<string,(token:string)=>void>()
@@ -49,6 +49,9 @@ contextBridge.exposeInMainWorld("electronAPI",{
     windowMaximizeToggle:()=>invoke(WINDOW_MAXIMIZE_TOGGLE_CHANNEL),
     windowClose:()=>invoke(WINDOW_CLOSE_CHANNEL),
     windowIsMaximized:()=>invoke(WINDOW_IS_MAXIMIZED_CHANNEL),
+    // Fire-and-forget taskbar progress overlay.
+    //   0..1 → percent, -1 → indeterminate, -2 → clear.
+    setProgress:(value:number)=>{ipcRenderer.send(WINDOW_SET_PROGRESS_CHANNEL,value)},
     onWindowMaximizedChange:(cb:(isMaximized:boolean)=>void):()=>void=>{
         let handler=(_:unknown,isMaximized:boolean)=>cb(isMaximized)
         ipcRenderer.on(WINDOW_MAXIMIZED_CHANGED_EVENT,handler)

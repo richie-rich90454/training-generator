@@ -10,6 +10,7 @@ import axios from "axios"
 import FileParserLazy from "./core/fileParserLazy.ts"
 import{SmartCache}from "./core/smartCache.ts"
 import{handle,registerWindowControlHandlers}from "./ipcMain.ts"
+import{WINDOW_SET_PROGRESS_CHANNEL}from "./types/ipc.ts"
 import type{FileObj,OllamaGenerateOptions,ParseBatchItem,OllamaStatus,OllamaModel}from "./types/index.ts"
 import{t}from "./renderer/i18n.ts"
 const APP_SCHEME="app"
@@ -838,6 +839,89 @@ async function getCurrentLogFilePathAsync():Promise<string>{
         return getLogFilePath(0)
     }
 }
+// ---------------------------------------------------------------------------
+// Taskbar progress overlay
+// ---------------------------------------------------------------------------
+// Electron's setProgressBar accepts a numeric `progress`:
+//   0..1 → percent complete
+//   < 0  → remove the progress bar (e.g. -1)
+//   > 1  → indeterminate mode (e.g. 2)
+// (See Electron docs: "Remove progress bar when progress < 0; Change to
+// indeterminate mode when progress > 1.") Using numeric sentinels avoids
+// string casts that would conflict with Electron's typed `progress: number`.
+const TASKBAR_PROGRESS_INDETERMINATE=2
+const TASKBAR_PROGRESS_REMOVE=-1
+/**
+ * Maps a `window:setProgress` payload (0..1, -1, -2) to the numeric value
+ * expected by `BrowserWindow.setProgressBar`.
+ *
+ *   -1 (indeterminate) → 2  (Electron: progress > 1)
+ *   -2 (clear)         → -1 (Electron: progress < 0)
+ *   0..1               → clamped to [0, 1]
+ *   NaN                → 0  (defensive; renderer should never send NaN)
+ */
+export function mapSetProgressPayload(value:number):number{
+    if(typeof value!=="number"||Number.isNaN(value))return 0
+    if(value===-1)return TASKBAR_PROGRESS_INDETERMINATE
+    if(value===-2)return TASKBAR_PROGRESS_REMOVE
+    return Math.min(1,Math.max(0,value))
+}
+/**
+ * Computes the macOS dock badge text for a `window:setProgress` payload.
+ * Returns "" (clear) for indeterminate (-1) and clear (-2) since there is no
+ * meaningful percentage to display. Returns "X%" for percent values.
+ */
+export function dockBadgeForProgress(value:number):string{
+    if(value===-1||value===-2)return ""
+    if(typeof value!=="number"||Number.isNaN(value))return "0%"
+    let pct=Math.round(Math.min(1,Math.max(0,value))*100)
+    return `${pct}%`
+}
+/**
+ * Applies the taskbar progress overlay to the given BrowserWindow.
+ *
+ * - Calls `mainWindow.setProgressBar(...)` with the mapped numeric value.
+ * - On macOS (`options.platform === "darwin"`), also calls
+ *   `options.dock.setBadge(...)` with the percentage text (or clears it).
+ *
+ * Guards against null/destroyed windows and missing `app.dock` (Linux/Windows).
+ * The `options` parameter is required so the function is pure and testable
+ * without touching `process.platform` or `app.dock` directly.
+ */
+export function applyTaskbarProgress(
+    mainWindow:BrowserWindow|null,
+    value:number,
+    options:{platform:string;dock?:{setBadge:(text:string)=>void}|null}
+):void{
+    if(!mainWindow||mainWindow.isDestroyed())return
+    let mapped=mapSetProgressPayload(value)
+    try{
+        mainWindow.setProgressBar(mapped)
+    }
+    catch(error){
+        console.warn("[main] setProgressBar failed:",error)
+    }
+    if(options.platform==="darwin"&&options.dock&&typeof options.dock.setBadge==="function"){
+        try{
+            options.dock.setBadge(dockBadgeForProgress(value))
+        }
+        catch(error){
+            console.warn("[main] dock.setBadge failed:",error)
+        }
+    }
+}
+/**
+ * Registers the `window:setProgress` IPC listener (fire-and-forget via
+ * `ipcMain.on` / `ipcRenderer.send`). Validates the payload is a number before
+ * dispatching to `applyTaskbarProgress`.
+ */
+function registerProgressOverlayHandler(getMainWindow:()=>BrowserWindow|null):void{
+    ipcMain.on(WINDOW_SET_PROGRESS_CHANNEL,(_event:Electron.IpcMainEvent,value:unknown)=>{
+        if(typeof value!=="number")return
+        let dock=(app as unknown as {dock?:{setBadge:(text:string)=>void}|null}).dock??null
+        applyTaskbarProgress(getMainWindow(),value,{platform:process.platform,dock})
+    })
+}
 function registerCriticalIpcHandlers():void{
     handle("dialog:openFile",async(_:Electron.IpcMainInvokeEvent):Promise<FileObj[]>=>{
         try{
@@ -1593,6 +1677,7 @@ app.whenReady().then(()=>{
     registerCriticalIpcHandlers()
     createMainWindow()
     registerWindowControlHandlers(()=>mainWindow)
+    registerProgressOverlayHandler(()=>mainWindow)
     createTray()
     registerDeferredIpcHandlers()
     // Belt-and-braces fallback in case dom-ready fires before window controls

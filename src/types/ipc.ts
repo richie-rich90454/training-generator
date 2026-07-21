@@ -4,6 +4,12 @@ export const WINDOW_MAXIMIZE_TOGGLE_CHANNEL="window:maximizeToggle" as const
 export const WINDOW_CLOSE_CHANNEL="window:close" as const
 export const WINDOW_IS_MAXIMIZED_CHANNEL="window:isMaximized" as const
 export const WINDOW_MAXIMIZED_CHANGED_EVENT="window:maximizedChanged" as const
+// Fire-and-forget channel (ipcRenderer.send / ipcMain.on) used to drive the
+// OS taskbar progress overlay. Payload is a single number:
+//   0..1  → percent complete
+//   -1    → indeterminate
+//   -2    → clear/remove
+export const WINDOW_SET_PROGRESS_CHANNEL="window:setProgress" as const
 export interface IpcChannels{
     'file:parse':{
         request:{filePath:string;fileType:string}
@@ -166,5 +172,8 @@ declare module "./electron"{
         windowClose():Promise<void>
         windowIsMaximized():Promise<boolean>
         onWindowMaximizedChange(cb:(isMaximized:boolean)=>void):()=>void
+        // Fire-and-forget taskbar progress overlay.
+        //   0..1 → percent, -1 → indeterminate, -2 → clear.
+        setProgress(value:number):void
     }
 }

@@ -1,7 +1,7 @@
 // Application orchestration store.
 // Composes fine-grained Solid stores (file, output, settings, UI) with framework-agnostic
 // business logic (processor, provider, orchestrator) to drive the SolidJS component tree.
-import { createSignal, untrack } from "solid-js"
+import { createSignal, createEffect, untrack } from "solid-js"
 import { createStore } from "solid-js/store"
 import type { SelectedFile, TrainingItem, OllamaStatus } from "../../types/index.js"
 import { createFileStore, type FileStore } from "./fileStore.js"
@@ -104,6 +104,23 @@ export function createAppStore(): AppStore {
   const [processingQueue, setProcessingQueue] = createStore<SelectedFile[]>([])
   let ollamaMonitorId: number | null = null
   let activePipeline: GenerationPipeline | null = null
+
+  // Dispatch the OS taskbar progress overlay via the fire-and-forget IPC
+  // channel. No-op when the Electron API is unavailable (browser/test mode)
+  // thanks to optional chaining.
+  function setTaskbarProgress(value: number): void {
+    window.electronAPI?.setProgress?.(value)
+  }
+
+  // Watch isProcessing and clear the taskbar overlay whenever processing
+  // ends (covers finish, error, abort, and early-return validation failures).
+  // On store creation the effect runs once with isProcessing() === false,
+  // which clears any stale progress left over from a previous run/crash.
+  createEffect(() => {
+    if (!isProcessing()) {
+      setTaskbarProgress(-2)
+    }
+  })
 
   function addLog(message: string, type: string = "info"): void {
     const level: LogLevel = type === "error" ? "error" : type === "warning" ? "warn" : "info"
@@ -296,6 +313,9 @@ export function createAppStore(): AppStore {
     setProcessingQueue(queue)
 
     setProgress(0, t("processing.starting"))
+    // Start the OS taskbar overlay at 0%. The createEffect above handles the
+    // clear (-2) when isProcessing transitions back to false.
+    setTaskbarProgress(0)
     addLog(
       t("log.startingProcessing", undefined, { count: String(fileStore.fileCount()) }),
       "info"
@@ -399,6 +419,13 @@ export function createAppStore(): AppStore {
         }
         outputStore.clearStaging()
         updateOutputPreview()
+        // Tick the OS taskbar overlay: completedFiles / totalFiles.
+        // Guard against divide-by-zero (queue.length can never be 0 here
+        // because processFiles early-returns when there are no files, but
+        // the guard is defensive).
+        const completed = successfulFiles + failedFiles
+        const total = queue.length
+        setTaskbarProgress(total > 0 ? completed / total : 0)
       },
       onLog: (message: string, level: "info" | "success" | "warning" | "error") => {
         addLog(message, level)
