@@ -59,6 +59,30 @@
     outline-offset:2px;
     border-radius:var(--radius-small);
 }
+.toast-undo{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--primary-color);
+    font-size:.875rem;
+    font-weight:600;
+    padding:4px 8px;
+    line-height:1.2;
+    flex-shrink:0;
+    border-radius:var(--radius-small);
+}
+.toast-undo:hover{
+    text-decoration:underline;
+}
+.toast-undo:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+    border-radius:var(--radius-small);
+}
+.toast-undo:disabled{
+    cursor:default;
+    opacity:.6;
+}
 .toast-info{
     border-left:4px solid var(--primary-color);
 }

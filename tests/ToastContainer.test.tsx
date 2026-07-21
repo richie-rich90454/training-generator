@@ -155,3 +155,130 @@ describe("ToastContainer", () => {
         expect(dismissToast).toHaveBeenCalledTimes(1)
     })
 })
+
+describe("ToastContainer - Undo action", () => {
+    afterEach(() => {
+        vi.useRealTimers()
+        vi.restoreAllMocks()
+    })
+
+    test("toast without undoAction does not render an Undo button", () => {
+        renderContainer([{ id: 1, message: "Hi", type: "info" }])
+        const buttons = screen.getAllByRole("button")
+        expect(buttons).toHaveLength(1)
+        expect(buttons[0].getAttribute("aria-label")).toBe(t("toast.dismissAria"))
+    })
+
+    test("toast with null undoAction does not render an Undo button", () => {
+        renderContainer([{ id: 1, message: "Hi", type: "info", undoAction: null as unknown as undefined }])
+        const buttons = screen.getAllByRole("button")
+        expect(buttons).toHaveLength(1)
+        expect(buttons[0].getAttribute("aria-label")).toBe(t("toast.dismissAria"))
+    })
+
+    test("toast with undoAction renders an Undo button with default label", () => {
+        renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction: () => { } }])
+        const undoBtn = screen.getByRole("button", { name: t("toast.undo") })
+        expect(undoBtn.textContent).toBe(t("toast.undo"))
+        // Close button is also present (2 buttons total).
+        expect(screen.getAllByRole("button")).toHaveLength(2)
+    })
+
+    test("toast with undoLabel renders custom label", () => {
+        renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction: () => { }, undoLabel: "Restore" }])
+        const undoBtn = screen.getByRole("button", { name: "Restore" })
+        expect(undoBtn.textContent).toBe("Restore")
+    })
+
+    test("clicking Undo calls undoAction once and dismisses the toast", () => {
+        const undoAction = vi.fn()
+        const { dismissToast } = renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        const undoBtn = screen.getByRole("button", { name: t("toast.undo") })
+        fireEvent.click(undoBtn)
+        expect(undoAction).toHaveBeenCalledTimes(1)
+        // handleDismiss starts the hide animation; transitionend completes it.
+        const toast = document.querySelector(".toast") as HTMLDivElement
+        fireEvent.transitionEnd(toast)
+        expect(dismissToast).toHaveBeenCalledTimes(1)
+        expect(dismissToast).toHaveBeenCalledWith(1)
+    })
+
+    test("Undo button disappears after 5 seconds while toast remains", () => {
+        vi.useFakeTimers()
+        const undoAction = vi.fn()
+        renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        // Undo button is initially visible (getByRole throws if not found).
+        screen.getByRole("button", { name: t("toast.undo") })
+        // Close button is also present.
+        screen.getByRole("button", { name: t("toast.dismissAria") })
+        vi.advanceTimersByTime(5000)
+        // Undo button is gone after 5s.
+        expect(screen.queryByRole("button", { name: t("toast.undo") })).toBeNull()
+        // Close button remains visible.
+        screen.getByRole("button", { name: t("toast.dismissAria") })
+    })
+
+    test("Undo timeout is cleared when toast is dismissed early", () => {
+        vi.useFakeTimers()
+        const undoAction = vi.fn()
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => { })
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => { })
+        const { dismissToast } = renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        // Resolve the close button BEFORE mocking getComputedStyle — the
+        // role+name query needs a real CSSStyleDeclaration (with
+        // getPropertyValue) to compute accessible names via dom-accessibility-api.
+        const closeBtn = screen.getByRole("button", { name: t("toast.dismissAria") })
+        const toast = document.querySelector(".toast") as HTMLDivElement
+        // Mock getComputedStyle for handleDismiss's fallback timer.
+        vi.spyOn(window, "getComputedStyle").mockReturnValue({
+            transitionDuration: "0.4s",
+        } as CSSStyleDeclaration)
+        // Dismiss via close button (before the 5s undo timeout fires).
+        fireEvent.click(closeBtn)
+        fireEvent.transitionEnd(toast)
+        expect(dismissToast).toHaveBeenCalledTimes(1)
+        // Advance past the undo timeout — should not trigger setState on a
+        // disposed component (no setState-after-dispose warning).
+        vi.advanceTimersByTime(5000)
+        expect(errorSpy).not.toHaveBeenCalled()
+        expect(warnSpy).not.toHaveBeenCalled()
+    })
+
+    test("rapid clicks on Undo only call undoAction once", () => {
+        const undoAction = vi.fn()
+        renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        const undoBtn = screen.getByRole("button", { name: t("toast.undo") })
+        fireEvent.click(undoBtn)
+        fireEvent.click(undoBtn)
+        fireEvent.click(undoBtn)
+        expect(undoAction).toHaveBeenCalledTimes(1)
+    })
+
+    test("Undo timeout is cleared on component dispose", () => {
+        vi.useFakeTimers()
+        const undoAction = vi.fn()
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => { })
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => { })
+        const result = renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        result.unmount()
+        // Advance past the undo timeout — should not trigger setState on a
+        // disposed component (no setState-after-dispose warning).
+        vi.advanceTimersByTime(5000)
+        expect(errorSpy).not.toHaveBeenCalled()
+        expect(warnSpy).not.toHaveBeenCalled()
+    })
+
+    test("undoAction that throws still dismisses the toast", () => {
+        const undoAction = vi.fn(() => { throw new Error("boom") })
+        const { dismissToast } = renderContainer([{ id: 1, message: "Deleted", type: "info", undoAction }])
+        const undoBtn = screen.getByRole("button", { name: t("toast.undo") })
+        expect(() => fireEvent.click(undoBtn)).toThrow("boom")
+        expect(undoAction).toHaveBeenCalledTimes(1)
+        // The finally block should have started the dismiss animation.
+        const toast = document.querySelector(".toast") as HTMLDivElement
+        expect(toast.classList.contains("toast-hiding")).toBe(true)
+        fireEvent.transitionEnd(toast)
+        expect(dismissToast).toHaveBeenCalledTimes(1)
+        expect(dismissToast).toHaveBeenCalledWith(1)
+    })
+})

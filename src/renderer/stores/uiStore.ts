@@ -14,6 +14,8 @@ export interface ToastItem {
     id: number
     message: string
     type: ToastType
+    undoAction?: () => void
+    undoLabel?: string
 }
 export interface DashboardMetrics {
     chunksDone: number

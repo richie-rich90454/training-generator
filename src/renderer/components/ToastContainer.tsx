@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { For, onMount } from "solid-js"
+import { For, onMount, onCleanup, createSignal } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import type { ToastItem } from "../stores/uiStore.js"
 import { Icon } from "./Icon.js"
@@ -33,17 +33,42 @@ interface ToastRowProps {
     toast: ToastItem
     onDismiss: (id: number) => void
 }
+const UNDO_BUTTON_VISIBLE_MS = 5000
 function ToastRow(props: ToastRowProps): JSX.Element {
     let ref: HTMLDivElement | undefined
     let hiding = false
+    const hasUndo = (): boolean => typeof props.toast.undoAction === "function"
+    const [undoVisible, setUndoVisible] = createSignal<boolean>(true)
+    let undoTimer: ReturnType<typeof setTimeout> | undefined
+    let undoCalled = false
+
+    function clearUndoTimer(): void {
+        if (undoTimer !== undefined) {
+            clearTimeout(undoTimer)
+            undoTimer = undefined
+        }
+    }
+
     onMount(() => {
         // Enter animation: render in initial state (opacity:0, translateX(100px))
         // for one frame, then add toast-visible to transition to the final state.
         requestAnimationFrame(() => {
             ref?.classList.add("toast-visible")
         })
+        if (hasUndo()) {
+            undoTimer = setTimeout(() => {
+                setUndoVisible(false)
+                undoTimer = undefined
+            }, UNDO_BUTTON_VISIBLE_MS)
+        }
     })
+
+    onCleanup(() => {
+        clearUndoTimer()
+    })
+
     function handleDismiss(): void {
+        clearUndoTimer()
         if (hiding) {
             // Already animating out; ignore repeat clicks so onDismiss fires once.
             return
@@ -66,6 +91,18 @@ function ToastRow(props: ToastRowProps): JSX.Element {
         // or hidden tab). Pad by 50ms so the animation always wins the race.
         window.setTimeout(done, readTransitionDuration(ref) + 50)
     }
+
+    function handleUndo(): void {
+        if (undoCalled) return
+        undoCalled = true
+        clearUndoTimer()
+        try {
+            props.toast.undoAction?.()
+        } finally {
+            handleDismiss()
+        }
+    }
+
     return (
         <div
             ref={ref}
@@ -77,6 +114,16 @@ function ToastRow(props: ToastRowProps): JSX.Element {
                 <Icon html={iconForType(props.toast.type)} />
             </span>
             <span class={styles["toast-message"]}>{props.toast.message}</span>
+            {hasUndo() && undoVisible() && (
+                <button
+                    type="button"
+                    class={styles["toast-undo"]}
+                    onClick={handleUndo}
+                    disabled={undoCalled}
+                >
+                    {props.toast.undoLabel ?? t("toast.undo")}
+                </button>
+            )}
             <button
                 class={styles["toast-close"]}
                 aria-label={t("toast.dismissAria")}
