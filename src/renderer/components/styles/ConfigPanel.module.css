@@ -55,6 +55,14 @@
     min-width:0;
     width:100%;
 }
+/* Long non-wrapping strings pasted into the custom-prompt textarea can cause
+   horizontal page overflow. Constrain the textarea to its own scroll area and
+   break long words so the panel layout is never pushed wide. */
+.config-field textarea{
+    overflow-x:auto;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+}
 @container (min-width: 440px){
     .config-field{
         grid-template-columns:minmax(120px, 0.42fr) minmax(0, 1fr);
