@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
+import { createStore } from "solid-js/store"
 import { TitleBar } from "../src/renderer/components/TitleBar.tsx"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
 
@@ -20,11 +21,20 @@ function makeElectronAPI(): ElectronAPIStub {
     }
 }
 
-function makeAppStore(): AppStore {
+function makeSettingsStore(initialTheme: string | undefined) {
+    const [appSettings, setAppSettings] = createStore<{ theme: string | undefined }>({ theme: initialTheme })
+    const setAppSetting = vi.fn((key: string, value: unknown) => {
+        if (key === "theme") setAppSettings("theme", value as string)
+    })
+    return { appSettings, setAppSetting, saveAppSettings: vi.fn() }
+}
+
+function makeAppStore(settingsStore?: ReturnType<typeof makeSettingsStore>): AppStore {
     return {
         uiStore: {
             openModal: vi.fn()
         } as any,
+        settingsStore: settingsStore ?? makeSettingsStore("light"),
         showSettings: vi.fn(),
         showHelp: vi.fn()
     } as unknown as AppStore
@@ -79,11 +89,11 @@ describe("TitleBar", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             expect(document.querySelector('[class*="window-controls"]')).not.toBeNull()
         })
-        test("renders two action buttons", () => {
+        test("renders three action buttons", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             const actions = document.querySelector('[class*="title-bar-actions"]')
             const buttons = actions?.querySelectorAll("button.btn-icon")
-            expect(buttons?.length).toBe(2)
+            expect(buttons?.length).toBe(3)
         })
         test("renders three window control buttons", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
@@ -140,6 +150,134 @@ describe("TitleBar", () => {
         test("edit templates button is not rendered", () => {
             render(() => <TitleBar appStore={makeAppStore()} />)
             expect(screen.queryByLabelText("Edit Prompt Templates")).toBeNull()
+        })
+    })
+
+    describe("theme toggle", () => {
+        test("theme toggle button renders with correct aria-label", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            expect(screen.getByLabelText("Toggle theme")).not.toBeNull()
+        })
+        test("theme toggle button has id='theme-toggle-btn'", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.id).toBe("theme-toggle-btn")
+        })
+        test("theme toggle button has data-i18n-aria-label='titleBar.themeToggle.aria'", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("data-i18n-aria-label")).toBe("titleBar.themeToggle.aria")
+        })
+        test("theme toggle button has class='btn-icon'", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.className).toContain("btn-icon")
+        })
+        test("aria-pressed is false when theme is light", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("aria-pressed")).toBe("false")
+        })
+        test("aria-pressed is true when theme is dark", () => {
+            render(() => <TitleBar appStore={makeAppStore(makeSettingsStore("dark"))} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("aria-pressed")).toBe("true")
+        })
+        test("data-icon is fa-moon when theme is light", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("data-icon")).toBe("fa-moon")
+        })
+        test("data-icon is fa-sun when theme is dark", () => {
+            render(() => <TitleBar appStore={makeAppStore(makeSettingsStore("dark"))} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("data-icon")).toBe("fa-sun")
+        })
+        test("icon SVG is rendered inside theme toggle button", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            const svg = btn.querySelector("svg")
+            expect(svg).not.toBeNull()
+        })
+        test("clicking theme toggle calls setAppSetting with 'dark' when current is 'light'", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            fireEvent.click(screen.getByLabelText("Toggle theme"))
+            expect(settingsStore.setAppSetting).toHaveBeenCalledWith("theme", "dark")
+        })
+        test("clicking theme toggle calls setAppSetting with 'light' when current is 'dark'", () => {
+            const settingsStore = makeSettingsStore("dark")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            fireEvent.click(screen.getByLabelText("Toggle theme"))
+            expect(settingsStore.setAppSetting).toHaveBeenCalledWith("theme", "light")
+        })
+        test("clicking theme toggle calls saveAppSettings for persistence", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            fireEvent.click(screen.getByLabelText("Toggle theme"))
+            expect(settingsStore.saveAppSettings).toHaveBeenCalledTimes(1)
+        })
+        test("clicking theme toggle swaps icon from fa-moon to fa-sun", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("data-icon")).toBe("fa-moon")
+            fireEvent.click(btn)
+            expect(btn.getAttribute("data-icon")).toBe("fa-sun")
+        })
+        test("clicking theme toggle swaps aria-pressed from false to true", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("aria-pressed")).toBe("false")
+            fireEvent.click(btn)
+            expect(btn.getAttribute("aria-pressed")).toBe("true")
+        })
+        test("rapid clicks: two clicks return to original light state", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            fireEvent.click(btn) // light -> dark
+            expect(btn.getAttribute("data-icon")).toBe("fa-sun")
+            fireEvent.click(btn) // dark -> light
+            expect(btn.getAttribute("data-icon")).toBe("fa-moon")
+            expect(btn.getAttribute("aria-pressed")).toBe("false")
+            expect(settingsStore.setAppSetting).toHaveBeenCalledTimes(2)
+            expect(settingsStore.saveAppSettings).toHaveBeenCalledTimes(2)
+        })
+        test("rapid clicks: three clicks end in dark state", () => {
+            const settingsStore = makeSettingsStore("light")
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            fireEvent.click(btn) // light -> dark
+            fireEvent.click(btn) // dark -> light
+            fireEvent.click(btn) // light -> dark
+            expect(btn.getAttribute("data-icon")).toBe("fa-sun")
+            expect(btn.getAttribute("aria-pressed")).toBe("true")
+            expect(settingsStore.setAppSetting).toHaveBeenCalledTimes(3)
+        })
+        test("undefined theme defaults to light display (icon is fa-moon, aria-pressed is false)", () => {
+            const settingsStore = makeSettingsStore(undefined)
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            expect(btn.getAttribute("data-icon")).toBe("fa-moon")
+            expect(btn.getAttribute("aria-pressed")).toBe("false")
+        })
+        test("clicking with undefined theme transitions to dark", () => {
+            const settingsStore = makeSettingsStore(undefined)
+            render(() => <TitleBar appStore={makeAppStore(settingsStore)} />)
+            const btn = screen.getByLabelText("Toggle theme")
+            fireEvent.click(btn)
+            expect(settingsStore.setAppSetting).toHaveBeenCalledWith("theme", "dark")
+            expect(btn.getAttribute("data-icon")).toBe("fa-sun")
+            expect(btn.getAttribute("aria-pressed")).toBe("true")
+        })
+        test("theme toggle button is positioned between settings-btn and help-btn", () => {
+            render(() => <TitleBar appStore={makeAppStore()} />)
+            const actions = document.querySelector('[class*="title-bar-actions"]')
+            const buttons = Array.from(actions?.querySelectorAll("button.btn-icon") ?? [])
+            const ids = buttons.map(b => b.id)
+            expect(ids).toEqual(["settings-btn", "theme-toggle-btn", "help-btn"])
         })
     })
 

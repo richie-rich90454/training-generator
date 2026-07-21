@@ -55,6 +55,22 @@ export function TitleBar(props: TitleBarProps): JSX.Element {
                     <Icon html={renderIcon("fa-cog")} />
                 </button>
                 <button
+                    id="theme-toggle-btn"
+                    class="btn-icon"
+                    aria-label={t("titleBar.themeToggle.aria")}
+                    aria-pressed={props.appStore.settingsStore.appSettings.theme === "dark"}
+                    data-i18n-aria-label="titleBar.themeToggle.aria"
+                    data-icon={props.appStore.settingsStore.appSettings.theme === "dark" ? "fa-sun" : "fa-moon"}
+                    onClick={() => {
+                        const current = props.appStore.settingsStore.appSettings.theme
+                        const next = current === "dark" ? "light" : "dark"
+                        props.appStore.settingsStore.setAppSetting("theme", next)
+                        props.appStore.settingsStore.saveAppSettings()
+                    }}
+                >
+                    <Icon html={props.appStore.settingsStore.appSettings.theme === "dark" ? renderIcon("fa-sun") : renderIcon("fa-moon")} />
+                </button>
+                <button
                     id="help-btn"
                     class="btn-icon"
                     title={t("header.help")}
