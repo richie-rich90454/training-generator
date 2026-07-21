@@ -208,6 +208,17 @@
     /* Defensive: only kicks in if a child somehow overflows. */
     overflow:hidden;
 }
+/* Force every Output Mode row to a single-column layout.
+   The panel-level @container (min-width: 440px) rule fires on the PANEL width
+   but applies a 2-column grid (minmax(120px, 0.42fr) minmax(0, 1fr)) to
+   .config-field rows. Inside the narrower fieldset content box that 2-column
+   grid overflows. This descendant rule (specificity 0,2,0) beats the
+   @container .config-field rule (0,1,0) so the label sits above the control
+   and the control gets the full fieldset content width. */
+.config-section .config-field{
+    grid-template-columns:minmax(0, 1fr);
+    align-items:start;
+}
 .config-section__title{
     display:flex;
     align-items:center;
