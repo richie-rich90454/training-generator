@@ -556,18 +556,30 @@ export function createAppStore(): AppStore {
   function clearAll(): void {
     const hasFiles = fileStore.hasFiles()
     const hasOutput = outputStore.hasOutput()
+    function performClear(): void {
+      const savedFiles = [...fileStore.selectedFiles]
+      const savedOutput = [...outputStore.outputData]
+      const savedStaging = [...outputStore.stagingData]
+      fileStore.clearFiles()
+      outputStore.clearOutput()
+      setQualityReport(null)
+      uiStore.setFilesProcessed(0)
+      uiStore.setLastProcessed(t("status.lastProcessedNever"))
+      setProgress(0, t("processing.ready"))
+      audit.record("clear_all", {})
+      addLog(t("log.clearedAll"), "success")
+      uiStore.showToast(t("toast.allCleared"), "success" as ToastType, undefined, {
+        action: () => {
+          savedFiles.forEach(f => fileStore.restoreFile(f))
+          outputStore.restoreData(savedOutput, savedStaging)
+        },
+        label: t("toast.undo")
+      })
+    }
     if (hasFiles || hasOutput) {
       showConfirm(t("confirm.clearAll")).then((confirmed) => {
         if (confirmed) {
-          fileStore.clearFiles()
-          outputStore.clearOutput()
-          setQualityReport(null)
-          uiStore.setFilesProcessed(0)
-          uiStore.setLastProcessed(t("status.lastProcessedNever"))
-          setProgress(0, t("processing.ready"))
-          audit.record("clear_all", {})
-          addLog(t("log.clearedAll"), "success")
-          uiStore.showToast(t("toast.allCleared"), "success" as ToastType)
+          performClear()
         }
       })
       return

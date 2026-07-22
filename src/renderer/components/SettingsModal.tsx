@@ -5,6 +5,7 @@ import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
 import { showConfirm } from "../confirm.js"
+import { loadProfile, saveProfile } from "../configProfiles.js"
 import modalStyles from "./styles/Modal.module.css"
 import settingsModalStyles from "./styles/SettingsModal.module.css"
 import formsStyles from "./styles/Forms.module.css"
@@ -237,7 +238,7 @@ const SECTIONS: SectionDef[] = [
     { id: "experimental", icon: "fa-magic" }
 ]
 export function SettingsModal(props: SettingsModalProps): JSX.Element {
-    const { settingsStore, hideSettings, savePreset } = props.appStore
+    const { settingsStore, hideSettings, savePreset, uiStore } = props.appStore
     // Persist the last active section so the modal reopens on the same
     // section the user was viewing before closing it. Falls back to
     // "appearance" if no value (or an invalid one) is stored.
@@ -504,7 +505,20 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
         setProfileName("")
     }
     async function handleDeleteProfile(): Promise<void> {
+        const name = settingsStore.selectedProfile()
+        if (!name) return
+        const profile = loadProfile(name)
         await settingsStore.deleteCurrentProfile()
+        uiStore.showToast(t("toast.profileDeleted"), "warning", undefined, {
+            action: () => {
+                if (profile) {
+                    saveProfile(profile)
+                    settingsStore.refreshProfiles()
+                    settingsStore.applyProfile(name)
+                }
+            },
+            label: t("toast.undo")
+        })
     }
     async function handleBrowseCustomCss(): Promise<void> {
         const api = (window as unknown as { electronAPI?: { openFileDialog?: () => Promise<Array<{ path: string }> | null> } }).electronAPI

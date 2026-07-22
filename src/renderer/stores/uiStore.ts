@@ -62,7 +62,7 @@ export interface UIStore {
     setProgress: (percent: number, text: string) => void
     addLog: (message: string, type?: LogType) => void
     clearLogs: () => void
-    showToast: (message: string, type?: ToastType, duration?: number) => void
+    showToast: (message: string, type?: ToastType, duration?: number, undo?: { action: () => void; label: string }) => void
     dismissToast: (id: number) => void
     openModal: (modal: ModalType) => void
     closeModal: () => void
@@ -160,9 +160,9 @@ export function createUIStore(): UIStore {
     function clearLogs(): void {
         setLogs([])
     }
-    function showToast(message: string, type: ToastType = "info", duration?: number): void {
+    function showToast(message: string, type: ToastType = "info", duration?: number, undo?: { action: () => void; label: string }): void {
         const id = nextToastId++
-        setToasts(toasts.length, { id, message, type })
+        setToasts(toasts.length, { id, message, type, undoAction: undo?.action, undoLabel: undo?.label })
         window.setTimeout(() => {
             dismissToast(id)
         }, duration ?? DEFAULT_TOAST_DURATION)

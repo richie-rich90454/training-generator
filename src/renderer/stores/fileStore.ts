@@ -22,6 +22,7 @@ export interface FileStore {
     fileStatuses: Record<string, string>
     addFiles: (files: File[]) => FileAddResult
     removeFile: (fileName: string) => void
+    restoreFile: (file: SelectedFile) => void
     clearFiles: () => void
     setFileStatus: (fileName: string, status: string) => void
     setOllamaReady: (ready: boolean) => void
@@ -162,6 +163,11 @@ export function createFileStore(config: FileStoreConfig = {}): FileStore {
         setSelectedFiles(selectedFiles.filter(f => f.name !== fileName))
         setFileStatuses(reconcile(Object.fromEntries(Object.entries(fileStatuses).filter(([k])=>k!==fileName))))
     }
+    function restoreFile(file: SelectedFile): void {
+        if (!selectedFiles.some(f => f.name === file.name)) {
+            setSelectedFiles([...selectedFiles, file])
+        }
+    }
     function clearFiles(): void {
         setSelectedFiles([])
         setFileStatuses(reconcile({}))
@@ -228,6 +234,7 @@ export function createFileStore(config: FileStoreConfig = {}): FileStore {
         get fileStatuses() { return fileStatuses },
         addFiles,
         removeFile,
+        restoreFile,
         clearFiles,
         setFileStatus,
         setOllamaReady,

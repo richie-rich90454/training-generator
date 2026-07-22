@@ -129,6 +129,7 @@ export interface OutputStore {
     parseConversationTurns: (text: string) => ConversationTurn[]
     appendOutput: (items: TrainingItem[], sourceFile?: string) => void
     clearOutput: () => void
+    restoreData: (output: TrainingItem[], staging: TrainingItem[]) => void
     stageItems: (items: TrainingItem[], sourceFile?: string) => void
     clearStaging: () => void
     exportOutput: (exportFormat?: string) => Promise<void>
@@ -472,6 +473,10 @@ export function createOutputStore(options?: OutputStoreOptions): OutputStore {
         setOutputData([])
         setStagingData([])
     }
+    function restoreData(output: TrainingItem[], staging: TrainingItem[]): void {
+        setOutputData([...output])
+        setStagingData([...staging])
+    }
     function formatData(data: TrainingItem[], format: string): string {
         if (format === "jsonl") return exportJSONL(data)
         else if (format === "json") return exportJSONArray(data)
@@ -613,6 +618,7 @@ export function createOutputStore(options?: OutputStoreOptions): OutputStore {
         parseConversationTurns,
         appendOutput,
         clearOutput,
+        restoreData,
         stageItems,
         clearStaging,
         exportOutput,

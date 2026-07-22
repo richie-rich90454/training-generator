@@ -13,7 +13,7 @@ export interface UploadCardProps {
 }
 const ACCEPT_TYPES = ".pdf,.docx,.doc,.rtf,.txt,.md,.markdown,.html"
 export function UploadCard(props: UploadCardProps): JSX.Element {
-    const { fileStore, clearAll } = props.appStore
+    const { fileStore, clearAll, uiStore } = props.appStore
     const [dragOver, setDragOver] = createSignal(false)
     const [dragCounter, setDragCounter] = createSignal(0)
     let fileInputRef: HTMLInputElement | undefined
@@ -195,7 +195,14 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
                                             data-i18n-aria-label="file.removeAria"
                                             data-i18n-aria-label-vars={JSON.stringify({ name: file.name })}
                                             title={t("file.removeAria", undefined, { name: file.name })}
-                                            onClick={() => fileStore.removeFile(file.name)}
+                                            onClick={() => {
+                                                const removedFile = file
+                                                fileStore.removeFile(file.name)
+                                                uiStore.showToast(t("toast.fileRemoved"), "info", undefined, {
+                                                    action: () => fileStore.restoreFile(removedFile),
+                                                    label: t("toast.undo")
+                                                })
+                                            }}
                                         >
                                             <Icon html={renderIcon("fa-times")} />
                                         </button>
