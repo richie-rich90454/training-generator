@@ -1,11 +1,17 @@
 import { createStore, reconcile } from "solid-js/store"
 import { createSignal, createMemo } from "solid-js"
-import type { SelectedFile } from "../../types/index.js"
+import type { SelectedFile, FileListSortBy, FileListSortDir } from "../../types/index.js"
 import { renderIcon } from "../icons.js"
 import { t } from "../i18n.js"
 const MAX_FILES = 100
 const MAX_FILE_SIZE = 100 * 1024 * 1024
 const VALID_EXTENSIONS = ["pdf", "docx", "doc", "rtf", "txt", "md", "markdown", "html"]
+export type { FileListSortBy, FileListSortDir }
+export interface FileStoreConfig {
+    initialSortBy?: FileListSortBy
+    initialSortDir?: FileListSortDir
+    onSortChange?: (by: FileListSortBy, dir: FileListSortDir) => void
+}
 export interface FileAddResult {
     addedCount: number
     skippedCount: number
@@ -29,15 +35,72 @@ export interface FileStore {
     getStatusIcon: (status: string) => string
     getStatusLabel: (status: string) => string
     getStatusColor: (status: string) => string
+    sortBy: () => FileListSortBy
+    sortDir: () => FileListSortDir
+    sortedFiles: () => SelectedFile[]
+    setSortBy: (by: FileListSortBy) => void
+    setSortDir: (dir: FileListSortDir) => void
 }
-export function createFileStore(): FileStore {
+function normalizeSortBy(value: unknown): FileListSortBy {
+    return value === "name" || value === "size" ? value : "date"
+}
+function normalizeSortDir(value: unknown): FileListSortDir {
+    return value === "desc" ? "desc" : "asc"
+}
+export function createFileStore(config: FileStoreConfig = {}): FileStore {
     const [selectedFiles, setSelectedFiles] = createStore<SelectedFile[]>([])
     const [fileStatuses, setFileStatuses] = createStore<Record<string, string>>({})
     const [ollamaReady, setOllamaReady] = createSignal(false)
     const [demoActive, setDemoActive] = createSignal(false)
+    const [sortByValue, setSortByValue] = createSignal<FileListSortBy>(normalizeSortBy(config.initialSortBy))
+    const [sortDirValue, setSortDirValue] = createSignal<FileListSortDir>(normalizeSortDir(config.initialSortDir))
     const hasFiles = createMemo(() => selectedFiles.length > 0)
     const fileCount = createMemo(() => selectedFiles.length)
     const canProcess = createMemo(() => hasFiles() && (ollamaReady() || demoActive()))
+    const sortBy = () => sortByValue()
+    const sortDir = () => sortDirValue()
+    const sortedFiles = createMemo(() => {
+        const files = selectedFiles
+        const by = sortByValue()
+        const dir = sortDirValue()
+        if (files.length <= 1) return files
+        const sorted = [...files].sort((a, b) => {
+            let cmp = 0
+            if (by === "name") {
+                cmp = (a.name || "").localeCompare(b.name || "")
+            } else if (by === "size") {
+                cmp = (a.size ?? 0) - (b.size ?? 0)
+            } else {
+                const aTime = a.addedAt ?? 0
+                const bTime = b.addedAt ?? 0
+                cmp = aTime - bTime
+            }
+            if (cmp === 0) {
+                cmp = (a.name || "").localeCompare(b.name || "")
+            }
+            return dir === "asc" ? cmp : -cmp
+        })
+        return sorted
+    })
+    function persistSort(): void {
+        const cb = config.onSortChange
+        if (cb) {
+            cb(sortByValue(), sortDirValue())
+        }
+    }
+    function setSortBy(by: FileListSortBy): void {
+        if (sortByValue() === by) {
+            setSortDirValue(sortDirValue() === "asc" ? "desc" : "asc")
+        } else {
+            setSortByValue(by)
+            setSortDirValue("asc")
+        }
+        persistSort()
+    }
+    function setSortDir(dir: FileListSortDir): void {
+        setSortDirValue(dir)
+        persistSort()
+    }
     function getFileExtension(file: File): string {
         const parts = file.name.split(".")
         const ext = parts.pop()
@@ -55,7 +118,8 @@ export function createFileStore(): FileStore {
             name: file.name,
             size: file.size,
             type: ext,
-            path: (file as File & { path?: string }).path || null
+            path: (file as File & { path?: string }).path || null,
+            addedAt: Date.now()
         }
     }
     function addFiles(files: File[]): FileAddResult {
@@ -176,6 +240,11 @@ export function createFileStore(): FileStore {
         formatFileSize,
         getStatusIcon,
         getStatusLabel,
-        getStatusColor
+        getStatusColor,
+        sortBy,
+        sortDir,
+        sortedFiles,
+        setSortBy,
+        setSortDir
     }
 }

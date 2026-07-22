@@ -133,7 +133,45 @@ export function UploadCard(props: UploadCardProps): JSX.Element {
                         when={fileStore.hasFiles()}
                         fallback={<p class={styles["empty-state"]} data-i18n="files.empty">{t("files.empty")}</p>}
                     >
-                        <For each={fileStore.selectedFiles}>
+                        <div class={styles["file-list-header"]} role="row">
+                            <button
+                                type="button"
+                                class={`${styles["file-list-header-button"]}${fileStore.sortBy() === "name" ? " " + styles["file-list-header-button--active"] : ""}`}
+                                aria-sort={fileStore.sortBy() === "name" ? (fileStore.sortDir() === "asc" ? "ascending" : "descending") : "none"}
+                                onClick={() => fileStore.setSortBy("name")}
+                                data-column="name"
+                            >
+                                <span data-i18n="fileList.column.name">{t("fileList.column.name")}</span>
+                                <Show when={fileStore.sortBy() === "name"}>
+                                    <span class={styles["file-list-header-arrow"]} aria-hidden="true">{fileStore.sortDir() === "asc" ? "▲" : "▼"}</span>
+                                </Show>
+                            </button>
+                            <button
+                                type="button"
+                                class={`${styles["file-list-header-button"]}${fileStore.sortBy() === "size" ? " " + styles["file-list-header-button--active"] : ""}`}
+                                aria-sort={fileStore.sortBy() === "size" ? (fileStore.sortDir() === "asc" ? "ascending" : "descending") : "none"}
+                                onClick={() => fileStore.setSortBy("size")}
+                                data-column="size"
+                            >
+                                <span data-i18n="fileList.column.size">{t("fileList.column.size")}</span>
+                                <Show when={fileStore.sortBy() === "size"}>
+                                    <span class={styles["file-list-header-arrow"]} aria-hidden="true">{fileStore.sortDir() === "asc" ? "▲" : "▼"}</span>
+                                </Show>
+                            </button>
+                            <button
+                                type="button"
+                                class={`${styles["file-list-header-button"]}${fileStore.sortBy() === "date" ? " " + styles["file-list-header-button--active"] : ""}`}
+                                aria-sort={fileStore.sortBy() === "date" ? (fileStore.sortDir() === "asc" ? "ascending" : "descending") : "none"}
+                                onClick={() => fileStore.setSortBy("date")}
+                                data-column="date"
+                            >
+                                <span data-i18n="fileList.column.date">{t("fileList.column.date")}</span>
+                                <Show when={fileStore.sortBy() === "date"}>
+                                    <span class={styles["file-list-header-arrow"]} aria-hidden="true">{fileStore.sortDir() === "asc" ? "▲" : "▼"}</span>
+                                </Show>
+                            </button>
+                        </div>
+                        <For each={fileStore.sortedFiles()}>
                             {(file) => {
                                 const status = () => fileStore.fileStatuses[file.name] || "waiting"
                                 return (

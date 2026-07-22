@@ -56,6 +56,50 @@
 .file-list{
     margin-top:var(--spacing-md);
 }
+.file-list-header{
+    display:grid;
+    grid-template-columns:minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap:var(--spacing-sm);
+    padding:var(--spacing-xs) var(--spacing-md);
+    margin-bottom:var(--spacing-sm);
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    align-items:center;
+}
+.file-list-header-button{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-xs);
+    background:none;
+    border:none;
+    padding:var(--spacing-xs) var(--spacing-sm);
+    color:var(--text-secondary);
+    font-size:.875rem;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:var(--radius-small);
+    transition:color var(--transition-fast), background-color var(--transition-fast);
+    text-align:left;
+    min-width:0;
+    font-family:inherit;
+}
+.file-list-header-button:hover{
+    color:var(--text-primary);
+    background:color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+.file-list-header-button:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+}
+.file-list-header-button--active{
+    color:var(--primary-color);
+}
+.file-list-header-arrow{
+    font-size:.75rem;
+    line-height:1;
+    flex-shrink:0;
+}
 .empty-state{
     text-align:center;
     color:var(--text-secondary);

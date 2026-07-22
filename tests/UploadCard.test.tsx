@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { render, screen, fireEvent } from "@solidjs/testing-library"
 import { UploadCard } from "../src/renderer/components/UploadCard.tsx"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
-import type { SelectedFile } from "../src/types/interfaces.js"
+import type { SelectedFile, FileListSortBy, FileListSortDir } from "../src/types/interfaces.js"
 import { t } from "../src/renderer/i18n.js"
 
 function makeFile(name = "test.txt"): File {
@@ -14,9 +14,13 @@ function makeSelectedFile(name = "test.txt", size = 100): SelectedFile {
 interface StubOptions {
     selectedFiles?: SelectedFile[]
     fileStatuses?: Record<string, string>
+    sortBy?: FileListSortBy
+    sortDir?: FileListSortDir
 }
 function makeStub(opts: StubOptions = {}) {
     const selectedFiles = opts.selectedFiles ?? []
+    const sortByValue = opts.sortBy ?? "date"
+    const sortDirValue = opts.sortDir ?? "asc"
     const addFiles = vi.fn(() => ({ addedCount: 1, skippedCount: 0, rejectedCount: 0 }))
     const removeFile = vi.fn()
     const clearAll = vi.fn()
@@ -38,7 +42,12 @@ function makeStub(opts: StubOptions = {}) {
         formatFileSize: (n: number) => `${n} B`,
         getStatusIcon: () => "",
         getStatusLabel: () => "Waiting",
-        getStatusColor: () => "#000"
+        getStatusColor: () => "#000",
+        sortBy: () => sortByValue,
+        sortDir: () => sortDirValue,
+        sortedFiles: () => selectedFiles,
+        setSortBy: vi.fn(),
+        setSortDir: vi.fn()
     }
     const appStore = {
         fileStore,
