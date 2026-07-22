@@ -25,6 +25,7 @@ import { readFileSync } from "node:fs"
 import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ConfigPanel } from "../src/renderer/components/ConfigPanel.js"
+import { SettingsModal } from "../src/renderer/components/SettingsModal.tsx"
 import { createSettingsStore, type SettingsStore } from "../src/renderer/stores/settingsStore.js"
 import { withRoot } from "./setup.js"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
@@ -39,6 +40,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 // handling, both of which are unreliable in the happy-dom test environment.
 const CSS_PATH = resolve(__dirname, "../src/renderer/components/styles/ConfigPanel.module.css")
 const configPanelCss: string = readFileSync(CSS_PATH, "utf-8")
+
+const SETTINGS_CSS_PATH = resolve(__dirname, "../src/renderer/components/styles/SettingsModal.module.css")
+const settingsModalCss: string = readFileSync(SETTINGS_CSS_PATH, "utf-8")
+
+const FORMS_CSS_PATH = resolve(__dirname, "../src/renderer/components/styles/Forms.module.css")
+const formsCss: string = readFileSync(FORMS_CSS_PATH, "utf-8")
 
 const WIDTHS: readonly number[] = [320, 360, 414, 480, 768, 1024, 1280, 1920]
 
@@ -272,6 +279,160 @@ describe("Output Mode UI overflow regression", () => {
                     const wrapper = label!.parentElement
                     expect(wrapper).not.toBeNull()
                     expect(wrapper!.tagName).toBe("DIV")
+                }
+            } finally {
+                result.unmount()
+                rootDispose()
+            }
+        })
+    })
+})
+
+/**
+ * Build a minimal AppStore stub for SettingsModal around a real SettingsStore.
+ * The real store is required so setAppSetting("outputFileMode", ...) actually
+ * mutates reactive state and the <Show> inside SettingsModal re-evaluates. The
+ * stub provides only the surface area SettingsModal destructures from
+ * props.appStore: { settingsStore, hideSettings, savePreset, uiStore }.
+ */
+function makeStubAppStoreForSettings(settingsStore: SettingsStore): AppStore {
+    return {
+        settingsStore,
+        uiStore: {
+            settingsOpen: () => true,
+            showToast: () => {},
+            availableOllamaModels: () => [],
+            openPromptEditor: () => {}
+        },
+        hideSettings: () => {},
+        savePreset: async () => {},
+        initProvider: () => {},
+        refreshOllamaModels: async () => {}
+    } as unknown as AppStore
+}
+
+describe("SettingsModal Output Mode UI overflow regression (Task 2.2 / 3.1)", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        // Force the Output Mode section to be the active tab on mount so its
+        // controls render without needing to click the nav button.
+        localStorage.setItem("settings.activeSection", "outputMode")
+        document.body.innerHTML = ""
+    })
+
+    afterEach(() => {
+        cleanup()
+        document.body.innerHTML = ""
+    })
+
+    it("Task 2.1: .settings-section has min-width:0 to prevent min-content overflow", () => {
+        const body = extractRuleBody(settingsModalCss, "\\.settings-section")
+        expect(body).not.toBeNull()
+        expect(body).toContain("min-width:0")
+    })
+
+    it("Task 2.1: .settings-field has min-width:0 to prevent child overflow", () => {
+        const body = extractRuleBody(settingsModalCss, "\\.settings-field")
+        expect(body).not.toBeNull()
+        expect(body).toContain("min-width:0")
+    })
+
+    it("Task 2.1: .settings-field__label has min-width:0 so label text cannot push controls", () => {
+        const body = extractRuleBody(settingsModalCss, "\\.settings-field__label")
+        expect(body).not.toBeNull()
+        expect(body).toContain("min-width:0")
+    })
+
+    it("Task 2.1: .form-control has min-width:0 so inputs cannot expand beyond their grid cell", () => {
+        const body = extractRuleBody(formsCss, "\\.form-control")
+        expect(body).not.toBeNull()
+        expect(body).toContain("min-width:0")
+    })
+
+    it("Task 2.1: .settings-modal-content has max-width:720px (the regression target width)", () => {
+        const body = extractRuleBody(settingsModalCss, "\\.settings-modal-content")
+        expect(body).not.toBeNull()
+        expect(body).toContain("max-width:720px")
+    })
+
+    it("Task 2.2: renders Output Mode section with all controls visible at 720px width, and toggling outputFileMode reveals/hides perFile-only controls", async () => {
+        // happy-dom does not compute real layout, so scrollWidth/clientWidth and
+        // getBoundingClientRect return 0. The layout assertions below therefore
+        // only fire when the host DOES compute layout; otherwise the regression
+        // is covered by (a) the CSS-file assertions above and (b) the
+        // DOM-structure assertions that confirm the section renders the
+        // expected controls and that reactivity (combined <-> perFile toggle)
+        // works at the 720px target width.
+        await withRoot(async (rootDispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeStubAppStoreForSettings(settingsStore)
+
+            const result = render(
+                () => createComponent(SettingsModal, { appStore })
+            )
+            // The .settings-modal-content rule sets max-width:720px. Set the
+            // rendered container to that width so a real layout engine would
+            // honor the constraint. happy-dom ignores this for layout, but it
+            // documents intent.
+            result.container.style.width = "720px"
+            result.container.style.display = "block"
+
+            try {
+                const section = result.container.querySelector(
+                    '#settings-panel-outputMode[data-section-id="outputMode"]'
+                ) as HTMLElement | null
+                expect(section).not.toBeNull()
+                const sectionEl = section as HTMLElement
+
+                // Radio group is always present (2 options: combined, perFile).
+                const radioInputs = sectionEl.querySelectorAll(
+                    'input[type="radio"][name="settings-output-file-mode"]'
+                )
+                expect(radioInputs.length).toBe(2)
+
+                // Default state: outputFileMode === "combined". perFile-only
+                // controls must NOT be rendered.
+                expect(sectionEl.querySelector("#settings-output-filename-template")).toBeNull()
+                expect(sectionEl.querySelector("#settings-max-items-per-file")).toBeNull()
+                expect(sectionEl.querySelector("#settings-include-source-metadata")).toBeNull()
+                expect(sectionEl.querySelector("#settings-strip-pii-before-export")).toBeNull()
+
+                // Toggle to perFile — perFile controls should now render.
+                settingsStore.setAppSetting("outputFileMode", "perFile")
+                await flushMicrotasks()
+                expect(settingsStore.appSettings.outputFileMode).toBe("perFile")
+                expect(sectionEl.querySelector("#settings-output-filename-template")).not.toBeNull()
+                expect(sectionEl.querySelector("#settings-max-items-per-file")).not.toBeNull()
+                expect(sectionEl.querySelector("#settings-include-source-metadata")).not.toBeNull()
+                expect(sectionEl.querySelector("#settings-strip-pii-before-export")).not.toBeNull()
+
+                // Toggle back to combined — perFile controls disappear again.
+                settingsStore.setAppSetting("outputFileMode", "combined")
+                await flushMicrotasks()
+                expect(sectionEl.querySelector("#settings-output-filename-template")).toBeNull()
+                expect(sectionEl.querySelector("#settings-max-items-per-file")).toBeNull()
+                expect(sectionEl.querySelector("#settings-include-source-metadata")).toBeNull()
+                expect(sectionEl.querySelector("#settings-strip-pii-before-export")).toBeNull()
+
+                // Best-effort layout assertion: only fires when the host
+                // environment computes real layout (happy-dom returns 0 for
+                // scrollWidth/clientWidth/getBoundingClientRect). When it does
+                // compute layout, the section must not overflow and every
+                // control must fit inside the section's right edge.
+                if (sectionEl.scrollWidth > 0 && sectionEl.clientWidth > 0) {
+                    expect(sectionEl.scrollWidth).toBeLessThanOrEqual(sectionEl.clientWidth + 1)
+                    const sectionRight = sectionEl.getBoundingClientRect().right
+                    if (sectionRight > 0) {
+                        const controls = sectionEl.querySelectorAll(
+                            "input, select, textarea, label"
+                        )
+                        for (const control of Array.from(controls)) {
+                            const rect = (control as HTMLElement).getBoundingClientRect()
+                            if (rect.right > 0) {
+                                expect(rect.right).toBeLessThanOrEqual(sectionRight + 1)
+                            }
+                        }
+                    }
                 }
             } finally {
                 result.unmount()
