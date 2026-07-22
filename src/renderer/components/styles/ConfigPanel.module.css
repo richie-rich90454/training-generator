@@ -326,3 +326,56 @@
 .config-panel__save-preset:focus-visible{
     outline-offset:-2px;
 }
+/* v2.0.1 — Recent presets quick-access dropdown (Task 6.8). Wrapper is
+   position:relative so the absolutely-positioned menu anchors to the button.
+   display:inline-flex keeps the wrapper only as wide as the button. */
+.recent-presets-dropdown{
+    position:relative;
+    display:inline-flex;
+}
+.recent-presets-dropdown__menu{
+    position:absolute;
+    top:calc(100% + 4px);
+    inset-inline-end:0;
+    min-width:200px;
+    max-width:320px;
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    box-shadow:0 4px 12px rgba(0, 0, 0, .12);
+    z-index:200;
+    padding:var(--spacing-xs) 0;
+    margin:0;
+    list-style:none;
+}
+.recent-presets-dropdown__item{
+    padding:var(--spacing-sm) var(--spacing-md);
+    cursor:pointer;
+    color:var(--text-primary);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+}
+.recent-presets-dropdown__item:hover,
+.recent-presets-dropdown__item:focus-visible{
+    background:var(--surface-variant);
+    outline:none;
+}
+.recent-presets-dropdown__item-name{
+    font-size:.85rem;
+    font-weight:500;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.recent-presets-dropdown__item-time{
+    font-size:.7rem;
+    color:var(--text-secondary);
+}
+.recent-presets-dropdown__empty{
+    padding:var(--spacing-sm) var(--spacing-md);
+    color:var(--text-secondary);
+    font-size:.8rem;
+    font-style:italic;
+}

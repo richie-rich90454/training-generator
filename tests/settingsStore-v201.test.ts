@@ -661,3 +661,169 @@ describe("SettingsStore v2.0.1 highContrast apply", () => {
         expect(document.body.classList.contains("high-contrast")).toBe(false)
     })
 })
+
+// v2.0.1 — Recent presets quick-access (Task 6.8)
+describe("SettingsStore v2.0.1 recent presets", () => {
+    it("starts with an empty recent presets list", () => {
+        store = makeSettingsStore()
+        expect(store.recentPresets()).toEqual([])
+    })
+
+    it("saving a preset adds it to the recent list", async() => {
+        store = makeSettingsStore()
+        store.setModel("llama3")
+        await store.savePreset()
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(1)
+        expect(recent[0].name).toBe("ollama/llama3")
+        expect(recent[0].path).toContain("llama3")
+        expect(typeof recent[0].savedAt).toBe("number")
+    })
+
+    it("saving a preset with the same name deduplicates the recent list", async() => {
+        store = makeSettingsStore()
+        store.setModel("llama3")
+        await store.savePreset()
+        store.setProvider("openai")
+        store.setModel("gpt-4")
+        await store.savePreset()
+        // Save llama3 again — should move to head, not duplicate
+        store.setProvider("ollama")
+        store.setModel("llama3")
+        await store.savePreset()
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(2)
+        expect(recent[0].name).toBe("ollama/llama3")
+        expect(recent[1].name).toBe("openai/gpt-4")
+    })
+
+    it("LRU cap of 5 is enforced — oldest entry is evicted", async() => {
+        store = makeSettingsStore()
+        for (let i = 1; i <= 6; i++) {
+            store.setModel(`model${i}`)
+            await store.savePreset()
+        }
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(5)
+        // Most recent first; model1 (oldest) evicted
+        expect(recent[0].name).toBe("ollama/model6")
+        expect(recent[4].name).toBe("ollama/model2")
+        expect(recent.find(p => p.name === "ollama/model1")).toBeUndefined()
+    })
+
+    it("recent presets list persists across store re-creation", async() => {
+        store = makeSettingsStore()
+        store.setModel("llama3")
+        await store.savePreset()
+        // Create a new store — should load the persisted recent list from localStorage
+        store = makeSettingsStore()
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(1)
+        expect(recent[0].name).toBe("ollama/llama3")
+    })
+
+    it("rapid saves do not race — all presets are recorded in order", async() => {
+        store = makeSettingsStore()
+        store.setModel("model1")
+        const p1 = store.savePreset()
+        store.setModel("model2")
+        const p2 = store.savePreset()
+        store.setModel("model3")
+        const p3 = store.savePreset()
+        await Promise.all([p1, p2, p3])
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(3)
+        // Most recent first
+        expect(recent[0].name).toBe("ollama/model3")
+        expect(recent[1].name).toBe("ollama/model2")
+        expect(recent[2].name).toBe("ollama/model1")
+    })
+
+    it("loadPreset with missing snapshot logs error and leaves settings untouched", async() => {
+        store = makeSettingsStore()
+        store.setModel("original-model")
+        await store.loadPreset("nonexistent-snapshot-key")
+        // Settings should be unchanged — loadPreset returned early
+        expect(store.settings.model).toBe("original-model")
+    })
+
+    it("loadPreset restores settings from a saved snapshot", async() => {
+        store = makeSettingsStore()
+        // Save preset A
+        store.setModel("model-a")
+        await store.savePreset()
+        // Save preset B (overwrites SETTINGS_KEY with model-b)
+        store.setModel("model-b")
+        await store.savePreset()
+        // Change to something else
+        store.setModel("temporary")
+        expect(store.settings.model).toBe("temporary")
+        // Load preset A — should restore model-a from its snapshot
+        const recent = store.recentPresets()
+        const presetA = recent.find(p => p.name === "ollama/model-a")
+        expect(presetA).toBeDefined()
+        await store.loadPreset(presetA!.path)
+        expect(store.settings.model).toBe("model-a")
+    })
+
+    it("loadRecentPresets ignores corrupted JSON and starts empty", () => {
+        localStorage.setItem("training-generator-recent-presets", "{corrupted json")
+        store = makeSettingsStore()
+        expect(store.recentPresets()).toEqual([])
+    })
+
+    it("loadRecentPresets ignores non-array persisted values", () => {
+        localStorage.setItem("training-generator-recent-presets", JSON.stringify({ not: "an array" }))
+        store = makeSettingsStore()
+        expect(store.recentPresets()).toEqual([])
+    })
+
+    it("loadRecentPresets ignores entries with missing or invalid fields", () => {
+        // Mix of valid and invalid entries — only valid ones should load
+        localStorage.setItem("training-generator-recent-presets", JSON.stringify([
+            { name: "valid", path: "valid-path", savedAt: 1717200000000 },
+            { name: "missing-path", savedAt: 1717200000000 },
+            { name: 123, path: "bad-name-type", savedAt: 1717200000000 },
+            { path: "missing-name", savedAt: 1717200000000 },
+            null,
+            "string-entry"
+        ]))
+        store = makeSettingsStore()
+        const recent = store.recentPresets()
+        expect(recent.length).toBe(1)
+        expect(recent[0].name).toBe("valid")
+    })
+
+    it("loadRecentPresets caps at 5 even if persisted list is longer", () => {
+        const oversized = []
+        for (let i = 0; i < 10; i++) {
+            oversized.push({ name: `model${i}`, path: `path${i}`, savedAt: 1717200000000 + i })
+        }
+        localStorage.setItem("training-generator-recent-presets", JSON.stringify(oversized))
+        store = makeSettingsStore()
+        expect(store.recentPresets().length).toBe(5)
+    })
+
+    it("addRecentPreset writes to localStorage for persistence", () => {
+        store = makeSettingsStore()
+        store.addRecentPreset("test-name", "test-path")
+        const raw = localStorage.getItem("training-generator-recent-presets")
+        expect(raw).not.toBeNull()
+        const parsed = JSON.parse(raw!)
+        expect(parsed.length).toBe(1)
+        expect(parsed[0].name).toBe("test-name")
+        expect(parsed[0].path).toBe("test-path")
+        expect(typeof parsed[0].savedAt).toBe("number")
+    })
+
+    it("savePreset writes snapshot to a namespaced localStorage key", async() => {
+        store = makeSettingsStore()
+        store.setModel("llama3")
+        await store.savePreset()
+        const snapshotRaw = localStorage.getItem("train-generator-preset-snapshot-ollama/llama3")
+        expect(snapshotRaw).not.toBeNull()
+        const snapshot = JSON.parse(snapshotRaw!)
+        expect(snapshot.model).toBe("llama3")
+        expect(snapshot.provider).toBe("ollama")
+    })
+})

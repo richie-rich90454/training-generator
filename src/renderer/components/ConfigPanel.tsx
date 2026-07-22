@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { For, Show } from "solid-js"
+import { For, Show, createSignal, createEffect, onCleanup } from "solid-js"
 import type { AppStore } from "../stores/appStore.js"
 import { Icon } from "./Icon.js"
 import { renderIcon } from "../icons.js"
@@ -24,6 +24,43 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
     function handleSavePreset(): void {
         savePreset()
     }
+    // v2.0.1 — Recent presets quick-access dropdown (Task 6.8).
+    // Signal-driven open state. Outside-click and Escape close the menu.
+    // createEffect registers document listeners only while open and tears them
+    // down on close or component unmount via onCleanup.
+    const [recentMenuOpen, setRecentMenuOpen] = createSignal(false)
+    let recentDropdownRef: HTMLDivElement | undefined
+    function toggleRecentMenu(): void {
+        setRecentMenuOpen(open => !open)
+    }
+    function closeRecentMenu(): void {
+        setRecentMenuOpen(false)
+    }
+    async function handleLoadRecentPreset(path: string): Promise<void> {
+        closeRecentMenu()
+        await settingsStore.loadPreset(path)
+    }
+    createEffect(() => {
+        // Read recentMenuOpen() so the effect re-runs when it changes.
+        const open = recentMenuOpen()
+        if (!open) return
+        const onDocClick = (e: MouseEvent): void => {
+            if (recentDropdownRef && !recentDropdownRef.contains(e.target as Node)) {
+                setRecentMenuOpen(false)
+            }
+        }
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key === "Escape") {
+                setRecentMenuOpen(false)
+            }
+        }
+        document.addEventListener("click", onDocClick)
+        document.addEventListener("keydown", onKey)
+        onCleanup(() => {
+            document.removeEventListener("click", onDocClick)
+            document.removeEventListener("keydown", onKey)
+        })
+    })
     function temperatureStyle() {
         const display = settingsStore.updateTemperatureDisplay(settingsStore.settings.temperature ?? 0.7)
         return {
@@ -423,16 +460,66 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         </label>
                     </div>
                 </fieldset>
-                <button
-                    type="button"
-                    class={`${styles["btn"]} ${styles["btn--save-preset"]} ${styles["config-panel__save-preset"]}`}
-                    aria-label={t("config.savePresetAria")}
-                    data-i18n-aria-label="config.savePresetAria"
-                    onClick={handleSavePreset}
-                >
-                    <Icon html={renderIcon("fa-save")} />
-                    <span data-i18n="config.savePreset">{t("config.savePreset")}</span>
-                </button>
+                <div style={{ display: "flex", gap: "var(--spacing-sm)", "flex-wrap": "wrap" }}>
+                    <button
+                        type="button"
+                        class={`${styles["btn"]} ${styles["btn--save-preset"]} ${styles["config-panel__save-preset"]}`}
+                        aria-label={t("config.savePresetAria")}
+                        data-i18n-aria-label="config.savePresetAria"
+                        onClick={handleSavePreset}
+                    >
+                        <Icon html={renderIcon("fa-save")} />
+                        <span data-i18n="config.savePreset">{t("config.savePreset")}</span>
+                    </button>
+                    <div class={styles["recent-presets-dropdown"]} ref={recentDropdownRef}>
+                        <button
+                            type="button"
+                            class={`${styles["btn"]} ${styles["btn-secondary"]}`}
+                            aria-haspopup="menu"
+                            aria-expanded={recentMenuOpen()}
+                            aria-label={t("config.recentPresets.aria")}
+                            data-i18n-aria-label="config.recentPresets.aria"
+                            onClick={toggleRecentMenu}
+                        >
+                            <Icon html={renderIcon("fa-clock")} />
+                            <span data-i18n="config.recentPresets.label">{t("config.recentPresets.label")}</span>
+                        </button>
+                        <Show when={recentMenuOpen()}>
+                            <ul class={styles["recent-presets-dropdown__menu"]} role="menu" aria-label={t("config.recentPresets.aria")}>
+                                <Show
+                                    when={settingsStore.recentPresets().length > 0}
+                                    fallback={
+                                        <li class={styles["recent-presets-dropdown__empty"]} role="menuitem" aria-disabled="true">
+                                            <span data-i18n="config.recentPresets.empty">{t("config.recentPresets.empty")}</span>
+                                        </li>
+                                    }
+                                >
+                                    <For each={settingsStore.recentPresets()}>
+                                        {(preset) => (
+                                            <li
+                                                class={styles["recent-presets-dropdown__item"]}
+                                                role="menuitem"
+                                                tabindex="0"
+                                                onClick={() => handleLoadRecentPreset(preset.path)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" || e.key === " ") {
+                                                        e.preventDefault()
+                                                        handleLoadRecentPreset(preset.path)
+                                                    }
+                                                }}
+                                            >
+                                                <span class={styles["recent-presets-dropdown__item-name"]}>{preset.name}</span>
+                                                <span class={styles["recent-presets-dropdown__item-time"]}>
+                                                    {new Date(preset.savedAt).toLocaleString()}
+                                                </span>
+                                            </li>
+                                        )}
+                                    </For>
+                                </Show>
+                            </ul>
+                        </Show>
+                    </div>
+                </div>
             </form>
         </div>
     )

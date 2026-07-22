@@ -2,12 +2,14 @@ import { describe, test, expect, vi } from "vitest"
 import { render, fireEvent } from "@solidjs/testing-library"
 import { ConfigPanel } from "../src/renderer/components/ConfigPanel.tsx"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
+import type { RecentPresetEntry } from "../src/types/index.js"
 import { t } from "../src/renderer/i18n.js"
 
 interface StubOpts {
     provider?: string
     processingType?: string
     availableModels?: string[]
+    recentPresets?: RecentPresetEntry[]
 }
 function makeStub(opts: StubOpts = {}) {
     const provider = opts.provider ?? "ollama"
@@ -41,6 +43,12 @@ function makeStub(opts: StubOpts = {}) {
     const setConcurrency = vi.fn()
     const setTemperature = vi.fn()
     const setModel = vi.fn()
+    // v2.0.1 — Recent presets quick-access (Task 6.8). The stub returns a
+    // fixed list (no signal) because the ConfigPanel tests don't need to
+    // observe live updates — they re-render with a new stub if they need a
+    // different list.
+    const recentPresetsList = opts.recentPresets ?? []
+    const loadPreset = vi.fn(async () => {})
     const settingsStore = {
         settings,
         appSettings: {},
@@ -61,6 +69,8 @@ function makeStub(opts: StubOpts = {}) {
         setConcurrency,
         setTemperature,
         setModel,
+        recentPresets: () => recentPresetsList,
+        loadPreset,
         updateTemperatureDisplay: vi.fn(() => ({ rangeFill: "", temperatureColor: "", temperatureColorHover: "", temperatureShadow: "", text: "0.7" }))
     }
     const initProvider = vi.fn()
@@ -82,7 +92,7 @@ function makeStub(opts: StubOpts = {}) {
         appStore, setProvider, setApiKey, setBaseUrl, setOllamaHost, setOllamaPort,
         setProcessingType, setCustomPrompt, setOutputFormat, setLanguage,
         setChunkSize, setConcurrency, setTemperature, setModel,
-        initProvider, openPromptEditor, savePreset
+        initProvider, openPromptEditor, savePreset, loadPreset
     }
 }
 function renderComponent(opts: StubOpts = {}) {
@@ -180,5 +190,104 @@ describe("ConfigPanel", () => {
     test("unmounts without throwing", () => {
         const utils = renderComponent()
         expect(() => utils.unmount()).not.toThrow()
+    })
+    // v2.0.1 — Recent presets quick-access dropdown (Task 6.8)
+    // Tests use [role="menu"] / [role="menuitem"] selectors instead of class
+    // names because CSS module class hashing can vary between build and test
+    // environments. Role attributes are stable and a11y-correct.
+    test("recent presets dropdown toggle opens and closes the menu", () => {
+        const { container } = renderComponent()
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        expect(toggle).not.toBeNull()
+        // Initially closed
+        expect(toggle.getAttribute("aria-expanded")).toBe("false")
+        expect(container.querySelector('[role="menu"]')).toBeNull()
+        // Click opens
+        fireEvent.click(toggle)
+        expect(toggle.getAttribute("aria-expanded")).toBe("true")
+        expect(container.querySelector('[role="menu"]')).not.toBeNull()
+        // Click again closes
+        fireEvent.click(toggle)
+        expect(toggle.getAttribute("aria-expanded")).toBe("false")
+        expect(container.querySelector('[role="menu"]')).toBeNull()
+    })
+    test("recent presets dropdown shows empty state when no presets", () => {
+        const { container } = renderComponent({ recentPresets: [] })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        const menu = container.querySelector('[role="menu"]')
+        expect(menu).not.toBeNull()
+        expect(menu?.textContent).toContain(t("config.recentPresets.empty"))
+        // The empty state menuitem has aria-disabled="true"
+        const emptyItem = container.querySelector('[role="menuitem"][aria-disabled="true"]')
+        expect(emptyItem).not.toBeNull()
+    })
+    test("recent presets dropdown lists saved presets with name and timestamp", () => {
+        const recentPresets = [
+            { name: "ollama/llama3", path: "train-generator-preset-snapshot-ollama/llama3", savedAt: 1717200000000 },
+            { name: "openai/gpt-4", path: "train-generator-preset-snapshot-openai/gpt-4", savedAt: 1717286400000 }
+        ]
+        const { container } = renderComponent({ recentPresets })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        // Items have role="menuitem" WITHOUT aria-disabled
+        const items = container.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])')
+        expect(items.length).toBe(2)
+        expect(items[0].textContent).toContain("ollama/llama3")
+        expect(items[1].textContent).toContain("openai/gpt-4")
+    })
+    test("clicking a recent preset calls settingsStore.loadPreset with its path", async() => {
+        const recentPresets = [
+            { name: "ollama/llama3", path: "train-generator-preset-snapshot-ollama/llama3", savedAt: 1717200000000 }
+        ]
+        const { loadPreset, container } = renderComponent({ recentPresets })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        const item = container.querySelector('[role="menuitem"]:not([aria-disabled="true"])') as HTMLElement
+        expect(item).not.toBeNull()
+        await fireEvent.click(item)
+        expect(loadPreset).toHaveBeenCalledWith("train-generator-preset-snapshot-ollama/llama3")
+    })
+    test("dropdown closes on Escape key", () => {
+        const { container } = renderComponent({
+            recentPresets: [{ name: "ollama/llama3", path: "snap1", savedAt: 1717200000000 }]
+        })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        expect(container.querySelector('[role="menu"]')).not.toBeNull()
+        fireEvent.keyDown(document, { key: "Escape" })
+        expect(container.querySelector('[role="menu"]')).toBeNull()
+    })
+    test("dropdown closes on outside click", () => {
+        const { container } = renderComponent({
+            recentPresets: [{ name: "ollama/llama3", path: "snap1", savedAt: 1717200000000 }]
+        })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        expect(container.querySelector('[role="menu"]')).not.toBeNull()
+        // Click outside the dropdown — create a detached element and click it
+        const outside = document.createElement("div")
+        document.body.appendChild(outside)
+        fireEvent.click(outside)
+        expect(container.querySelector('[role="menu"]')).toBeNull()
+        document.body.removeChild(outside)
+    })
+    test("dropdown closes after selecting a preset", async() => {
+        const recentPresets = [
+            { name: "ollama/llama3", path: "snap1", savedAt: 1717200000000 }
+        ]
+        const { container } = renderComponent({ recentPresets })
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        fireEvent.click(toggle)
+        expect(container.querySelector('[role="menu"]')).not.toBeNull()
+        const item = container.querySelector('[role="menuitem"]:not([aria-disabled="true"])') as HTMLElement
+        await fireEvent.click(item)
+        expect(container.querySelector('[role="menu"]')).toBeNull()
+    })
+    test("dropdown toggle button has aria-haspopup and aria-expanded attributes", () => {
+        const { container } = renderComponent()
+        const toggle = container.querySelector('button[aria-label="' + t("config.recentPresets.aria") + '"]') as HTMLButtonElement
+        expect(toggle.getAttribute("aria-haspopup")).toBe("menu")
+        expect(toggle.getAttribute("aria-expanded")).toBe("false")
     })
 })
