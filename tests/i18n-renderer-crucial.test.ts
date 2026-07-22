@@ -123,7 +123,7 @@ describe("applyLanguage", () => {
         el.setAttribute("data-i18n-aria-label", "upload.browseAria")
         document.body.appendChild(el)
         applyLanguage("zh-Hans")
-        expect(el.getAttribute("aria-label")).toBe("Browse for files (Ctrl+O)")
+        expect(el.getAttribute("aria-label")).toBe("浏览文件（Ctrl+O）")
     })
     it("sets document.documentElement.lang", () => {
         applyLanguage("zh-Hant")
