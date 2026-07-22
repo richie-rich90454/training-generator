@@ -2403,6 +2403,27 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             </button>
                                         </Show>
                                     </div>
+                                    <Show when={!isSearching()}>
+                                        <button
+                                            type="button"
+                                            class={styles["settings-section__disclosure"]}
+                                            aria-expanded={settingsStore.appSettings.advancedExpanded ?? false}
+                                            aria-controls="settings-panel-advanced-content"
+                                            data-i18n={(settingsStore.appSettings.advancedExpanded ?? false) ? "settings.advanced.hide" : "settings.advanced.show"}
+                                            onClick={() => {
+                                                const next = !(settingsStore.appSettings.advancedExpanded ?? false)
+                                                settingsStore.setAppSetting("advancedExpanded", next)
+                                                settingsStore.saveAppSettings()
+                                            }}
+                                        >
+                                            <Icon html={renderIcon((settingsStore.appSettings.advancedExpanded ?? false) ? "fa-chevron-up" : "fa-chevron-down")} />
+                                            <span data-i18n={(settingsStore.appSettings.advancedExpanded ?? false) ? "settings.advanced.hide" : "settings.advanced.show"}>
+                                                {(settingsStore.appSettings.advancedExpanded ?? false) ? t("settings.advanced.hide") : t("settings.advanced.show")}
+                                            </span>
+                                        </button>
+                                    </Show>
+                                    <Show when={(settingsStore.appSettings.advancedExpanded ?? false) || isSearching()}>
+                                        <div id="settings-panel-advanced-content" class={styles["settings-section__content"]}>
                                     <div class={styles["settings-field"]}>
                                         <label class={styles["settings-field__label"]} for="settings-gpu-acceleration">
                                             <Icon html={renderIcon("fa-bolt")} />
@@ -2617,6 +2638,8 @@ export function SettingsModal(props: SettingsModalProps): JSX.Element {
                                             onChange={(e) => settingsStore.setAppSetting("verboseDashboard", e.currentTarget.checked)}
                                         />
                                     </div>
+                                        </div>
+                                    </Show>
                                 </section>
                                 <section
                                     class={sectionClass("experimental")}

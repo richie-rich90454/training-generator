@@ -287,6 +287,36 @@
     width:12px;
     height:12px;
 }
+.settings-section__disclosure{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-xs);
+    padding:var(--spacing-xs) var(--spacing-sm);
+    background:transparent;
+    border:1px solid var(--border-color);
+    color:var(--text-primary);
+    border-radius:var(--radius-medium);
+    font-size:0.875rem;
+    cursor:pointer;
+    min-height:32px;
+    margin-bottom:var(--spacing-md);
+    min-width:0;
+}
+.settings-section__disclosure:hover{
+    background:var(--surface-variant);
+}
+.settings-section__disclosure:focus-visible{
+    outline:2px solid var(--primary-color);
+    outline-offset:2px;
+}
+.settings-section__disclosure > svg{
+    width:12px;
+    height:12px;
+    flex-shrink:0;
+}
+.settings-section__content{
+    min-width:0;
+}
 .settings-tooltip{
     position:relative;
     display:inline-flex;

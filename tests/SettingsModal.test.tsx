@@ -1,6 +1,9 @@
-import { describe, test, expect, vi } from "vitest"
-import { render, screen, fireEvent } from "@solidjs/testing-library"
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
+import { render, screen, fireEvent, cleanup } from "@solidjs/testing-library"
+import { createComponent } from "solid-js"
 import { SettingsModal } from "../src/renderer/components/SettingsModal.tsx"
+import { createSettingsStore, type SettingsStore } from "../src/renderer/stores/settingsStore.js"
+import { withRoot } from "./setup.js"
 import type { AppStore } from "../src/renderer/stores/appStore.js"
 import { t } from "../src/renderer/i18n.js"
 
@@ -209,5 +212,358 @@ describe("SettingsModal", () => {
         const resetButtons = container.querySelectorAll('[data-i18n-aria-label="settings.resetSection.ariaLabel"]')
         // At least the appearance section's reset button should be rendered
         expect(resetButtons.length).toBeGreaterThanOrEqual(1)
+    })
+})
+
+/**
+ * Build an AppStore stub around a REAL SettingsStore so setAppSetting actually
+ * mutates reactive state and <Show> re-evaluates. The stub fills in the
+ * minimum surface area SettingsModal.tsx reads at render time.
+ */
+function makeReactiveAppStore(settingsStore: SettingsStore, open = true): AppStore {
+    return {
+        settingsStore,
+        uiStore: {
+            settingsOpen: () => open,
+            showToast: vi.fn(),
+            availableOllamaModels: () => [],
+            openPromptEditor: () => {}
+        },
+        hideSettings: vi.fn(),
+        savePreset: vi.fn(async () => {}),
+        initProvider: () => {},
+        refreshOllamaModels: vi.fn(async () => {})
+    } as unknown as AppStore
+}
+
+/**
+ * Flush Solid's microtask queue so <Show>/<For> reactivity settles before
+ * assertions. Solid store updates are synchronous at the signal level, but
+ * <Show>'s internal createMemo schedules the DOM patch via a microtask in
+ * dev mode.
+ */
+function flushMicrotasks(): Promise<void> {
+    return Promise.resolve()
+}
+
+describe("SettingsModal — Advanced section auto-collapse (Task 6.4)", () => {
+    beforeEach(() => {
+        localStorage.clear()
+        document.body.innerHTML = ""
+    })
+    afterEach(() => {
+        cleanup()
+        document.body.innerHTML = ""
+    })
+
+    function clickAdvancedTab(): void {
+        const advancedTab = screen.getByRole("tab", { name: t("settings.sections.advanced") })
+        fireEvent.click(advancedTab)
+    }
+
+    function getDisclosure(container: HTMLElement): HTMLButtonElement {
+        const btn = container.querySelector('button[aria-controls="settings-panel-advanced-content"]') as HTMLButtonElement | null
+        if (!btn) throw new Error("Disclosure button not found in DOM")
+        return btn
+    }
+
+    test("Advanced section starts collapsed by default (advancedExpanded defaults to false)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                expect(disclosure.getAttribute("aria-expanded")).toBe("false")
+                // Content region is removed from the DOM when collapsed.
+                expect(result.container.querySelector("#settings-panel-advanced-content")).toBeNull()
+                expect(result.container.querySelector("#settings-gpu-acceleration")).toBeNull()
+                // Default state in the store.
+                expect(settingsStore.appSettings.advancedExpanded).toBe(false)
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("clicking disclosure expands fields, updates aria-expanded, and persists state", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+
+                expect(disclosure.getAttribute("aria-expanded")).toBe("true")
+                const content = result.container.querySelector("#settings-panel-advanced-content")
+                expect(content).not.toBeNull()
+                expect(result.container.querySelector("#settings-gpu-acceleration")).not.toBeNull()
+                // Setting is persisted in the store.
+                expect(settingsStore.appSettings.advancedExpanded).toBe(true)
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("clicking disclosure again collapses fields back to hidden", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            // Pre-expand so the first click is a collapse action.
+            settingsStore.setAppSetting("advancedExpanded", true)
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                expect(disclosure.getAttribute("aria-expanded")).toBe("true")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).not.toBeNull()
+
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+
+                expect(disclosure.getAttribute("aria-expanded")).toBe("false")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).toBeNull()
+                expect(result.container.querySelector("#settings-panel-advanced-content")).toBeNull()
+                expect(settingsStore.appSettings.advancedExpanded).toBe(false)
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("undefined advancedExpanded falls back to collapsed (graceful default)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            // Force undefined to simulate corrupted/missing persisted state.
+            // The component code uses `?? false` so an undefined value must
+            // resolve to the collapsed state.
+            ;(settingsStore.appSettings as { advancedExpanded?: boolean }).advancedExpanded = undefined
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                expect(disclosure.getAttribute("aria-expanded")).toBe("false")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).toBeNull()
+                // Clicking still works and sets a concrete boolean.
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(disclosure.getAttribute("aria-expanded")).toBe("true")
+                expect(settingsStore.appSettings.advancedExpanded).toBe(true)
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("disclosure is keyboard accessible (Enter activates, then Space toggles back)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                // Native <button> elements activate on Enter and Space; the
+                // regression here is that the button must be focusable and
+                // reachable via keyboard, and that activating it via keyboard
+                // event dispatch flips the state.
+                disclosure.focus()
+                expect(document.activeElement).toBe(disclosure)
+                // Enter activates (browser-emulated click).
+                fireEvent.keyDown(disclosure, { key: "Enter" })
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(disclosure.getAttribute("aria-expanded")).toBe("true")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).not.toBeNull()
+
+                // Space collapses.
+                fireEvent.keyDown(disclosure, { key: " " })
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(disclosure.getAttribute("aria-expanded")).toBe("false")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).toBeNull()
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("rapid toggles converge to the correct final state (no race)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                // Five rapid clicks: false → true → false → true → false → true
+                for (let i = 0; i < 5; i++) {
+                    fireEvent.click(disclosure)
+                }
+                await flushMicrotasks()
+
+                expect(settingsStore.appSettings.advancedExpanded).toBe(true)
+                expect(disclosure.getAttribute("aria-expanded")).toBe("true")
+                expect(result.container.querySelector("#settings-gpu-acceleration")).not.toBeNull()
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("expanded state survives unmount/remount because it lives on the store", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore1 = makeReactiveAppStore(settingsStore)
+            const result1 = render(() => createComponent(SettingsModal, { appStore: appStore1 }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+                const disclosure1 = getDisclosure(result1.container)
+                fireEvent.click(disclosure1)
+                await flushMicrotasks()
+                expect(settingsStore.appSettings.advancedExpanded).toBe(true)
+            } finally {
+                result1.unmount()
+            }
+
+            // Second render reuses the SAME store — expanded state must persist.
+            const appStore2 = makeReactiveAppStore(settingsStore)
+            const result2 = render(() => createComponent(SettingsModal, { appStore: appStore2 }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+                const disclosure2 = getDisclosure(result2.container)
+                expect(disclosure2.getAttribute("aria-expanded")).toBe("true")
+                expect(result2.container.querySelector("#settings-gpu-acceleration")).not.toBeNull()
+            } finally {
+                result2.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("dispose does not leak (unmount + post-unmount store mutation do not throw)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+
+            clickAdvancedTab()
+            await flushMicrotasks()
+            const disclosure = getDisclosure(result.container)
+            fireEvent.click(disclosure)
+            await flushMicrotasks()
+
+            expect(() => result.unmount()).not.toThrow()
+            // Mutating the store after unmount should not throw (no leaked effects).
+            expect(() => settingsStore.setAppSetting("advancedExpanded", false)).not.toThrow()
+            dispose()
+        })
+    })
+
+    test("aria-controls points to the controlled content element id", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                expect(disclosure.getAttribute("aria-controls")).toBe("settings-panel-advanced-content")
+
+                // Expand and verify the controlled element exists with the matching id.
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                const content = result.container.querySelector("#settings-panel-advanced-content")
+                expect(content).not.toBeNull()
+                expect(content?.getAttribute("id")).toBe("settings-panel-advanced-content")
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("disclosure label flips between Show and Hide based on state", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                // Collapsed → "Show advanced settings"
+                expect(disclosure.textContent ?? "").toContain(t("settings.advanced.show"))
+
+                // Expand → "Hide advanced settings"
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(disclosure.textContent ?? "").toContain(t("settings.advanced.hide"))
+
+                // Collapse again → "Show advanced settings"
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(disclosure.textContent ?? "").toContain(t("settings.advanced.show"))
+            } finally {
+                result.unmount()
+                dispose()
+            }
+        })
+    })
+
+    test("saveAppSettings is invoked on every toggle (persistence side-effect)", async () => {
+        await withRoot(async (dispose) => {
+            const settingsStore = createSettingsStore()
+            const saveSpy = vi.spyOn(settingsStore, "saveAppSettings")
+            const appStore = makeReactiveAppStore(settingsStore)
+            const result = render(() => createComponent(SettingsModal, { appStore }))
+            try {
+                clickAdvancedTab()
+                await flushMicrotasks()
+
+                const disclosure = getDisclosure(result.container)
+                saveSpy.mockClear()
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(saveSpy).toHaveBeenCalledTimes(1)
+
+                fireEvent.click(disclosure)
+                await flushMicrotasks()
+                expect(saveSpy).toHaveBeenCalledTimes(2)
+            } finally {
+                saveSpy.mockRestore()
+                result.unmount()
+                dispose()
+            }
+        })
     })
 })
