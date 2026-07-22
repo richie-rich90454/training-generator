@@ -169,12 +169,21 @@ describe("FileStore sort stability (name tiebreaker)", () => {
         expect(store.sortedFiles().map(f => f.name)).toEqual(["charlie.txt", "bravo.txt", "alpha.txt"])
     })
     it("uses name as tiebreaker for equal dates", () => {
-        // All files added in same millisecond will have equal addedAt
-        store.addFiles([
-            createFile("charlie.txt", 100),
-            createFile("alpha.txt", 100),
-            createFile("bravo.txt", 100)
-        ])
+        // buildSelectedFile calls Date.now() per file, so we mock it to a
+        // constant to guarantee all files in this batch share the same
+        // addedAt. Without this, the millisecond may tick over between calls
+        // and the primary date comparison would already be decisive.
+        const fixedTime = 1_000_000
+        const dateSpy = vi.spyOn(Date, "now").mockReturnValue(fixedTime)
+        try {
+            store.addFiles([
+                createFile("charlie.txt", 100),
+                createFile("alpha.txt", 100),
+                createFile("bravo.txt", 100)
+            ])
+        } finally {
+            dateSpy.mockRestore()
+        }
         // Default sort is date asc, all have same addedAt
         expect(store.sortedFiles().map(f => f.name)).toEqual(["alpha.txt", "bravo.txt", "charlie.txt"])
     })
