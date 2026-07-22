@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store"
 import { createSignal, createMemo, createEffect } from "solid-js"
-import type { AppSettings, FullAppSettings } from "../../types/index.js"
+import type { AppSettings, FullAppSettings, FileListSortBy, FileListSortDir, RecentPresetEntry } from "../../types/index.js"
 import { applyLanguage } from "../i18n.js"
 import { encryptKey, decryptKey } from "../security.js"
 import { listProfiles, saveProfile, loadProfile, deleteProfile } from "../configProfiles.js"
@@ -9,6 +9,12 @@ import { logger } from "../logger.js"
 const SETTINGS_KEY = "train-generator-settings"
 const APP_SETTINGS_KEY = "training-generator-app-settings"
 const UI_LANG_KEY = "train-generator-ui-lang"
+// v2.0.1 — Recent presets quick-access (Task 6.8). Stored separately from
+// SETTINGS_KEY so the LRU list survives preset loads (which overwrite
+// SETTINGS_KEY with the chosen snapshot).
+const RECENT_PRESETS_KEY = "training-generator-recent-presets"
+const MAX_RECENT_PRESETS = 5
+const PRESET_SNAPSHOT_PREFIX = "train-generator-preset-snapshot-"
 const VALID_PROCESSING_TYPES = ["instruction", "conversation", "chunking", "custom"]
 const VALID_OUTPUT_FORMATS = ["jsonl", "json", "chatml", "text", "csv"]
 const VALID_LANGUAGES = ["en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko"]
@@ -52,6 +58,11 @@ export interface SettingsStore {
     setEnableThinking: (value: boolean) => void
     setAppSetting: <K extends keyof FullAppSettings>(key: K, value: FullAppSettings[K]) => void
     setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void
+    setFileListSort: (by: FileListSortBy, dir: FileListSortDir) => void
+    // v2.0.1 — Recent presets quick-access (Task 6.8)
+    recentPresets: () => RecentPresetEntry[]
+    addRecentPreset: (name: string, path: string) => void
+    loadPreset: (path: string) => Promise<void>
     loadSettings: () => Promise<void>
     savePreset: () => Promise<void>
     loadAppSettings: () => void
@@ -223,13 +234,20 @@ export function createSettingsStore(): SettingsStore {
         autoRegenerateOnLowQuality: false,
         regenerateThreshold: 0.6,
         maxRegenerationAttempts: 2,
-        // v2.0.1 defaults — logging
+        // v2.0.1 — Logging
         logToFile: false,
-        logFilePath: ""
+        logFilePath: "",
+        // v2.0.1 — File list UI
+        fileListSort: { by: "date", dir: "asc" },
+        // v2.0.1 — UI state (persisted): Advanced section disclosure (collapsed by default)
+        advancedExpanded: false
     })
     const [profiles, setProfiles] = createStore<ConfigProfile[]>([])
     const [selectedProfile, setSelectedProfile] = createSignal<string>("")
     const [apiKeyPlain, setApiKeyPlain] = createSignal<string>("")
+    // v2.0.1 — Recent presets quick-access (Task 6.8). Signal-backed so the
+    // ConfigPanel dropdown reactively updates when savePreset records a new entry.
+    const [recentPresets, setRecentPresets] = createSignal<RecentPresetEntry[]>([])
     const isCloudProvider = createMemo(() => settings.provider !== "ollama")
     function applyTheme(theme: string): void {
         if (mediaListener) {
@@ -378,9 +396,89 @@ export function createSettingsStore(): SettingsStore {
                 baseUrl
             }
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(toSave))
+            // v2.0.1 — Recent presets quick-access (Task 6.8). Snapshot the
+            // saved preset under a namespaced key so loadPreset can restore it
+            // without clobbering the LRU list. Then record (name, path) at the
+            // head of the LRU list.
+            const name = provider + "/" + (settings.model || "default")
+            const snapshotPath = PRESET_SNAPSHOT_PREFIX + name
+            localStorage.setItem(snapshotPath, JSON.stringify(toSave))
+            addRecentPreset(name, snapshotPath)
         }
         catch (error) {
             logger.error("Error in savePreset:", error)
+        }
+    }
+    // v2.0.1 — Recent presets quick-access (Task 6.8).
+    // loadRecentPresets reads the persisted LRU list from localStorage at
+    // store construction so the dropdown is populated on app boot.
+    function loadRecentPresets(): void {
+        try {
+            const raw = localStorage.getItem(RECENT_PRESETS_KEY)
+            if (!raw) return
+            const parsed: unknown = JSON.parse(raw)
+            if (!Array.isArray(parsed)) return
+            const valid: RecentPresetEntry[] = []
+            for (const entry of parsed) {
+                if (
+                    entry && typeof entry === "object" &&
+                    typeof (entry as Record<string, unknown>).name === "string" &&
+                    typeof (entry as Record<string, unknown>).path === "string" &&
+                    typeof (entry as Record<string, unknown>).savedAt === "number"
+                ) {
+                    valid.push({
+                        name: (entry as Record<string, unknown>).name as string,
+                        path: (entry as Record<string, unknown>).path as string,
+                        savedAt: (entry as Record<string, unknown>).savedAt as number
+                    })
+                }
+            }
+            // Cap at MAX_RECENT_PRESETS in case the persisted list was edited
+            // out-of-band or the cap was lowered in a prior version.
+            setRecentPresets(valid.slice(0, MAX_RECENT_PRESETS))
+        }
+        catch (error) {
+            logger.error("Failed to load recent presets:", error)
+        }
+    }
+    function saveRecentPresets(list: RecentPresetEntry[]): void {
+        try {
+            localStorage.setItem(RECENT_PRESETS_KEY, JSON.stringify(list))
+        }
+        catch (error) {
+            logger.error("Failed to save recent presets:", error)
+        }
+    }
+    // addRecentPreset is synchronous — called at the end of the async
+    // savePreset. Because JS is single-threaded, rapid saves cannot race
+    // here: the awaited encryptKey resolves before addRecentPreset runs, and
+    // the next savePreset's await cannot interleave between the read of
+    // recentPresets() and the setRecentPresets+saveRecentPresets pair.
+    function addRecentPreset(name: string, path: string): void {
+        const current = recentPresets()
+        // Dedup by name: drop any existing entry with the same name so the
+        // new entry is the sole representative and moves to the head (LRU).
+        const filtered = current.filter(p => p.name !== name)
+        const entry: RecentPresetEntry = { name, path, savedAt: Date.now() }
+        const next = [entry, ...filtered].slice(0, MAX_RECENT_PRESETS)
+        setRecentPresets(next)
+        saveRecentPresets(next)
+    }
+    // loadPreset restores a previously-saved snapshot by writing it back to
+    // SETTINGS_KEY and re-running the validated loadSettings path. Missing
+    // snapshots log a graceful error and leave current settings untouched.
+    async function loadPreset(path: string): Promise<void> {
+        try {
+            const raw = localStorage.getItem(path)
+            if (!raw) {
+                logger.error("Recent preset not found:", path)
+                return
+            }
+            localStorage.setItem(SETTINGS_KEY, raw)
+            await loadSettings()
+        }
+        catch (error) {
+            logger.error("Failed to load preset:", error)
         }
     }
     function loadAppSettings(): void {
@@ -414,7 +512,9 @@ export function createSettingsStore(): SettingsStore {
                 // v2.0.1 — validation
                 "skipDedup", "autoRegenerateOnLowQuality",
                 // v2.0.1 — logging
-                "logToFile"
+                "logToFile",
+                // v2.0.1 — UI state (Advanced section disclosure)
+                "advancedExpanded"
             ]
             for (const key of boolKeys) {
                 if (saved[key] !== undefined) {
@@ -488,6 +588,13 @@ export function createSettingsStore(): SettingsStore {
             if (Array.isArray(saved.stopSequences)) setAppSettings("stopSequences", saved.stopSequences)
             if (Array.isArray(saved.bannedPhrases)) setAppSettings("bannedPhrases", saved.bannedPhrases)
             if (Array.isArray(saved.requiredPhrases)) setAppSettings("requiredPhrases", saved.requiredPhrases)
+            // v2.0.1 — file list sort preference
+            const savedSort = saved.fileListSort
+            if (savedSort && typeof savedSort === "object") {
+                const by: FileListSortBy = savedSort.by === "name" || savedSort.by === "size" ? savedSort.by : "date"
+                const dir: FileListSortDir = savedSort.dir === "desc" ? "desc" : "asc"
+                setAppSettings("fileListSort", { by, dir })
+            }
             // Migration: if v2.0.0 settings had no outputFileMode, default to "combined" (already the createStore default)
             const savedLang = localStorage.getItem(UI_LANG_KEY)
             if (savedLang) {
@@ -584,7 +691,9 @@ export function createSettingsStore(): SettingsStore {
             maxRegenerationAttempts: 2,
             // v2.0.1 — logging
             logToFile: false,
-            logFilePath: ""
+            logFilePath: "",
+            // v2.0.1 — file list UI
+            fileListSort: { by: "date", dir: "asc" }
         })
         saveAppSettings()
         applyTheme("auto")
@@ -655,6 +764,10 @@ export function createSettingsStore(): SettingsStore {
         applyHighContrast(Boolean(appSettings.highContrast))
     })
     loadAppSettings()
+    // v2.0.1 — Recent presets quick-access (Task 6.8). Load after
+    // loadAppSettings so the LRU list is available for the dropdown on first
+    // render. Independent of appSettings so order doesn't matter functionally.
+    loadRecentPresets()
     return {
         get settings() { return settings },
         get appSettings() { return appSettings },
@@ -692,6 +805,16 @@ export function createSettingsStore(): SettingsStore {
         setEnableThinking: (value: boolean) => setAppSettings("enableThinking", value),
         setAppSetting: <K extends keyof FullAppSettings>(key: K, value: FullAppSettings[K]) => setAppSettings(key, value as any),
         setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => setSettings(key, value as any),
+        setFileListSort: (by: FileListSortBy, dir: FileListSortDir) => {
+            const validBy: FileListSortBy = by === "name" || by === "size" ? by : "date"
+            const validDir: FileListSortDir = dir === "desc" ? "desc" : "asc"
+            setAppSettings("fileListSort", { by: validBy, dir: validDir })
+            saveAppSettings()
+        },
+        // v2.0.1 — Recent presets quick-access (Task 6.8)
+        recentPresets,
+        addRecentPreset,
+        loadPreset,
         loadSettings,
         savePreset,
         loadAppSettings,

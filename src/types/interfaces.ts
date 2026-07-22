@@ -59,6 +59,18 @@ export interface SelectedFile{
     size:number
     type:string
     path:string|null
+    addedAt?:number
+}
+export type FileListSortBy='name'|'size'|'date'
+export type FileListSortDir='asc'|'desc'
+export interface FileListSort{
+    by:FileListSortBy
+    dir:FileListSortDir
+}
+export interface RecentPresetEntry{
+    name:string
+    path:string
+    savedAt:number
 }
 export interface ChatMessage{
     role:'system'|'user'|'assistant'
@@ -214,6 +226,10 @@ export interface AppSettings{
     // v2.0.1 — Logging
     logToFile?:boolean
     logFilePath?:string
+    // v2.0.1 — File list UI
+    fileListSort?:FileListSort
+    // v2.0.1 — Recent presets quick-access
+    recentPresets?:RecentPresetEntry[]
 }
 export interface FullAppSettings{
     theme?:string
@@ -313,6 +329,12 @@ export interface FullAppSettings{
     // v2.0.1 — Logging
     logToFile?:boolean
     logFilePath?:string
+    // v2.0.1 — File list UI
+    fileListSort?:FileListSort
+    // v2.0.1 — UI state (persisted): whether the Advanced section's fields are expanded
+    advancedExpanded?:boolean
+    // v2.0.1 — Recent presets quick-access
+    recentPresets?:RecentPresetEntry[]
 }
 export interface LogEntry{
     timestamp:string
