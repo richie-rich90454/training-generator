@@ -255,7 +255,7 @@
     display:flex;
     align-items:center;
     gap:var(--spacing-sm);
-    margin:0 0 var(--spacing-sm) 0;
+    margin:0;
     font-size:.95rem;
     font-weight:600;
     color:var(--text-primary);

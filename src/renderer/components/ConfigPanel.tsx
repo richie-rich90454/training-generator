@@ -338,11 +338,11 @@ export function ConfigPanel(props: ConfigPanelProps): JSX.Element {
                         <span class={styles["range-value-pill"]} aria-live="polite">{temperatureDisplay().text}</span>
                     </div>
                 </div>
+                <legend class={styles["config-section__title"]}>
+                    <Icon html={renderIcon("fa-file-export")} />
+                    <span data-i18n="config.outputMode">{t("config.outputMode")}</span>
+                </legend>
                 <fieldset class={styles["config-section"]}>
-                    <legend class={styles["config-section__title"]}>
-                        <Icon html={renderIcon("fa-file-export")} />
-                        <span data-i18n="config.outputMode">{t("config.outputMode")}</span>
-                    </legend>
                     <p class={styles["config-section__description"]} data-i18n="config.outputMode.description">
                         {t("config.outputMode.description")}
                     </p>

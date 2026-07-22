@@ -24,7 +24,7 @@
     padding:var(--spacing-lg);
     max-width:520px;
     width:90%;
-    max-height:80vh;
+    max-height:90vh;
     overflow-y:auto;
     box-shadow:var(--shadow-4);
     transform:translateY(20px);
