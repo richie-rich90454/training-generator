@@ -52,6 +52,7 @@ export interface UIStore {
     devtoolsOpen: () => boolean
     outputPreview: () => string
     outputPreviewLoading: () => boolean
+    outputPreviewSearch: () => string
     liveStreamText: () => string
     appendLiveStream: (text: string) => void
     clearLiveStream: () => void
@@ -86,6 +87,7 @@ export interface UIStore {
     setOutputPreview: (text: string, loading?: boolean) => void
     clearOutputPreview: () => void
     updateOutputPreviewDebounced: (text: string, loading?: boolean) => void
+    setOutputPreviewSearch: (value: string) => void
     setFilesProcessed: (count: number) => void
     setLastProcessed: (time: string) => void
     setAvailableOllamaModels: (models: string[]) => void
@@ -118,6 +120,7 @@ export function createUIStore(): UIStore {
     const [commandPaletteOpen, setCommandPaletteOpenState] = createSignal<boolean>(false)
     const [outputPreview, setOutputPreview] = createSignal<string>("")
     const [outputPreviewLoading, setOutputPreviewLoading] = createSignal<boolean>(false)
+    const [outputPreviewSearch, setOutputPreviewSearch] = createSignal<string>("")
     const [liveStreamText, setLiveStreamText] = createSignal<string>("")
     const [filesProcessed, setFilesProcessed] = createSignal<number>(0)
     const [lastProcessed, setLastProcessed] = createSignal<string>(t("status.lastProcessedNever"))
@@ -338,6 +341,7 @@ export function createUIStore(): UIStore {
         devtoolsOpen,
         outputPreview,
         outputPreviewLoading,
+        outputPreviewSearch,
         liveStreamText,
         appendLiveStream,
         clearLiveStream,
@@ -372,6 +376,7 @@ export function createUIStore(): UIStore {
         setOutputPreview: setOutputPreviewDirect,
         clearOutputPreview,
         updateOutputPreviewDebounced,
+        setOutputPreviewSearch: (value: string) => setOutputPreviewSearch(value),
         setFilesProcessed: (count: number) => setFilesProcessed(count),
         setLastProcessed: (time: string) => setLastProcessed(time),
         setAvailableOllamaModels: (models: string[]) => setAvailableOllamaModels(models),

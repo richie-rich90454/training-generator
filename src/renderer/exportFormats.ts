@@ -207,3 +207,55 @@ let defaultRegistry=createDefaultExporterRegistry()
 export function exportFormat(format: string, items: TrainingItem[], options?: ExportOptions): Buffer|string|Promise<Buffer|string>{
     return defaultRegistry.export(format, items, options)
 }
+
+// Maximum sample size used when estimating total export size. Sampling keeps
+// the estimation O(1)-ish regardless of how large the dataset grows.
+const ESTIMATE_SAMPLE_SIZE = 50
+
+function byteLength(str: string): number {
+    // TextEncoder counts UTF-8 bytes — accurate for multi-byte content
+    // (CJK, emoji, etc.) and available in both browser and Node contexts.
+    return new TextEncoder().encode(str).length
+}
+
+/**
+ * Estimate the total byte size of exporting `items` with the given `format`.
+ *
+ * Samples up to {@link ESTIMATE_SAMPLE_SIZE} items, serializes each with the
+ * active exporter, averages the per-item byte count, and scales up to the full
+ * dataset. Returns `0` for empty input or unknown formats — callers should
+ * render "~0 B" in that case.
+ *
+ * Notes:
+ * - Async exporters are skipped (the default registry only registers sync
+ *   exporters, so this is defensive).
+ * - Buffer returns are skipped because the renderer context does not define
+ *   `Buffer`; only string returns are measured.
+ * - A throwing exporter (e.g., malformed item) is caught and contributes 0
+ *   bytes to the sample sum.
+ */
+export function estimateExportSize(items: TrainingItem[], format: string): number {
+    if (!items || items.length === 0) return 0
+    const exporter = defaultRegistry.get(format)
+    if (!exporter) return 0
+    const sampleSize = Math.min(ESTIMATE_SAMPLE_SIZE, items.length)
+    const sample = items.slice(0, sampleSize)
+    let totalSampleBytes = 0
+    for (const item of sample) {
+        try {
+            const result = exporter.export([item])
+            if (typeof result === "string") {
+                totalSampleBytes += byteLength(result)
+            }
+            // Skip Buffer and Promise<...> results — sync string output is the
+            // only case the renderer can measure without async glue.
+        } catch {
+            // Defensive: a single malformed item should not zero-out the
+            // estimate for the rest of the dataset.
+            continue
+        }
+    }
+    if (sampleSize === 0 || totalSampleBytes === 0) return 0
+    const avgBytesPerItem = totalSampleBytes / sampleSize
+    return Math.round(avgBytesPerItem * items.length)
+}
