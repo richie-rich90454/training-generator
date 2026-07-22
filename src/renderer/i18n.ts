@@ -2719,6 +2719,11 @@ OUTPUT: structured analysis covering everything important.`,
   },
 }
 
+// Snapshot of locale data BEFORE the English-fallback merge below.
+// Used by tests/i18n-key-parity.test.ts to verify each locale explicitly
+// provides its own translation for every English key (no silent fallbacks).
+export const rawTranslations: Record<string, TranslationDict> = { ...translations }
+
 const baseEnTranslations = translations.en
 for (const locale of Object.keys(translations)) {
   if (locale !== "en") {
