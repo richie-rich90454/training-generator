@@ -1,6 +1,12 @@
+---
+title: Development Guide
+description: Local development setup, scripts, code style, testing, build and packaging, and contribution conventions for Training Generator.
+outline: [2, 3]
+---
+
 # Development Guide
 
-This guide covers local development setup, scripts, code style, testing, build and packaging, and the conventions used across the Training Generator codebase. It is the companion to [CONTRIBUTING.md](../CONTRIBUTING.md), which covers the contribution workflow and PR checklist.
+This guide covers local development setup, scripts, code style, testing, build and packaging, and the conventions used across the Training Generator codebase. It is the companion to [CONTRIBUTING.md](../../CONTRIBUTING.md), which covers the contribution workflow and PR checklist.
 
 ---
 
@@ -177,7 +183,13 @@ When adding or changing UI text:
 2. Use `t('your.key')` in TypeScript modules, SolidJS components, exporters, and the splash screen instead of literal strings.
 3. For dynamic values, pass replacements through the third argument: `t('error.unsupportedFileFormat', undefined, { format })`.
 4. Run `npm run typecheck` after changing keys to catch missing imports or type mismatches.
-5. Update `docs/user-guide.md` and `docs/configuration.md` if the new option changes user-facing behavior.
+5. Update the relevant docs page if the new option changes user-facing behavior:
+   - New setting → `/configuration/settings-reference.md`
+   - New shortcut → `/getting-started/keyboard-shortcuts.md`
+   - New provider → `/providers/overview.md`
+   - New output format → `/output/formats.md`
+   - Architecture change → `/architecture/overview.md`
+   - Troubleshooting tip → `/troubleshooting/common-issues.md`
 
 The i18n test suite asserts 100% key coverage across all eight locales. Missing keys fall back to English.
 
@@ -185,16 +197,16 @@ The i18n test suite asserts 100% key coverage across all eight locales. Missing 
 
 ## Testing
 
-Training Generator uses **Vitest** with `@solidjs/testing-library` and `happy-dom`. The suite contains 4,868 tests across 184 files with 100% coverage as the target.
+Training Generator uses **Vitest** with `@solidjs/testing-library` and `happy-dom`. The suite contains roughly 5,467 tests across more than 200 files with 100% coverage as the target.
 
 ```bash
-npm test                # Full suite (4,868 tests)
+npm test                # Full suite (roughly 5,467 tests)
 npm run test:watch      # Watch mode
 npm run test:coverage   # V8 coverage report
 npm run typecheck       # tsc --noEmit (strict mode)
 ```
 
-See the [Testing guide](testing/overview.md) for the full strategy, test layout, conventions, and how to add tests for a new feature.
+See the [Testing guide](../testing/overview.md) for the full strategy, test layout, conventions, and how to add tests for a new feature.
 
 ::: tip Crucial tests
 Test files suffixed `-crucial` cover the most load-bearing behavior of a module. Treat failures of these as release blockers.
@@ -230,12 +242,12 @@ npm run docs:preview    # Preview the built site locally
 
 When adding a new feature, update the relevant doc:
 
-- New setting → `docs/configuration/settings-reference.md` (and the relevant section doc).
-- New shortcut → `docs/keyboard-shortcuts.md`.
-- New provider → `docs/providers/overview.md` and `docs/providers.md`.
-- New output format → `docs/output/formats.md`.
-- Architecture change → `docs/architecture.md` and `docs/architecture/overview.md`.
-- Troubleshooting tip → `docs/troubleshooting/common-issues.md`.
+- New setting → `/configuration/settings-reference.md` (and the relevant section doc).
+- New shortcut → `/getting-started/keyboard-shortcuts.md`.
+- New provider → `/providers/overview.md`.
+- New output format → `/output/formats.md`.
+- Architecture change → `/architecture/overview.md`.
+- Troubleshooting tip → `/troubleshooting/common-issues.md`.
 
 The docs README (`docs/README.md`) is the entry point for the docs site.
 
@@ -277,7 +289,7 @@ Releases are tagged `v<version>` (for example `v2.0.1`) and built via GitHub Act
 3. The release workflow builds and publishes installers to GitHub Releases.
 4. The release-drafter workflow maintains the release notes draft.
 
-See [CHANGELOG.md](../CHANGELOG.md) for the per-release change history.
+See [CHANGELOG.md](../../CHANGELOG.md) for the per-release change history.
 
 ---
 
@@ -289,7 +301,7 @@ See [CHANGELOG.md](../CHANGELOG.md) for the per-release change history.
 
 ## Next steps
 
-- [CONTRIBUTING.md](../CONTRIBUTING.md) — contribution workflow and PR checklist.
-- [Architecture](architecture/overview.md) — main/renderer/worker split and data flow.
-- [Testing](testing/overview.md) — test strategy and coverage.
-- [Installation](getting-started/installation.md) — local setup details.
+- [CONTRIBUTING.md](../../CONTRIBUTING.md) — contribution workflow and PR checklist.
+- [Architecture](overview.md) — main/renderer/worker split and data flow.
+- [Testing](../testing/overview.md) — test strategy and coverage.
+- [Installation](../getting-started/installation.md) — local setup details.
