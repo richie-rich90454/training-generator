@@ -22,6 +22,46 @@ All v2.0.1 fields seed sensible defaults so existing persisted settings remain b
 - **Since** — the version the field was introduced. Fields marked `2.0.0` existed before v2.0.1. Fields marked `2.0.1` are new in this release.
 - **Control** — where the field is exposed in the UI (ConfigPanel = right column, Modal = Settings modal, CLI = config file only).
 
+## Settings interfaces
+
+The settings are typed in `src/types/interfaces.ts`. `AppSettings` covers the configuration panel and export controls, while `FullAppSettings` covers the Settings modal, window, and telemetry fields:
+
+```ts
+export interface AppSettings {
+  model?: string
+  processingType?: string
+  outputFormat?: string
+  language?: string
+  chunkSize?: number
+  concurrency?: number
+  provider?: string
+  apiKey?: string
+  baseUrl?: string
+  temperature?: number
+  // … additional panel fields
+  outputFileMode?: 'combined' | 'perFile'
+  outputFilenameTemplate?: string
+  confirmBeforeExport?: boolean
+  autoExportOnCompletion?: boolean
+  maxItemsPerFile?: number
+}
+
+export interface FullAppSettings {
+  theme?: string
+  fontSize?: string
+  autoSave?: boolean
+  autoCheckOllama?: boolean
+  startMaximized?: boolean
+  rememberWindowSize?: boolean
+  maxFileSize?: number
+  maxOutputItems?: number
+  maxChunks?: number
+  smartSizing?: boolean
+  maxParallelFiles?: number
+  // … additional modal fields
+}
+```
+
 ---
 
 ## Output mode and export controls
