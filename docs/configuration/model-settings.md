@@ -119,6 +119,22 @@ The Settings modal lets you save **named profiles** (`train-generator-profiles`)
 
 Each stored profile contains: `name`, `model`, `processingType`, `outputFormat`, `language`, `chunkSize`, `concurrency`, `provider`, `baseUrl`, `smartSizing`, `createdAt`.
 
+## Programmatic access
+
+The same settings are available through `createSettingsStore` in `src/renderer/stores/settingsStore.ts`:
+
+```ts
+import { createSettingsStore } from "../src/renderer/stores/settingsStore.js"
+
+const settings = createSettingsStore()
+settings.setModel("llama3.2")
+settings.setProvider("ollama")
+settings.setTemperature(0.7)
+settings.setChunkSize(2000)
+settings.setConcurrency(3)
+settings.setProcessingType("instruction")
+```
+
 ## Quick reference
 
 | Setting | Default | Typical range |
