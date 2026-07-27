@@ -148,6 +148,34 @@ This prevents cluttering your output directory with empty `.jsonl` files.
 
 ---
 
+## Output store code
+
+`createOutputStore` in `src/renderer/stores/outputStore.ts` branches on `outputFileMode` and groups items by `sourceFile` metadata:
+
+```ts
+const mode = opts.getOutputFileMode?.() || 'combined'
+if (mode === 'perFile') {
+  await exportPerFile(allData, format)
+  return
+}
+
+if (allData.length > SPLIT_THRESHOLD) {
+  // split into training_data-1.jsonl, training_data-2.jsonl, …
+}
+```
+
+The per-file path expands the filename template and splits large groups independently:
+
+```ts
+const baseName = expandFilenameTemplate(template, {
+  source: sourceStem,
+  format,
+  index: fileIndex
+})
+const partCount = Math.ceil(items.length / maxItems)
+const filename = `${baseName}${partSuffix}${extensionForFormat(format)}`
+```
+
 ## CLI behavior
 
 The CLI does **not** support per-file mode. It always runs in combined mode and writes a single file at the path passed to `--output`. The `outputFileMode`, `outputFilenameTemplate`, and `maxItemsPerFile` settings are not exposed as CLI flags. If you need per-source exports, run the desktop app or post-process the combined CLI output. See [CLI Usage](/cli/usage.md) for the full flag reference.
