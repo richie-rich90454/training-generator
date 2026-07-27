@@ -67,6 +67,36 @@ The renderer is built with **SolidJS** fine-grained reactivity (`createSignal`, 
 
 The orchestrator (`src/renderer/processing/orchestrator.ts`) decouples file reading, chunking, and processing logic from components. CSS is plain vanilla CSS with module scoping configured globally to preserve existing class names.
 
+## Store API
+
+Stores are framework-agnostic functions that return reactive SolidJS primitives. For example, `createOutputStore` exposes generated items and export helpers:
+
+```ts
+import { createOutputStore } from "../src/renderer/stores/outputStore.js"
+
+const output = createOutputStore({
+  getOutputFileMode: () => "combined",
+  getOutputFilenameTemplate: () => "{source}",
+  getMaxItemsPerFile: () => 50000,
+  getIncludeSourceMetadata: () => false,
+  getStripPiiBeforeExport: () => false
+})
+
+output.stageItems(items, "report.pdf")
+await output.exportOutput("jsonl")
+```
+
+## IPC bridge
+
+The preload script exposes a tightly scoped API. Renderer code calls `window.electronAPI` for filesystem and provider operations instead of using Node APIs directly:
+
+```ts
+const savePath = await window.electronAPI.saveFileDialog("training_data.jsonl")
+if (savePath) {
+  await window.electronAPI.saveFile(savePath, content)
+}
+```
+
 ## Key modules
 
 ### File parsing
