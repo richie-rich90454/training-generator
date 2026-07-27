@@ -267,4 +267,3 @@ The v2.0.1 release adds roughly fifty new user-adjustable fields on top of the v
 - [Output Mode](/configuration/output-mode.md) — the per-file export feature guide.
 - [Model Settings](/configuration/model-settings.md) — provider, temperature, chunk size, concurrency.
 - [Output Settings](/configuration/output-settings.md) — format and language selection.
-- [Configuration Guide](/configuration.md) — the configuration panel and Settings modal walkthrough.
