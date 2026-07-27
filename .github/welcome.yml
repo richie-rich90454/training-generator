@@ -1,0 +1,27 @@
+# Welcome configuration.
+#
+# These messages are posted to first-time contributors. They are consumed by
+# the welcome workflow at .github/workflows/welcome.yml (which uses
+# actions/first-interaction@v1) and can also be read by any welcome bot that
+# consumes this schema.
+
+# Posted the first time someone opens an issue in this repository.
+issueOpened: >
+  Thanks for opening your first issue in Training Generator!
+
+  Please make sure you've included enough detail for us to reproduce or
+  understand the problem. While you wait, feel free to check the
+  [documentation](https://github.com/richie-rich90454/training-generator/tree/main/docs)
+  and the
+  [troubleshooting guide](https://github.com/richie-rich90454/training-generator/blob/main/docs/troubleshooting/common-issues.md).
+  A maintainer will take a look soon. Thanks for helping improve the project.
+
+# Posted the first time someone opens a pull request in this repository.
+pullRequestOpened: >
+  Thanks for opening your first pull request in Training Generator!
+
+  A maintainer will review your changes shortly. In the meantime, please make
+  sure you've read
+  [CONTRIBUTING.md](https://github.com/richie-rich90454/training-generator/blob/main/CONTRIBUTING.md)
+  and that `npm run typecheck` and `npm test` pass locally. We really
+  appreciate your contribution!

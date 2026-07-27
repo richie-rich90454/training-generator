@@ -1,0 +1,44 @@
+import type{FileObj,ReadFileResult,SaveFileResult,ParseFileResult,ParseBatchResult,OllamaStatus,OllamaGenerateResult,LogEntry}from"./index.js"
+
+export interface ElectronAPI{
+    openFileDialog:()=>Promise<FileObj[]>
+    readFile:(filePath:string)=>Promise<ReadFileResult>
+    getPrompt:(language:string,processingType:string)=>Promise<{success:boolean;content?:string;error?:string}>
+    parseFile:(filePath:string,fileType:string)=>Promise<ParseFileResult>
+    parseFileBuffer:(buffer:ArrayBuffer,fileType:string)=>Promise<ParseFileResult>
+    parseFilesBatch:(files:FileObj[])=>Promise<ParseBatchResult>
+    saveFile:(filePath:string,content:string)=>Promise<SaveFileResult>
+    saveFileDialog:(defaultFilename?:string)=>Promise<string|null>
+    chooseDirectory:(defaultPath?:string)=>Promise<string|null>
+    checkOllama:(ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaStatus>
+    generateWithOllama:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
+    generateWithOllamaStream:(model:string,prompt:string,options?:Record<string,unknown>,ollamaHost?:string,ollamaPort?:number)=>Promise<OllamaGenerateResult>
+    generateWithOpenAI:(apiKey:string,baseUrl:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
+    generateWithAnthropic:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
+    generateWithGemini:(apiKey:string,model:string,prompt:string,options?:Record<string,unknown>)=>Promise<{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}>
+    getAppVersion:()=>Promise<string>
+    getPlatform:()=>Promise<string>
+    getSecureKey:()=>Promise<string|null>
+    setSecureKey:(key:string)=>Promise<boolean>
+    openUserGuide:()=>Promise<{success:boolean;error?:string}>
+    loadCache:()=>Promise<{success:boolean;data?:Record<string,any>}>
+    saveCache:(data:Record<string,any>)=>Promise<{success:boolean}>
+    clearCache:()=>Promise<{success:boolean}>
+    compactCache:()=>Promise<{success:boolean}>
+    saveProgress:(data:any)=>Promise<{success:boolean}>
+    loadProgress:()=>Promise<{success:boolean;data?:any}>
+    clearProgress:()=>Promise<{success:boolean}>
+    saveCheckpoint:(data:any)=>Promise<{success:boolean}>
+    loadCheckpoint:()=>Promise<{success:boolean;data?:any}>
+    clearCheckpoint:()=>Promise<{success:boolean}>
+    writeLog:(entry:LogEntry)=>Promise<void>
+    exportLogs:(data:string)=>Promise<{success:boolean;error?:string}>
+    onOllamaStreamToken:(requestId:string,callback:(token:string)=>void)=>()=>void
+}
+
+declare global{
+    interface Window{
+        electronAPI?:ElectronAPI
+        app?:unknown
+    }
+}

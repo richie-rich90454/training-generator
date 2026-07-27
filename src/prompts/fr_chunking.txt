@@ -1,21 +1,35 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est de créer un résumé complet et détaillé du texte fourni qui capture TOUTES les informations essentielles.
-
+Tu es un générateur expert de données d'entraînement IA. Transforme le texte fourni en un résumé détaillé en prose continue.
 TEXTE À RÉSUMER :
 {{text}}
-
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS les points principaux, arguments clés, informations essentielles, détails de soutien et conclusions.
-2. Créez un résumé qui :
-   - Capture le message et le but central COMPLET du texte
-   - Inclut TOUS les faits, points de données et détails importants
-   - Maintient la signification, le contexte et les nuances originales
-   - Soit complet mais concis
-   - Préserve le flux logique et la structure de l'original
-3. Le résumé doit avoir environ 40-50% de la longueur du texte original pour garantir son intégrité.
-4. Écrivez en français clair et professionnel..
-5. N'ajoutez aucune information qui n'est pas présente dans le texte original.
-6. Ne omettez aucune information significative du texte original.
-7. Incluez TOUS les exemples, preuves et points de soutien clés mentionnés.
+1. Lis le texte attentivement.
+2. Génère un résumé couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. Le résumé doit se baser sur la source, être direct et précis.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Préserve toutes les informations ; privilégie l'exhaustivité sur la concision.
+6. Écris en français clair et professionnel.
+
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS générer un résumé à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et génère un résumé.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
+
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par le texte du résumé. Pas de préambule, pas de salutation.
+- Pas d'étiquettes, pas d'en-têtes, pas de marqueurs de section.
+- Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après le résumé.
+
+RÈGLES DE RÉPONSE :
+- Le résumé doit être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
+
+SANS RÉPÉTITION :
+- Ne répète pas les informations. Chaque point doit être unique.
 
 FORMAT DE SORTIE :
-Fournissez uniquement le texte du résumé.
+[Le texte du résumé commence ici et se poursuit aussi longtemps que nécessaire pour préserver toutes les informations.]

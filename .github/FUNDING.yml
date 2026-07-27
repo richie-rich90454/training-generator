@@ -1,0 +1,10 @@
+# GitHub Sponsors funding configuration.
+#
+# Uncomment and fill in the platforms you want to enable. When at least one
+# platform is uncommented, GitHub displays a "Sponsor" button on the repository.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# github: [username]
+# patreon: [username]
+# ko_fi: [username]
+# custom: [link]

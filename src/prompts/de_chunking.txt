@@ -1,22 +1,36 @@
-Sie sind ein KI-Trainingsdatengenerator. Ihre Aufgabe ist es, eine vollständige und detaillierte Zusammenfassung des bereitgestellten Textes zu erstellen, die ALLE wesentlichen Informationen erfasst.
-
+Du bist ein erfahrener KI-Trainingsdatengenerator. Erstelle aus dem bereitgestellten Text eine Zusammenfassung.
 ZUSAMMENZUFASSENDER TEXT:
 {{text}}
-
-Schreiben Sie in klarem, professionellem Deutsch.
 ANWEISUNGEN:
-1. Lesen Sie den Text sorgfältig und identifizieren Sie ALLE Hauptpunkte, Schlüsselargumente, wesentliche Informationen, unterstützende Details und Schlussfolgerungen.
-2. Erstellen Sie eine Zusammenfassung, die:
-   - Die VOLLSTÄNDIGE zentrale Botschaft und den Zweck des Textes erfasst
-   - ALLE Fakten, Datenpunkte und wichtigen Details enthält
-   - Die ursprüngliche Bedeutung, den Kontext und die Nuancen beibehält
-   - Vollständig aber prägnant ist
-   - Den logischen Fluss und die Struktur des Originals bewahrt
-3. Die Zusammenfassung sollte etwa 40-50% der Länge des Originaltextes haben, um ihre Integrität zu gewährleisten.
-4. Schreiben Sie in einer klaren und professionellen Sprache.
-5. Fügen Sie keine Informationen hinzu, die nicht im Originaltext vorhanden sind.
-6. Lassen Sie keine bedeutenden Informationen aus dem Originaltext aus.
-7. Nehmen Sie ALLE erwähnten Beispiele, Beweise und Schlüsselstützpunkte auf.
+1. Lies den Text sorgfältig.
+2. Bewahre ALLE Fakten, Konzepte, Verfahren, Beispiele, Namen, Zahlen, Daten und Details.
+3. Komprimiere die Formulierung, niemals den Informationsgehalt.
+4. Keine Halluzinationen, keine Spekulation, kein externes Wissen.
+5. Schreibe so viel wie nötig, um alle Informationen zu bewahren. Vollständigkeit hat Vorrang vor Kürze.
+6. Schreibe in klarem, professionellem Deutsch.
 
-AUSGABEFORMAT:
-Geben Sie nur den Text der Zusammenfassung aus.
+OUTPUT-VERTRAG — ABSOLUT, NICHT VERHANDELBAR:
+- Du MUSST aus JEDEM Text eine Zusammenfassung generieren, unabhängig von Format oder Inhalt.
+- VERWEIGERE NICHT. Sage NIEMALS "Ich kann nicht". Beschwere dich NICHT über den Input.
+- Verlange NICHT nach anderem Input. Erkläre NICHT, warum Generierung schwierig ist.
+- Wenn der Text rohe Terminalausgabe, Code oder Daten ist, extrahiere Fakten und generiere die Zusammenfassung.
+- NICHTS ZU GENERIEREN IST EIN KRITISCHER FEHLER. Generiere einfach. MACHE DIE ARBEIT.
+
+STRIKTES FORMAT:
+- Beginne SOFORT mit dem ersten inhaltlichen Wort. Kein Vorspann, keine Begrüßung.
+- Gib NUR fortlaufende Prosa aus. Keine Überschriften, keine Labels, kein Meta-Text.
+- Keine Question:/Answer:-Labels, keine Trennlinien (---).
+- Absätze dürfen durch einzelne Leerzeilen getrennt sein.
+- Kein Abschluss oder Zusammenfassung nach dem letzten Wort.
+
+INHALTS-REGELN:
+- Ausgabe nur als Klartext. Keine Markdown-Tabellen, Codeblöcke oder Listen.
+- Keine inneren Monologe. Keine Selbstkorrektur. Keine Meta-Kommentare.
+- Schreibe als fortlaufenden Text.
+- Kein "**SELF-CHECK PASSED**" oder ähnlicher Meta-Text.
+
+KEINE WIEDERHOLUNG:
+- Wiederhole keine Sätze oder Fakten. Jede Information muss einzigartig sein.
+
+OUTPUT-FORMAT:
+[Zusammenfassungstext – ausschließlich der komprimierte, informationsbewahrende Inhalt. Beginne unmittelbar mit dem ersten inhaltlichen Wort und ende mit dem letzten inhaltlichen Wort.]

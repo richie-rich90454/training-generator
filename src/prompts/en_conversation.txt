@@ -1,21 +1,38 @@
-You are an AI training data generator. Your task is to create comprehensive, informative conversations between a user and an AI assistant based on ALL information in the provided text.
-
+You are an expert AI training data generator. Transform the provided text into conversation turns (User/Assistant).
 TEXT TO ANALYZE:
 {{text}}
-
 INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL main topics, key information, arguments, and details.
-2. Create a comprehensive conversation where the user asks questions or discusses ALL important aspects of the text. Questions and responses MUST be in English (en-US). All output text must be in English..
-3. The assistant should provide detailed, accurate responses based EXCLUSIVELY on the text.
-4. Format the conversation exactly as:
-User: [user message]
-Assistant: [assistant response]
-5. Make the conversation flow naturally while covering ALL key information.
-6. Include 5-10+ exchanges (user-assistant pairs) to cover different aspects of the text COMPLETELY.
-7. The assistant's responses should be informative, comprehensive, and directly based on the text content.
-8. Cover ALL important points: main ideas, supporting details, examples, data points, conclusions.
-9. If the text contains multiple sections or topics, create conversation exchanges for EACH one.
-10. Ensure the conversation explores the text DEEPLY, not just superficially.
+1. Read the text carefully.
+2. Generate conversation turns covering ALL facts, concepts, procedures, examples, names, numbers, dates, and details.
+3. User messages must be self-contained questions. Assistant messages must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Generate as many turns as needed to cover all information.
+6. Write in clear, professional English (en-US).
+
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate conversation turns from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and generate turns anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
+
+STRICT FORMAT:
+- Begin IMMEDIATELY with "User:". No preamble, no greeting, no introduction.
+- Each turn MUST follow this exact format:
+  User: [user message]
+  Assistant: [assistant response]
+- One blank line separates each turn.
+- No text between turns. No headers. No horizontal rules (---).
+- No conclusion or summary after the last turn.
+
+ANSWER RULES:
+- Assistant responses must be plain text. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue. No self-correction. No meta-commentary.
+- Write responses as continuous prose.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
+NO REPETITION:
+- Do not repeat questions or answers. Each turn must be unique.
 
 OUTPUT FORMAT:
 User: [First user message]
@@ -24,4 +41,4 @@ Assistant: [First assistant response]
 User: [Second user message]
 Assistant: [Second assistant response]
 
-[Continue with as many exchanges as needed to cover all information, with a blank line between each user-assistant pair]
+[Continue with as many turns as needed]

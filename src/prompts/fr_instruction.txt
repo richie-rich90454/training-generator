@@ -1,26 +1,38 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est d'extraire des paires de questions-réponses complètes du texte fourni qui couvrent TOUTES les informations importantes pour le réglage des instructions.
-
+Tu es un générateur expert de données d'entraînement IA. Transforme le texte fourni en paires Q&R.
 TEXTE À ANALYSER :
 {{text}}
-
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS les concepts clés, faits, arguments, points de données et informations importantes.
-2. Pour CHAQUE information significative, créez une question claire et spécifique que quelqu'un pourrait poser à son sujet. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
-3. Fournissez des réponses détaillées et précises basées EXCLUSIVEMENT sur le contenu du texte.
-4. Formatez chaque paire exactement comme suit :
-Question: [la question]
-Answer: [la réponse]
-5. Créez des types de questions DIVERSIFIÉS :
-   - Questions factuelles (qui, quoi, quand, où)
-   - Questions conceptuelles (comment, pourquoi, expliquer)
-   - Questions analytiques (comparer, contraster, analyser)
-   - Questions d'application (comment utiliser, mettre en œuvre, appliquer)
-   - Questions d'inférence (que peut-on conclure, qu'est-ce qui est implicite)
-6. Assurez-vous que les réponses sont COMPLÈTES mais concises, couvrant tous les détails pertinents du texte.
-7. Générez AUTANT de paires de questions-réponses de haute qualité que nécessaire pour couvrir TOUTES les informations importantes du texte. Visez 5-10+ paires selon la densité du texte.
-8. Ne sautez AUCUNE information importante. Couvrez TOUS les points clés mentionnés dans le texte.
-9. Si le texte contient des listes, des procédures ou des étapes, créez des questions pour CHAQUE élément/étape.
-10. Si le texte contient des exemples, créez des questions sur chaque exemple.
+1. Lis le texte attentivement.
+2. Génère des paires Q&R couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. Les questions doivent être autonomes. Les réponses doivent se baser sur la source, être directes et précises.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Génère autant de paires que nécessaire pour couvrir toutes les informations.
+6. Écris en français clair et professionnel.
+
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS générer des paires Q&R à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et génère des Q&R.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
+
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par « Question: ». Pas de préambule, pas de salutation.
+- Chaque paire DOIT suivre ce format :
+  Question: [question]
+  Answer: [réponse]
+- Une ligne vide sépare chaque paire.
+- Pas de texte entre les paires. Pas d'en-têtes. Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après la dernière paire.
+
+RÈGLES DE RÉPONSE :
+- Les réponses doivent être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris les réponses en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
+
+SANS RÉPÉTITION :
+- Ne répète pas les questions ou réponses. Chaque paire doit être unique.
 
 FORMAT DE SORTIE :
 Question: [Première question]
@@ -29,4 +41,4 @@ Answer: [Première réponse]
 Question: [Deuxième question]
 Answer: [Deuxième réponse]
 
-[Continuez avec autant de paires que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire question-réponse]
+[Continue selon les besoins]

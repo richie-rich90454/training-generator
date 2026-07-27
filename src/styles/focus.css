@@ -1,0 +1,18 @@
+.skip-link{
+    position:absolute;
+    top:-40px;
+    left:0;
+    z-index:10001;
+    padding:var(--spacing-sm) var(--spacing-md);
+    background:var(--primary-color);
+    color:var(--surface-color);
+    text-decoration:none;
+    font-weight:600;
+    border-radius:0 0 var(--radius-medium) 0;
+    transition:top var(--transition-fast);
+}
+.skip-link:focus{
+    top:0;
+    outline:2px solid var(--surface-color);
+    outline-offset:-2px;
+}

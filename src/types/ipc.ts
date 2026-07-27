@@ -1,0 +1,179 @@
+import type{FileObj,OllamaModel,OllamaStatus,OllamaGenerateOptions,OllamaGenerateResult,LogEntry,ParseBatchItem}from "./interfaces.js"
+export const WINDOW_MINIMIZE_CHANNEL="window:minimize" as const
+export const WINDOW_MAXIMIZE_TOGGLE_CHANNEL="window:maximizeToggle" as const
+export const WINDOW_CLOSE_CHANNEL="window:close" as const
+export const WINDOW_IS_MAXIMIZED_CHANNEL="window:isMaximized" as const
+export const WINDOW_MAXIMIZED_CHANGED_EVENT="window:maximizedChanged" as const
+// Fire-and-forget channel (ipcRenderer.send / ipcMain.on) used to drive the
+// OS taskbar progress overlay. Payload is a single number:
+//   0..1  → percent complete
+//   -1    → indeterminate
+//   -2    → clear/remove
+export const WINDOW_SET_PROGRESS_CHANNEL="window:setProgress" as const
+export interface IpcChannels{
+    'file:parse':{
+        request:{filePath:string;fileType:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
+    'file:parseBuffer':{
+        request:{buffer:ArrayBuffer;fileType:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
+    'file:parseBatch':{
+        request:{files:FileObj[]}
+        response:{success:boolean;results?:ParseBatchItem[];error?:string}
+    }
+    'file:save':{
+        request:{filePath:string;content:string}
+        response:{success:boolean;error?:string}
+    }
+    'file:read':{
+        request:{filePath:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
+    'prompt:get':{
+        request:{language:string;processingType:string}
+        response:{success:boolean;content?:string;error?:string}
+    }
+    'dialog:openFile':{
+        request:void
+        response:FileObj[]
+    }
+    'dialog:saveFile':{
+        request:{defaultFilename?:string}
+        response:string|null
+    }
+    'dialog:chooseDirectory':{
+        request:{defaultPath?:string}
+        response:string|null
+    }
+    'ollama:check':{
+        request:{ollamaHost?:string;ollamaPort?:number}
+        response:OllamaStatus
+    }
+    'ollama:generate':{
+        request:{model:string;prompt:string;options?:OllamaGenerateOptions;ollamaHost?:string;ollamaPort?:number}
+        response:OllamaGenerateResult
+    }
+    'ollama:generateStream':{
+        request:{model:string;prompt:string;options?:OllamaGenerateOptions;ollamaHost?:string;ollamaPort?:number}
+        response:OllamaGenerateResult
+    }
+    'ollama:status-update':{
+        request:OllamaStatus
+        response:void
+    }
+    'openai:generate':{
+        request:{apiKey:string;baseUrl:string;model:string;prompt:string;options?:Record<string,unknown>}
+        response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
+    }
+    'anthropic:generate':{
+        request:{apiKey:string;model:string;prompt:string;options?:Record<string,unknown>}
+        response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
+    }
+    'gemini:generate':{
+        request:{apiKey:string;model:string;prompt:string;options?:Record<string,unknown>}
+        response:{success:boolean;response?:string;usage?:{total_tokens:number};error?:string}
+    }
+    'app:getVersion':{
+        request:void
+        response:string
+    }
+    'app:getPlatform':{
+        request:void
+        response:string
+    }
+    'docs:openUserGuide':{
+        request:void
+        response:{success:boolean;error?:string}
+    }
+    'secureKey:getKey':{
+        request:void
+        response:string|null
+    }
+    'secureKey:setKey':{
+        request:{key:string}
+        response:boolean
+    }
+    'cache:load':{
+        request:void
+        response:{success:boolean;data?:Record<string,unknown>}
+    }
+    'cache:save':{
+        request:{data:Record<string,unknown>}
+        response:{success:boolean}
+    }
+    'cache:clear':{
+        request:void
+        response:{success:boolean}
+    }
+    'cache:compact':{
+        request:void
+        response:{success:boolean}
+    }
+    'progress:save':{
+        request:{data:unknown}
+        response:{success:boolean}
+    }
+    'progress:load':{
+        request:void
+        response:{success:boolean;data?:unknown}
+    }
+    'progress:clear':{
+        request:void
+        response:{success:boolean}
+    }
+    'save-checkpoint':{
+        request:{data:unknown}
+        response:{success:boolean}
+    }
+    'load-checkpoint':{
+        request:void
+        response:{success:boolean;data?:unknown}
+    }
+    'clear-checkpoint':{
+        request:void
+        response:{success:boolean}
+    }
+    'write-log':{
+        request:{entry:LogEntry}
+        response:void
+    }
+    'export-logs':{
+        request:{data:string}
+        response:{success:boolean;error?:string}
+    }
+    'window:minimize':{
+        request:void
+        response:void
+    }
+    'window:maximizeToggle':{
+        request:void
+        response:void
+    }
+    'window:close':{
+        request:void
+        response:void
+    }
+    'window:isMaximized':{
+        request:void
+        response:boolean
+    }
+}
+export type IpcChannel=keyof IpcChannels
+export type IpcRequest<C extends IpcChannel>=IpcChannels[C]['request']
+export type IpcResponse<C extends IpcChannel>=IpcChannels[C]['response']
+export type IpcInvoke=<C extends IpcChannel>(channel:C,request:IpcRequest<C>)=>Promise<IpcResponse<C>>
+export type IpcHandle=<C extends IpcChannel>(channel:C,handler:(event:Electron.IpcMainInvokeEvent,request:IpcRequest<C>)=>IpcResponse<C>|Promise<IpcResponse<C>>)=>void
+declare module "./electron"{
+    interface ElectronAPI{
+        windowMinimize():Promise<void>
+        windowMaximizeToggle():Promise<void>
+        windowClose():Promise<void>
+        windowIsMaximized():Promise<boolean>
+        onWindowMaximizedChange(cb:(isMaximized:boolean)=>void):()=>void
+        // Fire-and-forget taskbar progress overlay.
+        //   0..1 → percent, -1 → indeterminate, -2 → clear.
+        setProgress(value:number):void
+    }
+}

@@ -1,27 +1,38 @@
-You are an AI training data generator. Your task is to extract comprehensive question-answer pairs from the provided text that cover ALL important information for instruction tuning.
-
+You are an expert AI training data generator. Transform the provided text into Q&A pairs.
 TEXT TO ANALYZE:
 {{text}}
-
-Questions and answers MUST be in English (en-US). All output text must be in English.
 INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL key concepts, facts, arguments, data points, and important information.
-2. For EACH significant piece of information, create a clear, specific question that someone might ask about it. Questions and answers MUST be in English (en-US). All output text must be in English.
-3. Provide detailed, accurate answers based EXCLUSIVELY on the text content.
-4. Format each pair exactly as:
-Question: [the question]
-Answer: [the answer]
-5. Create DIVERSE question types:
-   - Factual questions (who, what, when, where)
-   - Conceptual questions (how, why, explain)
-   - Analytical questions (compare, contrast, analyze)
-   - Application questions (how to use, implement, apply)
-   - Inference questions (what can be concluded, implied)
-6. Ensure answers are COMPREHENSIVE but concise, covering all relevant details from the text.
-7. Generate AS MANY high-quality question-answer pairs as needed to cover ALL important information in the text. Aim for 5-10+ pairs depending on text density.
-8. Do NOT skip any important information. Cover ALL key points mentioned in the text.
-9. If the text contains lists, procedures, or steps, create questions for EACH item/step.
-10. If the text contains examples, create questions about each example.
+1. Read the text carefully.
+2. Generate Q&A pairs covering ALL facts, concepts, procedures, examples, names, numbers, dates, and details.
+3. Questions must be self-contained. Answers must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Generate as many pairs as needed to cover all information.
+6. Write in clear, professional English (en-US).
+
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate Q&A pairs from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and generate Q&A anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
+
+STRICT FORMAT:
+- Begin IMMEDIATELY with "Question:". No preamble, no greeting, no introduction.
+- Each pair MUST follow this exact format:
+  Question: [question]
+  Answer: [answer]
+- One blank line separates each pair.
+- No text between pairs. No headers. No horizontal rules (---).
+- No conclusion or summary after the last pair.
+
+ANSWER RULES:
+- Answers must be plain text. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue ("Wait, let me re-read..."). No self-correction. No meta-commentary.
+- Write answers as continuous prose.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
+NO REPETITION:
+- Do not repeat questions or answers. Each pair must be unique.
 
 OUTPUT FORMAT:
 Question: [First question]
@@ -30,4 +41,4 @@ Answer: [First answer]
 Question: [Second question]
 Answer: [Second answer]
 
-[Continue with as many pairs as needed to cover all information, with a blank line between each question-answer pair]
+[Continue with as many pairs as needed]

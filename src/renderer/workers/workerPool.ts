@@ -1,0 +1,344 @@
+import type { TrainingItem } from "../../types/index.js"
+import { logger } from "../logger.js"
+
+let chunkWorker: Worker | null = null
+let dedupWorker: Worker | null = null
+let requestCounter: number = 0
+
+interface ChunkPending {
+  resolve: (chunks: string[]) => void
+  reject: (error: Error) => void
+  timer: ReturnType<typeof setTimeout>
+}
+
+interface DedupPending {
+  resolve: (result: { items: TrainingItem[]; removed: number }) => void
+  reject: (error: Error) => void
+  timer: ReturnType<typeof setTimeout>
+}
+
+const chunkPending: Map<number, ChunkPending> = new Map()
+const dedupPending: Map<number, DedupPending> = new Map()
+
+const TIMEOUT_MS: number = 60000
+const MAX_WORKER_RESTARTS: number = 3
+const MAX_PENDING: number = 100
+const MAX_WORKER_PAYLOAD_CHARS: number = 10 * 1024 * 1024
+const RESTART_BACKOFF_MS: number = 1000
+const IDLE_TIMEOUT_MS: number = 60000
+
+let chunkRestarts: number = 0
+let dedupRestarts: number = 0
+let chunkBackoffUntil: number = 0
+let dedupBackoffUntil: number = 0
+let chunkIdleTimer: ReturnType<typeof setTimeout> | null = null
+let dedupIdleTimer: ReturnType<typeof setTimeout> | null = null
+
+function supportsWorkers(): boolean {
+  return typeof Worker !== "undefined"
+}
+
+function rejectAllChunkPending(error: Error): void {
+  for (const pending of chunkPending.values()) {
+    clearTimeout(pending.timer)
+    pending.reject(error)
+  }
+  chunkPending.clear()
+}
+
+function rejectAllDedupPending(error: Error): void {
+  for (const pending of dedupPending.values()) {
+    clearTimeout(pending.timer)
+    pending.reject(error)
+  }
+  dedupPending.clear()
+}
+
+function recreateChunkWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
+  if (chunkWorker !== worker || !worker) return
+  cancelChunkIdleTermination()
+  worker.terminate()
+  chunkWorker = null
+  // Reject every pending request bound to this worker. The worker is dead, so
+  // none of them can ever receive a response — leaving them pending would make
+  // callers wait up to TIMEOUT_MS per request for an error that already happened.
+  if (chunkRestarts < MAX_WORKER_RESTARTS) {
+    chunkRestarts++
+    chunkBackoffUntil = Date.now() + RESTART_BACKOFF_MS * chunkRestarts
+    rejectAllChunkPending(new Error(reason))
+  } else {
+    chunkBackoffUntil = 0
+    rejectAllChunkPending(new Error("Chunk worker failed permanently after maximum restart attempts"))
+  }
+}
+
+function recreateDedupWorker(worker: Worker | null, reason: string = "Worker terminated"): void {
+  if (dedupWorker !== worker || !worker) return
+  cancelDedupIdleTermination()
+  worker.terminate()
+  dedupWorker = null
+  if (dedupRestarts < MAX_WORKER_RESTARTS) {
+    dedupRestarts++
+    dedupBackoffUntil = Date.now() + RESTART_BACKOFF_MS * dedupRestarts
+    rejectAllDedupPending(new Error(reason))
+  } else {
+    dedupBackoffUntil = 0
+    rejectAllDedupPending(new Error("Dedup worker failed permanently after maximum restart attempts"))
+  }
+}
+
+// Idle termination: shut down a worker that has been idle (no pending requests)
+// for IDLE_TIMEOUT_MS. This is a clean shutdown — the worker is healthy, just
+// unused. It does NOT increment the restart counter or set backoff, so the next
+// request will lazily recreate the worker via getChunkWorker()/getDedupWorker().
+// This prevents workers from staying alive forever after processing finishes.
+function scheduleChunkIdleTermination(): void {
+  if (chunkIdleTimer) return
+  if (!chunkWorker || chunkPending.size > 0) return
+  chunkIdleTimer = setTimeout(() => {
+    chunkIdleTimer = null
+    // Re-check at fire time: a request may have arrived between scheduling
+    // and firing. If so, keep the worker alive.
+    if (chunkWorker && chunkPending.size === 0) {
+      chunkWorker.terminate()
+      chunkWorker = null
+    }
+  }, IDLE_TIMEOUT_MS)
+}
+
+function cancelChunkIdleTermination(): void {
+  if (chunkIdleTimer) {
+    clearTimeout(chunkIdleTimer)
+    chunkIdleTimer = null
+  }
+}
+
+function scheduleDedupIdleTermination(): void {
+  if (dedupIdleTimer) return
+  if (!dedupWorker || dedupPending.size > 0) return
+  dedupIdleTimer = setTimeout(() => {
+    dedupIdleTimer = null
+    if (dedupWorker && dedupPending.size === 0) {
+      dedupWorker.terminate()
+      dedupWorker = null
+    }
+  }, IDLE_TIMEOUT_MS)
+}
+
+function cancelDedupIdleTermination(): void {
+  if (dedupIdleTimer) {
+    clearTimeout(dedupIdleTimer)
+    dedupIdleTimer = null
+  }
+}
+
+function createChunkWorker(): Worker | null {
+  try {
+    const worker = new Worker(new URL("./chunk.worker.js", import.meta.url), { type: "module" })
+    worker.addEventListener("message", (e: MessageEvent) => {
+      const pending = chunkPending.get(e.data.id)
+      if (!pending) return
+      chunkPending.delete(e.data.id)
+      clearTimeout(pending.timer)
+      if (e.data.error) {
+        pending.reject(new Error(e.data.error))
+      } else {
+        chunkRestarts = 0
+        chunkBackoffUntil = 0
+        pending.resolve(e.data.chunks)
+      }
+      // When the last pending request resolves, arm the idle timer so the
+      // worker doesn't stay alive forever after processing finishes.
+      if (chunkPending.size === 0) {
+        scheduleChunkIdleTermination()
+      }
+    })
+    worker.addEventListener("error", (e: ErrorEvent) => {
+      recreateChunkWorker(worker, e.message || "Worker error")
+    })
+    worker.addEventListener("messageerror", () => {
+      recreateChunkWorker(worker, "Failed to deserialize message")
+    })
+    return worker
+  } catch {
+    return null
+  }
+}
+
+function createDedupWorker(): Worker | null {
+  try {
+    const worker = new Worker(new URL("./dedup.worker.js", import.meta.url), { type: "module" })
+    worker.addEventListener("message", (e: MessageEvent) => {
+      const pending = dedupPending.get(e.data.id)
+      if (!pending) return
+      dedupPending.delete(e.data.id)
+      clearTimeout(pending.timer)
+      if (e.data.error) {
+        pending.reject(new Error(e.data.error))
+      } else {
+        dedupRestarts = 0
+        dedupBackoffUntil = 0
+        pending.resolve(e.data)
+      }
+      if (dedupPending.size === 0) {
+        scheduleDedupIdleTermination()
+      }
+    })
+    worker.addEventListener("error", (e: ErrorEvent) => {
+      recreateDedupWorker(worker, e.message || "Worker error")
+    })
+    worker.addEventListener("messageerror", () => {
+      recreateDedupWorker(worker, "Failed to deserialize message")
+    })
+    return worker
+  } catch {
+    return null
+  }
+}
+
+function getChunkWorker(): Worker | null {
+  if (!supportsWorkers()) return null
+  if (chunkRestarts >= MAX_WORKER_RESTARTS) return null
+  if (Date.now() < chunkBackoffUntil) return null
+  if (!chunkWorker) {
+    chunkWorker = createChunkWorker()
+  }
+  return chunkWorker
+}
+
+function getDedupWorker(): Worker | null {
+  if (!supportsWorkers()) return null
+  if (dedupRestarts >= MAX_WORKER_RESTARTS) return null
+  if (Date.now() < dedupBackoffUntil) return null
+  if (!dedupWorker) {
+    dedupWorker = createDedupWorker()
+  }
+  return dedupWorker
+}
+
+export async function chunkInWorker(
+  text: string,
+  chunkSize: number,
+  overlap: number,
+  smartSizing: boolean = false
+): Promise<string[]> {
+  if (chunkPending.size >= MAX_PENDING) {
+    return Promise.reject(new Error("Too many pending worker requests"))
+  }
+  if (text.length > MAX_WORKER_PAYLOAD_CHARS) {
+    logger.warn(`chunkInWorker: payload too large (${text.length} chars); truncating to ${MAX_WORKER_PAYLOAD_CHARS}`)
+    text = text.slice(0, MAX_WORKER_PAYLOAD_CHARS)
+  }
+
+  const worker = getChunkWorker()
+  if (!worker) {
+    // Fallback: import and run on main thread
+    const { semanticChunk } = await import("../chunker.js")
+    return semanticChunk(text, chunkSize, overlap, smartSizing)
+  }
+
+  // A new request is about to be registered — cancel any pending idle
+  // termination so the worker isn't torn down while we're using it.
+  cancelChunkIdleTermination()
+
+  return new Promise((resolve, reject) => {
+    const id = ++requestCounter
+    const timer = setTimeout(() => {
+      chunkPending.delete(id)
+      reject(new Error("Worker timeout"))
+      recreateChunkWorker(worker, "Worker terminated due to timeout")
+    }, TIMEOUT_MS)
+
+    chunkPending.set(id, { resolve, reject, timer })
+    // Transferable objects not applicable here: all data is text (strings/objects),
+    // not ArrayBuffer, so structured clone is the correct transfer mechanism.
+    try {
+      worker.postMessage({ id, text, chunkSize, overlap, smartSizing })
+    } catch (err) {
+      clearTimeout(timer)
+      chunkPending.delete(id)
+      reject(err instanceof Error ? err : new Error(String(err)))
+      recreateChunkWorker(worker, "Failed to post message to worker")
+    }
+  })
+}
+
+export function dedupInWorker(
+  items: TrainingItem[],
+  threshold: number = 0.9
+): Promise<{ items: TrainingItem[]; removed: number }> {
+  return new Promise((resolve, reject) => {
+    if (dedupPending.size >= MAX_PENDING) {
+      reject(new Error("Too many pending worker requests"))
+      return
+    }
+
+    const worker = getDedupWorker()
+    if (!worker) {
+      // Fallback: import and run on main thread
+      import("../deduplicator.js").then(({ deduplicate }) => {
+        resolve(deduplicate(items, threshold))
+      }).catch(reject)
+      return
+    }
+
+    cancelDedupIdleTermination()
+
+    const id = ++requestCounter
+    const timer = setTimeout(() => {
+      dedupPending.delete(id)
+      reject(new Error("Worker timeout"))
+      recreateDedupWorker(worker, "Worker terminated due to timeout")
+    }, TIMEOUT_MS)
+
+    dedupPending.set(id, { resolve, reject, timer })
+    // Transferable objects not applicable here: data is JSON-serializable objects (items array),
+    // not ArrayBuffer, so structured clone is the correct transfer mechanism.
+    try {
+      worker.postMessage({ id, items, threshold })
+    } catch (err) {
+      clearTimeout(timer)
+      dedupPending.delete(id)
+      reject(err instanceof Error ? err : new Error(String(err)))
+      recreateDedupWorker(worker, "Failed to post message to worker")
+    }
+  })
+}
+
+export function terminateWorkers(): void {
+  cancelChunkIdleTermination()
+  cancelDedupIdleTermination()
+  chunkRestarts = 0
+  dedupRestarts = 0
+  chunkBackoffUntil = 0
+  dedupBackoffUntil = 0
+  rejectAllChunkPending(new Error("Workers terminated"))
+  rejectAllDedupPending(new Error("Workers terminated"))
+  if (chunkWorker) {
+    chunkWorker.terminate()
+    chunkWorker = null
+  }
+  if (dedupWorker) {
+    dedupWorker.terminate()
+    dedupWorker = null
+  }
+}
+
+// Terminate workers when the page is being closed to avoid orphaned worker
+// threads in Electron. Both `pagehide` (standard) and `beforeunload` (legacy
+// fallback) are registered so the cleanup fires reliably across browsers.
+// `pagehide` is preferred for modern browsers (it fires reliably on bfcache
+// navigation); `beforeunload` is a safety net for older browsers/Electron
+// versions that may not fire `pagehide` on window close.
+if (typeof window !== "undefined") {
+  const cleanup = (): void => {
+    try {
+      terminateWorkers()
+    } catch {
+      // Swallow errors during page teardown — the page is going away anyway,
+      // and throwing here could prevent other unload handlers from running.
+    }
+  }
+  window.addEventListener("pagehide", cleanup)
+  window.addEventListener("beforeunload", cleanup)
+}

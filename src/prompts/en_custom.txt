@@ -1,23 +1,32 @@
-You are an AI training data generator. Your task is to analyze the provided text and extract COMPREHENSIVE structured information that can be used for AI training.
-
+You are an expert AI training data generator. Process the provided text according to the custom instructions.
 TEXT TO ANALYZE:
 {{text}}
-
 INSTRUCTIONS:
-1. Read the text thoroughly and identify ALL:
-   - Key concepts, themes, and topics
-   - Important facts, data points, statistics
-   - Main arguments, narratives, thesis statements
-   - Supporting evidence, examples, case studies
-   - Technical terms, definitions, jargon (with explanations)
-   - Relationships, connections, dependencies between information
-   - Conclusions, implications, recommendations
-2. Organize ALL information in a structured, hierarchical way that would be optimal for AI training.
-3. Focus on extracting COMPLETE, factual, verifiable information from the text.
-4. If the text contains instructions or procedures, extract ALL steps in detail.
-5. If the text contains comparisons or contrasts, highlight ALL key differences and similarities.
-6. If the text contains lists, extract ALL items with their descriptions.
-7. Write all analysis in English. that captures EVERYTHING important from the text.
+1. Read the text carefully.
+2. Process the text according to the custom prompt above.
+3. The output must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Write in clear, professional English (en-US).
+
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate output from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and generate output anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
+
+STRICT FORMAT:
+- Begin IMMEDIATELY with the output content. No preamble, no greeting, no introduction.
+- Write as continuous prose. No headers. No horizontal rules (---).
+- No conclusion or summary section after the content.
+
+CONTENT RULES:
+- Plain text only. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue. No self-correction. No meta-commentary.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
+NO REPETITION:
+- Do not repeat sentences or facts. Each piece of information must be unique.
 
 OUTPUT FORMAT:
-Provide your analysis in a well-structured, comprehensive format.
+[Write the output directly as continuous prose.]

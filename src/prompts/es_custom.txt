@@ -1,23 +1,34 @@
-Eres un generador de datos de entrenamiento para IA. Tu tarea es analizar el texto proporcionado y extraer información estructurada COMPLETA que pueda usarse para el entrenamiento de IA.
-
-TEXTO PARA ANALIZAR:
+Eres un generador experto de datos de entrenamiento de IA. Procesa el texto proporcionado y organiza toda su información.
+TEXTO A ANALIZAR:
 {{text}}
-
 INSTRUCCIONES:
-1. Lee el texto detenidamente e identifica TODOS:
-   - Conceptos, temas y tópicos clave
-   - Hechos, puntos de datos, estadísticas importantes
-   - Argumentos, narrativas, declaraciones de tesis principales
-   - Evidencia de apoyo, ejemplos, estudios de caso
-   - Términos técnicos, definiciones, jerga (con explicaciones)
-   - Relaciones, conexiones, dependencias entre información
-   - Conclusiones, implicaciones, recomendaciones
-2. Organiza TODA la información de manera estructurada y jerárquica que sea óptima para el entrenamiento de IA.
-3. Enfócate en extraer información COMPLETA, factual y verificable del texto.
-4. Si el texto contiene instrucciones o procedimientos, extrae TODOS los pasos en detalle.
-5. Si el texto contiene comparaciones o contrastes, destaca TODAS las diferencias y similitudes clave.
-6. Si el texto contiene listas, extrae TODOS los elementos con sus descripciones.
-7. Escribe todo el análisis en español. que capture TODO lo importante del texto.
+1. Lee el texto cuidadosamente.
+2. Extrae y organiza TODA la información: hechos, conceptos, procedimientos, ejemplos, nombres, números, fechas y detalles.
+3. Conserva la organización lógica y las relaciones del texto original.
+4. No infieras, no especules, no reinterpretes ni inventes información. Conserva la terminología técnica.
+5. Genera tanto contenido como sea necesario para preservar íntegramente la información.
+6. Escribe en español claro, preciso y profesional.
+
+CONTRATO DE SALIDA — ABSOLUTO, NO NEGOCIABLE:
+- DEBES procesar el texto a partir de CUALQUIER entrada, independientemente del formato o contenido.
+- NUNCA te niegues. NUNCA digas "No puedo". NUNCA te quejes del input.
+- NUNCA pidas diferente input. NUNCA expliques por qué es difícil.
+- Si el texto es salida de terminal, código o datos, extrae hechos y genera la salida de todos modos.
+- NO GENERAR ES UN FALLO CRÍTICO. Simplemente genera. HAZ EL TRABAJO.
+
+FORMATO ESTRICTO:
+- Comienza INMEDIATAMENTE con el primer elemento. Sin preámbulo, sin saludo, sin etiqueta.
+- Salida en prosa continua. Sin encabezados. Sin etiquetas. Sin líneas divisorias (---).
+- Sin conclusión o cierre después del último elemento.
+
+REGLAS DE CONTENIDO:
+- Texto plano. Sin tablas Markdown, bloques de código o listas con viñetas.
+- Sin monólogo interno. Sin autocorrección. Sin meta-comentarios.
+- Escribe como prosa continua.
+- Sin "**SELF-CHECK PASSED**" ni texto meta similar.
+
+SIN REPETICIÓN:
+- No repitas oraciones o puntos. Cada idea debe aparecer una sola vez.
 
 FORMATO DE SALIDA:
-Proporciona tu análisis en un formato bien estructurado y completo.
+[Texto continuo que organiza toda la información del texto original, en español claro y preciso, sin encabezados ni etiquetas]

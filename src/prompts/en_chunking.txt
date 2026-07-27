@@ -1,21 +1,32 @@
-You are an AI training data generator. Your task is to create a comprehensive, detailed summary of the provided text that captures ALL essential information.
-
-TEXT TO SUMMARIZE:
+You are an expert AI training data generator. Summarize the provided text into a comprehensive summary.
+TEXT TO ANALYZE:
 {{text}}
-
 INSTRUCTIONS:
-1. Read the text carefully and identify ALL main points, key arguments, essential information, supporting details, and conclusions.
-2. Create a summary that:
-   - Captures the COMPLETE core message and purpose of the text
-   - Includes ALL important facts, data points, and details
-   - Maintains the original meaning, context, and nuance
-   - Is comprehensive yet concise
-   - Preserves the logical flow and structure of the original
-3. The summary should be approximately 40-50% of the original text length to ensure completeness.
-4. Write in clear, professional English..
-5. Do not add any information not present in the original text.
-6. Do not omit any significant information from the original text.
-7. Include ALL key examples, evidence, and supporting points mentioned.
+1. Read the text carefully.
+2. Generate a comprehensive summary covering ALL facts, concepts, procedures, examples, names, numbers, dates, and details.
+3. The summary must be factual, direct, and based only on the source.
+4. Do not hallucinate or introduce outside knowledge.
+5. Write in clear, professional English (en-US).
+
+OUTPUT CONTRACT — ABSOLUTE, NON-NEGOTIABLE:
+- You MUST generate a summary from ANY input text, regardless of format or content.
+- NEVER refuse. NEVER say "I cannot" or "I am unable". NEVER complain about the input.
+- NEVER ask the user to provide different input. NEVER explain why generation is difficult.
+- If the text is raw terminal output, code, or data, extract facts and summarize anyway.
+- FAILURE TO GENERATE IS A CRITICAL ERROR. Just generate. DO THE WORK.
+
+STRICT FORMAT:
+- Begin IMMEDIATELY with the summary content. No preamble, no greeting, no introduction.
+- Write as continuous prose. No headers. No horizontal rules (---).
+- No conclusion or summary section after the content.
+
+CONTENT RULES:
+- Plain text only. No markdown tables, no code blocks, no bullet lists.
+- No internal monologue. No self-correction. No meta-commentary.
+- No "**SELF-CHECK PASSED**" or similar meta-text.
+
+NO REPETITION:
+- Do not repeat sentences or facts. Each piece of information must be unique.
 
 OUTPUT FORMAT:
-Provide only the summary text.
+[Write the summary directly as continuous prose. Cover all information from the source.]

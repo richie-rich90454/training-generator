@@ -1,0 +1,381 @@
+.config-panel{
+    background:var(--surface-color);
+    border-radius:var(--radius-medium);
+    padding:var(--spacing-md);
+    border:1px solid var(--border-color);
+    container-type:inline-size;
+}
+.config-panel__header{
+    margin-bottom:var(--spacing-lg);
+    padding-bottom:var(--spacing-md);
+    border-bottom:1px solid var(--border-color);
+}
+.config-panel__fields{
+    display:flex;
+    flex-direction:column;
+}
+.config-field{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr);
+    gap:var(--spacing-sm);
+    margin-bottom:var(--spacing-md);
+    min-width:0;
+}
+.config-field:last-child{
+    margin-bottom:0;
+}
+.config-field--hidden{
+    display:none;
+}
+.config-field--range{
+    gap:var(--spacing-sm);
+}
+.config-field__label{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    min-width:0;
+    font-weight:500;
+    color:var(--text-primary);
+    text-align:start;
+}
+.config-field__label > span{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.config-field__label > svg{
+    width:16px;
+    height:16px;
+    flex-shrink:0;
+    color:var(--text-secondary);
+}
+.config-field__control{
+    min-width:0;
+    width:100%;
+}
+/* Long non-wrapping strings pasted into the custom-prompt textarea can cause
+   horizontal page overflow. Constrain the textarea to its own scroll area and
+   break long words so the panel layout is never pushed wide. */
+.config-field textarea{
+    overflow-x:auto;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+}
+@container (min-width: 440px){
+    .config-field{
+        grid-template-columns:minmax(120px, 0.42fr) minmax(0, 1fr);
+        align-items:center;
+        gap:var(--spacing-md);
+    }
+    .config-field__label{
+        align-self:center;
+        padding-inline-end:var(--spacing-sm);
+    }
+    .config-field__control{
+        min-width:0;
+    }
+}
+.range-control{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-md);
+    width:100%;
+    min-width:0;
+    height:40px;
+}
+.range-track-wrapper{
+    flex:1;
+    display:flex;
+    align-items:center;
+    position:relative;
+    height:100%;
+    min-width:0;
+}
+.range-control input[type="range"]{
+    width:100%;
+    height:6px;
+    border-radius:var(--radius-full);
+    background:linear-gradient(90deg,
+        var(--primary-color) 0%,
+        var(--primary-color) var(--range-fill, 70%),
+        var(--surface-variant) var(--range-fill, 70%),
+        var(--surface-variant) 100%
+    );
+    box-shadow:inset 0 1px 2px rgba(0, 0, 0, .08);
+    border:1px solid var(--border-color);
+    outline:none;
+    cursor:pointer;
+    -webkit-appearance:none;
+    appearance:none;
+    margin:0;
+}
+.range-control input[type="range"]::-webkit-slider-runnable-track{
+    width:100%;
+    height:6px;
+    background:transparent;
+    border-radius:var(--radius-full);
+}
+.range-control input[type="range"]::-moz-range-track{
+    width:100%;
+    height:6px;
+    background:transparent;
+    border-radius:var(--radius-full);
+}
+.range-control input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:20px;
+    height:20px;
+    border-radius:var(--radius-full);
+    background:radial-gradient(circle at center, var(--primary-color) 0%, var(--primary-color) 30%, var(--surface-color) 34%, var(--surface-color) 100%);
+    border:2px solid var(--primary-color);
+    box-shadow:0 2px 8px rgba(0, 0, 0, .18);
+    margin-top:-7px;
+    transition:transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+.range-control input[type="range"]::-moz-range-thumb{
+    width:20px;
+    height:20px;
+    border-radius:var(--radius-full);
+    background:radial-gradient(circle at center, var(--primary-color) 0%, var(--primary-color) 30%, var(--surface-color) 34%, var(--surface-color) 100%);
+    border:2px solid var(--primary-color);
+    box-shadow:0 2px 8px rgba(0, 0, 0, .18);
+    transition:transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+.range-control input[type="range"]::-webkit-slider-thumb:hover{
+    transform:scale(1.15);
+    border-color:var(--primary-hover);
+    box-shadow:0 4px 14px rgba(26, 115, 232, .35);
+}
+.range-control input[type="range"]::-moz-range-thumb:hover{
+    transform:scale(1.15);
+    border-color:var(--primary-hover);
+    box-shadow:0 4px 14px rgba(26, 115, 232, .35);
+}
+.range-control input[type="range"]:active::-webkit-slider-thumb{
+    transform:scale(.95);
+    box-shadow:0 2px 6px rgba(26, 115, 232, .35);
+}
+.range-control input[type="range"]:active::-moz-range-thumb{
+    transform:scale(.95);
+    box-shadow:0 2px 6px rgba(26, 115, 232, .35);
+}
+.range-control input[type="range"]:focus-visible{
+    box-shadow:0 0 0 3px rgba(26, 115, 232, .2), inset 0 1px 2px rgba(0, 0, 0, .08);
+}
+.range-ticks{
+    position:absolute;
+    bottom:0;
+    inset-inline-start:0;
+    inset-inline-end:0;
+    display:flex;
+    justify-content:space-between;
+    font-size:.75rem;
+    color:var(--text-secondary);
+    padding:0 8px;
+    user-select:none;
+    pointer-events:none;
+}
+.model-combobox{position:relative;display:flex;align-items:stretch;gap:var(--spacing-xs)}
+.model-combobox__input{flex:1;border-start-end-radius:0;border-end-end-radius:0}
+.model-combobox__toggle{width:40px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--surface-color);color:var(--text-secondary);border:1px solid var(--text-disabled);border-inline-start:none;border-start-end-radius:var(--radius-medium);border-end-end-radius:var(--radius-medium);cursor:pointer}
+.model-combobox__toggle--refresh{width:36px;border-start-end-radius:0;border-end-end-radius:0}
+.model-combobox__toggle:disabled{background:var(--surface-variant);color:var(--text-disabled);cursor:not-allowed;opacity:.5}
+.model-combobox__listbox{position:absolute;top:calc(100% + 2px);inset-inline-start:0;inset-inline-end:0;max-height:min(200px, calc(100vh - var(--listbox-top, 100px)));overflow:auto;z-index:100;margin:0;padding:var(--spacing-xs) 0;list-style:none;background:var(--surface-color);border:1px solid var(--border-color);border-radius:var(--radius-medium);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.model-combobox__option{padding:var(--spacing-sm) var(--spacing-md);cursor:pointer;color:var(--text-primary)}
+.model-combobox__option:hover,.model-combobox__option--selected{background:var(--surface-variant)}
+.range-value-pill{
+    min-width:48px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:var(--radius-full);
+    background:linear-gradient(135deg, var(--temperature-color, var(--primary-color)), var(--temperature-color-hover, var(--primary-hover)));
+    color:var(--surface-color);
+    font-size:.85rem;
+    font-weight:700;
+    flex-shrink:0;
+    box-shadow:0 2px 8px var(--temperature-shadow, rgba(26, 115, 232, .25));
+    font-variant-numeric:tabular-nums;
+    transition:background var(--transition-fast), box-shadow var(--transition-fast);
+}
+/* At narrow panel widths (e.g. 320px) the 48px pill squeezes the range
+   track. Allow it to shrink to 36px — still wide enough for the "0.7"
+   temperature text — so the track keeps usable width. */
+@container (max-width: 360px){
+    .range-value-pill{
+        min-width:36px;
+    }
+}
+.config-section{
+    /* Reset <fieldset> UA defaults: min-width:min-content, margin:0 2px,
+       and the default padding/border-radius cascade can push children out of
+       the border box at narrow panel widths. */
+    min-width:0;
+    margin-inline:0;
+    margin-block:var(--spacing-md);
+    padding:var(--spacing-md);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    background:var(--surface-variant);
+    /* Defensive: only kicks in if a child somehow overflows. */
+    overflow:hidden;
+}
+/* Force every Output Mode row to a single-column layout.
+   The panel-level @container (min-width: 440px) rule fires on the PANEL width
+   but applies a 2-column grid (minmax(120px, 0.42fr) minmax(0, 1fr)) to
+   .config-field rows. Inside the narrower fieldset content box that 2-column
+   grid overflows. This descendant rule (specificity 0,2,0) beats the
+   @container .config-field rule (0,1,0) so the label sits above the control
+   and the control gets the full fieldset content width. */
+.config-section .config-field{
+    grid-template-columns:minmax(0, 1fr);
+    align-items:start;
+}
+/* Modifier applied via JSX to label-less rows inside the fieldset (the
+   radio-group wrapper and the four checkbox rows). Specificity 0,2,0 matches
+   the base rule above and intentionally avoids !important; declared later so
+   it wins ties. Defensive: documents that these rows never want a 2-column
+   label/control split even if the .config-section .config-field rule is later
+   removed. */
+.config-section .config-field--full{
+    grid-template-columns:minmax(0, 1fr);
+}
+/* .checkbox-field uses display:flex (not grid), so grid-template-columns is a
+   no-op on it today. Declared defensively so that if .checkbox-field ever
+   becomes a grid it stays single-column inside the fieldset, consistent with
+   .config-field rows. */
+.config-section .checkbox-field{
+    grid-template-columns:minmax(0, 1fr);
+}
+.config-section__title{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    margin:0;
+    font-size:.95rem;
+    font-weight:600;
+    color:var(--text-primary);
+}
+.config-section__title > svg{
+    width:16px;
+    height:16px;
+    color:var(--text-secondary);
+}
+.config-section__description{
+    margin:0 0 var(--spacing-md) 0;
+    font-size:.8rem;
+    color:var(--text-secondary);
+    line-height:1.4;
+}
+.radio-group{
+    display:flex;
+    flex-direction:column;
+    gap:var(--spacing-xs);
+}
+.radio-group__option{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    cursor:pointer;
+    min-height:24px;
+}
+.radio-group__option input[type="radio"]{
+    width:18px;
+    height:18px;
+    margin:0;
+    cursor:pointer;
+    accent-color:var(--primary-color);
+}
+.radio-group__option span{
+    color:var(--text-primary);
+    font-size:.85rem;
+}
+.config-field__help{
+    font-size:.75rem;
+    color:var(--text-secondary);
+    line-height:1.4;
+    margin-top:var(--spacing-xs);
+}
+.checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    margin-bottom:var(--spacing-sm);
+    min-height:24px;
+}
+.checkbox-field:last-child{
+    margin-bottom:0;
+}
+.checkbox-field label{
+    display:flex;
+    align-items:center;
+    gap:var(--spacing-sm);
+    cursor:pointer;
+    color:var(--text-primary);
+    font-size:.85rem;
+    margin:0;
+    width:100%;
+}
+/* Defensive: the .btn base rule carries overflow:hidden and the panel/fieldset
+   chain may also clip. Draw the focus outline 2px INSIDE the border edge so it
+   is never clipped by any ancestor (or the button's own) overflow:hidden. */
+.config-panel__save-preset:focus-visible{
+    outline-offset:-2px;
+}
+/* v2.0.1 — Recent presets quick-access dropdown (Task 6.8). Wrapper is
+   position:relative so the absolutely-positioned menu anchors to the button.
+   display:inline-flex keeps the wrapper only as wide as the button. */
+.recent-presets-dropdown{
+    position:relative;
+    display:inline-flex;
+}
+.recent-presets-dropdown__menu{
+    position:absolute;
+    top:calc(100% + 4px);
+    inset-inline-end:0;
+    min-width:200px;
+    max-width:320px;
+    background:var(--surface-color);
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-medium);
+    box-shadow:0 4px 12px rgba(0, 0, 0, .12);
+    z-index:200;
+    padding:var(--spacing-xs) 0;
+    margin:0;
+    list-style:none;
+}
+.recent-presets-dropdown__item{
+    padding:var(--spacing-sm) var(--spacing-md);
+    cursor:pointer;
+    color:var(--text-primary);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+}
+.recent-presets-dropdown__item:hover,
+.recent-presets-dropdown__item:focus-visible{
+    background:var(--surface-variant);
+    outline:none;
+}
+.recent-presets-dropdown__item-name{
+    font-size:.85rem;
+    font-weight:500;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.recent-presets-dropdown__item-time{
+    font-size:.7rem;
+    color:var(--text-secondary);
+}
+.recent-presets-dropdown__empty{
+    padding:var(--spacing-sm) var(--spacing-md);
+    color:var(--text-secondary);
+    font-size:.8rem;
+    font-style:italic;
+}

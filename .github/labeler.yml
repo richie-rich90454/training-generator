@@ -1,0 +1,40 @@
+# Labeler configuration for actions/labeler v5.
+# Maps labels to changed-file path globs.
+# https://github.com/actions/labeler
+
+ui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/renderer/components/**'
+
+core:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/core/**'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'tests/**'
+
+docs:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+      - '*.md'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+
+i18n:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/renderer/i18n.ts'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'

@@ -1,27 +1,44 @@
-Vous êtes un générateur de données d'entraînement pour l'IA. Votre tâche est de créer des conversations complètes et informatives entre un utilisateur et un assistant IA basées sur TOUTES les informations du texte fourni.
-
+Tu es un générateur expert de données d'entraînement IA. Transforme le texte fourni en tours de conversation.
 TEXTE À ANALYSER :
 {{text}}
-
 INSTRUCTIONS :
-1. Lisez le texte attentivement et identifiez TOUS les sujets principaux, les informations clés, les arguments et les détails.
-2. Créez une conversation complète où l'utilisateur pose des questions ou discute de TOUS les aspects importants du texte. Les questions et réponses DOIVENT être en français. Tout le texte de sortie doit être en français..
-3. L'assistant doit fournir des réponses détaillées et précises basées EXCLUSIVEMENT sur le texte.
-4. Formatez la conversation exactement comme suit :
-User: [message utilisateur]
-Assistant: [réponse assistant]
-5. Faites couler la conversation naturellement tout en couvrant TOUTES les informations clés.
-6. Incluez 5-10+ échanges (paires utilisateur-assistant) pour couvrir COMPLÈTEMENT différents aspects du texte.
-7. Les réponses de l'assistant doivent être informatives, complètes et directement basées sur le contenu du texte.
-8. Couvrez TOUS les points importants : idées principales, détails de soutien, exemples, points de données, conclusions.
-9. Si le texte contient plusieurs sections ou sujets, créez des échanges de conversation pour CHACUN.
-10. Assurez-vous que la conversation explore le texte en PROFONDEUR, pas seulement superficiellement.
+1. Lis le texte attentivement.
+2. Génère des tours de conversation couvrant TOUS les faits, concepts, procédures, exemples, noms, nombres, dates et détails.
+3. Les messages utilisateur doivent être autonomes. Les réponses de l'assistant doivent se baser sur la source, être directes et précises.
+4. N'invente pas et n'introduis pas de connaissances externes.
+5. Génère autant de tours que nécessaire pour couvrir toutes les informations.
+6. Écris en français clair et professionnel.
+
+CONTRAT DE SORTIE — ABSOLU, NON NÉGOCIABLE :
+- Tu DOIS générer des tours de conversation à partir de N'IMPORTE QUEL texte, quel que soit le format ou le contenu.
+- NE REFUSE JAMAIS. Ne dis JAMAIS « Je ne peux pas ». Ne te plains JAMAIS de l'entrée.
+- NE DEMANDE JAMAIS une entrée différente. N'explique JAMAIS pourquoi c'est difficile.
+- Si le texte est une sortie de terminal, du code ou des données, extrais les faits et génère des tours de conversation.
+- NE RIEN GÉNÉRER EST UN ÉCHEC CRITIQUE. Génère simplement. FAIS LE TRAVAIL.
+
+FORMAT STRICT :
+- Commence IMMÉDIATEMENT par « User: ». Pas de préambule, pas de salutation.
+- Chaque paire DOIT suivre ce format :
+  User: [message utilisateur]
+  Assistant: [réponse de l'assistant]
+- Une ligne vide sépare chaque paire.
+- Pas de texte entre les paires. Pas d'en-têtes. Pas de lignes de séparation (---).
+- Pas de conclusion ou de résumé après la dernière paire.
+
+RÈGLES DE RÉPONSE :
+- Les réponses doivent être en texte brut. Pas de tableaux Markdown, blocs de code ou listes à puces.
+- Pas de monologue interne. Pas d'autocorrection. Pas de méta-commentaires.
+- Écris les réponses en prose continue.
+- Pas de « **SELF-CHECK PASSED** » ni de texte méta similaire.
+
+SANS RÉPÉTITION :
+- Ne répète pas les questions ou réponses. Chaque paire doit être unique.
 
 FORMAT DE SORTIE :
 User: [Premier message utilisateur]
-Assistant: [Première réponse assistant]
+Assistant: [Première réponse de l'assistant]
 
 User: [Deuxième message utilisateur]
-Assistant: [Deuxième réponse assistant]
+Assistant: [Deuxième réponse de l'assistant]
 
-[Continuez avec autant d'échanges que nécessaire pour couvrir toutes les informations, avec une ligne vide entre chaque paire utilisateur-assistant]
+[Continue selon les besoins]
