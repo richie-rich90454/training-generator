@@ -71,6 +71,35 @@ Pass a JSON file with `--config` to define reusable settings. CLI flags override
 npm run cli -- --config ./configs/english-qa.json
 ```
 
+## CLI pipeline code
+
+The CLI entry point in `src/cli/index.ts` parses arguments, reads the config file, selects the output writer from the file extension, and runs the same parser/chunker/processor used by the desktop app:
+
+```ts
+const args = parseArgs()
+if (args.config) {
+  const configData = loadConfig(args.config)
+  if (configData.model) args.model = configData.model
+  if (configData.chunkSize) args.chunkSize = configData.chunkSize
+}
+
+const provider = createCliProvider(args.provider)
+const processor = new Processor()
+processor.provider = provider
+processor.concurrency = args.concurrency
+
+// Output writer is chosen from the extension
+function writeOutput(outputPath: string, items: TrainingItem[]): void {
+  const ext = path.extname(outputPath).toLowerCase()
+  let content: string
+  if (ext === ".jsonl") content = exportJSONL(items)
+  else if (ext === ".json") content = exportJSONArray(items)
+  else if (ext === ".csv") content = exportCSV(items)
+  else content = exportJSONL(items)
+  fs.writeFileSync(outputPath, content, "utf-8")
+}
+```
+
 ## Output format selection
 
 The output writer is chosen from the `--output` file extension:
