@@ -14,7 +14,7 @@ Training Generator is an Electron desktop application built with TypeScript and 
 
 | Requirement | Minimum | Recommended | Notes |
 | --- | --- | --- | --- |
-| Node.js | 18+ | 24+ | Required for the build toolchain and CLI. |
+| Node.js | 20+ | 24+ | Required for the build toolchain and CLI. |
 | npm | 9+ | 10+ | Ships with Node.js. |
 | Ollama | — | latest | Required for local AI processing. [Download](https://ollama.com/) |
 | Git | any | latest | Required to clone the repository. |
@@ -137,8 +137,8 @@ Packaged installers are written to the `release/` directory.
 ## Type checking and tests
 
 ```bash
-npm run typecheck       # tsc --noEmit (strict mode)
-npm test                # Run the full test suite (4,868 tests across 184 files)
+npm run lint            # tsc --noEmit (strict mode)
+npm test                # Run the full test suite
 npm run test:watch      # Watch mode
 npm run test:coverage   # Coverage report
 ```
