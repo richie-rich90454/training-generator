@@ -66,6 +66,36 @@ Semantic chunking splits text at sentence boundaries while preserving code block
 The deduplicator hashes item text with simhash and compares Hamming distances…
 ```
 
+## Exporter API
+
+The formats above are produced by the exporter registry in `src/renderer/exportFormats.ts`. You can use the same registry programmatically:
+
+```ts
+import { createDefaultExporterRegistry } from "../src/renderer/exportFormats.js"
+
+const registry = createDefaultExporterRegistry()
+const supported = registry.getSupportedFormats() // ["jsonl", "json", "csv", "text"]
+const output = registry.export("jsonl", items)
+```
+
+Chat-style formats (ShareGPT, OpenAI fine-tune, Llama 2, Llama 3, Mistral) live in `src/renderer/exporters/chatTemplateExporters.ts`. Each exporter converts a `TrainingItem` into a messages array and then applies a template:
+
+```ts
+import { itemToMessages, applyLlama2Template, applyShareGptTemplate } from "../src/renderer/exporters/chatTemplateExporters.js"
+
+const messages = itemToMessages({
+  instruction: "Answer the question based on the text",
+  input: "What is semantic chunking?",
+  output: "Semantic chunking splits text at sentence boundaries…"
+})
+
+const llama2 = applyLlama2Template(messages)
+// [INST] What is semantic chunking? [/INST] Semantic chunking splits text…
+
+const sharegpt = applyShareGptTemplate(messages)
+// { id: 1, conversations: [{ from: "human", value: "…" }, { from: "gpt", value: "…" }] }
+```
+
 ## Format reference
 
 | Format | Extension | Shape | Per-line | Best for |
