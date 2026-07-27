@@ -25,9 +25,9 @@
     "typecheck": "tsc --noEmit",
     "cli": "tsx src/cli/index.ts",
     "postinstall": "node scripts/postinstall.mjs",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:dev": "npm --prefix docs run dev",
+    "docs:build": "npm --prefix docs run build",
+    "docs:preview": "npm --prefix docs run preview"
   },
   "keywords": [
     "electron",
@@ -180,7 +180,6 @@
     "vite": "^8.1.5",
     "vite-plugin-copy": "^0.1.6",
     "vite-plugin-solid": "^2.11.14",
-    "vitepress": "^1.6.4",
     "vitest": "^4.1.10"
   },
   "dependencies": {
