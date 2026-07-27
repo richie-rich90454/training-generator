@@ -64,6 +64,31 @@ Inside a modal, `Tab` and `Shift + Tab` cycle focus through the focusable elemen
 - `Escape` closes settings, help, quality report, statistics, and other modal dialogs.
 - If the prompt template editor is open, `Escape` closes it unless the settings modal is also open.
 
+## Implementation
+
+Shortcuts are registered with `useKeyboardShortcuts` in `src/renderer/composables/useKeyboardShortcuts.ts`. A shortcut definition includes the key, modifiers, and a handler:
+
+```ts
+import { useKeyboardShortcuts } from "../src/renderer/composables/useKeyboardShortcuts.js"
+
+const { unregister } = useKeyboardShortcuts([
+  {
+    id: "process",
+    key: "Enter",
+    modifiers: { ctrl: true },
+    handler: () => startProcessing()
+  },
+  {
+    id: "export",
+    key: "e",
+    modifiers: { ctrl: true },
+    handler: () => exportOutput()
+  }
+], { preventDefault: true })
+```
+
+The helper also parses and formats shortcut strings such as `Ctrl+Shift+P` into a structured object for cross-platform display.
+
 ## Next steps
 
 - [Quick Start](/getting-started/quick-start.md) — generate your first dataset.
