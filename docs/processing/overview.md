@@ -47,6 +47,28 @@ It adds a small **context prefix** from the previous chunk so generations mainta
 Both strategies can run in a web worker via `src/renderer/workers/workerPool.ts` to keep the UI responsive during large jobs.
 :::
 
+## Chunking API
+
+You can call the same chunking functions from `src/renderer/chunker.ts` that the pipeline uses:
+
+```ts
+import { semanticChunk, simpleChunk, detectSemanticUnits } from "../src/renderer/chunker.js"
+
+const text = "First sentence. Second sentence.\n\n```js\nconst x = 1\n```"
+
+let chunks = semanticChunk(text, 2000, 100, true)
+if (chunks.length === 0) {
+  chunks = simpleChunk(text, 2000)
+}
+```
+
+`detectSemanticUnits` returns the boundaries of code blocks, tables, and lists so callers can avoid splitting inside them:
+
+```ts
+const units = detectSemanticUnits(text)
+// [{ start: 0, end: 32, type: "normal" }, { start: 34, end: 58, type: "code_block" }]
+```
+
 ## Processing types
 
 ### Instruction
