@@ -6,6 +6,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Training Generator',
   description: 'AI Training Data Generator Documentation',
+  base: '/training-generator/',
   cleanUrls: true,
   lastUpdated: true,
   appearance: true,
