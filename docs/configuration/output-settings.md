@@ -109,6 +109,18 @@ Available once at least one file has been processed successfully:
 Choose a folder where you have write permission. Cancelling the save dialog (or directory chooser) stops the export with an "Export cancelled" message.
 :::
 
+## Programmatic access
+
+`createOutputStore` exposes the selected export format and formats data for preview or saving:
+
+```ts
+import { createOutputStore } from "../src/renderer/stores/outputStore.js"
+
+const output = createOutputStore()
+output.setExportFormat("chatml")
+const preview = output.formatData(items, "chatml")
+```
+
 ## Provenance & Quality
 
 Every generated item is tagged with provenance metadata that records its source file and chunk. The quality validator scores generated items and the deduplicator removes near-duplicates (simhash + length ratio). These run automatically; provenance from removed items is merged into the kept item.
