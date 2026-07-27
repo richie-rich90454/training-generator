@@ -81,6 +81,23 @@ A typical instruction-tuning item in JSONL format looks like this:
 {"instruction":"Answer the question based on the text","input":"What is semantic chunking?","output":"Semantic chunking splits text at sentence boundaries while preserving code blocks, tables, and lists, adding a small context prefix from the previous chunk."}
 ```
 
+## How items are built
+
+The pipeline creates `TrainingItem` objects in `src/renderer/stores/outputStore.ts`. For an instruction-type run with JSONL output, the store parses Q&A pairs from the model response and returns Alpaca-shaped items:
+
+```ts
+import { createOutputStore } from "../src/renderer/stores/outputStore.js"
+
+const output = createOutputStore()
+const items = output.createTrainingItem(
+  "What is semantic chunking?",
+  "Semantic chunking splits text at sentence boundaries…",
+  "instruction",
+  "jsonl"
+)
+// [{ format: "instruction", instruction: "…", input: "…", output: "…" }]
+```
+
 ## Next steps
 
 - [Model Settings](/configuration/model-settings.md) — tune temperature, concurrency, and chunk size.
