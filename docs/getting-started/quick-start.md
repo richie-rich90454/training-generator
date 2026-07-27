@@ -60,7 +60,7 @@ In the right-hand configuration panel, set:
 
 ## 5. Process
 
-Click **Process Files**. The dashboard shows live progress: chunks generated, requests in flight, successes, and failures. Chunking and deduplication run in web workers, so the UI stays responsive.
+Click **Process Files** or press `Ctrl+Enter` (`Cmd+Enter` on macOS). The dashboard shows live progress: chunks generated, requests in flight, successes, and failures. Chunking and deduplication run in web workers, so the UI stays responsive.
 
 ## 6. Preview and export
 
