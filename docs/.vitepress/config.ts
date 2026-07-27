@@ -9,10 +9,9 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   appearance: true,
-  // Pre-existing docs/*.md files (README.md, troubleshooting.md, etc.) contain
-  // relative links to files outside the docs root (project README, .github
-  // issue templates). Ignore dead-link checks so those legacy files don't
-  // break the build.
+  // Legacy flat files at the docs root have been removed in favor of the
+  // grouped structure below. Keep dead-link checks lenient so that any
+  // external markdown links to moved pages do not break the build.
   ignoreDeadLinks: true,
   sitemap: {
     hostname: 'https://github.com/richie-rich90454/training-generator'
@@ -28,13 +27,15 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/getting-started/quick-start' },
       { text: 'Configuration', link: '/configuration/model-settings' },
+      { text: 'Output', link: '/output/formats' },
       { text: 'CLI', link: '/cli/usage' },
       { text: 'Providers', link: '/providers/overview' },
+      { text: 'Architecture', link: '/architecture/overview' },
+      { text: 'Troubleshooting', link: '/troubleshooting/common-issues' },
       {
         text: 'More',
         items: [
-          { text: 'Architecture', link: '/architecture/overview' },
-          { text: 'Troubleshooting', link: '/troubleshooting/common-issues' },
+          { text: 'Testing', link: '/testing/overview' },
           {
             text: 'Source Repository',
             link: 'https://github.com/richie-rich90454/training-generator'
@@ -49,7 +50,8 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Installation', link: '/getting-started/installation' },
-            { text: 'Quick Start', link: '/getting-started/quick-start' }
+            { text: 'Quick Start', link: '/getting-started/quick-start' },
+            { text: 'Keyboard Shortcuts', link: '/getting-started/keyboard-shortcuts' }
           ]
         }
       ],
@@ -106,7 +108,8 @@ export default defineConfig({
           text: 'Architecture',
           collapsed: false,
           items: [
-            { text: 'Overview', link: '/architecture/overview' }
+            { text: 'Overview', link: '/architecture/overview' },
+            { text: 'Development', link: '/architecture/development' }
           ]
         }
       ],
