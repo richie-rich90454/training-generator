@@ -119,6 +119,34 @@ When a cloud provider is selected, Training Generator keeps Ollama registered as
 Failover only works if Ollama is running with a compatible model. Keep Ollama running even when using a cloud provider.
 :::
 
+## Provider API
+
+`src/renderer/provider.ts` exports a factory that builds a `ProviderManager` with the selected provider and always keeps Ollama registered as a fallback:
+
+```ts
+import { createProvider } from "../src/renderer/provider.js"
+
+const provider = createProvider("openai", {
+  apiKey: process.env.OPENAI_API_KEY,
+  baseUrl: "https://api.openai.com"
+})
+
+const result = await provider.generate(prompt, "gpt-4o-mini", {
+  temperature: 0.7,
+  signal: abortController.signal
+})
+// result.text, result.tokens, result.provider
+```
+
+The `ProviderManager` tracks consecutive failures and fails over after three consecutive errors:
+
+```ts
+if (health.consecutiveFailures >= 3) {
+  const next = provider.failover()
+  if (next) return next.generate(prompt, model, options)
+}
+```
+
 ## CLI provider selection
 
 The CLI exposes the same provider selection:
