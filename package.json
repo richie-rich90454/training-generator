@@ -177,7 +177,7 @@
     "terser": "^5.49.0",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2",
-    "vite": "^8.1.5",
+    "vite": "^8.2.0",
     "vite-plugin-copy": "^0.1.6",
     "vite-plugin-solid": "^2.11.14",
     "vitest": "^4.1.10"
