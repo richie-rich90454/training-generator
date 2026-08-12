@@ -163,7 +163,7 @@
     ]
   },
   "devDependencies": {
-    "@solidjs/router": "^0.16.2",
+    "@solidjs/router": "^1.0.0",
     "@solidjs/testing-library": "^0.8.10",
     "@vitest/coverage-v8": "^4.1.10",
     "concurrently": "^10.0.4",
