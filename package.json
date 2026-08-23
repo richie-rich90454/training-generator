@@ -172,7 +172,7 @@
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2",
     "glob": "^13.0.6",
-    "happy-dom": "^20.11.2",
+    "happy-dom": "^20.11.6",
     "solid-js": "^1.9.14",
     "terser": "^5.50.0",
     "tsx": "^4.23.12",
