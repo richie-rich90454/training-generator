@@ -165,7 +165,7 @@
   "devDependencies": {
     "@solidjs/router": "^1.0.0",
     "@solidjs/testing-library": "^0.8.10",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "concurrently": "^10.0.5",
     "cross-env": "^10.1.0",
     "electron": "^44.2.0",
