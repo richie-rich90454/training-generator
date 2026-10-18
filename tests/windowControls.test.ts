@@ -4,13 +4,17 @@ import{WINDOW_MINIMIZE_CHANNEL,WINDOW_MAXIMIZE_TOGGLE_CHANNEL,WINDOW_CLOSE_CHANN
 import{initWindowControls,disposeWindowControls}from "../src/renderer/windowControls.ts"
 let state=vi.hoisted(()=>({
     exposedAPI:undefined as any,
+    exposedName:undefined as string|undefined,
     listeners:{} as Record<string,Array<(...args:any[])=>void>>
 }))
 vi.mock("electron",()=>{
     return{
         contextBridge:{
+            // Vitest 5 does not record .mock.calls for mocked functions invoked
+            // during the static-import phase, so capture the call here instead.
             exposeInMainWorld:vi.fn((name:string,api:unknown)=>{
                 state.exposedAPI=api
+                state.exposedName=name
             })
         },
         ipcRenderer:{
@@ -28,7 +32,7 @@ vi.mock("electron",()=>{
     }
 })
 import "../src/preload.ts"
-import{ipcRenderer,contextBridge}from "electron"
+import{ipcRenderer}from "electron"
 describe("Window control IPC channel constants",()=>{
     test("WINDOW_MINIMIZE_CHANNEL is 'window:minimize'",()=>{
         expect(WINDOW_MINIMIZE_CHANNEL).toBe("window:minimize")
@@ -58,7 +62,8 @@ describe("Preload exposes window control methods",()=>{
         expect(state.exposedAPI.onWindowMaximizedChange).toBeDefined()
     })
     test("contextBridge.exposeInMainWorld was called with electronAPI",()=>{
-        expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith("electronAPI",expect.any(Object))
+        expect(state.exposedName).toBe("electronAPI")
+        expect(state.exposedAPI).toEqual(expect.any(Object))
     })
     test("windowMinimize calls invoke with WINDOW_MINIMIZE_CHANNEL",async()=>{
         await state.exposedAPI.windowMinimize()
