@@ -1,11 +1,12 @@
 import{describe,test,expect,beforeEach,afterEach,vi}from "vitest"
 import fs from "fs"
+import os from "os"
 import path from "path"
-import{fileURLToPath}from "url"
 import FileParserLazy from "../src/core/fileParserLazy.js"
 
-let __dirname=path.dirname(fileURLToPath(import.meta.url))
-let testDir:string=path.join(__dirname,"fixtures","file-parser-lazy")
+// Scratch files live in the OS temp dir so the committed fixtures under
+// tests/fixtures/ are never modified or deleted by a test run.
+let testDir:string=path.join(os.tmpdir(),`training-generator-file-parser-lazy-fixtures-${process.pid}`)
 
 describe("FileParserLazy",()=>{
     let parser:FileParserLazy
